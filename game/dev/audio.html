@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Moonshine — audio</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root { --bg: #181828; --panel: #242440; --edge: #5868a8; --text: #e8e0c8; --dim: #a8a090; --hi: #f8d070; --bad: #f87858; }
+  html { background: var(--bg); color: var(--text); font: 14px/1.4 ui-monospace, Menlo, monospace; }
+  body { max-width: 900px; margin: 0 auto; padding: 16px; }
+  h1 { font-size: 20px; color: var(--hi); margin: 0 0 4px; }
+  h2 { font-size: 15px; margin: 0 0 8px; color: var(--hi); }
+  p { color: var(--dim); margin: 4px 0 12px; }
+  section { background: var(--panel); border: 2px solid var(--edge); border-radius: 6px; padding: 12px; margin: 12px 0; }
+  button { font: inherit; background: #303060; color: var(--text); border: 2px solid var(--edge); border-radius: 4px; padding: 6px 10px; margin: 3px; cursor: pointer; }
+  button:hover { background: #404080; }
+  button.playing { border-color: var(--hi); color: var(--hi); }
+  label { display: inline-flex; align-items: center; gap: 6px; margin: 4px 16px 4px 0; }
+  .now { color: var(--hi); }
+  table { border-collapse: collapse; width: 100%; margin-top: 8px; }
+  td, th { text-align: right; padding: 2px 6px; border-bottom: 1px solid #383860; }
+  td:first-child, th:first-child { text-align: left; }
+  td.bad { color: var(--bad); }
+  canvas.wave { width: 160px; height: 28px; vertical-align: middle; }
+  #text { min-height: 2.8em; background: #101020; border: 2px solid var(--edge); padding: 8px; margin-top: 8px; white-space: pre-wrap; }
+  .note { font-size: 12px; color: var(--dim); }
+</style>
+</head>
+<body>
+<h1>Moonshine — audio</h1>
+<p>Every music track and sound effect, for listening and review. Audio starts on your first click. Sources: <code>game/src/audio/</code>; direction: <code>docs/audio-direction.md</code>.</p>
+
+<section>
+  <h2>Music</h2>
+  <div id="music"></div>
+  <div>
+    <button id="stop">■ Stop (fade)</button>
+    <label>Crossfade <input id="fade" type="number" value="800" min="0" step="100" style="width:6em"> ms</label>
+  </div>
+  <p>Now playing: <span class="now" id="now">—</span></p>
+  <p class="note">Cues (one-shot pieces like the Wrongness motif) interrupt the current track, then let it come back.</p>
+</section>
+
+<section>
+  <h2>Sound effects</h2>
+  <div id="sfx"></div>
+  <div>
+    <button id="talk">Text: a resident talks</button>
+    <button id="think">Text: Cheryl's narration</button>
+    <button id="walk">Walk 12 steps</button>
+  </div>
+  <div id="text"></div>
+</section>
+
+<section>
+  <h2>Mix</h2>
+  <label>Master <input id="vol-master" type="range" min="0" max="1" step="0.01"></label>
+  <label>Music <input id="vol-music" type="range" min="0" max="1" step="0.01"></label>
+  <label>SFX <input id="vol-sfx" type="range" min="0" max="1" step="0.01"></label>
+  <label><input id="mute" type="checkbox"> Mute</label>
+  <br>
+  <label>Wrongness <input id="wrong" type="range" min="0" max="1" step="0.05" value="0"> <span id="wrong-val">0</span></label>
+  <p class="note">Wrongness drifts the music out of tune as the game's threat grows. It applies to notes from now on.</p>
+</section>
+
+<section>
+  <h2>Level check</h2>
+  <p>Renders everything offline at full volume and measures it. Peaks are before the safety limiter; anything above −1 dBFS is flagged.</p>
+  <button id="check">Render and measure</button>
+  <div id="report"></div>
+</section>
+
+<script type="module">
+import * as audio from '../src/audio/index.js';
+import { renderMusic, renderSfx, analyze } from '../src/audio/offline.js';
+import { SONGS } from '../src/audio/music/index.js';
+
+const $ = (id) => document.getElementById(id);
+const compiled = (id) => audio.getCompiledSong(id);
+
+// First input anywhere starts audio.
+addEventListener('pointerdown', () => audio.initAudio(), { once: true });
+addEventListener('keydown', () => audio.initAudio(), { once: true });
+
+function refreshNow() {
+  const id = audio.currentMusic();
+  $('now').textContent = id ? `${SONGS[id].title} (${id})` : '—';
+  for (const b of document.querySelectorAll('[data-music]')) b.classList.toggle('playing', b.dataset.music === id);
+}
+
+for (const id of audio.MUSIC_IDS) {
+  const c = compiled(id);
+  const b = document.createElement('button');
+  b.dataset.music = id;
+  const len = c.loopSteps ? `loop ${c.loopSeconds.toFixed(1)} s` : `cue ${c.introSeconds.toFixed(1)} s`;
+  b.textContent = `${c.loopSteps ? '▶' : '⚡'} ${SONGS[id].title} — ${len}`;
+  b.onclick = async () => {
+    await audio.initAudio();
+    if (c.loopSteps) audio.playMusic(id, { fadeMs: Number($('fade').value) });
+    else audio.playCue(id);
+    refreshNow();
+  };
+  $('music').append(b);
+}
+$('stop').onclick = () => { audio.stopMusic(Number($('fade').value)); refreshNow(); };
+
+for (const id of audio.SFX_IDS) {
+  const b = document.createElement('button');
+  b.textContent = id;
+  b.onclick = async () => { await audio.initAudio(); audio.sfx(id); };
+  $('sfx').append(b);
+}
+
+let typing = null;
+async function typeText(text, blip) {
+  await audio.initAudio();
+  clearInterval(typing);
+  let i = 0;
+  $('text').textContent = '';
+  typing = setInterval(() => {
+    const ch = text[i++];
+    $('text').textContent += ch;
+    if (/[A-Za-z0-9]/.test(ch) && i % 2 === 1) audio.sfx(blip);
+    if (i >= text.length) clearInterval(typing);
+  }, 33);
+}
+$('talk').onclick = () => typeText("Mind the third step, it wobbles. Has done since my grandmother's day. We like it that way.", 'blip');
+$('think').onclick = () => typeText('A lemon tree in a blue pot. Somebody here waters it every morning, and talks to it, I bet.', 'blip_cheryl');
+$('walk').onclick = async () => {
+  await audio.initAudio();
+  for (let i = 0; i < 12; i++) setTimeout(() => audio.sfx('step'), i * 270);
+};
+
+for (const k of ['master', 'music', 'sfx']) {
+  const el = $(`vol-${k}`);
+  el.value = audio.getVolume(k);
+  el.oninput = () => audio.setVolume(k, Number(el.value));
+}
+$('mute').checked = audio.isMuted();
+$('mute').onchange = () => audio.setMuted($('mute').checked);
+$('wrong').oninput = () => { audio.setWrongness(Number($('wrong').value)); $('wrong-val').textContent = $('wrong').value; };
+
+function drawWave(buffer) {
+  const cv = document.createElement('canvas');
+  cv.className = 'wave';
+  cv.width = 320; cv.height = 56;
+  const g = cv.getContext('2d');
+  g.fillStyle = '#101020'; g.fillRect(0, 0, cv.width, cv.height);
+  g.fillStyle = '#88a8f8';
+  const d = buffer.getChannelData(0);
+  const per = Math.max(1, Math.floor(d.length / cv.width));
+  for (let x = 0; x < cv.width; x++) {
+    let m = 0;
+    for (let i = x * per; i < (x + 1) * per && i < d.length; i++) m = Math.max(m, Math.abs(d[i]));
+    const h = m * cv.height;
+    g.fillRect(x, (cv.height - h) / 2, 1, Math.max(1, h));
+  }
+  return cv;
+}
+
+/** Render and measure every track and effect. Also used by tests/audio/check-audio.mjs. */
+async function checkAll() {
+  const rows = [];
+  for (const id of audio.MUSIC_IDS) {
+    const c = compiled(id);
+    // Long enough to cross the loop point once (or to let a cue's echo die away).
+    const seconds = c.loopSteps ? c.introSeconds + c.loopSeconds + 4 : c.introSeconds + 6;
+    const raw = await renderMusic(id, seconds, { limiter: false });
+    const lim = await renderMusic(id, Math.min(seconds, 20));
+    rows.push({ kind: 'music', id, raw: analyze(raw), limited: analyze(lim), buffer: raw, length: c.loopSteps ? c.loopSeconds : c.introSeconds });
+  }
+  for (const id of audio.SFX_IDS) {
+    const raw = await renderSfx(id, 3.5, { limiter: false });
+    const lim = await renderSfx(id, 3.5);
+    const a = analyze(raw);
+    rows.push({ kind: 'sfx', id, raw: a, limited: analyze(lim), buffer: raw, length: a.soundUntil });
+  }
+  return rows;
+}
+window.audioDev = {
+  checkAll: async () => (await checkAll()).map(({ buffer, ...r }) => r),
+};
+
+$('check').onclick = async () => {
+  $('report').textContent = 'Rendering…';
+  const rows = await checkAll();
+  const t = document.createElement('table');
+  t.innerHTML = '<tr><th>id</th><th>length s</th><th>peak dB</th><th>RMS dB</th><th>loudest 0.3 s</th><th>after limiter</th><th></th></tr>';
+  for (const r of rows) {
+    const tr = document.createElement('tr');
+    const f = (x) => x.toFixed(1);
+    const bad = r.raw.peakDb > -1 ? ' class="bad"' : '';
+    tr.innerHTML = `<td>${r.kind}: ${r.id}</td><td>${f(r.length)}</td><td${bad}>${f(r.raw.peakDb)}</td><td>${f(r.raw.rmsDb)}</td><td>${f(r.raw.loudestWindowDb)}</td><td>${f(r.limited.peakDb)}</td><td></td>`;
+    tr.lastChild.append(drawWave(r.buffer));
+    t.append(tr);
+  }
+  $('report').replaceChildren(t);
+};
+
+setInterval(refreshNow, 500);
+refreshNow();
+</script>
+</body>
+</html>
