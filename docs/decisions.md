@@ -6,6 +6,7 @@ This file records the project's technical and process decisions. Creative decisi
 
 - The client's brief is in [brief.md](brief.md). It is the root authority for what the game must be.
 - Creative direction: [story-bible.md](story-bible.md), [art-direction.md](art-direction.md), [audio-direction.md](audio-direction.md) (each written by the task that owns it).
+- Game design: [design/overview.md](design/overview.md) (world map, gating, puzzle dependencies, interaction rules) and one build-ready document per slice, starting with [design/01-opening.md](design/01-opening.md).
 
 ## Technology
 
