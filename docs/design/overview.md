@@ -286,7 +286,7 @@ What the player can be working on at each stage. "Seed" means talking to an NPC 
 Following the process in [../decisions.md](../decisions.md): build and polish **Act 1** first ([01-opening.md](01-opening.md)), then widen in this order, each a slice with its own build-ready design document:
 
 1. Act 1, Cistern Court.
-2. Act 2, the surface city (all surface areas in their day state).
+2. Act 2, the surface city (all surface areas in their day state): [02-city.md](02-city.md).
 3. Act 3, Downstairs: Step Gallery, Lamp Halls, Chart Room.
 4. Act 4, the bell, Mott, the rhyme, the Pump Hall, and the reveal.
 5. Act 5, the dry Bilge, the lighthouse, the bow decks.
