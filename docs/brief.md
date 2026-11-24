@@ -1,0 +1,23 @@
+# Client brief
+
+The client's brief, verbatim. Everything else in `docs/` serves this.
+
+> I'd like to build an adventure game that we can deploy to a GitHub Pages site and play there in the browser.
+>
+> The game is set in a quaint city with winding sidewalks reminiscent of Santorini or Venice, without feeling derivative of them. Underneath the city, unbeknownst to the residents, is a network of tunnels and chambers with a different architectural style and some long-forgotten technology—there's some unusual history behind the city that its residents don't know. Something is Wrong and threatens the city. Residents are unaware of the Wrongness, though some have encountered specific symptoms of it. The player must save the city, and the residents will never know that they did.
+>
+> The player begins confined to a small area to get the hang of the game's controls and puzzle style. When they're about to complete their initial goal, which is of small personal stakes, something strange happens that gives them their own first glimpse of the Wrongness, and keeps them from their goal. Then the game opens up to the wider city, and eventually, the player will discover an entrance to the underground area. The player's initial goal recedes to exploration and the strange things about the city that result from its unknown history and the Wrongness—but they are able to achieve that goal, in an unexpected manner, at the end of the game once they've saved the city.
+>
+> There may be a few different places where the player can pass between the surface and underground, and they'll need to go back and forth between them a few times. Some of these passages may be one-way, either for story or puzzle reasons. At least once, the player returns to the surface and finds it changed in some way, and it may feel like they're making things worse. These changes should feel significant and should be built up to and revealed in an exciting manner.
+>
+> Puzzles tend to take multiple steps to solve and feel natural to the location: blocked paths, an NPC with a problem, a missing item, something broken, etc. Every character and place has a reason to exist, though it may not be apparent at first encounter. Although there are some things that the player needs to do before others, the game is nonlinear and there's enough to do that the player never feels stuck—if they can't figure out one puzzle they're never far from something else they can do.
+>
+> The city has a few distinctive landmarks, some of which have significance below-ground in ways that may not be obvious at first. Some portions of the city or the underground may be blocked off or inaccessible until certain plot or puzzle points are reached, or may become inaccessible or require a new way to access as the city changes.
+>
+> The player moves through the scrolling top-down/2.5D world and encounters and solves puzzles by talking to characters, obtaining items, interacting with things, etc. They can control the game by keyboard, using arrows and one or two other keys, or by clicking and tapping where to move with the game pathfinding.
+>
+> The game uses SNES-style graphics (tiles and sprites with a constrained palette) and sound (synthesized effects and music). We don't need to match SNES hardware constraints exactly but the game should look, sound, and feel like it's from that time.
+>
+> The game has a plot and narrative with a beginning, middle, and end. The player plays as Cheryl, in her late 50s, who a backstory and personality that the game will show glimpses of while letting players fill in some gaps. Cheryl doesn't have dialog when talking with other characters, but written descriptions of objects etc are in her voice and she may have a few lines of internal monologue at significant moments. Most NPCs are referred to by descriptions like Old Man, Shopkeeper, or Sweaty Kid rather than by name, but a few play significant roles in the story and may be named. The story and dialog should be engaging and entertaining, with some humor, some surprises, and characters with obsessions, neuroses, blind spots, foibles, etc.
+>
+> I'd like you to have another task orchestrate work among other lander tasks to get the job done efficiently. ... They should make reasonable decisions about story, puzzles, locations, graphics, etc, and do each to the best of their ability. Agents should check each others' work and give feedback. I'd like them to work in an iterative manner, building a small version of the game first and making sure it reaches a high level of quality, gradually broadening the scope until the entire game has been built, and keeping the playable GitHub repo up to date the whole time.
