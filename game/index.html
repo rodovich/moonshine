@@ -3,13 +3,24 @@
 <head>
 <meta charset="utf-8">
 <title>Moonshine</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <style>
-  html, body { margin: 0; height: 100%; background: #10101c; color: #e8e0c8; font-family: monospace; }
-  body { display: flex; align-items: center; justify-content: center; }
+  html, body {
+    margin: 0; padding: 0; width: 100%; height: 100%;
+    overflow: hidden; background: #000;
+    overscroll-behavior: none;
+    -webkit-user-select: none; user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  canvas#screen { display: block; touch-action: none; outline: none; }
+  noscript { color: #e8e0c8; font-family: monospace; display: block; padding: 2em; }
 </style>
 </head>
 <body>
-<p>Moonshine is under construction. The first playable slice will appear here soon.</p>
+<noscript>Moonshine needs JavaScript to run.</noscript>
+<script type="module" src="src/main.js"></script>
 </body>
 </html>

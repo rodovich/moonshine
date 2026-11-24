@@ -32,6 +32,16 @@ This file records the project's technical and process decisions. Creative decisi
 - **Content is data plus small scripts.** Maps, characters, items, and text live under `game/src/content/`. Interactions and cutscenes are async functions that call a small engine API (say a line, give an item, set a flag, move a character, change map, play music). Game state is a set of flags plus the inventory, saved to `localStorage`.
 - **Debug hooks for testing.** URL parameters let a tester start at a given map and position with given flags and items (documented in the engine README), so reviewers and Playwright tests can reach any scene quickly.
 
+## Engine
+
+The engine's own decisions (grid-stepped movement, display scaling, text style, scripting model) and the full content-authoring guide live in [game/src/engine/README.md](../game/src/engine/README.md). The ones that shape content:
+
+- **Movement is grid-stepped**: characters occupy whole 16×16 tiles and glide smoothly between them, in four directions. Puzzle layouts can rely on "who stands on which tile".
+- **The overhead layer is for things always above characters** (eaves, arch tops, canopies). Anything a character can stand both in front of and behind is a sprite entity, which sorts by its feet.
+- **Text style**: NPC dialog in a navy box with a speaker tab; Cheryl's descriptions in a warm brown box with no label; her thoughts in the warm box, italic, with a dashed frame. The bitmap font is in `game/src/art/font.js`.
+- **The audio boundary** is four functions in `game/src/audio/index.js` (`unlockAudio`, `playMusic`, `stopMusic`, `sfx`); the file's header lists the effect ids the engine uses.
+- **UI colors** are the `ui_*` entries in `game/src/art/palette.js`. The `ph_*` entries are placeholder art for the engine test maps and go away with them.
+
 ## Repository layout
 
 ```
