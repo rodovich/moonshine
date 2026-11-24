@@ -1,0 +1,477 @@
+// The world scene: the current map, its entities, the player, the camera,
+// and the script runner. Player control lives in control.js; the script API
+// in script.js.
+
+import { WIDTH, HEIGHT } from './display.js';
+import { TileMap, TILE } from './tilemap.js';
+import { Entity, DIR_VEC, dirBetween } from './entity.js';
+import { findPath, nearestReachable } from './pathfind.js';
+import { makeApi } from './script.js';
+import { Control } from './control.js';
+import { writeSave } from './save.js';
+import { colorOf, loadSheet } from './art.js';
+import { uiSmall } from '../art/ui.js';
+import { drawText } from './text.js';
+import { playMusic, stopMusic } from '../audio/index.js';
+
+export class World {
+  constructor(game, state) {
+    this.game = game;
+    this.content = game.content;
+    this.state = state;
+    this.effects = game.effects;
+    this.textbox = game.textbox;
+    this.inventory = game.inventory;
+    this.tick = 0;
+    this.busy = 0; // scripts running
+    this.queue = [];
+    this.waiters = [];
+    this.cam = { x: 0, y: 0 };
+    this.camPan = null; // { x, y } fixed camera center while panning
+    this.marker = null;
+    this.api = makeApi(this);
+    this.control = new Control(this);
+    this.small = loadSheet(uiSmall);
+    this.player = new Entity({ id: 'player', x: state.x, y: state.y, facing: state.facing, ...this.content.player }, true);
+    this.player.name = this.content.player.name || 'Cheryl';
+    this.loadMap(state.map, state.x, state.y, state.facing);
+  }
+
+  // ---- Maps and entities ----------------------------------------------
+
+  loadMap(id, x, y, facing) {
+    const def = this.content.maps[id];
+    if (!def) throw new Error(`no map "${id}"`);
+    this.mapDef = def;
+    this.map = new TileMap(def);
+    this.state.map = id;
+    const p = this.player;
+    p.x = p.fromX = x;
+    p.y = p.fromY = y;
+    p.moving = false;
+    p.walkDist = 0;
+    if (facing) p.facing = facing;
+    this.entities = [p];
+    this.byId = new Map();
+    this.removed = new Set(); // ids removed by scripts until the map reloads
+    this.refreshEntities();
+    this.control.reset();
+    this.camPan = null;
+    this.snapCamera();
+    if (def.music !== undefined) {
+      if (def.music) playMusic(def.music);
+      else stopMusic();
+    }
+  }
+
+  // Add entities whose `when` now passes; remove ones whose `when` fails.
+  refreshEntities() {
+    for (const def of this.mapDef.entities || []) {
+      const show = !def.when || def.when(this.api);
+      const existing = this.byId.get(def.id);
+      if (show && !existing && !this.removed.has(def.id)) {
+        const e = new Entity(def);
+        e.home = { x: def.x, y: def.y, facing: e.facing };
+        this.entities.push(e);
+        this.byId.set(def.id, e);
+      } else if (!show && existing) {
+        this.removeEntity(existing);
+      }
+    }
+  }
+
+  removeEntity(e) {
+    this.entities = this.entities.filter((x) => x !== e);
+    this.byId.delete(e.id);
+  }
+
+  entity(id) {
+    if (id === 'player') return this.player;
+    if (id instanceof Entity) return id;
+    return this.byId.get(id) || null;
+  }
+
+  // Solid entity covering a tile (optionally ignoring one entity).
+  entityAt(x, y, ignore = null) {
+    for (const e of this.entities) {
+      if (e !== ignore && e.solid && e.visible && e.occupies(x, y)) return e;
+    }
+    return null;
+  }
+
+  // Interactable entity at a tile (solid or not).
+  interactableAt(x, y) {
+    for (const e of this.entities) {
+      if (e.isPlayer || !e.visible) continue;
+      if (e.x <= x && e.y <= y && x < e.x + e.w && y < e.y + e.h && isInteractable(e)) return e;
+    }
+    return null;
+  }
+
+  blocked(x, y, mover = null) {
+    if (this.map.solid(x, y)) return true;
+    const e = this.entityAt(x, y, mover);
+    return !!e;
+  }
+
+  // Can `mover` (with its footprint) step into x,y?
+  canEnter(mover, x, y) {
+    for (let dy = 0; dy < mover.h; dy++) {
+      for (let dx = 0; dx < mover.w; dx++) {
+        if (this.blocked(x + dx, y + dy, mover)) return false;
+      }
+    }
+    return true;
+  }
+
+  // Path for an entity to any of `goals`, avoiding solid tiles and entities.
+  // If none is reachable and `closest` is set, path to the nearest reachable tile.
+  pathFor(mover, goals, { closest = false, ignoreEntities = false } = {}) {
+    const blocked = (x, y) => (ignoreEntities ? this.map.solid(x, y) : !this.canEnter(mover, x, y));
+    const start = [mover.x, mover.y];
+    let path = findPath(start, goals, blocked, this.map.w, this.map.h);
+    if (path || !closest || !goals.length) return path;
+    const target = goals[0];
+    const near = nearestReachable(start, target, blocked, this.map.w, this.map.h);
+    path = findPath(start, [near], blocked, this.map.w, this.map.h);
+    return path;
+  }
+
+  // Tiles from which the player can interact with `e`, each with the facing
+  // to use there. Includes talking across counters.
+  interactSpots(e) {
+    const spots = [];
+    const seen = new Set();
+    for (let fy = e.y; fy < e.y + e.h; fy++) {
+      for (let fx = e.x; fx < e.x + e.w; fx++) {
+        for (const [dir, [dx, dy]] of Object.entries(DIR_VEC)) {
+          let sx = fx - dx;
+          let sy = fy - dy;
+          if (e.occupies(sx, sy)) continue;
+          if (this.map.counter(sx, sy)) {
+            sx -= dx;
+            sy -= dy;
+          }
+          const k = `${sx},${sy}`;
+          if (seen.has(k) || !this.map.inBounds(sx, sy) || this.map.solid(sx, sy)) continue;
+          seen.add(k);
+          spots.push({ x: sx, y: sy, facing: dir });
+        }
+      }
+    }
+    return spots;
+  }
+
+  // ---- Scripts ---------------------------------------------------------
+
+  // Run an async content script `fn(api, ...args)`. Scripts run one at a time;
+  // later ones queue. Resolves with the script's return value.
+  run(fn, ...args) {
+    return new Promise((resolve, reject) => {
+      this.queue.push({ fn, args, resolve, reject });
+      if (!this.busy) this.next();
+    });
+  }
+
+  async next() {
+    const job = this.queue.shift();
+    if (!job) return;
+    this.busy++;
+    try {
+      job.resolve(await job.fn(this.api, ...job.args));
+    } catch (err) {
+      console.error('[script]', err);
+      job.resolve(undefined);
+    } finally {
+      this.busy--;
+      this.refreshEntities();
+      if (!this.queue.length) this.save();
+      this.next();
+    }
+  }
+
+  // Promise that resolves after `ticks` ticks.
+  waitTicks(ticks) {
+    return new Promise((resolve) => this.waiters.push({ ticks: Math.max(0, Math.round(ticks)), resolve }));
+  }
+
+  // Promise that resolves once `pred()` is true (checked every tick).
+  until(pred) {
+    return new Promise((resolve) => this.waiters.push({ pred, resolve }));
+  }
+
+  save() {
+    if (this.game.debug.nosave) return;
+    const p = this.player;
+    this.state.x = p.x;
+    this.state.y = p.y;
+    this.state.facing = p.facing;
+    writeSave(this.state);
+  }
+
+  async transition(mapId, x, y, facing, { fade = true, seconds = 0.25 } = {}) {
+    if (fade) await this.effects.fade('out', seconds);
+    this.loadMap(mapId, x, y, facing);
+    this.save();
+    const onEnter = this.mapDef.onEnter;
+    if (fade) await this.effects.fade('in', seconds);
+    if (onEnter) this.run(onEnter);
+  }
+
+  // Interact with or use an item on an entity (player already in place).
+  async interactWith(e, itemId = null) {
+    const p = this.player;
+    const face = dirBetween(p.x, p.y, nearestTileOf(e, p.x, p.y)[0], nearestTileOf(e, p.x, p.y)[1]);
+    if (face) p.facing = face;
+    const turn = e.directional && e.def.turnToTalk !== false;
+    const prevFacing = e.facing;
+    if (turn) e.facing = dirBetween(e.x, e.y, p.x, p.y) || e.facing;
+    e.talking = true;
+    try {
+      if (itemId) await this.useItemOn(e, itemId);
+      else await runInteract(this.api, e);
+    } finally {
+      e.talking = false;
+      if (turn && (!e.def.behavior || e.def.behavior === 'idle') && !e.moving && this.byId.get(e.id) === e && e.facing !== prevFacing) {
+        e.facing = e.home?.facing || prevFacing;
+      }
+    }
+  }
+
+  async useItemOn(e, itemId) {
+    const g = this.api;
+    const use = e.def.use || {};
+    if (use[itemId]) return use[itemId](g, e, itemId);
+    if (use['*']) return use['*'](g, e, itemId);
+    const fallback = this.content.defaults?.useFail;
+    if (fallback) return fallback(g, e, itemId);
+    return g.describe("That doesn't do anything.");
+  }
+
+  // ---- Per-tick update ------------------------------------------------
+
+  update(input) {
+    this.tick++;
+    if (this.textbox.open) {
+      this.textbox.update(input);
+    } else if (this.inventory.open) {
+      this.inventory.update(input);
+    } else if (!this.busy) {
+      this.control.update(input);
+    } else {
+      input.taps(); // discard taps during cutscenes
+    }
+
+    for (const e of this.entities) {
+      if (e.updateMove() && e.isPlayer) this.control.arrived();
+      e.animTick++;
+    }
+    for (const e of this.entities) {
+      if (!e.moving && e.route && e.route.length) followRoute(this, e);
+      else if (!e.isPlayer) this.updateNpc(e);
+      if (!e.moving) e.walkDist = 0;
+    }
+    if (!this.textbox.open && !this.inventory.open && !this.busy) this.control.afterMove(input);
+    else this.control.afterMove(null);
+    if (!this.player.moving) this.player.walkDist = 0;
+
+    // Waiters
+    if (this.waiters.length) {
+      const still = [];
+      for (const w of this.waiters) {
+        if (w.pred ? w.pred() : w.ticks-- <= 0) w.resolve();
+        else still.push(w);
+      }
+      this.waiters = still;
+    }
+    this.updateCamera();
+  }
+
+  updateNpc(e) {
+    if (e.moving) return;
+    if (this.busy || e.talking) return;
+    const b = e.def.behavior;
+    if (!b || b === 'idle') return;
+    const type = typeof b === 'string' ? b : b.type;
+    const p = this.player;
+    if (type === 'face') {
+      const range = b.range || 3;
+      if (Math.abs(p.x - e.x) + Math.abs(p.y - e.y) <= range) e.facing = dirBetween(e.x, e.y, p.x, p.y) || e.facing;
+    } else if (type === 'wander') {
+      if (e.wanderWait == null) e.wanderWait = this.game.rng.int(30, 150);
+      if (e.wanderWait-- > 0) return;
+      const pause = b.pause || [1, 3];
+      e.wanderWait = this.game.rng.int(pause[0] * 60, pause[1] * 60);
+      const dirs = Object.keys(DIR_VEC);
+      const dir = dirs[this.game.rng.int(0, 3)];
+      const [dx, dy] = DIR_VEC[dir];
+      const [ax, ay, aw, ah] = b.area || [e.home.x - 2, e.home.y - 2, 5, 5];
+      const nx = e.x + dx;
+      const ny = e.y + dy;
+      e.facing = dir;
+      if (nx < ax || ny < ay || nx + e.w > ax + aw || ny + e.h > ay + ah) return;
+      if (this.canEnter(e, nx, ny) && !this.isExit(nx, ny)) e.startStep(dir);
+    }
+  }
+
+  isExit(x, y) {
+    return (this.mapDef.exits || []).some((ex) => inArea(ex, x, y));
+  }
+
+  // ---- Camera ---------------------------------------------------------
+
+  cameraTarget() {
+    if (this.camPan) return this.camPan;
+    const p = this.player;
+    return { x: p.px + TILE / 2, y: p.py + TILE / 2 - 8 };
+  }
+
+  clampCamera(cx, cy) {
+    const mw = this.map.w * TILE;
+    const mh = this.map.h * TILE;
+    let x = Math.round(cx - WIDTH / 2);
+    let y = Math.round(cy - HEIGHT / 2);
+    x = mw <= WIDTH ? Math.floor((mw - WIDTH) / 2) : Math.max(0, Math.min(mw - WIDTH, x));
+    y = mh <= HEIGHT ? Math.floor((mh - HEIGHT) / 2) : Math.max(0, Math.min(mh - HEIGHT, y));
+    return { x, y };
+  }
+
+  snapCamera() {
+    const t = this.cameraTarget();
+    this.cam = this.clampCamera(t.x, t.y);
+  }
+
+  updateCamera() {
+    const t = this.cameraTarget();
+    const want = this.clampCamera(t.x, t.y);
+    if (this.camPan && this.camPan.speed) {
+      // Glide toward the pan target.
+      const s = this.camPan.speed;
+      const dx = want.x - this.cam.x;
+      const dy = want.y - this.cam.y;
+      const dist = Math.hypot(dx, dy);
+      if (dist <= s) this.cam = want;
+      else this.cam = { x: Math.round(this.cam.x + (dx / dist) * s), y: Math.round(this.cam.y + (dy / dist) * s) };
+    } else {
+      this.cam = want;
+    }
+  }
+
+  // ---- Drawing --------------------------------------------------------
+
+  draw(ctx) {
+    const bg = this.mapDef.background ? colorOf(this.mapDef.background) : '#000000';
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    const [sx, sy] = this.effects.shakeOffset();
+    const cx = this.cam.x - sx;
+    const cy = this.cam.y - sy;
+    this.map.draw(ctx, 'ground', cx, cy, WIDTH, HEIGHT, this.tick);
+    this.map.draw(ctx, 'objects', cx, cy, WIDTH, HEIGHT, this.tick);
+    this.drawMarker(ctx, cx, cy);
+    const sorted = [...this.entities].sort((a, b) => {
+      const la = a.layer === 'ground' ? 0 : 1;
+      const lb = b.layer === 'ground' ? 0 : 1;
+      return la - lb || a.sortY - b.sortY || a.px - b.px;
+    });
+    for (const e of sorted) e.draw(ctx, cx, cy);
+    this.map.draw(ctx, 'overhead', cx, cy, WIDTH, HEIGHT, this.tick);
+    if (this.game.debug.debug) this.drawDebug(ctx, cx, cy);
+    this.effects.applyWorld(ctx);
+    if (!this.busy && !this.textbox.open && !this.inventory.open) this.control.drawHud(ctx);
+    this.inventory.draw(ctx);
+    this.textbox.draw(ctx, this.player.py - this.cam.y);
+  }
+
+  drawMarker(ctx, cx, cy) {
+    const m = this.marker;
+    if (!m) return;
+    m.t++;
+    const frame = m.t < 4 ? 'marker_0' : m.t < 8 ? 'marker_1' : m.t < 14 ? 'marker_2' : Math.floor(m.t / 24) % 2 ? 'marker_1' : 'marker_0';
+    if (m.t > 14 && !m.persist) return;
+    ctx.drawImage(this.small.frame(frame), m.x * TILE + 4 - cx, m.y * TILE + 6 - cy);
+  }
+
+  drawDebug(ctx, cx, cy) {
+    ctx.save();
+    ctx.globalAlpha = 0.35;
+    for (let y = 0; y < this.map.h; y++) {
+      for (let x = 0; x < this.map.w; x++) {
+        if (this.map.solid(x, y)) {
+          ctx.fillStyle = '#f80000';
+          ctx.fillRect(x * TILE - cx, y * TILE - cy, TILE, TILE);
+        }
+      }
+    }
+    ctx.fillStyle = '#00f8f8';
+    for (const ex of this.mapDef.exits || []) ctx.fillRect(ex.x * TILE - cx, ex.y * TILE - cy, (ex.w || 1) * TILE, (ex.h || 1) * TILE);
+    ctx.fillStyle = '#f8f800';
+    for (const [x, y] of this.control.path || []) ctx.fillRect(x * TILE + 6 - cx, y * TILE + 6 - cy, 4, 4);
+    ctx.restore();
+    const p = this.player;
+    drawText(ctx, `${this.state.map} ${p.x},${p.y}`, 4, HEIGHT - 12, { color: 'ui_select' });
+  }
+}
+
+export function isInteractable(e) {
+  const d = e.def;
+  return !!(d.interact || d.use || d.look || d.talk);
+}
+
+async function runInteract(g, e) {
+  const d = e.def;
+  if (d.interact) return d.interact(g, e);
+  if (d.talk) {
+    const lines = Array.isArray(d.talk) ? d.talk : [d.talk];
+    return g.say(e.name, ...lines);
+  }
+  if (d.look) {
+    const lines = Array.isArray(d.look) ? d.look : [d.look];
+    return g.describe(...lines);
+  }
+  return undefined;
+}
+
+export function inArea(a, x, y) {
+  return x >= a.x && y >= a.y && x < a.x + (a.w || 1) && y < a.y + (a.h || 1);
+}
+
+function nearestTileOf(e, x, y) {
+  const nx = Math.max(e.x, Math.min(e.x + e.w - 1, x));
+  const ny = Math.max(e.y, Math.min(e.y + e.h - 1, y));
+  return [nx, ny];
+}
+
+// Scripted movement for NPCs (and the player during cutscenes): e.route is a
+// list of directions; e.routeGoal (optional) lets us re-path around obstacles.
+export function followRoute(world, e) {
+  const dir = e.route[0];
+  const [dx, dy] = DIR_VEC[dir];
+  const nx = e.x + dx;
+  const ny = e.y + dy;
+  if (e.routeGhost || world.canEnter(e, nx, ny)) {
+    e.route.shift();
+    e.startStep(dir);
+    e.routeBlocked = 0;
+    return;
+  }
+  e.facing = dir;
+  e.routeBlocked = (e.routeBlocked || 0) + 1;
+  if (e.routeGoal && e.routeBlocked % 20 === 0) {
+    const path = world.pathFor(e, [e.routeGoal]);
+    if (path) e.route = pathToDirs([e.x, e.y], path);
+  }
+  // A scripted move must finish: after two seconds, walk through whatever is in the way.
+  if (e.routeBlocked > 120 && !world.map.solid(nx, ny)) e.routeGhost = true;
+}
+
+export function pathToDirs(start, path) {
+  const dirs = [];
+  let [x, y] = start;
+  for (const [nx, ny] of path) {
+    dirs.push(dirBetween(x, y, nx, ny));
+    x = nx;
+    y = ny;
+  }
+  return dirs;
+}
