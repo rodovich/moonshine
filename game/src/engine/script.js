@@ -7,7 +7,7 @@
 
 import { DIR_VEC, dirBetween } from './entity.js';
 import { pathToDirs } from './world.js';
-import { playMusic, stopMusic, sfx } from '../audio/index.js';
+import { playMusic, stopMusic, sfx } from './sound.js';
 import { loadSheet } from './art.js';
 import { TILE } from './tilemap.js';
 

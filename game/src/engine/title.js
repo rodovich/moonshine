@@ -5,7 +5,7 @@ import { drawText, drawTextCentered, measure, LINE_HEIGHT } from './text.js';
 import { loadSheet } from './art.js';
 import { uiSmall } from '../art/ui.js';
 import { inRect } from './ui.js';
-import { sfx } from '../audio/index.js';
+import { sfx } from './sound.js';
 
 export class Title {
   constructor(game, { canContinue }) {

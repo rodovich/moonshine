@@ -10,7 +10,7 @@ import { drawText, drawTextCentered, measure, wrap, LINE_HEIGHT } from './text.j
 import { loadSheet } from './art.js';
 import { uiSmall } from '../art/ui.js';
 import { STYLES, drawBox, inRect } from './ui.js';
-import { sfx } from '../audio/index.js';
+import { sfx } from './sound.js';
 
 const PANEL = { x: 24, y: 14, w: 208, h: 96 };
 const COLS = 8;

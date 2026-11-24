@@ -12,7 +12,7 @@ import { writeSave } from './save.js';
 import { colorOf, loadSheet } from './art.js';
 import { uiSmall } from '../art/ui.js';
 import { drawText } from './text.js';
-import { playMusic, stopMusic } from '../audio/index.js';
+import { playMusic, stopMusic } from './sound.js';
 
 export class World {
   constructor(game, state) {

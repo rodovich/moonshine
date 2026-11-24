@@ -6,7 +6,7 @@ import { drawText, measure, wrap, LINE_HEIGHT } from './text.js';
 import { loadSheet } from './art.js';
 import { uiSmall } from '../art/ui.js';
 import { STYLES, drawBox, inRect } from './ui.js';
-import { sfx } from '../audio/index.js';
+import { sfx } from './sound.js';
 
 const BOX_X = 8;
 const BOX_W = WIDTH - 16;

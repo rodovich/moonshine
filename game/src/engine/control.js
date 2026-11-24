@@ -10,7 +10,7 @@ import { uiIcons } from '../art/ui.js';
 import { STYLES, drawBox, inRect } from './ui.js';
 import { drawText, measure } from './text.js';
 import { inArea, isInteractable } from './world.js';
-import { sfx } from '../audio/index.js';
+import { sfx } from './sound.js';
 
 const BAG_BTN = { x: WIDTH - 24, y: 4, w: 20, h: 20 };
 const HOLD_BANNER = { x: 4, y: 4, w: 0, h: 20 }; // width set when drawn

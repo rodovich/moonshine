@@ -12,7 +12,7 @@ import { World } from './world.js';
 import { Title } from './title.js';
 import { newState, hasSave, loadSave, clearSave } from './save.js';
 import { readDebugParams } from './debug.js';
-import { unlockAudio } from '../audio/index.js';
+import { unlockAudio } from './sound.js';
 
 const STEP = 1000 / 60;
 
