@@ -222,8 +222,8 @@ flowchart TD
 - *Seeds (optional in Act 2, required later):* Ambrose under the bell; Mott on the quay ("A hand to the left."); the Skipping Girls; the Clockmaker and his letters to the observatory; the sea cave on the Back, where Mott's grandfather "found the copper."
 
 **Act 3**
-- *Step Gallery.* A jammed bronze lid over a light shaft (opened with the **crowbar**) lets a beam of daylight in. A pivoting bronze mirror (two positions are wrong, one is right, and the wrong ones light up nice mosaics) puts the beam on a moon-lock. The round door opens onto the **moonglass disc** (a light source and, later, a key).
-- *Chute.* A smooth hullstone slide behind the round door drops Cheryl one-way into the Lamp Halls. Internal monologue on landing.
+- *Step Gallery.* A jammed bronze lid over a light shaft (opened with the **crowbar**) lets a beam of daylight in. A pivoting bronze mirror (two positions are wrong, one is right, and the wrong ones light up wall inlays) puts the beam on a moon-lock. A sealed hatch opens onto the **moonglass disc** (a light source and, later, a key).
+- *Chute.* A smooth hullstone slide behind the hatch drops Cheryl one-way into the Lamp Halls. Internal monologue on landing.
 - *Lamp Halls.* Dark except near light-pipes; the disc lights a radius around Cheryl. Contents: the ladder up to the Step Gallery (kick it down to make a shortcut), the fountain valve wheel (turning it causes a faraway gurgle and, through a speaking tube, a distant voice shouting "The FOUNTAIN!"), and the flooded corridor ("I'm brave, not stupid.").
 - *Chart Room.* The Keeper's chair, cup, and ledger; the mosaic, lit through the Dome's floor-eye. With paper and charcoal, Cheryl takes a rubbing: the **Ship Plan**, which works as the underground map. The Founders' Door is bolted from this side.
 

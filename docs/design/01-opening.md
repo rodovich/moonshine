@@ -163,7 +163,7 @@ Every examinable object also keeps a look counter, so that its first look, secon
    - *Moonshine Night.*
    - *A tub on the roof and the moon on its way. Thirty-one years, and I haven't missed one.*
    - *Everything's nearly ready. Nearly.*
-3. Control is given. A one-time control hint fades in at the bottom for about six seconds: "Arrows: walk · Z: look / talk · X: bag" (on touch devices: "Tap to walk · Tap things to look").
+3. Control is given. A one-time control hint fades in at the bottom for about six seconds: "Arrows: walk   Z: look/talk   X: bag" (on touch devices: "Tap to walk. Tap things to look."). The font has no "·", so don't use it in game text.
 
 The first thing most players touch is the tub, and its first description names the problem and who has the plug.
 
@@ -555,7 +555,7 @@ The tints (dusk, night, day) are global color treatments by the engine, not sepa
 
 **Music**
 - **Cistern Court**: a warm dusk theme, unhurried, in a gentle triple meter. Plucked strings and a reedy, accordion-like lead. Loops in 60–90 seconds. It becomes Cheryl's home theme for the whole game.
-- **Moonrise**: a music box playing the skipping-rhyme melody. The rhyme's tune is the game's central motif; later it returns underground and at the ending. It needs a "detune and stop mid-phrase" ending for this scene.
+- **Moonrise**: a music box playing the skipping-rhyme melody. The rhyme's tune is the game's central motif; later it returns underground and at the ending. Following the [audio direction](../audio-direction.md#leitmotifs), build it from the home motif's intervals rearranged, with a turn to the flat sixth, so that Tessel's home tune turns out to be a fragment of the Founders' rhyme. It needs a "detune and stop mid-phrase" ending for this scene.
 - **Morning After**: a thinner, slightly uneasy variation of Cistern Court, short and looping.
 
 **Sound effects**

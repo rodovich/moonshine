@@ -68,7 +68,7 @@ Each landmark has an ordinary job above ground and a forgotten one below. This i
 
 Five hundred and some years ago, a people lived in a flat, wet country of marshes and canals called **the Lowland**. The sea was taking it a field at a time. Their engineers were tide-workers who had spent generations building sluices, mills, and pumps that ran on the pull of the moon, and they made a decision: if the land would not stay above the sea, they would build land that floated.
 
-Over forty years they raised a hill of hollow stone in a dry dock on the marsh: thousands of sealed cells of a light, glassy, pumice-filled concrete they called hullstone, ribbed and vaulted like the inside of a shell. They put houses on its back, a mast on its crown, and machinery in its belly. When the sea came in for good, the hill lifted, and they sailed away on it.
+Over forty years they raised a hill of hollow stone in a dry dock on the marsh: thousands of sealed cells of a light, glassy, pumice-filled concrete they called hullstone, fitted and ribbed like the inside of a hull. They put houses on its back, a mast on its crown, and machinery in its belly. When the sea came in for good, the hill lifted, and they sailed away on it.
 
 They drifted and sailed for a generation, looking for calm water. They found the Bowl, a flooded crater with a single narrow mouth, as still as a millpond. They dropped an anchor the size of a chapel in the middle of it, and they set the mooring by the moon: the chain's length and bearing were fixed so that, from the Sighting Basin at the bottom of the hull, the late-summer full moon would rise dead center in the Gate. Every year they checked it. If the moon sat true in the Basin, the city was where it should be.
 
@@ -78,13 +78,13 @@ Cheryl is not a descendant. She came from the mainland thirty-one years ago. The
 
 ### Architecture and technology
 
-Above ground, Tessel is square-ish, whitewashed, warm, and improvised. Below ground, the Founders' work is the opposite:
+Above ground, Tessel is rounded, whitewashed, warm, and improvised. Below ground, the Founders' work is the opposite. (The visual rules are in [art direction](art-direction.md#the-underground-direction-for-future-sheets); this is the story behind them.)
 
-- **Curved, never square.** Ribbed vaults like the inside of a hull or a seashell. Round doors with bronze rims, like portholes. Spiral stairs. Floors that dish gently toward drains.
-- **Hullstone**: dark sea-green, faintly glassy, smooth as a pebble, with a fine honeycomb texture where it's broken.
-- **Bronze** everywhere, gone verdigris-green: valves, wheels, gear trains, speaking tubes, the windlass drum, the chain.
-- **Mosaics** of tiny tiles in deep blue, silver, and sea-green: tides, moon phases, fish, the three pumps drawn as three women, the city drawn as a boat. The recurring emblem is a crescent moon over a wave, joined by a chain link.
-- **Moonglass**: a pale, milky glass that drinks light and gives it back as a cool blue glow for days. It lights the Founders' lamps, which sit in scallop-shell niches, and the light-pipes, which carry daylight down from the moon-eyes on the streets. Their locks also use it: a *moon-lock* opens when bright light falls on its glass eye. The underground is lit in cool blue; the surface is lit in warm gold.
+- **Straight, precise, and dark.** Long corridors of fitted slate-dark *hullstone* blocks with no visible mortar, chamfered 45° corners instead of arches, and floors of large square plates. It's built like the inside of a ship: corridors are decks, and at regular intervals heavy chamfered *ribs* cross the ceiling like a hull's frames. Steep ladder-stairs, not spirals. Hatches, not doors.
+- **Hullstone**: a dark, dense-looking stone that is secretly light: where a block is broken, its inside is a fine honeycomb of sealed air cells. That's why the hill floats.
+- **Bronze** fittings gone to verdigris: valves, wheels, gear trains, speaking tubes, the windlass drum, the chain.
+- **Geometric inlays** repeated along the walls, in a strict pattern language: tides as stepped lines, moon phases as squares filling up, the three pumps as three upright bars of different widths. Only the Chart Room's great floor inlay is pictorial: the city drawn as a ship. The recurring emblem is a crescent over a stepped wave, joined by a chain link.
+- **Moonglass**: a pale glass that drinks light and gives it back as a cool cyan glow for days (`relic_cyan` in the palette). It lights the Founders' lamps and the light-pipes, which carry daylight down from the moon-eyes on the streets. Their locks also use it: a *moon-lock* opens when bright light falls on its glass eye. The machinery's own warning lights and the Tide Wheel's housings glow amber (`relic_amber`). The underground is lit locally by these glows; the surface by the sun.
 - **Tide power.** Tidal flow through gill-like channels in the hull turns the **Tide Wheel**, which drives the **Three Sisters** (the ballast pumps: Thin, Stout, and Middle) and the **Windlass**. The Founders called the whole system, in effect, "the moon's work."
 - **Sighting.** The shaft, the mirror, and the Basin form a periscope aimed at the Gate.
 - **Signals.** The bell and its rope, speaking tubes, and rods connect the deck above to the machinery below.
@@ -155,6 +155,10 @@ The city's real danger grows steadily. What the city *sees* grows in jumps, and 
 | Act 5 | From the lighthouse, the Teeth are visible and closer each time Cheryl looks. | Hers, she suspects. |
 | Act 6 | Cheryl releases the windlass brake. The whole city lurches; everyone falls over; the piano makes its last journey. Then everything settles, the canals refill, and the moon sits in the Gate. | Nobody's, as far as the city knows. |
 
+### How the Wrongness looks and sounds
+
+The Wrongness isn't a creature; it's the city being *out of true*. The [art](art-direction.md#the-wrongness) and [audio](audio-direction.md#the-three-worlds) directions already express that: misregistered pixels, colors that slip, notes that sag flat. Use those treatments only where the player is *feeling* the city come loose: the moonrise, the groan and the crack, the lurches, the Bilge flooding, the reveal. Never use them for a monster, a villain, or a glowing evil thing. There isn't one. Scale the audio's global Wrongness amount with the escalation table above: about 0.1 after Act 1, 0.2 in Act 3, 0.35 in Act 4, 0.5 in Act 5 while the reef approaches, and 0 the moment the moon centers in the Basin.
+
 ## Cheryl
 
 ### Who she is
@@ -217,9 +221,9 @@ Rules for her voice:
 - When something is genuinely awe-inspiring, she's brief and plain. Downstairs she gets quieter.
 - She calls people by her own nicknames in descriptions ("Her Next Door," "the Mayor, who was Duncan when he was seven"). Their in-game labels stay descriptive.
 
-### Look (for the art task)
+### Look
 
-Silver-streaked hair in a loose bun with a pencil through it. Reading glasses on a beaded chain. A mustard cardigan over a teal skirt, sensible shoes, a canvas tote bag (where the inventory lives). She walks briskly and stops to look at things.
+[Art direction](art-direction.md#cheryl) owns her design: silver hair in a bun with a coral tie, a coral cardigan over a cream blouse, a navy skirt, sensible brown shoes, and a leather satchel across her body, where the inventory lives. She walks briskly and stops to look at things. Text should agree with the sprite (her "bag" is the satchel).
 
 ## Cast
 
@@ -308,7 +312,7 @@ Two threads lead to the first way Downstairs: get the Movers' crowbar by soaping
 
 *The underground and the big middle reveal. About 25–35 minutes.*
 
-Under the hundredth step is the **Step Gallery**, a curving hullstone vault of sea-green stone, bronze, and dark moonglass. *(Internal monologue, the first time Cheryl stands in it.)* She pries open a jammed light-shaft lid and swings a bronze mirror until daylight falls on a moon-lock. A round door opens, and she gains a **moonglass disc** that glows and lights her way. A hidden chute drops her, one-way, into the **Lamp Halls**. She finds a ladder she can kick down to make the Step Gallery a two-way shortcut, a valve wheel that (she discovers later) stops the Fountain, and a black flooded corridor heading downhill that she wisely refuses to swim.
+Under the hundredth step is the **Step Gallery**, a long, straight, low deck of dark fitted hullstone, ribbed like the inside of a hull, with verdigris bronze and dead moonglass lamps. *(Internal monologue, the first time Cheryl stands in it.)* She pries open a jammed light-shaft lid and swings a bronze mirror until daylight falls on a moon-lock. A sealed hatch opens, and she gains a **moonglass disc** that glows and lights her way. A hidden chute drops her, one-way, into the **Lamp Halls**. She finds a ladder she can kick down to make the Step Gallery a two-way shortcut, a valve wheel that (she discovers later) stops the Fountain, and a black flooded corridor heading downhill that she wisely refuses to swim.
 
 At the north end is the **Chart Room** under the Blue Dome: the last Keeper's chair, cup, and ledger (*Rang at the turn. All well.*), and a floor mosaic, lit from above through the Dome's glass eye, showing **Tessel as a ship**: the hull, the mast where the Bell Tower stands, the chain from the Prow to an anchor, the Three Sisters, the Basin under Cistern Court. *(Internal monologue: "Oh." … "Oh, we're a boat.")* She takes a rubbing, the **Ship Plan**, which becomes the player's underground map. Then she unbolts the Founders' Door and walks out into the Archive crypt, to Ottilie's indignation.
 
@@ -349,7 +353,7 @@ The bow decks, the Chain Locker, the Windlass: links taller than Cheryl, a bronz
 
 Night. Cheryl levers out the broken Tooth with the crowbar, sets the clapper in its place, and waits by the speaking tube. Far above, the bell rings at the turn. *Pull the old tooth when the bell says when.* She throws the brake. The Tide Wheel bites, the drum turns, and the chain comes home link by link, each one a thunderclap. Cut to the surface: the whole city lurches; everyone falls over; Her Next Door's sheets stand straight out; the piano makes its final journey; through the lighthouse window the Teeth slide away into the dark.
 
-Cheryl walks the **Long Keel**, a straight corridor down the center of the hull, to the **Sighting Room**: a round chamber under the shaft, with a stone basin big enough to sit in, dry, and in the bottom of it, her bath plug. *("My plug.")* She plugs the Basin. Water rises from the shaft's seep. The moon's reflection slides into it, off-center. She turns the trim wheel a quarter turn, then another, until the moon sits dead center in the Gate in the water. The Basin's moonglass rim lights; every lamp Downstairs blazes blue; the Middle Sister finally goes to sleep; the city settles to its proper waterline. Far above, the canals refill. ("I'M AFLOAT!")
+Cheryl walks the **Long Keel**, a straight corridor down the center of the hull, to the **Sighting Room**: an eight-sided chamber under the shaft, with a stone basin big enough to sit in, dry, and in the bottom of it, her bath plug. *("My plug.")* She plugs the Basin. Water rises from the shaft's seep. The moon's reflection slides into it, off-center. She turns the trim wheel a quarter turn, then another, until the moon sits dead center in the Gate in the water. The Basin's moonglass rim lights; every lamp Downstairs blazes blue; the Middle Sister finally goes to sleep; the city settles to its proper waterline. Far above, the canals refill. ("I'M AFLOAT!")
 
 Cheryl takes off her shoes and gets into the Basin. *(Internal monologue, the last: a few short lines. She doesn't explain anything. See sample lines.)*
 
