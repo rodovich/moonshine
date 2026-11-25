@@ -1,9 +1,12 @@
 // Act 3 Downstairs, laid out as docs/design/03-downstairs.md's maps (for judging the art in place).
-// Default: the Step Gallery (24 x 11), with the lever pulled and the beam on the hatch.
+// Default: the Step Gallery (24 x 11), with the lever pulled and the beam on the hatch (up-right).
 // ?state=halls: the Lamp Halls (32 x 14). ?state=dark: the Step Gallery before the lever.
+// ?state=nw / n / rest: the mirror aimed up-left (Sisters inlay), straight up (moons inlay), or resting
+// (beam lying flat along the floor to the east).
 
 export function SCENE(state) {
-  return state === 'halls' ? halls() : gallery(state === 'dark');
+  if (state === 'halls') return halls();
+  return gallery(state === 'dark', ['nw', 'n', 'rest'].includes(state) ? state : 'ne');
 }
 
 const hull = f => `hull:${f}`, ds = f => `ds:${f}`, day = f => `ds_day:${f}`, wat = f => `ds_water:${f}`;
@@ -29,36 +32,44 @@ function floor(L, x0, x1, y0, y1) {
   }
 }
 
-function gallery(dark) {
+function gallery(dark, aim) {
   const W = 24, H = 11, L = grid(W, H);
   wall(L, 1, 22, 1);
   floor(L, 1, 22, 3, 9);
   // Wall pieces sit on the doc's x; upper-row pieces (niches, inlays) on y1, lower-row pieces (lever) on y2.
   L.set('ground', 2, 1, ds(dark ? 'niche_dead' : 'niche_lit'));
   L.set('ground', 22, 1, ds('niche_dead'));
+  // The mirror's three targets on the north wall, four rows above it (03-downstairs.md).
+  // Inlays are upper-row pieces (y1) over their target tiles (y2); the moon-lock hatch is on the lower row.
   L.set('ground', 6, 1, ds('inlay_sisters_l')); L.set('ground', 7, 1, ds('inlay_sisters_r'));
-  L.set('ground', 14, 1, ds('inlay_moon_l')); L.set('ground', 15, 1, ds('inlay_moon_r'));
-  L.set('ground', 10, 2, ds(dark ? 'lever_jammed' : 'lever_pulled'));
-  const seal = dark ? 'seal' : 'seal_lit';
-  L.set('ground', 19, 1, ds(`${seal}_nw`)); L.set('ground', 20, 1, ds(`${seal}_ne`));
-  L.set('ground', 19, 2, ds(`${seal}_sw`)); L.set('ground', 20, 2, ds(`${seal}_se`));
+  L.set('ground', 10, 1, ds('inlay_moon_l')); L.set('ground', 11, 1, ds('inlay_moon_r'));
+  L.set('ground', 19, 2, ds(dark ? 'lever_jammed' : 'lever_pulled'));
+  L.set('ground', 15, 2, ds(!dark && aim === 'ne' ? 'moonhatch_lit' : 'moonhatch'));
   // the ladder up to the Hundred Steps at (3,3), in its column of daylight
   L.set('ground', 3, 3, day('day_spot'));
   L.set('overhead', 3, 2, day('over_shaft_open'));
   L.set('overhead', 3, 3, day('over_column'));
   // the floor grate (6,8), closed
   L.set('ground', 6, 8, ds('grate_closed'));
-  // ceiling ribs at x5, 9, 13, 17, 21 across the deck
-  for (const x of [5, 9, 13, 17, 21]) for (let y = 3; y <= 9; y++) L.set('overhead', x, y, hull('over_rib_v'));
+  // ceiling ribs across the deck
+  for (const x of [5, 17, 21]) for (let y = 3; y <= 9; y++) L.set('overhead', x, y, hull('over_rib_v'));
   // the light shaft over the mirror (11,6)
   L.set('overhead', 11, 4, day(dark ? 'over_shaft_shut' : 'over_shaft_open'));
   if (!dark) { L.set('overhead', 11, 5, day('over_column')); L.set('ground', 11, 6, day('day_spot')); }
+  // the reflected beam: 45 degrees up-left or up-right, straight up, or flat along the floor to the east
+  const add = (x, y, ref) => { const cur = L.overhead[y][x]; L.set('overhead', x, y, cur ? `${cur}+${ref}` : ref); };
+  if (!dark) {
+    if (aim === 'ne') { add(12, 5, day('over_beam_ne')); add(13, 4, day('over_beam_ne')); add(14, 3, day('over_beam_ne')); add(15, 2, day('over_beam_end_n')); }
+    if (aim === 'nw') { add(10, 5, day('over_beam_nw')); add(9, 4, day('over_beam_nw')); add(8, 3, day('over_beam_nw')); add(7, 2, day('over_beam_end_n')); }
+    if (aim === 'n') { add(11, 3, day('over_beam_v')); add(11, 2, day('over_beam_end_n')); }
+    if (aim === 'rest') { for (let x = 12; x <= 21; x++) add(x, 6, day('over_beam_h')); add(22, 6, day('over_beam_end_e')); }
+  }
+  const mirror = dark ? 'mirror_s' : { ne: 'mirror_ne', nw: 'mirror_nw', n: 'mirror_n', rest: 'mirror_e' }[aim];
   const sprites = [
-    { sheet: 'ds_mirror', frame: dark ? 'mirror_s' : 'mirror_ne', x: 11 * 16 + 8, y: 7 * 16 },
+    { sheet: 'ds_mirror', frame: mirror, x: 11 * 16 + 8, y: 7 * 16 },
     { sheet: 'ds_mirror', frame: 'dropladder_down', x: 3 * 16 + 8, y: 4 * 16 },
   ];
-  if (!dark) sprites.push({ sheet: 'ds_beams', frame: 'beam_hatch', x: 32, y: 16, topLeft: true });
-  return { title: 'Step Gallery' + (dark ? ' (before the lever)' : ' (beam on the hatch)'), ...L, sprites, hero: [9 * 16, 4 * 16 + 14, 'up'], scale: 2 };
+  return { title: 'Step Gallery' + (dark ? ' (before the lever)' : ` (mirror ${aim})`), ...L, sprites, hero: [9 * 16, 4 * 16 + 14, 'up'], scale: 2 };
 }
 
 function halls() {
