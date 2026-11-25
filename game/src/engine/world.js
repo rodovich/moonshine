@@ -70,10 +70,14 @@ export class World {
     this.snapCamera();
     this.applyLighting(0);
     // Audio: ambience beds and a music filter per map (see sound.js).
-    setAmbience(def.ambience || []);
-    setMusicFilter(def.musicFilter || null);
-    if (def.music !== undefined) {
-      if (def.music) playMusic(def.music);
+    // music, ambience, and musicFilter may be functions of the state, like
+    // lighting, so a later act can change a map's mood before it fades in.
+    const val = (v) => (typeof v === 'function' ? safeCall(v, this.api) : v);
+    setAmbience(val(def.ambience) || []);
+    setMusicFilter(val(def.musicFilter) || null);
+    const music = val(def.music);
+    if (music !== undefined) {
+      if (music) playMusic(music);
       else stopMusic();
     }
   }

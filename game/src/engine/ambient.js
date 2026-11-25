@@ -97,7 +97,11 @@ export class Ambient {
       this.timers.set(ev, left);
       if (left > 0) continue;
       this.timers.set(ev, this.rng(...(ev.every || [10, 10])));
-      if (!ev.when || safeCall(ev.when, w.api)) safeCall(ev.run, w.api);
+      if (ev.when && !safeCall(ev.when, w.api)) continue;
+      // { script: true } runs it as a full script (queued, takes control,
+      // can say/changeMap): a bell that rings on its own after a while.
+      if (ev.script) w.run(ev.run);
+      else safeCall(ev.run, w.api);
     }
     // Entity barks and emotes
     const p = w.player;

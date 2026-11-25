@@ -306,6 +306,12 @@ export function makeApi(world) {
       world.picture = null;
       if (fade) await fx.fade('in', fade / 2);
     },
+    // Queue a full script from a plain callback (an ambient event, a patrol's
+    // onWaypoint): it runs after the current one, like any interaction.
+    // Resolves with its result; don't await it from inside a script.
+    runScript(fn, ...args) {
+      return world.run(fn, ...args);
+    },
     // Resolves on the next key (Z/X and friends) or tap: for a full-screen
     // picture the player dismisses (the Ship Plan).
     waitForInput() {
