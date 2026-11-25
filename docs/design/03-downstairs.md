@@ -2,7 +2,7 @@
 
 This is the build-ready design for Act 3 ([overview](overview.md), [story bible](../story-bible.md)). It picks up where [02-city.md](02-city.md) ends: Cheryl climbing down the ladder under the hundredth step. It ends when she walks out of the Founders' Door into Ottilie's crypt and up into the Crown at dusk, to find every doorstep in Tessel glowing.
 
-> **Structure pass (client feedback).** Rubbing follows Ottilie's new instruction, "floors, where the light falls" ([structure-pass.md](structure-pass.md), section 4). Downstairs, plain walls and the inlays answer "Walls. Ottilie said floors, where the light falls." (the inlays add "Three bars. I'll remember three bars."); the Step Gallery floor under the light shaft answers "Floor, and light, but nothing written on it. Not this one."; the Chart Room mosaic gives the Ship Plan, as below. The Ship Plan's first look adds "It's a map. Of us, I think." / "Ottilie will want to read the writing. She'll be wrong about it, but she can read it."
+> **Structure pass (client feedback).** Rubbing follows Ottilie's new instruction, "floors, where the light falls" ([structure-pass.md](structure-pass.md), section 4). Downstairs, plain walls and the inlays answer "Walls. Ottilie said floors, where the light falls." (the inlays add "Three bars. I'll remember three bars."); the daylight from the shaft lands on the mirror's tile (11, 6), so the near miss is on the mirror once the lever has opened the shaft: "Light falling on it, just as Ottilie said. But it's a mirror, not a floor. Not this one." (before the lever: "A rubbing of a mirror. No."); the Bunk Room's duty roster gives the walls line before its own (as built); the Chart Room mosaic gives the Ship Plan, as below. The Ship Plan's first look adds "It's a map. Of us, I think." / "Ottilie will want to read the writing. She'll be wrong about it, but she can read it."
 
 ## The slice in brief
 
@@ -135,6 +135,7 @@ The main deck: a long hall with light-pipes coming down from the street above, t
 
 - `~` in the north passage (25–26, 1–6) is fast, knee-deep water: solid until the valve turns, then drained floor (walkable, wet-looking).
 - `~` in the south corridor (17–18, 11–13) is still, black, deep water sloping away: always solid.
+- **After the valve, the west end floods** (x1–11, y6–10; client feedback, see "The valve"): the water that drained out of the north passage runs west along the hall and covers the floor around the chute mouth and the ladder's foot, in the same fast, knee-deep water tile the north passage used. It's solid, visibly so, for the rest of the act. This replaces the old rule that the ladders "decline" after the valve. The bunk room doorway (13–14) stays dry.
 
 **Entities:** light-pipes at (6, 8), (14, 8), (22, 8), placed between the ceiling ribs so the overhead layer never hides them: glass rods from the ceiling with a pool of daylight under each (radius 2). The drop-ladder is on the north wall at (8, 4–5), hooked up high with its chain and cleat, until pulled down. Cheryl lands from the chute at (3, 7).
 
@@ -225,7 +226,7 @@ The corners (`X` at the row ends) are chamfered walls; draw them as 45° wall pi
 | `halls.ladder` | Chain pulled | Drop-ladder down; Step Gallery grate open; two-way shortcut |
 | `lamp.<id>` | Disc used on a dead lamp | That lamp lit, permanently; the Bunk Room's lamp reveals the tool rack |
 | `got.valveKey` | Key taken from the tool rack | |
-| `halls.valve` | Valve key used on the valve wheel | North passage drained; **the Fountain stops**; wheel jammed; key stays on the spindle; both ladders up decline |
+| `halls.valve` | Valve key used on the valve wheel | North passage drained; **the Fountain stops**; wheel jammed; key stays on the spindle; the hall's west end floods over the ladder's foot |
 | `chart.seen` | The inlay sequence plays | |
 | `got.shipPlan` | Paper and charcoal used on the inlay | Paper consumed; Ship Plan gained |
 | `founders.unbolted` | The bolt is drawn | Founders' Door two-way |
@@ -353,7 +354,7 @@ Cheryl sits at the mouth and lets go. Fade to black with a long sliding whoosh t
 ### The valve
 
 1. Cheryl fits the valve key onto the spindle and heaves. A groan; a 1 px shake; again; a 2 px shake. The wheel turns with a long grinding squeal.
-2. The gushing pipe slows and stops. Down the passage the water drains away over two seconds with a gurgle (tiles swap from flowing water to wet floor).
+2. The gushing pipe slows and stops. Down the passage the water drains away over two seconds with a gurgle (tiles swap from flowing water to wet floor). The same water comes out along the hall floor and runs west: the camera follows it as it spreads over x1–11, around the chute mouth and the ladder's foot (tiles swap to fast, knee-deep water, column by column, over about two seconds), then comes back to Cheryl.
 3. Silence for one second.
 4. Down the speaking tube at (20, 5), small and far away: FAR-OFF VOICE: The FOUNTAIN! The Fountain's STOPPED!
 5. FAR-OFF VOICE: Five hundred YEARS!
@@ -361,6 +362,8 @@ Cheryl sits at the mouth and lets go. Fade to black with a long sliding whoosh t
 7. "I've stopped the Fountain. Five hundred years, and I've stopped it."
 
 The valve key stays jammed on the spindle (removed from the inventory). Afterward, the wheel: "Jammed. Whatever I've done, I've done it." The passage: "Drained. Wet, but walkable. North."
+
+**The flooded west end** (after the valve), on looking or walking into it: First: "The water from the passage. It's run down the hall instead, right over the ladder." / "Knee-deep and running. That way's shut. North, then." Then, before the Founders' Door is unbolted: "Still running. North, then." After: "Still running. Ottilie's door, then." There are no other refusals: before the valve, both ladders work freely.
 
 ### Bunk Room
 
@@ -525,7 +528,7 @@ All of this is built (audio/foundation, e4adffd): `downstairs`, `reveal`, and `r
 - [ ] With the disc, the Lamp Halls feel dark but never frustrating; the player can always see the next exit or object within a few tiles.
 - [ ] Turning the valve reads clearly as the cause of the Fountain stopping.
 - [ ] A player without paper can still finish the act and come back for the rubbing through the Founders' Door.
-- [ ] The drop-ladder works both ways before the valve; both ladders up decline after the valve; the Founders' Door works both ways after unbolting.
+- [ ] The drop-ladder works both ways before the valve, with no refusals; after the valve the flooded west end visibly blocks it; the Founders' Door works both ways after unbolting.
 - [ ] No route shows the surface in an unspecified state: test going up the ladders before the valve (Act 2 day, Fountain running), and trying them after the valve and after unbolting (both decline).
 - [ ] The clunks after the lever are noticeable, so the glowing doorsteps at dusk have a cause the player can name.
 - [ ] The valve chain is discoverable: the crowbar slips, the dark bunk room invites the disc, the key shows once the lamp is lit.
@@ -556,7 +559,7 @@ The Act 3 builder (zEKLwXahJL) built this act on `content/act3`; its full list o
 - **The disc is a carried light,** which makes darkness a gentle mechanic rather than a maze. This needs an engine darkness layer with light sources.
 - **The crowbar works the hundredth step and the lever, and fails on the valve.** The failure points the player at the bunk room and the valve key, which turns three optional systems (lamps, the bunk room, the tools) into the act's one multi-step puzzle. The crowbar returns in Act 6 for the Tooth. (From review by xaKh8TS_PJ.)
 - **The lever is the Keepers' master shutter for every light-pipe in Tessel.** The clunks going up the hill give the glowing doorsteps a cause the player has seen. (From review.)
-- **After the valve, the act's only exit is the Founders' Door,** so the dry Fountain is first seen at dusk with the rest of the act's ending. (From review.)
+- **After the valve, the act's only exit is the Founders' Door,** so the Chart Room's reveal always comes before Cheryl surfaces, and the dry Fountain is first seen at dusk with the rest of the act's ending. (From review.) **It's enforced by something the player can see, not by refusals:** the water from the drained passage floods the west end of the hall, over the ladder's foot. The client found the old refusal ("Ottilie's door is quicker") artificial. A blocker has to look like one and stay one; Cheryl caused this one, which fits the act.
 - **Internal monologue is kept to three moments:** arriving, the reveal, and the vista. (From review; see the story bible's voice rules.)
 - **The ledger plants "Past full: allow two fingers"** for the Act 6 trim, and gives the last Keeper a few lines of his own. Brannoc is the only Founder-era name in the game.
 - **The shaft-and-bowl hotspot stops at "very nearly my house."** Cheryl suspects but doesn't conclude, so the Act 6 discovery of her plug in the Basin is still a surprise.

@@ -1070,8 +1070,8 @@ export const court_tree = {
       'GGGGGGGGhhhggggg',
       'GGGGGGhhhhgggggG',
       'GGGhgggggGggggGG',
-      'GGggggggGGGkkGGG',
-      'hggkkgGGGGGYYGGG',
+      'GGggggggGGGGGGGG',
+      'hggkkgGGGGGGGGGG',
     ],
     over_lemon_ne: [
       'GGGk............',
@@ -1087,9 +1087,9 @@ export const court_tree = {
       'ggGGGGGGhhhhHk..',
       'gGGGGGGhhhhhHk..',
       'GGGGGGhhhhhhHk..',
-      'GGGGGkkggggGGk..',
-      'GGGGhYYgggGGGGk.',
-      'GGhhhYygGGGGGhHk',
+      'GGGGGGGggggGGk..',
+      'GGGGhGhgggGGGGk.',
+      'GGhhhhhgGGGGGhHk',
     ],
     over_lemon_w: [
       'kggGGGGGhhHGGGGh',
@@ -1110,7 +1110,7 @@ export const court_tree = {
       '................',
     ],
     over_lemon_c: [
-      'hggYYGGGGGGYyGGG',
+      'hggYYGGGGGGGGGGG',
       'gggYyGGGGGGkkHGG',
       'ggGkkGGGGhhhhHhh',
       'gGGGGGGGhhhhhHhh',
@@ -1128,7 +1128,7 @@ export const court_tree = {
       '................',
     ],
     over_lemon_e: [
-      'GhhhhkkGGGGGhhHk',
+      'GhhhhhhGGGGGhhHk',
       'hhhhhGGGGGhhhhHk',
       'hhhhhGGGGhhhhhHk',
       'hhhhhHGGhhhhhHk.',

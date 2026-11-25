@@ -4,6 +4,8 @@
 // harbor_dawn: the Teeth sliding away, the ferry level at her landing, the water back to its height.
 // court_piano: the piano delivered by Cheryl's door; the well's grate lifted.
 // steps_race: Stair Race bunting over landing 2, the finish tape, the rope barrier round the open step.
+// steps_lid / steps_lid_chalk: the hundredth step boarded over from Act 4 on (MIND THE STEP), and the
+//   epilogue's version with 100! chalked on it.
 // Night states are shown under the night tint. The engine keeps the lamp colors (lamp_glow, lamp_warm)
 // bright under it (EMISSIVE in tints.js); this dev page doesn't, so the lanterns look dimmer here.
 import { SCENE as act4 } from './scene-act4-surface.js';
@@ -15,6 +17,7 @@ export function SCENE(state = 'bilge_night') {
   if (state === 'harbor_dawn') return harborDawn();
   if (state === 'court_piano') return courtPiano();
   if (state === 'steps_race') return stepsRace();
+  if (state === 'steps_lid' || state === 'steps_lid_chalk') return stepsLid(state === 'steps_lid_chalk');
   return bilgeNight();
 }
 
@@ -109,4 +112,15 @@ function stepsRace() {
     { sheet: 'counting_woman', frame: 'down_0', ...at(9, 6) }, { sheet: 'girl', frame: 'jump_down', alt: 'b', ...at(2, 3) },
   ];
   return { title: 'Hundred Steps: Stair Race morning', ground, objects, overhead, sprites, scale: 3, tint: 'day' };
+}
+
+// ---- The Hundred Steps from Act 4 on: the hundredth step boarded over, flush and walkable ----
+function stepsLid(chalk) {
+  const S = stepsRace();
+  for (let y = 8; y < 11; y++) for (let x = 5; x < 9; x++) S.objects[y][x] = null;   // no barrier
+  if (!chalk) { S.overhead = S.overhead.map(r => r.map(() => null)); S.objects[1][6] = S.objects[1][7] = null; }
+  const v = chalk ? 'chalked' : 'boarded';
+  S.ground[9][6] = `steps_lid:${v}_l`; S.ground[9][7] = `steps_lid:${v}_r`;
+  S.sprites = chalk ? S.sprites : [{ sheet: 'cheryl', frame: 'down_0', ...at(6, 8) }];
+  return { ...S, title: chalk ? 'Hundred Steps, epilogue: the lid with 100! chalked on it' : 'Hundred Steps, Acts 4-6: the hundredth step boarded over' };
 }

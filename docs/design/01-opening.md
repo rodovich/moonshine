@@ -95,6 +95,7 @@ One scrolling map with two levels: the roof terraces at the top and the courtyar
 - **The low wall** (x9) between the two roofs, with a one-step gap at y5.
 - **Her Next Door's roof** (x10–18, y2–8): two clotheslines running north–south at x12 and x15, hung with sheets. The *back line* runs along the north parapet from hook (11,1) to hook (18,1); without the prop it sags into her pots.
 - **The east parapet** (x19, y3–7): the view of the Gate.
+- **The sighting pins**: two small bronze pins in line with the tub, one set in the top of the low wall at (9, 4) and one on the east parapet at (19, 4). Sitting at the tub, they line up on the Gate, with Her Next Door's sheet lines between them. An old Founder sighting fitting, though nobody knows it.
 - **The stair** (x7, y8–11): down through the gap between the houses.
 - **The court** (y12–23): the lemon tree and chess table to the west, the well in the middle, the Kid's lap track around the well, the bench under the Neighbor's window.
 - **The Kid's lap**: a rectangle from (7,14) to (13,14) to (13,19) to (7,19) and back. He hops the hurdle at (13,17). **He stops and jogs in place, facing Cheryl, whenever she is within two tiles of him, or as soon as the player clicks or taps him**, so he's easy to talk to and to give things to with either control scheme. He resumes his lap when she moves away.
@@ -229,6 +230,10 @@ Lines are Cheryl's descriptions unless labeled otherwise. Each line is one text 
 
 **Low wall** (x9): "The wall between my roof and hers. Low enough to talk over. She does."
 
+**Sighting pins** (9, 4) and (19, 4), looked at from either roof
+- Dusk: First: "Two bronze pins. One on our wall, one on the far parapet, past her sheets." / "Sit in the tub and they line up on the Gate. The moon comes up right between them. Every year." Then: "The pins. Lined up on the Gate, waiting."
+- Morning: "Still lined up on the Gate. So it isn't the pins that moved either."
+
 **Sheets on the N–S lines** (x12 and x15, posts included)
 - First: "Her Next Door's sheets. Strung right across my view of the Gate. Every year they creep a little further over."
 - Then: "I could unpeg them. I could also move to the mainland. Neither is happening tonight."
@@ -353,6 +358,7 @@ Sits at (2,16) on his stool, facing Gerald's empty chair. Idle animation: chin o
 - OLD MAN: Black. Tall. Dignified. Gerald won't play against a teaspoon. I've tried.
 - OLD MAN: I could win in one move. I won't. I'd never hear the end of it.
 - OLD MAN: Shh.
+- OLD MAN: Gerald says it'll come up straight in the Gate again. He says it every year. He's always right. It's maddening.
 
 **Give pepper mill** (works whether or not they've talked) → remove pepper mill; give **bath plug**; `oldMan.hasPepperKing`
 - (He turns the mill over. *Grind.*)
@@ -402,6 +408,7 @@ Stands at (17,5) among her sheets. Idle animation: smoothing a sheet, then stepp
 **Repeat after** (alternate)
 - NEIGHBOR: Look at them. Drinking it in.
 - NEIGHBOR: Enjoy your bath. Don't splash my whites.
+- NEIGHBOR: Straight up the Gate, it'll be. Between your pins, like always. My sheets know.
 
 **Other items**
 - Pepper mill: NEIGHBOR: Pepper? On Moonshine Night? I've no idea what you're getting at.
@@ -489,9 +496,10 @@ Each NPC has its own "Anything else" decline (listed with their dialog), so givi
 2. **The costume.** Cheryl walks behind the chimney stack (to (8, 3), hidden by its overhead caps). A beat. Her cardigan lands folded on the nearer chair (2, 7) (a folded-cardigan object appears). She steps out in her **striped bathing costume**, navy and cream, knee-length, with a matching cap over her bun (a new sprite set, used only for this sequence). From the Neighbor's roof, without turning round: NEIGHBOR: Not looking. (auto box) Cheryl walks to (3, 5), just south of the tub, turns east, and sits on the tub's edge, feet in the water (sit pose, costume version).
 3. **Cistern Court** fades out over two seconds. Ambient sound rises: the festival murmur from the city below. Far off, the Mayor's new clock on the Crown strikes the hour (three strokes, fading).
 4. Crossfade (one second) to the **vista**.
-5. **Vista.** The Bowl at dusk from Cheryl's roof, looking east. Foreground: Cheryl's silhouette from behind, lower left, sitting on the tub's rim in her striped bathing costume and cap, and the rim of the tub. Below her, roofs stepping down to the water, lit warm from behind her by the last of the sunset, each with a tiny basin that twinkles, and the first lamps coming on. Middle: the Bowl, calm, reflecting the cool eastern sky. Background: the Rim's cliffs, glowing faintly rose in the last sun (alpenglow), against the **eastern** sky at dusk (the sun is setting behind Cheryl, in the west, so there is no sunset glow in this direction): deep blue above, a soft rose-pink band just above the Rim, and a blue-grey band (the Earth's shadow) along the cliff tops. The Gate notch is at screen center (x ≈ 128). See the story bible's "The sky over Tessel." Music: **Moonrise**, a music box playing the rhyme melody slowly.
-6. A pale, silvery glow brightens behind the Rim, *to the right of the Gate* (x ≈ 176): moonlight, not sunset. Hold two seconds. The music box keeps playing; the murmur continues.
-7. The moon's rim appears over the cliff at x ≈ 176 and rises slowly (about six seconds until half of it is up), large, pale peach-gold as it clears the Rim and whitening as it climbs, with a cool silver halo, laying a faint peach-gold path across the Bowl toward Cheryl. As it appears, the festival murmur stops dead. A single dog barks, far off. The music box slows, drifts flat, and stops mid-phrase.
+5. **Vista.** The Bowl at dusk from Cheryl's roof, looking east. Foreground: Cheryl's silhouette from behind, lower left, sitting on the tub's rim in her striped bathing costume and cap, and the rim of the tub. Below her, roofs stepping down to the water, lit warm from behind her by the last of the sunset, each with a tiny basin that twinkles, and the first lamps coming on. Middle: the Bowl, calm, reflecting the cool eastern sky. Background: the Rim's cliffs, glowing faintly rose in the last sun (alpenglow), against the **eastern** sky at dusk (the sun is setting behind Cheryl, in the west, so there is no sunset glow in this direction): deep blue above, a soft rose-pink band just above the Rim, and a blue-grey band (the Earth's shadow) along the cliff tops. The Gate notch is at screen center (x ≈ 128). **The sighting pins** are in the foreground, lined up on the Gate like a gunsight: the near pin large at the bottom center, on the dark line of the low wall, and the far pin small on the far parapet, directly above it, both pointing at the notch. See the story bible's "The sky over Tessel." Music: **Moonrise**, a music box playing the rhyme melody slowly.
+5a. Internal monologue over the vista, before any glow: *Pins lined up. The Gate, dead between them.* / *Any second now.* (Client feedback: the player must know where the moon belongs before it misses.)
+6. A pale, silvery glow brightens behind the Rim, *to the right of the Gate* (x ≈ 176), well outside the pins: moonlight, not sunset. Hold two seconds. The music box keeps playing; the murmur continues.
+7. The moon's rim appears over the cliff at x ≈ 176 and rises slowly on a slant, up and to the right, moving further from the pins as it climbs (about six seconds until half of it is up), large, pale peach-gold as it clears the Rim and whitening as it climbs, with a cool silver halo, laying a faint peach-gold path across the Bowl toward Cheryl. As it appears, the festival murmur stops dead. A single dog barks, far off. The music box slows, drifts flat, and stops mid-phrase.
 8. Internal monologue over the vista: *No.* / *It comes up in the Gate.* / *It has come up in the Gate every year of my life.*
 9. **Hard cut** (no fade) back to the roof, now under the **night** tint, with Cheryl seated at the tub.
 10. **The groan.** A long, low metallic groan from far below (about three seconds). Light screen shake (1 px) for its whole length. The tub water sloshes. The chimney pots rattle. The sheets on the back line swing out to one side and hang there at an angle. Auto boxes: SWEATY KID: WHOA! then NEIGHBOR: My SHEETS!
@@ -565,7 +573,8 @@ The tints (dusk, night, day) are global color treatments by the engine, not sepa
 
 **Vista (full screen, 256×224)**
 - Background: the Bowl at dusk looking east from Cheryl's roof, as described in step 5 of the sequence, with the Gate at screen center
-- Separate pieces: the moon (about 32×32), the glow behind the Rim, Cheryl's silhouette with the tub rim (foreground), and rooftop basin twinkles (2–3 frames)
+- Separate pieces: the moon (about 32×32), the glow behind the Rim, Cheryl's silhouette with the tub rim (foreground), the sighting pins lined up on the Gate (foreground: near pin large, far pin small), and rooftop basin twinkles (2–3 frames)
+- On the roof map: the two bronze sighting pins, small objects on the low wall at (9, 4) and the east parapet at (19, 4)
 
 **Effects**
 - Global tints: dusk, night (moonlit), day
@@ -597,6 +606,7 @@ The tints (dusk, night, day) are global color treatments by the engine, not sepa
 - [ ] All blocked exits explain why.
 - [ ] Every action works with keyboard alone and with pointer alone.
 - [ ] Each text box fits (about 90 characters).
+- [ ] Before the moon appears, the player knows where it should rise (the pins in the vista and the line over them).
 - [ ] The moonrise sequence lands: the off-center moon is clear even to someone not looking for it, the silence after the murmur stops is felt, and the cut back to the roof is sharp.
 - [ ] Morning state: piano gone, Squeeze open, sheets grey, chessboard slid, well breathing, every NPC has new lines.
 - [ ] First-time players finish in 8–12 minutes (up to about 20 if they look at everything).
@@ -619,6 +629,7 @@ The opening content task (WCVWR8hxu8) built this slice on `content/opening`; its
 
 - **The rooftop tub is public on purpose** (client feedback: it looked strangely exposed). On Moonshine Night all Tessel is on its roofs and nobody looks at anybody else's; Cheryl and Her Next Door have both kept that rule for thirty-one years. Cheryl bathes in a striped bathing costume, changing behind the chimney stack. It reads in play three ways: the tub's look, the Neighbor's repeat line, and the costume change with the Neighbor's "Not looking." A screen was rejected because it would block the view of the Gate across the Neighbor's terrace, which is the point of the scene.
 - **Client feedback on age and sky:** Cheryl's lines never lean on her age; the moonrise sky follows the story bible's "The sky over Tessel."
+- **The sighting pins show where the moon belongs before it misses** (client feedback: the moonrise was visibly off, but the player hadn't been shown where it should be). Two bronze pins on the roofs line up on the Gate from the tub; they're in the vista's foreground, and Cheryl's line over them comes just before the glow. Her Next Door and the Old Man set the expectation earlier. The moon then rises outside the pins and climbs away from them on its natural slant. The Act 6 final vista shows the moon rising dead between them. The pins are an old Founder sighting fitting, which fits the story: Cheryl has been doing the Keepers' job on her roof all along. The client's alternative, a dawn moonset, was weighed and not taken: a full moon sets in the west at dawn, away from the eastern Gate, so it would have meant moving the Gate and rebuilding the sky, both vistas, the festival, and Act 1's evening.
 
 - **Revised after review (xaKh8TS_PJ):** the hurdle's position fixed on the map; an item-use hint; the Kid stops within two tiles or when clicked; per-NPC declines for wrong items; flat collision and a shelf line; the tap points to the next step; fewer ship clues in the morning (the bed and drain lines no longer say "boat" or "rope"); Gerald's game is seventeen years, so it can't be read as a clue to Cheryl's past; the Pelletiers' cat added (an existing art-kit sprite).
 - **The slice is two maps: Cistern Court (roof and court in one scrolling map) and the flat.** That's big enough for two parallel threads and small enough to polish soon.

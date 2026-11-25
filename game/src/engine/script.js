@@ -55,6 +55,11 @@ export function makeApi(world) {
   async function move(e, target, opts = {}) {
     const speedBefore = e.stepTicks;
     if (opts.speed) e.stepTicks = opts.speed;
+    // A coordinate wrapped in a list ([[x, y]]) is still a coordinate.
+    if (Array.isArray(target) && target.length === 1 && Array.isArray(target[0]) && typeof target[0][0] === 'number') {
+      console.warn(`[script] move ${e.id}: got [[${target[0]}]]; treating it as the tile (${target[0]})`);
+      target = target[0];
+    }
     if (Array.isArray(target) && typeof target[0] === 'number') {
       let path = world.pathFor(e, [target], { ignoreEntities: false }) || world.pathFor(e, [target], { ignoreEntities: true });
       if (!path) {
@@ -65,7 +70,11 @@ export function makeApi(world) {
       e.routeGoal = target;
     } else {
       const dirs = typeof target === 'string' ? target.trim().split(/[\s,]+/) : target;
-      e.route = dirs.map((d) => ({ u: 'up', d: 'down', l: 'left', r: 'right' })[d] || d);
+      e.route = dirs.map((d) => ({ u: 'up', d: 'down', l: 'left', r: 'right' })[d] || d).filter((d) => {
+        if (DIR_VEC[d]) return true;
+        console.warn(`[script] move ${e.id}: "${d}" isn't a direction (up, down, left, right); skipping it`);
+        return false;
+      });
       e.routeGoal = null;
     }
     e.routeGhost = !!opts.ghost;
