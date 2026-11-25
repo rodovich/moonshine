@@ -106,6 +106,7 @@ export async function kbInteract(page, id, item = null) {
     const spot = await page.evaluate((id) => {
       const w = window.moonshine.world;
       const e = w.entity(id);
+      if (!e) return { missing: `${w.state.map} has no entity "${id}" (present: ${w.entities.map((x) => x.id).join(', ')})` };
       const spots = w.interactSpots(e);
       const p = w.player;
       const here = spots.find((s) => s.x === p.x && s.y === p.y);
@@ -113,6 +114,7 @@ export async function kbInteract(page, id, item = null) {
       const path = w.pathFor(p, spots.map((s) => [s.x, s.y]));
       return path && path.length ? { next: path[0] } : null;
     }, id);
+    if (spot && spot.missing) throw new Error(spot.missing);
     if (!spot) throw new Error(`can't reach ${id}`);
     if (spot.here) {
       await kbFace(page, spot.facing);
@@ -203,9 +205,12 @@ export async function ptrWalk(page, x, y) {
 export async function ptrInteract(page, id) {
   for (let guard = 0; guard < 10; guard++) {
     const e = await page.evaluate((id) => {
-      const en = window.moonshine.world.entity(id);
+      const w = window.moonshine.world;
+      const en = w.entity(id);
+      if (!en) return { missing: `${w.state.map} has no entity "${id}" (present: ${w.entities.map((x) => x.id).join(', ')})` };
       return { x: en.x, y: en.y };
     }, id);
+    if (e.missing) throw new Error(e.missing);
     if (await onScreen(page, e.x, e.y)) {
       await clickTileAt(page, e.x, e.y);
       await waitFor(page, () => window.moonshine.snapshot().busy || !!window.moonshine.snapshot().text, null, 10000);

@@ -273,7 +273,7 @@ export function withAct4(maps) {
       ropeTrigger(8, 7, 1, 4, 'right', [7, 8]),
       ropeTrigger(15, 7, 1, 4, 'left', [16, 8]),
       {
-        x: 11, y: 11, w: 2,
+        x: 11, y: 11, w: 2, stop: false,
         when: (g) => fountainDry(g) && !mayorHere(g) && !g.flag('stepped.rope'),
         run: async (g) => {
           g.setFlag('stepped.rope');
@@ -435,6 +435,17 @@ export function withAct4(maps) {
       { ...find(court, 'cat_morning'), id: 'cat_a4', when: act4, interact: (g) => g.describe("She's moved her bed against the uphill wall. She's not wrong.") },
     ],
     onEnter: async (g) => { g.playMusic('morning_after'); await surfaceAudio(g); },
+    ambient: [{
+      // The Old Man still moves a piece and moves it back (his Act 1 fidget, for his Act 4 self).
+      every: [6, 11], when: act4,
+      run: (g) => {
+        const old = g.npc('old_man_a4');
+        if (old.pose) return;
+        g.pose(old, 'think_right_1');
+        g.sfx('chess_tap', { at: old });
+        setTimeout(() => { if (old.pose === 'think_right_1') { old.setPose(null); g.sfx('chess_tap', { at: old }); } }, 900);
+      },
+    }],
   });
 
   const teacup = {
