@@ -224,7 +224,7 @@ Lines are Cheryl's descriptions unless labeled otherwise. Each line is one text 
 
 **South roof edge** (any `=` on y9): Dusk: "Tessel, all the way down to the water. Every roof has a basin on it tonight, waiting for the moon." Morning: "Basins on every roof, still full. Nobody wants to be the first to tip theirs out."
 
-**West and north parapets**: "The next roof over is a long step and a short fall. I was nineteen once. Never again."
+**West and north parapets**: "The next roof over is a long step and a short fall. I've made it before. Not tonight, and not in my good cardigan."
 
 **Low wall** (x9): "The wall between my roof and hers. Low enough to talk over. She does."
 
@@ -287,7 +287,7 @@ Lines are Cheryl's descriptions unless labeled otherwise. Each line is one text 
 - Third: "A note on the lid: BACK AFTER MOON. DO NOT TOUCH PIANO."
 - Then: → plays one key (a slightly flat note). "Middle C. A little flat. I'd know."
 - Use **soap** on it: "Not now. It isn't going anywhere."
-- Walking or clicking into the blocked Squeeze: "I'm not climbing over a piano at my age. Besides, I'm not going anywhere tonight."
+- Walking or clicking into the blocked Squeeze: "I'm not climbing over a piano I didn't order. Besides, I'm not going anywhere tonight."
 
 **The Squeeze** (morning): First: "The Squeeze is clear. There's a long scrape down every step, and at the bottom, a lot of surprised geraniums." Walking into the exit leaves the slice, after one last thought before the fade: *Down, then.* (It echoes Act 4's *Up, then.*)
 
@@ -489,9 +489,9 @@ Each NPC has its own "Anything else" decline (listed with their dialog), so givi
 2. Cheryl walks to (3,5), just south of the tub, turns east, and sits on the tub's edge (sit pose).
 3. **Cistern Court** fades out over two seconds. Ambient sound rises: the festival murmur from the city below. Far off, the Mayor's new clock on the Crown strikes the hour (three strokes, fading).
 4. Crossfade (one second) to the **vista**.
-5. **Vista.** The Bowl at dusk from Cheryl's roof, looking east. Foreground: Cheryl's silhouette from behind, lower left (the bun and its coral tie), and the rim of the tub. Below her, roofs stepping down to the water, each with a tiny basin that twinkles. Middle: the dark Bowl with a long gleam. Background: the Rim's cliffs, deep violet against a sky shading from apricot to indigo, with the Gate notch at screen center (x ≈ 128). Music: **Moonrise**, a music box playing the rhyme melody slowly.
-6. A glow brightens behind the Rim, *to the right of the Gate* (x ≈ 176). Hold two seconds. The music box keeps playing; the murmur continues.
-7. The moon's rim appears over the cliff at x ≈ 176 and rises slowly (about six seconds until half of it is up). As it appears, the festival murmur stops dead. A single dog barks, far off. The music box slows, drifts flat, and stops mid-phrase.
+5. **Vista.** The Bowl at dusk from Cheryl's roof, looking east. Foreground: Cheryl's silhouette from behind, lower left (the bun and its coral tie), and the rim of the tub. Below her, roofs stepping down to the water, lit warm from behind her by the last of the sunset, each with a tiny basin that twinkles, and the first lamps coming on. Middle: the Bowl, dusk-blue, calm. Background: the Rim's cliffs, dark, against the **eastern** sky at dusk (the sun is setting behind Cheryl, in the west, so there is no sunset glow in this direction): deep blue above, a soft rose-pink band just above the Rim, and a blue-grey band (the Earth's shadow) along the cliff tops. The Gate notch is at screen center (x ≈ 128). See the story bible's "The sky over Tessel." Music: **Moonrise**, a music box playing the rhyme melody slowly.
+6. A pale, silvery glow brightens behind the Rim, *to the right of the Gate* (x ≈ 176): moonlight, not sunset. Hold two seconds. The music box keeps playing; the murmur continues.
+7. The moon's rim appears over the cliff at x ≈ 176 and rises slowly (about six seconds until half of it is up), large and amber-gold this low, laying a gold path across the Bowl toward Cheryl. As it appears, the festival murmur stops dead. A single dog barks, far off. The music box slows, drifts flat, and stops mid-phrase.
 8. Internal monologue over the vista: *No.* / *It comes up in the Gate.* / *It has come up in the Gate every year of my life.*
 9. **Hard cut** (no fade) back to the roof, now under the **night** tint, with Cheryl seated at the tub.
 10. **The groan.** A long, low metallic groan from far below (about three seconds). Light screen shake (1 px) for its whole length. The tub water sloshes. The chimney pots rattle. The sheets on the back line swing out to one side and hang there at an angle. Auto boxes: SWEATY KID: WHOA! then NEIGHBOR: My SHEETS!
