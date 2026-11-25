@@ -70,7 +70,11 @@ Where the design left something open, or didn't work in play, this is what the b
 - **The plug's glint** is `plug_glint:glint` over the dry Basin every few seconds, with the `plug_glint` sound, until the plug is taken. It draws among the characters, so the moonbeam overhead softens it.
 - **Looking into the full Basin** shows the Basin view at the current trim, with a line for each position, so the player can check the moon before turning the wheel.
 - **The moon glides between trim positions** (about 1.6 s) rather than jumping.
-- **The master stop is pulled from below it (9, 7)**; the room's "1 px tilt" is `g.tilt(0, 1)` easing back over two seconds.
+- **The trim wheel asks which way to turn** (toward the Gate, back, or leave it), so stopping two fingers past rather than dead in the Gate is the player's choice (from the playtest).
+- **Items used on the moonbeam go to the Basin** below it, since a click on the beam lands on the shaft's hotspot.
+- **Lines added from the playtest:** in the lift, "The cage creaks past numbers painted on the shaft wall. Nine. Eight. Up and up."; on surfacing, *Daylight. I'd forgotten about daylight.*; halfway along the Long Keel, "A grate in the floor. Far below, a slow thump, and another. The Middle Sister, still at it."
+- **Act 6 doesn't need the disc**: the Long Keel and the Sighting Room give Cheryl her pool of light themselves.
+- **The master stop is pulled from below it (9, 7)** (she walks there first); the room's "1 px tilt" is `g.tilt(0, 1)` easing back over two seconds.
 - **The bath**: Cheryl steps to (6, 6) beside the Basin, takes her shoes off there (the shoes stay on that tile while she bathes), and sits in the middle of the Basin. After **Later.** she stands at (7, 7) and the Long Keel's `keel` music plays in the room.
 - **The lift doesn't work before the bath**, and says so ("Not yet. Not with the moon off to one side like that.").
 - **The lift ride** is a full-screen picture of the shaft wall sliding down past her disc's pool of light, about four seconds.

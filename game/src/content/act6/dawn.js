@@ -65,7 +65,9 @@ export async function dawn(g) {
   await g.fade('out', 1);
   await g.showPicture(shaftRide(g), { fade: 0 });
   await g.fade('in', 0.5);
-  await g.wait(3.8);
+  await g.wait(0.8);
+  await g.describe('The cage creaks past numbers painted on the shaft wall. Nine. Eight. Up and up.', { auto: 2.4 });
+  await g.wait(0.4);
   await g.fade('out', 0.6);
   await g.hidePicture({ fade: 0 });
 
@@ -99,6 +101,7 @@ export async function dawn(g) {
   g.sfx('well_grate', { volume: 0.5 });
   await g.wait(0.6);
 
+  await g.think("Daylight. I'd forgotten about daylight.");
   // 3-6. The Old Man looks up from his chess.
   g.facePlayer('left');
   g.pose('epi_old_man', 'talk_right');
