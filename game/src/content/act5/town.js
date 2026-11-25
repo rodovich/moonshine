@@ -159,49 +159,66 @@ export function withSquare5(def) {
 }
 
 // ---------------------------------------------------------------------------
-// The Shop: the window display fallen over in the rise, with the Keeper's
-// telescope lying in it. He swaps it for the guidebook, whether or not the
-// Keeper has asked for it yet (docs/design/structure-pass.md, section 6; the
-// "only once she's asked" gate is dropped, since it only lengthened the route).
+// The Shop: the window display went over in the rise, and the Keeper's
+// telescope rolled right under the counter, to the back. Cheryl hooks it out
+// with the crowbar (docs/design/05-high-and-dry.md, "The Shopkeeper (Shop)").
+// The guidebook is optional now: he'll put it in his window if offered.
 
-const swapped = (g) => !!g.flag('telescope.back');
-const asked = (g) => !!g.flag('keeper.asked');
+const fetched = (g) => !!g.flag('telescope.back');
+const guideIn = (g) => !!g.flag('shop.guidebook');
 
 async function shopkeeperTalk(g, self) {
-  if (swapped(g)) return g.say(self, "Two swaps in one week. I'm going to have a sit down.");
+  if (guideIn(g)) return g.say(self, "It's in. It's perfect. Don't touch the window.");
+  if (fetched(g)) return g.say(self, 'A gap. People will talk. They\'ll say, "Did you see his window?"');
   if (firstMeet(g, 'shopkeeper5')) {
-    await g.say(self,
-      'Miss. Look. The window. It went over in the night. When the whole shop lifted.',
-      'The telescope\'s lying in it like a fallen soldier. Best thing I\'ve ever displayed.');
+    return g.say(self,
+      'Miss. Look. The window. It went over in the night, when the whole shop lifted.',
+      "And the telescope rolled right under the counter. Right to the back. I can't reach it.",
+      "I wouldn't anyway. Curating is hands-off. But it's very upsetting.");
   }
-  if (asked(g)) return g.say(self, 'Give it BACK? Then there\'s a GAP, Miss. I need something local. Something that says Tessel.');
-  // Before the Keeper has asked, he still names his price, so the swap can come first.
-  return g.say(self, 'If it goes, there\'s a GAP, Miss. I\'d need something local. Something that says Tessel.');
+  return g.say(self, "Under the counter. Where nobody can see it. It's the worst place in the world for a display.");
+}
+
+async function fishOutTelescope(g) {
+  if (fetched(g)) return g.describe("Nothing under there now but dust and a button.");
+  const p = g.player;
+  if (!(p.y === 4 && p.x >= 2 && p.x <= 5)) await g.movePlayer([4, 4]);
+  g.facePlayer('up');
+  g.pose('player', 'kneel_up');
+  await g.wait(0.4);
+  g.sfx('stone_scrape');
+  await g.wait(0.7);
+  g.sfx('stone_scrape');
+  await g.wait(0.6);
+  g.sfx('coins_rattle');
+  await g.wait(0.5);
+  g.sfx('knock');
+  g.pose('player', null);
+  await g.describe('Out it comes. Brass, dusty, and not a dent on it.');
+  g.setFlag('telescope.back');
+  g.setFlag('window.telescope', false);
+  await g.say('shopkeeper5', "Oh, well done. ...It's not display now, is it. It's been under a counter. Take it to her.");
+  await getItem(g, 'telescope');
 }
 
 async function giveGuidebook(g, self) {
-  if (swapped(g)) return g.say(self, "It's in. It's perfect. Don't touch the window.");
+  if (guideIn(g)) return g.say(self, "It's in. It's perfect. Don't touch the window.");
   g.takeItem('guidebook');
   g.sfx('give');
   await g.say(self, 'A guidebook! "Tessel: A Pocket Companion." Genuinely local. Confidently wrong. PERFECT.');
-  // In it goes; out comes the telescope.
   await g.moveNpc(self, [7, 4]);
   g.faceNpc(self, 'down');
   await g.wait(0.3);
   g.sfx('stone_scrape');
-  g.setFlag('shop.guide');
-  g.setFlag('window.telescope', false);
+  g.setFlag('shop.guidebook');
   await g.wait(0.6);
   g.faceNpc(self, 'player');
-  await g.say(self, 'In it goes. Out comes the telescope. Display for display. Twice in one week. I\'m practically a merchant.');
-  g.sfx('give');
-  g.setFlag('telescope.back');
-  await getItem(g, 'telescope');
+  await g.say(self, "In it goes. The window is complete. Twice in one week. I'm practically a merchant.");
 }
 
 function shopPatches(g) {
   if (!started(g)) return [];
-  const f = g.flag('shop.guide') ? 'display_guide' : 'display_fallen';
+  const f = guideIn(g) ? 'display_guide' : 'display_fallen';
   return [['detail', 7, 5, { tile: `shop5:${f}_l`, solid: true }], ['detail', 8, 5, { tile: `shop5:${f}_r`, solid: true }]];
 }
 
@@ -212,16 +229,26 @@ const shopkeeper5 = {
   interact: shopkeeperTalk,
   use: {
     guidebook: giveGuidebook,
-    '*': (g, self) => g.say(self, "Is it local? It's not local, Miss. I need local."),
+    crowbar: (g, self) => g.say(self, 'Not at me, Miss. At the COUNTER.'),
+    '*': (g, self) => g.say(self, "Is it local? It's not local, Miss."),
   },
+};
+
+const counter5 = {
+  // The counter (2-6, 3), and under it at the back, the telescope.
+  id: 'counter5', x: 2, y: 3, w: 5, solid: false, when: started,
+  interact: (g) => (fetched(g)
+    ? g.describe('A counter, polished by a lifetime of not selling things.')
+    : g.describe("The telescope's under the counter, right at the back. It would take a long arm. Or a crowbar.")),
+  use: { crowbar: fishOutTelescope, '*': cherylDeclines },
 };
 
 const display5 = {
   id: 'display5', x: 7, y: 5, w: 2, solid: false, when: started,
-  interact: (g) => (g.flag('shop.guide')
+  interact: (g) => (guideIn(g)
     ? g.describe('The guidebook, open in pride of place, on a little stand. "Tessel: A Pocket Companion." Somebody will buy it. He won\'t sell it.')
-    : g.describe("The window display, flat on its back, and the Keeper's telescope lying in it. Like a crime scene, but for a telescope.")),
-  use: { guidebook: (g) => g.describe("It's his window. He should be the one to fill it."), '*': cherylDeclines },
+    : g.describe('The window display, flat on its back, and the stand on its side. Like a crime scene, but for a window.')),
+  use: { guidebook: (g) => g.describe("It's his window. He should be the one to fill it."), crowbar: fishOutTelescope, '*': cherylDeclines },
 };
 
 export function withShop5(def) {
@@ -229,7 +256,7 @@ export function withShop5(def) {
   return {
     ...base,
     patches: morePatches(base.patches, shopPatches),
-    entities: [...hide(base.entities, ['shopkeeper', 'hat_display']), shopkeeper5, display5],
+    entities: [...hide(base.entities, ['shopkeeper', 'hat_display', 'counter_2', 'counter_6']), shopkeeper5, counter5, display5],
   };
 }
 
@@ -465,4 +492,4 @@ export function withCourt5(def) {
   return { ...base, entities, onEnter: windOnEnter(base, LAUNDRY_AMBIENCE) };
 }
 
-export const townScripts = { fillBucket, giveGuidebook, mayorTalk, ambroseTalk, ottilieTalk };
+export const townScripts = { fillBucket, giveGuidebook, fishOutTelescope, mayorTalk, ambroseTalk, ottilieTalk };
