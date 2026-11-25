@@ -213,7 +213,6 @@ const shopkeeper5 = {
   interact: shopkeeperTalk,
   use: {
     guidebook: giveGuidebook,
-    hat: (g, self) => g.say(self, "Your hat? It's been in the window once already. People would think I'd gone backwards."),
     '*': (g, self) => g.say(self, "Is it local? It's not local, Miss. I need local."),
   },
 };
