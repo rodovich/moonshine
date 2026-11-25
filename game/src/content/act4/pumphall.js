@@ -224,7 +224,7 @@ const objects = [
   {
     id: 'fountain_ladder', unreachable: (g) => !!g.flag('pumps.burst') && 'under the flood',  x: 2, y: 1, h: 2,
     interact: async (g) => {
-      if (g.flag('pumps.burst')) return g.describe("Under water. That way's gone.");
+      if (g.flag('pumps.burst')) return g.describe("The water's over the foot of it, and the floor between is all flood. That way's gone.");
       await g.describe('Back up to the Fountain.');
       g.sfx('step_stairs');
       return g.changeMap('fountain_square', ...BASIN, 'down');
