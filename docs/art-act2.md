@@ -16,8 +16,10 @@ Module `game/src/art/act2_npcs.js` (16×32, bottom-centered). Walks use the engi
 | 6 | Woman with Basin | `basin_woman:down_0` (holding the basin); `tip_down_0/1` (tipping: the water pours off the rim). Start the trickle overlay on frame 1 | |
 | 7 | Skipping Girls | `girl:down_0`; `turn_right_0/1`, `turn_left_0/1` (turning: hand up, hand down); `jump_down_0` (in the air, 4 px up) / `jump_down_1` (landed); palettes `a`, `b`, `c` | Two turners stand two tiles apart facing each other: the left one plays `turn_right`, the right one `turn_left`; the jumper stands between them |
 | 7 | The rope | `rope:rope_0..3` (48×32, 110 ms: over their heads, in front, on the ground, behind) | Draw with its top-left at the left turner's tile x (pixel x = tile × 16) and its bottom on the turners' feet line (y = feet − 32). Sync the jumper: up on frames 2–3 |
-| 8 | Woman with Watering Can | `watering_woman:down_0`; `water_down_0/1` (the can tips; drops fall) | curls, sage dress |
-| 8 | Man on Bench | `bench_man:sit_down_0/1` (behind his newspaper; frame 1 turns the page) | Draw over the bench, feet on the floor tile in front |
+| 8 | Woman with Watering Can | `watering_woman:down_0`; `water_down_0/1` (the can tips; drops fall) | curls, sage dress. This is her plain sprite, once she has given the glasses back |
+| 8 | …with her husband's glasses up in her hair (structure pass, the Tide-Sheet thread) | `watering_woman_glasses`: the same frames (`down_0`, `water_down_0/1`, `fall_down_0/1`) with thin gold reading glasses pushed up on her curls, drawn large (two lenses, each 4×3) with a gold glint star above the left one. It's an observation clue, so it has to read on a 16-px sprite | swap the sheet back to `watering_woman` when she returns them |
+| 8 | Man on Bench | `bench_man:sit_down_0/1` (behind his newspaper; frame 1 turns the page) | Draw over the bench, feet on the floor tile in front. Without his glasses |
+| 8 | …with his glasses on (structure pass) | `bench_man_glasses:sit_down_0/1` (the paper lowered so his face shows over it, the gold rims on his nose with his eyes behind them; frame 1 turns the page); standing `down_0` (paper folded under his arm); `look_down_0/1` (his head dipped, looking down over a rail; the glint crosses lenses on frame 1, 1600/600 ms); `fall_down_0/1` | Act 4: he stands in for the Man on Bridge, `bench_man_glasses:look_down` in place of `clockmaker@bridge:look_down` |
 
 ## Objects and tiles
 
@@ -26,6 +28,7 @@ Module `game/src/art/act2_objects.js`. See them composed at `/dev/art.html?only=
 | # | Piece | Frames | Layer |
 | --- | --- | --- | --- |
 | 10 | Icons | `items_act2:paper_charcoal`, `guidebook`, `crowbar` (light iron with a white gleam and no ink outline, so it reads on the navy bag panel) | inventory |
+| SP | Structure-pass icons | `items_act2:telescope` (the Keeper's brass telescope, three drawn sections, its glass catching the light), `tide_sheet` (the island's paper folded in half: masthead, columns, a small picture), `shop_hat` (the Shop window's straw hat: wide brim, cobalt band, its coral price card still on). The guidebook now has a big gold shield crest with a white star, so "a proper BOOK, with a crest on" reads at icon size | inventory |
 | 10 | Crowbar lying on the paving | `act2_props:crowbar_ground` (2 frames: a glint runs along it, 1400/160 ms) | sprite (16×16) or objects |
 | 11 | The piano as one entity (32×32, bottom-centered) | `piano:piano_front` (wedged at an angle, as in the court), `piano_level` (standing level), `piano_slide_0/1` (tipping as it slides, 120 ms), `piano_back` (seen from behind and above, for the Fountain Square arch) | sprite |
 | 12 | Water trickle across a landing | `act2_water:trickle_h` (4 frames; tiles chain along a row, west to east), ending in `trickle_end` (4 frames: the stream narrows and slips into the step's joint). Transparent overlays | objects |
@@ -68,4 +71,6 @@ Module `game/src/art/act2_interiors.js`. On the dev page: `/dev/art.html?only=sc
 | 18 | Counter (2–6, 3) | `shop:counter_l`, `counter_m` (repeat; it has the shop bell), `counter_r` | objects |
 | 18 | Marble jar (1, 5), every marble on the east side | `shop:marble_jar` | objects |
 | 18 | Window display with the straw hat (7–8, 5) | `shop:display_l`, `display_r` (the hat matches `items2:hat`) | objects |
+| SP | Window display with the Keeper's telescope (7–8, 5), Acts 2 and 4, after the swap | `shop:display_scope_l`, `display_scope_r`: the same stand, the brass telescope on two little wooden cradles angled up toward the window, no price card (it's curated, not for sale). Act 5's fallen state is `shop5:display_fallen_l/r` (see [art-act5.md](art-act5.md)) | objects |
+| SP | The lamp room's telescope under its dust sheet, facing the wall (6, 4–5) | `lamproom:scope_sheet_bot` at (6, 5) and `scope_sheet_top` at (6, 4): a shrouded shape on a tripod leaning toward the north wall, iron legs and brass feet below the hem, the brass eyepiece poking out toward the room. Put the top tile on the overhead layer if (6, 4) is walkable. Once it's taken, `lamproom:sheet_empty` at (6, 5) (the sheet in a heap) and nothing at (6, 4). Module `act5_surface.js` | objects (top: overhead or objects) |
 | 18 | Barometer, stuck on FAIR | `shop:barometer`, hung on the wall over (7, 0) because the shelves fill row 1 | objects |

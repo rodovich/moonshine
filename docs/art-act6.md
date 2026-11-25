@@ -18,6 +18,7 @@ Lined up on the dev page at `/dev/art.html?only=scene:act6_people`. New sheets a
 | The Boatman with the piano in his boat | `boatman_piano:piano_rock_0..3` (450 ms) and `piano_sing_0/1`, 32×32, placed like `boatman:rock_*` |
 | Mott raising a mug of tea (the climax montage) | `mott_jug:raise_mug_down_0` (mug raised, steam), `raise_mug_down_1` (raised higher). The earlier jug frames `raise_down_0/1` are kept |
 | Ambrose at the rope at night; the Keeper at the window | the existing `ambrose:ring_up_*` and `keeper:window_up_*` |
+| The epilogue Keeper with her telescope (structure pass): at the window, or on the Harbor quay looking out to sea | `keeper:scope_up_0/1` (from behind, looking out); `scope_down_0/1` (facing us, looking out to sea through it, for a quay south of her); `hold_down_0` (holding it, talking). See [art-act5.md](art-act5.md) |
 | The Pelletiers home with luggage | `pelletier_m`, `pelletier_f`: `<dir>_0..2`, each with a suitcase in hand |
 | The Tourist with her suitcase | `tourist_case:down_0..2` (standing, and walking toward the camera) |
 | Two Stair Race runners | `runner` (palettes base: sage vest; `b`: mustard vest), the Kid's body with a race bib: run `<dir>_1..4` (`sprite.walk: [1, 2, 3, 4]`), `jog_<dir>_0/1`, `arms_up_0/1` |
