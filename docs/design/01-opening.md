@@ -420,7 +420,7 @@ Stands at (17,5) among her sheets. Idle animation: smoothing a sheet, then stepp
 About ten. Runs laps of the well (see the map notes) at a steady jog, hopping the hurdle each time round. Sweat drops fly off him at the corners. Whenever Cheryl is within two tiles of him, or the player clicks or taps him, he stops where he is and jogs in place, facing her, so talking to him and giving him things work like any standing NPC.
 
 **First talk** → `kid.wantsTimer`
-- SWEATY KID: Can't stop! Stair Race in nine days. I'm gonna win it by SO much.
+- SWEATY KID: Can't stop! Stair Race in three days. I'm gonna win it by SO much.
 - SWEATY KID: I'm doing laps. Forty laps. Or thirty. I keep losing count, because the well's round.
 - SWEATY KID: If I had a timer I'd know if I was getting faster. Mum says I'm only getting sweatier.
 - SWEATY KID: The prop? It's my hurdle. Watch! → he hops the hurdle once and comes back.
