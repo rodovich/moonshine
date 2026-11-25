@@ -352,3 +352,23 @@ test('click-to-use chases a fast runner until he stops, then uses the item', asy
   await page.mouse.click(at.x, at.y);
   await waitFor(page, () => (window.moonshine.snapshot().text || '').includes('SPEED'), null, 15000);
 });
+
+test('click-to-use waits when the only free side is briefly blocked, then uses the item', async ({ page }) => {
+  await boot(page, `${STREET}&x=13&y=9&items=letter`);
+  await waitIdle(page);
+  await page.evaluate(() => {
+    const w = window.moonshine.world;
+    // The Kid stands still at (14,8); walls on three sides leave (14,9) free,
+    // and a crate sits there for a second.
+    const k = w.byId.get('kid');
+    k.x = k.fromX = 14; k.y = k.fromY = 8; k.def = { ...k.def, behavior: 'idle' };
+    for (const [x, y] of [[14, 7], [13, 8], [15, 8]]) w.map.setTile('ground', x, y, { tile: 'street:retain_top', solid: true });
+    w.mapDef.entities.push({ id: 'crate_tmp', x: 14, y: 9, sprite: { sheet: w.byId.get('cat').def.sprite.sheet, frame: 'cat_sleep' } });
+    w.refreshEntities();
+    w.control.holding = 'letter';
+    setTimeout(() => { w.removeEntity(w.byId.get('crate_tmp')); w.removed.add('crate_tmp'); }, 1000);
+  });
+  const at = await page.evaluate(() => { const w = window.moonshine.world; const d = w.byId.get('kid').lastDrawn; return w.game.display.toClient(d.x + d.w / 2 - w.cam.x, d.y + d.h - 10 - w.cam.y); });
+  await page.mouse.click(at.x, at.y);
+  await waitFor(page, () => (window.moonshine.snapshot().text || '').includes('SPEED'), null, 8000);
+});

@@ -221,6 +221,11 @@ export class Control {
     } else if (this.nearEnough(e)) {
       // A moving character ended up next to her (or on her tile): talk anyway.
       this.act(e, pend.item);
+    } else if (e.moving && (pend.waits || 0) < 120) {
+      // He's mid-step (his old and new tiles both count as taken, which can
+      // hide the only free side): wait a beat and look again once he lands.
+      this.pending = { ...pend, waits: (pend.waits || 0) + 1 };
+      this.path = [];
     } else if ((pend.tries || 0) < 3 || ((e.x !== pend.at[0] || e.y !== pend.at[1]) && (pend.chases || 0) < 40)) {
       // The target moved (a running Kid) or was blocked: try again. Chasing
       // someone who keeps moving doesn't use up the three tries (up to 40
@@ -228,7 +233,14 @@ export class Control {
       const moved = e.x !== pend.at[0] || e.y !== pend.at[1];
       this.pending = { ...pend, tries: (pend.tries || 0) + (moved ? 0 : 1), chases: (pend.chases || 0) + (moved ? 1 : 0) };
       this.repath();
-      if (!this.path.length) this.pending = null;
+      if (!this.path.length) {
+        // No way to a free side right now, but he's close (a side briefly
+        // taken, someone passing): keep the use pending and look again
+        // shortly, for up to two seconds, instead of dropping it.
+        const close = Math.abs(e.x - p.x) + Math.abs(e.y - p.y) <= 3;
+        if (close && (pend.waits || 0) < 120) this.pending = { ...this.pending, waits: (pend.waits || 0) + 1, tries: Math.min(this.pending.tries, 2) };
+        else this.pending = null;
+      }
     }
   }
 
