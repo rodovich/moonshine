@@ -456,7 +456,7 @@ export function withCourt5(def) {
   const base = withSheets(def);
   let entities = act5Talk(base.entities, 'old_man', (g, self) => g.say(self, "The whole house lifted in the night. Gerald says we've risen in the world. Gerald thinks he's funny."));
   for (const id of ['neighbor', 'neighbor_after', 'neighbor_morning']) {
-    entities = act5Talk(entities, id, (g) => g.say('Neighbor', "The wind! My sheets are out on the line flat as flags. Whiter than ever. I don't trust it."));
+    entities = act5Talk(entities, id, (g) => g.say('Neighbor', "My whites have never been whiter. Not since the house lifted in the night. I don't trust it."));
   }
   // Her sheets, in Act 5's wind: she says whiter than ever; they look grey to Cheryl.
   entities = act5Talk(entities, 'back_line', (g) => g.describe("Still grey to me. She says whiter than ever. I'm not arguing with a woman about her sheets."));
