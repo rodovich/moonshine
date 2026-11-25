@@ -248,17 +248,28 @@ export class World {
 
   // Interactable entity at a tile (solid or not).
   interactableAt(x, y) {
-    for (const e of this.entities) {
-      if (e.isPlayer || !e.visible) continue;
-      if (e.x <= x && e.y <= y && x < e.x + e.w && y < e.y + e.h && isInteractable(e)) return e;
-    }
-    return null;
+    return this.pickEntity(this.entities.filter((e) => !e.isPlayer && e.visible
+      && e.x <= x && e.y <= y && x < e.x + e.w && y < e.y + e.h && isInteractable(e)));
+  }
+
+  // When several interactable things share a tile, characters win over
+  // objects with sprites, which win over sprite-less hotspots (the Kid
+  // standing on the hollow step).
+  pickEntity(list) {
+    const rank = (e) => (e.directional ? 0 : e.art ? 1 : 2);
+    return list.length ? list.reduce((a, b) => (rank(b) < rank(a) ? b : a)) : null;
   }
 
   blocked(x, y, mover = null) {
     if (this.map.solid(x, y)) return true;
     const e = this.entityAt(x, y, mover);
-    return !!e;
+    if (e) return true;
+    // Cheryl never walks onto a character, even one marked solid: false
+    // (that only keeps it from blocking other characters' paths).
+    if (mover && mover.isPlayer) {
+      return this.entities.some((o) => o !== mover && o.directional && o.visible && o.occupies(x, y));
+    }
+    return false;
   }
 
   // Can `mover` (with its footprint) step into x,y?
@@ -266,6 +277,20 @@ export class World {
     for (let dy = 0; dy < mover.h; dy++) {
       for (let dx = 0; dx < mover.w; dx++) {
         if (this.blocked(x + dx, y + dy, mover)) return false;
+      }
+    }
+    return true;
+  }
+
+  // Like canEnter for route planning: moving non-solid characters don't count.
+  canPlan(mover, x, y) {
+    for (let dy = 0; dy < mover.h; dy++) {
+      for (let dx = 0; dx < mover.w; dx++) {
+        const tx = x + dx;
+        const ty = y + dy;
+        if (this.map.solid(tx, ty) || this.entityAt(tx, ty, mover)) return false;
+        const still = this.entities.some((o) => o !== mover && o.directional && o.visible && !isMover(o) && o.occupies(tx, ty));
+        if (still) return false;
       }
     }
     return true;
@@ -279,8 +304,12 @@ export class World {
     const goalKeys = new Set(goals.map(([x, y]) => `${x},${y}`));
     const avoidExits = mover.isPlayer;
     const exits = avoidExits ? this.activeExits() : null;
+    // Cheryl's routes plan through moving characters that don't block
+    // (solid: false patrollers and wanderers): they'll move on, and if one is
+    // in her way when she gets there she waits and he turns back.
+    const plan = mover.isPlayer && !ignoreEntities;
     const blocked = (x, y) => {
-      if (ignoreEntities ? this.map.solid(x, y) : !this.canEnter(mover, x, y)) return true;
+      if (plan ? !this.canPlan(mover, x, y) : ignoreEntities ? this.map.solid(x, y) : !this.canEnter(mover, x, y)) return true;
       return avoidExits && !goalKeys.has(`${x},${y}`) && this.isExit(x, y, exits);
     };
     const start = [mover.x, mover.y];
@@ -586,8 +615,9 @@ export class World {
     const route = b.route;
     e.patrolIdx = e.patrolIdx ?? 0;
     let [tx, ty] = route[e.patrolIdx % route.length];
+    const step = e.patrolReverse ? route.length - 1 : 1;
     if (e.x === tx && e.y === ty) {
-      e.patrolIdx = (e.patrolIdx + 1) % route.length;
+      e.patrolIdx = (e.patrolIdx + step) % route.length;
       e.patrolWait = Math.round((b.pause || 0) * 60);
       // A plain callback, not a script: it mustn't take control from the player.
       if (b.onWaypoint) b.onWaypoint(this.api, e, e.patrolIdx);
@@ -610,7 +640,20 @@ export class World {
     } else {
       e.facing = dir;
       if (b.blockedPose && e.pose !== b.blockedPose) e.setPose(b.blockedPose);
+      // Cheryl in the way (a narrow flight): after a moment he turns round and
+      // runs his lap the other way, so neither waits on the other for ever.
+      const [nx, ny] = [e.x + dx, e.y + dy];
+      if (p.occupies(nx, ny) || (this.control.path && this.control.path.some(([px, py]) => px === nx && py === ny))) {
+        e.patrolBlockedT = (e.patrolBlockedT || 0) + 1;
+        if (e.patrolBlockedT > 30) {
+          e.patrolBlockedT = 0;
+          e.patrolReverse = !e.patrolReverse;
+          e.patrolIdx = (e.patrolIdx + (e.patrolReverse ? route.length - 1 : 1)) % route.length;
+        }
+      }
+      return;
     }
+    e.patrolBlockedT = 0;
   }
 
   // Exits that count for pathing: open ones (no `when`, or `when` holds) and
@@ -680,7 +723,8 @@ export class World {
     if (!this.picture) this.ambient.drawBark(ctx);
     this.drawHint(ctx);
     this.inventory.draw(ctx);
-    this.textbox.draw(ctx, this.picture ? 0 : this.player.py - this.cam.y);
+    // On tall phones the game draws the box below the frame instead.
+    if (!this.textbox.below) this.textbox.draw(ctx, this.picture ? 0 : this.player.py - this.cam.y);
   }
 
   drawWorld(ctx) {
@@ -763,6 +807,12 @@ export class World {
     const layer = this.layer('dark');
     layer.fillStyle = colorOf(def.darkColor || 'void');
     layer.fillRect(0, 0, WIDTH, HEIGHT);
+    // Light pools stay inside the map: no glow over the void around a room.
+    const mapRect = [-cx, -cy, this.map.w * TILE, this.map.h * TILE];
+    layer.save();
+    layer.beginPath();
+    layer.rect(...mapRect);
+    layer.clip();
     layer.globalCompositeOperation = 'destination-out';
     for (const l of lights) {
       for (const [k, a] of [[1, 0.4], [0.75, 0.6], [0.5, 1]]) {
@@ -770,12 +820,14 @@ export class World {
         layer.drawImage(discImage(Math.round(l.r * TILE * k)), Math.round(l.px - cx - l.r * TILE * k), Math.round(l.py - cy - l.r * TILE * k));
       }
     }
-    layer.globalAlpha = 1;
-    layer.globalCompositeOperation = 'source-over';
+    layer.restore();
     ctx.save();
     ctx.globalAlpha = Math.min(1, dark);
     ctx.drawImage(layer.canvas, 0, 0);
     // Colored lights tint their pool (inner bands a little more).
+    ctx.beginPath();
+    ctx.rect(...mapRect);
+    ctx.clip();
     ctx.globalCompositeOperation = 'screen';
     for (const l of lights) {
       if (!l.color) continue;
@@ -920,6 +972,13 @@ export function safeCall(fn, ...args) {
     console.error('[content]', err);
     return undefined;
   }
+}
+
+// A character that moves on its own (so routes may plan through it).
+function isMover(e) {
+  const b = e.def.behavior;
+  const t = b && (typeof b === 'string' ? b : b.type);
+  return !e.solid && (t === 'patrol' || t === 'wander');
 }
 
 export function isInteractable(e) {

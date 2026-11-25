@@ -24,6 +24,13 @@ export class TextBox {
     this.position = 'bottom';
     this.tick = 0;
     this.small = loadSheet(uiSmall);
+    // Box geometry. In the frame: 240 px wide at the bottom or top. On tall
+    // phones the game sets `below` ({ w, h } in its own pixels) and the box is
+    // drawn into a larger canvas under the frame instead; `toLocal` maps taps.
+    this.bx = BOX_X;
+    this.bw = BOX_W;
+    this.below = null;
+    this.toLocal = null;
   }
 
   get open() {
@@ -36,7 +43,8 @@ export class TextBox {
   show({ text, speaker = null, style = 'npc', position = 'bottom', auto = null }) {
     return new Promise((resolve) => {
       const s = STYLES[style] || STYLES.npc;
-      const lines = wrap(text, BOX_W - PAD_X * 2);
+      this.applyLayout();
+      const lines = wrap(text, this.bw - PAD_X * 2);
       const pages = [];
       for (let i = 0; i < lines.length; i += LINES) pages.push(lines.slice(i, i + LINES));
       this.position = position;
@@ -50,7 +58,8 @@ export class TextBox {
     return new Promise((resolve) => {
       const s = STYLES[style] || STYLES.npc;
       // A long prompt pages like normal text; the options appear on its last page.
-      const lines = prompt ? wrap(prompt, BOX_W - PAD_X * 2) : [];
+      this.applyLayout();
+      const lines = prompt ? wrap(prompt, this.bw - PAD_X * 2) : [];
       const pages = [];
       for (let i = 0; i < lines.length; i += LINES) pages.push(lines.slice(i, i + LINES));
       if (!pages.length) pages.push([]);
@@ -62,6 +71,11 @@ export class TextBox {
       };
       if (!prompt) this.active.shown = Infinity;
     });
+  }
+
+  applyLayout() {
+    this.bx = this.below ? 2 : BOX_X;
+    this.bw = this.below ? this.below.w - 4 : BOX_W;
   }
 
   // A box unfolds when it opens, but not when it directly follows another
@@ -132,7 +146,8 @@ export class TextBox {
       if (d === 'down' || d === 'right') { c.index = (c.index + 1) % c.options.length; sfx('cursor'); }
       if (input.pressed('confirm')) return this.finish(c.index);
       if (input.pressed('cancel') && c.cancelIndex != null) { sfx('cancel'); return this.finish(c.cancelIndex); }
-      for (const t of taps) {
+      for (const t0 of taps) {
+        const t = this.toLocal ? this.toLocal(t0) : t0;
         const i = c.rects.findIndex((r) => inRect(t, r));
         if (i >= 0) {
           c.index = i;
@@ -174,29 +189,31 @@ export class TextBox {
     if (!a) return;
     let pos = this.position;
     if (pos === 'auto') pos = playerScreenY > HEIGHT * 0.62 ? 'top' : 'bottom';
-    const y = pos === 'top' ? 8 : HEIGHT - BOX_H - 8;
+    // Below the frame: label on top, the box, then any choices underneath.
+    if (this.below) pos = 'below';
+    const y = pos === 'below' ? 14 : pos === 'top' ? 8 : HEIGHT - BOX_H - 8;
     const hasText = a.pages[a.page].length > 0;
     if (a.openT < OPEN_TICKS) {
       // Unfolding from the middle, like an SNES window opening.
       const h = Math.max(6, Math.round((BOX_H * (a.openT + 1)) / (OPEN_TICKS + 1)));
-      drawBox(ctx, BOX_X, y + Math.round((BOX_H - h) / 2), BOX_W, h, a.style);
+      drawBox(ctx, this.bx, y + Math.round((BOX_H - h) / 2), this.bw, h, a.style);
       return;
     }
     if (hasText || !a.choice) {
-      drawBox(ctx, BOX_X, y, BOX_W, BOX_H, a.style);
+      drawBox(ctx, this.bx, y, this.bw, BOX_H, a.style);
       if (a.speaker) this.drawLabel(ctx, a.speaker, y, pos);
       let remaining = Math.floor(a.shown);
       a.pages[a.page].forEach((line, i) => {
         if (remaining <= 0) return;
         const n = [...line].length;
-        drawText(ctx, line, BOX_X + PAD_X, y + PAD_Y + i * LINE_HEIGHT, {
+        drawText(ctx, line, this.bx + PAD_X, y + PAD_Y + i * LINE_HEIGHT, {
           color: a.style.text, italic: a.style.italic, count: remaining,
         });
         remaining -= n;
       });
       if (this.revealed() && a.auto == null && (!a.choice || a.page < a.pages.length - 1)) {
         const frame = this.small.frame(Math.floor(this.tick / 16) % 2 ? 'arrow_1' : 'arrow_0');
-        ctx.drawImage(frame, BOX_X + BOX_W - 14, y + BOX_H - 11);
+        ctx.drawImage(frame, this.bx + this.bw - 14, y + BOX_H - 11);
       }
     }
     if (a.choice && this.revealed() && a.page === a.pages.length - 1) this.drawChoices(ctx, y, pos, hasText);
@@ -205,7 +222,7 @@ export class TextBox {
   drawLabel(ctx, speaker, boxY, pos) {
     const w = measure(speaker) + 12;
     const h = 17;
-    const lx = BOX_X + 6;
+    const lx = this.bx + 6;
     const ly = pos === 'top' ? boxY + BOX_H - 3 : boxY - h + 3;
     drawBox(ctx, lx, ly, w, h, this.active.style);
     drawText(ctx, speaker, lx + 6, ly + 4, { color: 'ui_label' });
@@ -215,10 +232,10 @@ export class TextBox {
     const c = this.active.choice;
     const optW = Math.max(...c.options.map((o) => measure(o))) + 24;
     const optH = c.options.length * LINE_HEIGHT + 10;
-    const x = BOX_X + BOX_W - optW;
+    const x = this.bx + this.bw - optW;
     let y;
-    if (!hasText) y = pos === 'top' ? 8 : HEIGHT - optH - 8;
-    else y = pos === 'top' ? boxY + BOX_H + 2 : boxY - optH - 2;
+    if (!hasText) y = pos === 'below' ? 2 : pos === 'top' ? 8 : HEIGHT - optH - 8;
+    else y = pos === 'top' || pos === 'below' ? boxY + BOX_H + 2 : boxY - optH - 2;
     drawBox(ctx, x, y, optW, optH, this.active.style);
     c.rects = [];
     c.options.forEach((o, i) => {

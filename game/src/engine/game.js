@@ -131,9 +131,29 @@ export class Game {
 
   update() {
     this.ticks++;
+    // Dialogue goes below the frame on tall phones (set before boxes open).
+    const area = this.display.dialogArea;
+    const below = !!(area && this.world && this.scene === this.world);
+    this.textbox.below = below ? { w: area.w, h: area.h } : null;
+    this.textbox.toLocal = below ? (t) => (t.cx == null ? t : this.display.dialogLocal(t.cx, t.cy)) : null;
     this.input.tick();
     this.scene.update(this.input);
     this.effects.update();
+  }
+
+  // Dialogue drawn below the frame on tall phones (null when not in use).
+  dialogImage() {
+    const tb = this.textbox;
+    if (!tb.below || !tb.open) return null;
+    if (!this.dialogCanvas || this.dialogCanvas.width !== tb.below.w || this.dialogCanvas.height !== tb.below.h) {
+      this.dialogCanvas = document.createElement('canvas');
+      this.dialogCanvas.width = tb.below.w;
+      this.dialogCanvas.height = tb.below.h;
+    }
+    const ctx = this.dialogCanvas.getContext('2d');
+    ctx.clearRect(0, 0, tb.below.w, tb.below.h);
+    tb.draw(ctx);
+    return this.dialogCanvas;
   }
 
   // The big bag button under the frame on portrait phones (null to hide).
@@ -194,7 +214,7 @@ export class Game {
     this.scene.draw(ctx);
     this.effects.applyFade(ctx);
     if (this.card) drawCard(ctx, this.card.text);
-    this.display.present(this.effects.waveParams(), this.touchBarImage());
+    this.display.present(this.effects.waveParams(), this.touchBarImage(), this.dialogImage());
   }
 }
 

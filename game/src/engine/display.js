@@ -62,6 +62,16 @@ export class Display {
     // button (in game pixels, below y = 224, drawn at twice the frame's scale).
     const below = (devH - this.oy - this.drawH) / this.scale;
     this.touchBar = portrait && below >= 64 ? { x: WIDTH / 2 - 24, y: HEIGHT + Math.min(24, (below - 48) / 2), w: 48, h: 48 } : null;
+    // On tall portrait screens, dialogue is drawn below the frame at 1.5× the
+    // frame's scale (whole device pixels), so phone text is readable.
+    this.dialogArea = null;
+    if (portrait) {
+      const k = Math.max(1, Math.round(this.scale * 1.5));
+      const top = this.oy + this.drawH + Math.round(6 * this.scale);
+      const w = Math.min(WIDTH, Math.floor((devW - 2 * Math.round(2 * this.scale)) / k));
+      const h = 124; // label + 3-line box + up to 4 options
+      if (devH - top >= h * k && w >= 160) this.dialogArea = { x: Math.floor((devW - w * k) / 2), y: top, w, h, k };
+    }
     this.dpr = dpr;
     this.ctx.imageSmoothingEnabled = false;
   }
@@ -80,6 +90,20 @@ export class Display {
     return { x: rect.left + (this.ox + x * this.scale) / this.dpr, y: rect.top + (this.oy + y * this.scale) / this.dpr };
   }
 
+  // Client coordinates -> pixels of the dialogue canvas below the frame.
+  dialogLocal(clientX, clientY) {
+    const a = this.dialogArea;
+    const rect = this.canvas.getBoundingClientRect();
+    return { x: ((clientX - rect.left) * this.dpr - a.x) / a.k, y: ((clientY - rect.top) * this.dpr - a.y) / a.k };
+  }
+
+  // Dialogue canvas pixels -> client coordinates (for tests).
+  dialogToClient(x, y) {
+    const a = this.dialogArea;
+    const rect = this.canvas.getBoundingClientRect();
+    return { x: rect.left + (a.x + x * a.k) / this.dpr, y: rect.top + (a.y + y * a.k) / this.dpr };
+  }
+
   touchBarHit(p) {
     const r = this.touchBar;
     return !!r && p.x >= r.x && p.y >= r.y && p.x < r.x + r.w && p.y < r.y + r.h;
@@ -88,7 +112,7 @@ export class Display {
   // fx: { wave: {amp, freq, phase} } post-processing handled here; color
   // effects are applied to the buffer by effects.js before present.
   // `overlay`: a canvas drawn into the touch bar's rect (below the frame).
-  present(wave, overlay = null) {
+  present(wave, overlay = null, dialog = null) {
     const ctx = this.ctx;
     ctx.imageSmoothingEnabled = false;
     ctx.fillStyle = this.letterbox;
@@ -104,6 +128,10 @@ export class Display {
       ctx.drawImage(this.post, 0, 0, WIDTH, HEIGHT, this.ox, this.oy, this.drawW, this.drawH);
     } else {
       ctx.drawImage(this.buffer, 0, 0, WIDTH, HEIGHT, this.ox, this.oy, this.drawW, this.drawH);
+    }
+    if (dialog && this.dialogArea) {
+      const a = this.dialogArea;
+      this.ctx.drawImage(dialog, 0, 0, a.w, a.h, a.x, a.y, a.w * a.k, a.h * a.k);
     }
     if (overlay && this.touchBar) {
       const r = this.touchBar;

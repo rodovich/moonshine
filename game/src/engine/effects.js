@@ -239,8 +239,19 @@ export class Effects {
 }
 
 // Rotate hue of every pixel, then snap to 15-bit color.
+// The frame is copied through its own CPU-side canvas, so the main buffer
+// stays GPU-backed (fast to draw) and only this effect pays for readback.
+let hueCtx = null;
 function applyHue(ctx, degrees) {
-  const img = ctx.getImageData(0, 0, WIDTH, HEIGHT);
+  if (!hueCtx) {
+    const c = document.createElement('canvas');
+    c.width = WIDTH;
+    c.height = HEIGHT;
+    hueCtx = c.getContext('2d', { willReadFrequently: true });
+  }
+  hueCtx.clearRect(0, 0, WIDTH, HEIGHT);
+  hueCtx.drawImage(ctx.canvas, 0, 0);
+  const img = hueCtx.getImageData(0, 0, WIDTH, HEIGHT);
   const d = img.data;
   const a = (degrees * Math.PI) / 180;
   const c = Math.cos(a);
@@ -257,5 +268,9 @@ function applyHue(ctx, degrees) {
     d[i + 1] = Math.min(248, Math.max(0, m[3] * r + m[4] * g + m[5] * b)) & 0xf8;
     d[i + 2] = Math.min(248, Math.max(0, m[6] * r + m[7] * g + m[8] * b)) & 0xf8;
   }
-  ctx.putImageData(img, 0, 0);
+  hueCtx.putImageData(img, 0, 0);
+  ctx.save();
+  ctx.globalCompositeOperation = 'copy';
+  ctx.drawImage(hueCtx.canvas, 0, 0);
+  ctx.restore();
 }

@@ -24,7 +24,9 @@ export function readDebugParams(content) {
   const startMode = q.get('start');
   if (q.has('map') || startMode) {
     out.start = true;
-    out.nosave = q.get('save') !== '1';
+    // A debug start never writes the save slot unless save=1, except
+    // start=continue (the player's own game), which saves unless save=0.
+    out.nosave = startMode === 'continue' && !q.has('map') ? q.get('save') === '0' : q.get('save') !== '1';
     let state = null;
     if (startMode === 'continue') state = loadSave();
     if (!state) state = newState(content.start);
