@@ -13,6 +13,9 @@ pair('shop:display_l', 'shop:display_r', 1, 1);                 // with the hat 
 pair('shop:display_scope_l', 'shop:display_scope_r', 4, 1);     // with the telescope (Acts 2 and 4)
 pair('shop5:display_fallen_l', 'shop5:display_fallen_r', 1, 4); // fallen over in the rise, the telescope in it (Act 5)
 pair('shop5:display_guide_l', 'shop5:display_guide_r', 4, 4);   // the guidebook in pride of place (Act 5, after)
+pair('shop5:display_fallen_empty_l', 'shop5:display_fallen_empty_r', 7, 4); // fallen, the telescope rolled under the counter (Act 5)
+objects[2][6] = 'shop:counter_l'; objects[2][7] = 'shop:counter_m';
+objects[2][8] = 'shop:counter_r_glint';                          // its brass end glinting under the counter's east end
 // the lamp room (x 10-17, y 0-5): the window ring, the telescope under its dust sheet facing the wall, the sheet empty
 for (let y = 0; y < 6; y++) for (let x = 10; x < 18; x++) ground[y][x] = y === 0 ? 'lamproom:window' : 'lamproom:floor';
 objects[1][11] = 'lamproom:scope_sheet_top'; objects[2][11] = 'lamproom:scope_sheet_bot';
