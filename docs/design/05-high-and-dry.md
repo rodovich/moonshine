@@ -2,6 +2,8 @@
 
 This is the build-ready design for Act 5 ([overview](overview.md), [story bible](../story-bible.md)). It picks up the same afternoon as the end of [04-the-list.md](04-the-list.md): the canals dry, the bronze door in the exposed hull, and the city riding six feet higher than it should. It ends at dusk in the Windlass Room under the lighthouse, with the bell's old clapper seated where the broken Tooth was, waiting for moonrise.
 
+> **Structure pass (client feedback).** The telescope replaces the brass polish ([structure-pass.md](structure-pass.md), section 6). The Keeper wants her telescope back to watch the reef; the Shopkeeper's fallen window holds it; he swaps it back for the guidebook; the Keeper takes it and lets Cheryl use the lamp. The dialog below is updated. Saves from before the structure pass where the Tourist already had Cheryl's hat get the telescope placed in the window on load (`telescope.migrated`), with one Keeper line for them. The Bilge has a west exit to the Goat Path, (0, 12–14), open in this act. The brass polish stays on the Shop shelf as scenery.
+
 ## The slice in brief
 
 Riding high, Tessel catches the wind and drifts faster. From the harbor and the lighthouse the Teeth, the reef at the mouth of the Bowl, are plainly visible, and closer each time Cheryl looks. The Lighthouse Keeper has finally turned round: "There's a REEF. Why is there a REEF?" The Mayor has declared Dry Canal Day, with a celebration in the canal bed at moonrise. Ambrose says the next turn of the tide is at moonrise too.
@@ -9,12 +11,12 @@ Riding high, Tessel catches the wind and drifts faster. From the harbor and the 
 The Ship Plan shows what's left: the chain runs from the bow to the anchor, and something at the bow holds it. The way to the bow is the bronze door at the foot of the Water Stairs. Three threads, in any order:
 
 - **The rope.** The Water Stairs end in a broken flight above a six-foot drop. The Boatman sits in his beached boat at the bottom, mourning his drying planks, with a coil of mooring rope he won't give up. The Fishmonger lends Cheryl a bucket ("what use is a bucket now the sea's gone?"). She fills it at the refilled Fountain and lowers it to him. He pours it into his boat: "AFLOAT!" A boat that floats doesn't need tying up, so he hands up his rope. Cheryl ties it to the stair's ring and climbs down.
-- **The door.** The door's glass eye wants more light than Cheryl's disc holds. Only the lighthouse lamp is bright enough, and the Keeper, who has polished in a frenzy since she saw the reef, won't let anyone near it without polish. The Shopkeeper's window display fell over in the rise and now has a gap; he'll take the guidebook to fill it and gives her brass polish. In the lamp, the disc blazes, but the charge fades in under a minute, and the door is the length of the town away. The Sweaty Kid, who still has Cheryl's egg timer, winds the egg, takes the disc, and runs. He beats the egg. The door opens.
+- **The door.** The door's glass eye wants more light than Cheryl's disc holds. Only the lighthouse lamp is bright enough, and the Keeper, who has turned round at last, won't let anyone near it until she has her telescope back to watch the reef. It's in the Shop window, where Cheryl put it in Act 2. The Shopkeeper's display fell over in the rise; he'll swap the telescope back for the guidebook. In the lamp, the disc blazes, but the charge fades in under a minute, and the door is the length of the town away. The Sweaty Kid, who still has Cheryl's egg timer, winds the egg, takes the disc, and runs. He beats the egg. The door opens.
 - **The Tooth.** The Clockmaker's doorstop, "the only thing in this town that keeps still," is a great notched bronze lump: the bell's old clapper. He trades it for Mott's square jug, "a doorstop that doesn't roll."
 
 Down the rope, through the door, along the bow passage, into the **Windlass Room**: a bronze drum like a chapel on its side, chain links taller than Cheryl, and beside the drum the stump of the sheared Tooth. She levers out the stump with the crowbar and sets the clapper in its socket. It fits as if it was waiting. *Every part does two jobs.* The speaking tube from the bell brings down wind and gulls and nothing else yet. She sits on a coil of chain to wait for moonrise.
 
-**Playtime:** 30–40 minutes. **Maps:** 3 new (Clockmaker's Shop, Bow Passage, Windlass Room), plus new states of the dry Bilge, the risen Harbor, the lamp room, Fountain Square, the Shop, and Act 5 lines across the town. **New items:** bucket, rope, brass polish, clapper. **Wrongness:** 0.5.
+**Playtime:** 30–40 minutes. **Maps:** 3 new (Clockmaker's Shop, Bow Passage, Windlass Room), plus new states of the dry Bilge, the risen Harbor, the lamp room, Fountain Square, the Shop, and Act 5 lines across the town. **New items:** bucket, rope, clapper (and the telescope again, from Act 2). **Wrongness:** 0.5.
 
 ## Building the danger
 
@@ -66,7 +68,7 @@ The Harbor from Act 2, after the rise. The quay now stands six feet above the wa
 
 ### Lamp room (Act 5 state)
 
-The Act 2 lamp room. The Keeper now stands at the window, at (5, 2), facing *out*, polishing the glass instead of the lamp. The lamp at (3–4, 2–3) is lit (it's a lighthouse; it's afternoon, but she lit it "for the REEF"). An empty polish tin lies on the floor at (2, 5).
+The Act 2 lamp room. The Keeper now stands at the window, at (5, 2), facing *out*, shading her eyes. The lamp at (3–4, 2–3) is lit (it's a lighthouse; it's afternoon, but she lit it "for the REEF"). The dust sheet from Act 2 lies on the floor at (2, 5), with nothing under it.
 
 - **Light:** the lamp is a strong light source (radius 4, warm), and its turning shine sweeps the room.
 
@@ -154,8 +156,10 @@ The machine that holds Tessel to its anchor. A bronze drum the size of a chapel 
 | `bucket.full` | Bucket used on the Fountain | The bucket item becomes "bucket of water" |
 | `boatman.afloat` | Full bucket lowered to the Boatman | He's AFLOAT; Cheryl has the rope |
 | `rope.tied` | Rope used on the stair ring | The rope climb at (25, 8) |
-| `got.polish` | Guidebook given to the Shopkeeper | Guidebook gone; polish in the bag |
-| `disc.charged` | Polish given to the Keeper, then the disc held in the lamp | Starts the relay scene |
+| `keeper.asked` | First talk with the Keeper | The Shopkeeper will now swap the telescope |
+| `got.telescope` | Guidebook given to the Shopkeeper | Guidebook gone; the telescope in the bag |
+| `keeper.telescope` | Telescope given to the Keeper | The lamp is usable |
+| `disc.charged` | The disc held in the lamp, after `keeper.telescope` | Starts the relay scene |
 | `door.open` | The relay scene ends | The bronze door open; Bow Passage lamps lit; the disc back, dim |
 | `got.clapper` | The square jug given to the Clockmaker | |
 | `tooth.out` | Crowbar used on the stump | |
@@ -165,10 +169,10 @@ The machine that holds Tessel to its anchor. A bronze drum the size of a chapel 
 
 ```
  ROPE THREAD                         DOOR THREAD                           TOOTH THREAD
- Fishmonger ─► BUCKET                guidebook (Act 2) ─► Shopkeeper       square jug (Act 4)
-     │                                   ("the window has a GAP")             ─► Clockmaker
+ Fishmonger ─► BUCKET                the Keeper wants her telescope        square jug (Act 4)
+     │                               guidebook (Act 2) ─► Shopkeeper          ─► Clockmaker
  fill at the Fountain                        │                                    │
-     │                                   BRASS POLISH ─► the Keeper             CLAPPER
+     │                                   TELESCOPE ─► the Keeper                CLAPPER
  lower it to the Boatman                     │                                    │
      │ ("AFLOAT!")                       hold the disc in the lamp                │
      ▼                                       │ (it fades in a minute)             │
@@ -185,7 +189,7 @@ The machine that holds Tessel to its anchor. A bronze drum the size of a chapel 
 
 - **All three threads are independent.** The Kid jumps down to the mud for the relay, so the door can open before the rope is down; Cheryl needs both the open door and the rope to get through it herself.
 - **Reaching the Windlass Room without the clapper is fine.** The stump and socket point at it (see the descriptions), and the rope is a two-way climb.
-- **No item is consumed early.** The guidebook is only accepted by the Shopkeeper now that his window has a gap (Act 2's decline was "My window is complete"). The jug is only useful to the Clockmaker.
+- **No item is consumed early.** The Shopkeeper accepts the guidebook only in Act 5, once the Keeper has asked for her telescope; in Acts 2 and 4 he declines it ("My window is complete."), because the Clockmaker needs it in Act 4. The jug is only useful to the Clockmaker.
 
 ### Hints in the world
 
@@ -196,8 +200,8 @@ The machine that holds Tessel to its anchor. A bronze drum the size of a chapel 
 | The Fountain is the only water | The Fountain look ("Fuller than before"); the Fishmonger ("Not a drop in the whole Bilge") |
 | The eye needs more light than the disc | The disc on the door: "The eye stays dark. It wants more than my disc has in it." |
 | The lighthouse lamp is bright enough | Cheryl at the door ("Brighter. The brightest light in Tessel."); the Keeper ("Brightest lamp on any coast"); the lamp's own shine |
-| The Keeper needs polish; the Shop has it | The Keeper's lines; the Shop's shelves (Act 2: "Brass polish, lamp oil… Everything a lighthouse could want") |
-| The guidebook fills the Shopkeeper's gap | The Shopkeeper's new lines; the Act 2 decline ("My window is complete") |
+| The Keeper wants her telescope; it's in the Shop window | The Keeper's lines; the window itself (the player put it there) |
+| The guidebook fills the Shopkeeper's gap | The Shopkeeper's "something local, something that says Tessel"; the earlier declines ("My window is complete") |
 | The disc fades too fast to walk it to the door | Holding it after the charge: "Nobody could walk that in a minute. Somebody would have to run it flat out and jump off the quay." Then the Kid in the harbor |
 | The Clockmaker's Shop is worth visiting | Ambrose: "MY BELL'S OLD BRONZE TONGUE IS PROPPING HIS SHOP DOOR OPEN." |
 | The clapper is the spare Tooth | The doorstop's look ("That notch is made to catch something."); the stump's look in the Windlass Room |
@@ -244,24 +248,25 @@ At the window, facing out.
 **First talk**
 - LIGHTHOUSE KEEPER: There's a REEF. Why is there a REEF? Twenty-two years and nobody mentions a REEF?
 - LIGHTHOUSE KEEPER: I turned round this morning to see what the shouting was. I've never turned round. And THERE IT WAS.
-- LIGHTHOUSE KEEPER: I've lit the lamp. In the afternoon. For the reef. I've polished it twelve times. I've run out of polish.
-- LIGHTHOUSE KEEPER: Nobody touches the lamp. Not without polish. If I can't polish it after, I'll go to pieces.
-- LIGHTHOUSE KEEPER: The Shop has polish. He won't sell it. He never sells anything.
+- LIGHTHOUSE KEEPER: I need to SEE it. Properly. And my telescope's in a SHOP WINDOW.
+- LIGHTHOUSE KEEPER: You put it there. I said somewhere it'd be looked at. …I did say that.
+  - (Saves with `telescope.migrated` instead: LIGHTHOUSE KEEPER: And my telescope's in a SHOP WINDOW. Don't ask me how.)
+- LIGHTHOUSE KEEPER: Bring me my telescope, and you can have anything. Anything.
 
 **Repeat** (alternate)
-- LIGHTHOUSE KEEPER: Polish. I need polish. The Shop has polish. He won't sell it. He never sells anything.
+- LIGHTHOUSE KEEPER: My telescope. In a shop window. Being LOOKED AT.
 - LIGHTHOUSE KEEPER: Don't look at the window. No. Do. Somebody has to.
 
-**Give brass polish** → `got.polish` removed
-- LIGHTHOUSE KEEPER: Polish! Real polish! Oh, Cheryl. You've saved my life. Possibly everyone's. Don't tell me which.
+**Give telescope** → telescope removed; `keeper.telescope`
+- LIGHTHOUSE KEEPER: My telescope! Oh, Cheryl. You've saved my life. Possibly everyone's. Don't tell me which.
 - LIGHTHOUSE KEEPER: What do you want? Anything. …The LAMP? You want to put your hand in my lamp?
-- LIGHTHOUSE KEEPER: …Go on, then. Quickly. Then I'm polishing it.
-- → The lamp becomes usable: use the disc on it (see "The disc and the Kid").
+- LIGHTHOUSE KEEPER: …Go on, then. Quickly. I'll be at the window.
+- → The lamp becomes usable: use the disc on it (see "The disc and the Kid"). The Keeper stands at the window with the telescope.
 
 **After the relay** (repeat)
-- LIGHTHOUSE KEEPER: Polished it again. Twice. I feel better. The reef doesn't care, but I do.
+- LIGHTHOUSE KEEPER: Twenty-two years I looked at the lamp. Now I can't stop looking at that reef.
 
-**Items:** disc (before the polish): LIGHTHOUSE KEEPER: Not near the lamp. Not without polish. I mean it.
+**Items:** disc (before the telescope): LIGHTHOUSE KEEPER: Not near the lamp. Not till I've got my telescope. I mean it.
 
 ### The Fishmonger (dry Bilge)
 
@@ -309,20 +314,17 @@ Cheryl talks to him from the stair tiles (22–25, 7) by interacting with the br
 Staring at the fallen display.
 
 **First talk**
-- SHOPKEEPER: Miss. Look. The window. It went over in the night. When the whole shop lifted. The hat's on the floor.
-- SHOPKEEPER: There's a GAP, Miss. In the window. A shop with a gap in the window is a shop that's given up.
-- SHOPKEEPER: I need something to display. Something local. Something that says Tessel.
+- SHOPKEEPER: Miss. Look. The window. It went over in the night. When the whole shop lifted.
+- SHOPKEEPER: The telescope's lying in it like a fallen soldier. Best thing I've ever displayed.
+- After the Keeper has asked for it: SHOPKEEPER: Give it BACK? Then there's a GAP, Miss. I need something local. Something that says Tessel.
 
 **Repeat:** SHOPKEEPER: A gap. People will talk. They'll say, "Did you see his window?"
 
-**Give guidebook** → guidebook gone; *Got Brass Polish.*
+**Give guidebook** (only once the Keeper has asked; before that, "My window is complete.") → guidebook gone; *Got Telescope.*
 - SHOPKEEPER: A guidebook! "Tessel: A Pocket Companion." Genuinely local. Confidently wrong. PERFECT.
-- SHOPKEEPER: In it goes. There. The window is complete. Thank you, Miss. What can I— no, I don't sell things.
-- SHOPKEEPER: …Oh, go on. A swap. Display for display. What do you want?
-- → Cheryl looks at the shelf with the brass polish. SHOPKEEPER: The polish? That's lighthouse polish. Nobody needs lighthouse polish except—
-- SHOPKEEPER: Take it. Before I change my mind. I've never done this before. I feel quite light-headed.
+- SHOPKEEPER: In it goes. Out comes the telescope. Display for display. Twice in one week. I'm practically a merchant.
 
-**After** (repeat): SHOPKEEPER: My first swap in thirty years. I'm going to have a sit down.
+**After** (repeat): SHOPKEEPER: Two swaps in one week. I'm going to have a sit down.
 
 ### The Clockmaker (Clockmaker's Shop)
 
@@ -384,7 +386,7 @@ At his bench, repairing the clock drive she unclamped. Calm now, in a brittle wa
 
 - STRANDED TOURIST: The ferry's six feet DOWN now. I looked over the edge. It's hanging off its ropes like washing.
 - STRANDED TOURIST: My guidebook said nothing about the sea leaving. Then again, you've got my guidebook.
-- Repeat: STRANDED TOURIST: Dry Canal Day. I'm going. I've nothing else to do. I'm wearing your hat.
+- Repeat: STRANDED TOURIST: Dry Canal Day. I'm going. I've nothing else to do. I'm wearing this hat.
 
 ### The Counting Woman (Hundred Steps)
 
@@ -425,9 +427,9 @@ At his bench, repairing the clock drive she unclamped. Calm now, in a brittle wa
 
 ### Lamp room
 
-- **The lamp** (before the polish): "The lamp, lit in the middle of the afternoon. Brightest light in Tessel." / "She's standing between me and it."
+- **The lamp** (before the telescope): "The lamp, lit in the middle of the afternoon. Brightest light in Tessel." / "She's standing between me and it."
 - **The window** (by stage): as the Teeth, but from up here: Stage 1: "From up here, the Teeth are a white line across the mouth of the Bowl. And we're pointing at them." Stage 2: "Closer. The whole town's leaning toward them like a dog on a lead." Stage 3: "Close enough to count. I don't."
-- **The empty polish tin**: "Empty. Scraped. She's been at it with a fingernail."
+- **The dust sheet**: "The dust sheet the telescope lived under. She's kicked it into a corner."
 
 ### Clockmaker's Shop
 
@@ -481,19 +483,19 @@ A ladder of bronze rungs runs up beside the speaking tube, from the Windlass Roo
 | Bucket | A wooden bucket, empty | "The Fishmonger's bucket. It smells, as you'd expect." |
 | Bucket of water | The same, full, with a glint | "A bucket of the Fountain. Heavy. Holy, nearly." |
 | Rope | A coil of tarry rope | "The Boatman's mooring rope. Tarry, salty, and longer than I'd like to climb." |
-| Brass polish | A round tin with a lighthouse on the lid | "Lighthouse polish. It says so on the tin. The tin is very shiny." |
+| Telescope (from Act 2) | A brass telescope | "The Keeper's telescope. Brass, and polished to within an inch of its life." |
 | Clapper | A great bronze tongue, rounded and notched | "The bell's old clapper. Rounded at one end, notched at the other. Heavy as sin." |
 
 - Bucket of water on anything else: "No. That's for a boat."
 - Rope on anything but the stair ring: "There's nothing here worth tying."
-- Polish on anything: "It's for a lighthouse. It says so on the tin."
+- Telescope on anything else: "It's the Keeper's. She wants it back, and she wants it now."
 - Clapper on anything but the socket: "It's heavy, and it wants to be somewhere particular."
-- Disc on the lamp before the polish: the Keeper's decline.
+- Disc on the lamp before the telescope: the Keeper's decline.
 - **The Ship Plan in Act 5** (inventory look, first time): "The chain runs from the bow to the anchor. Beside it, at the bow, a little drawing of a tooth." / "Rounded at one end, notched at the other." Later looks: the second line only. This lets a player recognize the doorstop before going down the rope, so the clapper can be fetched on the way and not after a trip to the Windlass Room.
 
 ## The disc and the Kid
 
-**Trigger:** the disc used on the lamp, after the polish.
+**Trigger:** the disc used on the lamp, after the telescope.
 
 1. Cheryl holds the disc into the lamp's focus. The lamp's beam swings through it; the disc flares white, then a deep, brilliant cyan. A rising glassy chime. The Keeper shades her eyes.
 2. "It's drinking the lamp." / "It's full. It's never been this full."
@@ -537,10 +539,10 @@ The run is fully scripted and always succeeds.
 **Tiles and objects**
 - Dry Bilge: the stair ring (bronze, set in a tread); the rope tied and hanging down the hull to the mud (2 tiles tall); the bronze door opening (grinding open, a few frames), and open with cyan light spilling out; the dim disc sitting in the door's eye
 - Risen Harbor: the old quay edge row; a row of exposed hull with barnacles and a tide line; the sea, lower; the ferry hanging low and tilted on taut ropes; **the Teeth** on the horizon in three stages (a line of white surf on dark rocks, then larger, then with surf visibly breaking)
-- Lamp room: the lamp lit and turning; the Keeper at the window; an empty polish tin
+- Lamp room: the lamp lit and turning; the Keeper at the window (with the telescope, once given); the empty dust sheet
 - Clockmaker's Shop: wall clocks (each face showing a different time), a workbench with the clock drive in pieces in little dishes, the door propped open by the clapper and the door swung shut
 - Fountain Square: a DRY CANAL DAY banner on two poles (overhead); two crowd residents
-- Shop: the window display fallen over, the hat on the floor; then the display with the guidebook in pride of place
+- Shop: the window display fallen over, the telescope lying in it; then the display with the guidebook in pride of place
 - Bow Passage: a short underground passage with ribs; lamps waking (a lighting-up sequence); the inside of the bronze door
 - Windlass Room: the **drum** (16×4 tiles, bronze, wound with enormous chain), the chain running off its east end through the **hawse** (a round hole in the east wall, the evening sea glimpsed through it); the **Tooth socket** with a sheared stump, empty, and with the clapper seated; the stump lying loose; the brake lever with its plate (bell, hand, arrow; locked and thrown); the speaking tube; coils of spare chain; the sealed hatch with a moon-in-bowl emblem (sealed, and open for Act 6)
 - Laundry streaming on every surface map that has laundry
@@ -555,7 +557,7 @@ The run is fully scripted and always succeeds.
 - The disc, flaring (an overlay of 3–4 frames) and dim
 - Two crowd residents (swaps) for the Mayor's audience
 
-**Item icons:** bucket (empty and full), rope coil, brass polish tin, clapper
+**Item icons:** bucket (empty and full), rope coil, clapper (the telescope's icon is from Act 2)
 
 ## Audio needed
 
