@@ -29,15 +29,17 @@ export class TextBox {
     return !!this.active;
   }
 
-  // Show text; resolves when the player dismisses the last page.
-  show({ text, speaker = null, style = 'npc', position = 'bottom' }) {
+  // Show text; resolves when the player dismisses the last page. With
+  // `auto` (seconds), each page closes on its own that long after it's fully
+  // shown, and input neither skips nor advances it.
+  show({ text, speaker = null, style = 'npc', position = 'bottom', auto = null }) {
     return new Promise((resolve) => {
       const s = STYLES[style] || STYLES.npc;
       const lines = wrap(text, BOX_W - PAD_X * 2);
       const pages = [];
       for (let i = 0; i < lines.length; i += LINES) pages.push(lines.slice(i, i + LINES));
       this.position = position;
-      this.active = { pages, page: 0, shown: 0, pause: 0, style: s, styleName: style, speaker, resolve, choice: null };
+      this.active = { pages, page: 0, shown: 0, pause: 0, style: s, styleName: style, speaker, resolve, choice: null, auto, autoT: 0 };
     });
   }
 
@@ -90,6 +92,19 @@ export class TextBox {
     }
 
     const taps = input.taps();
+    if (a.auto != null) {
+      input.flush();
+      if (!this.revealed()) return;
+      if (++a.autoT < a.auto * 60) return;
+      a.autoT = 0;
+      if (a.page < a.pages.length - 1) {
+        a.page++;
+        a.shown = 0;
+      } else {
+        this.finish();
+      }
+      return;
+    }
     if (a.choice && this.revealed()) {
       const c = a.choice;
       const d = input.menuDir();
@@ -154,7 +169,7 @@ export class TextBox {
         });
         remaining -= n;
       });
-      if (this.revealed() && !a.choice) {
+      if (this.revealed() && !a.choice && a.auto == null) {
         const frame = this.small.frame(Math.floor(this.tick / 16) % 2 ? 'arrow_1' : 'arrow_0');
         ctx.drawImage(frame, BOX_X + BOX_W - 14, y + BOX_H - 11);
       }

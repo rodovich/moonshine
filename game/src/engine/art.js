@@ -3,7 +3,7 @@
 //
 //   const art = loadSheet(sheet);              // default palette
 //   const alt = loadSheet(sheet, 'night');     // a named swap from sheet.palettes
-//   const red = loadSheet(sheet, { a: 'ph_red' }); // ad-hoc overrides on top of the default
+//   const red = loadSheet(sheet, { a: 'coral' }); // ad-hoc overrides on top of the default
 //   art.frame('wall_plain')   -> canvas (cached)
 //   art.anim('water')         -> [canvas, canvas, ...] for water_0, water_1, ...
 //   art.has('water_0')        -> boolean
@@ -76,6 +76,22 @@ export class SheetArt {
     return list;
   }
 
+  // Per-frame durations in ms for animation `base`, from the sheet's
+  // `durations` (a number for every frame, or an array) or `fallbackMs`.
+  durations(base, fallbackMs = 200) {
+    const n = this.anim(base).length;
+    const d = this.sheet.durations && this.sheet.durations[base];
+    if (Array.isArray(d)) return Array.from({ length: n }, (_, i) => d[i % d.length]);
+    return Array(n).fill(typeof d === 'number' ? d : fallbackMs);
+  }
+
+  // The frame of animation `base` showing `ms` milliseconds after it started (loops).
+  frameAt(base, ms, fallbackMs) {
+    const frames = this.anim(base);
+    if (frames.length <= 1) return frames[0] || null;
+    return frames[frameIndexAt(this.durations(base, fallbackMs), ms)];
+  }
+
   render(rows, name) {
     const { w, h } = this;
     if (rows.length !== h) warnOnce(`${this.label}.${name}: ${rows.length} rows, expected ${h}`);
@@ -133,7 +149,20 @@ export function loadSheet(sheet, variant) {
   return art;
 }
 
-// A canvas of one solid color, handy for placeholders and effects.
+// Index into a looping list of frame durations at time `ms`.
+export function frameIndexAt(durs, ms) {
+  let total = 0;
+  for (const d of durs) total += d;
+  if (total <= 0) return 0;
+  let t = ((ms % total) + total) % total;
+  for (let i = 0; i < durs.length; i++) {
+    if (t < durs[i]) return i;
+    t -= durs[i];
+  }
+  return durs.length - 1;
+}
+
+// A palette color name (or #rrggbb) as a CSS color.
 export function colorOf(name) {
   return resolveColor(name);
 }

@@ -7,7 +7,7 @@
 
 import { DIR_VEC, dirBetween } from './entity.js';
 import { pathToDirs } from './world.js';
-import { playMusic, stopMusic, sfx } from './sound.js';
+import { playMusic, stopMusic, sfx, playCue, setWrongness } from './sound.js';
 import { loadSheet } from './art.js';
 import { TILE } from './tilemap.js';
 
@@ -25,8 +25,15 @@ export function makeApi(world) {
     return speaker.name || null;
   }
 
+  // Lines may end with an options object: { auto: seconds }.
   async function showLines(lines, opts) {
-    for (const text of lines.flat()) await tb.show({ text, position: 'auto', ...opts });
+    let extra = {};
+    const last = lines[lines.length - 1];
+    if (last && typeof last === 'object' && !Array.isArray(last)) {
+      extra = last;
+      lines = lines.slice(0, -1);
+    }
+    for (const text of lines.flat()) await tb.show({ text, position: 'auto', ...opts, ...extra });
   }
 
   function resolveEntity(id) {
@@ -171,6 +178,22 @@ export function makeApi(world) {
     setSprite(id, sprite) {
       resolveEntity(id).setSprite(sprite);
     },
+    // Play a named animation on an entity instead of its idle/walk frames
+    // (e.g. 'sit_right'); null returns to normal.
+    pose(id, anim) {
+      resolveEntity(id).setPose(anim);
+    },
+    // How many times the player has looked at / talked to this entity before
+    // (0 the first time). Also passed to `interact` as its third argument.
+    looks(id) {
+      return world.looks(resolveEntity(id));
+    },
+    // Change a tile until the map reloads. For changes that should last, use
+    // the map's `patches`. `value` is a legend value (tile name or
+    // 'sheet:frame'), or null to clear.
+    setTile(layer, x, y, value) {
+      world.map.setTile(layer, x, y, value);
+    },
 
     // ---- Time and screen ----
     wait(seconds) {
@@ -202,6 +225,50 @@ export function makeApi(world) {
     clearEffects(seconds = 0.3) {
       return fx.clear(seconds);
     },
+    // Scene lighting: 'day', 'dusk', 'night', or a preset from
+    // content.lighting; null for none. Lasts until the next map load, which
+    // applies that map's own `lighting`.
+    setLighting(name, seconds = 0) {
+      return world.setLighting(name, seconds);
+    },
+    get lighting() {
+      return world.lighting;
+    },
+    // Show a full-screen 256×224 picture instead of the map: either
+    // { sheet, frame, palette } or a function (ctx, ms) that draws it (ms
+    // since it appeared). Text boxes still work over it. `fade` in seconds
+    // (0 = hard cut).
+    async showPicture(spec, { fade = 0.5 } = {}) {
+      if (fade) await fx.fade('out', fade / 2);
+      world.picture = { spec, ms: 0 };
+      if (fade) await fx.fade('in', fade / 2);
+    },
+    async hidePicture({ fade = 0.5 } = {}) {
+      if (fade) await fx.fade('out', fade / 2);
+      world.picture = null;
+      if (fade) await fx.fade('in', fade / 2);
+    },
+    // Centered text over a black screen for `seconds` (e.g. "Cheryl did not
+    // sleep well."). Draws above fades, so fade out first if you like.
+    async card(text, seconds = 2.5) {
+      world.game.card = { text };
+      await world.waitTicks(secs(seconds));
+      world.game.card = null;
+    },
+    // A small hint at the bottom of the screen for `seconds`. Doesn't block
+    // the player or the script.
+    hint(text, seconds = 6) {
+      world.hintState = { text, t: 0, ticks: secs(seconds) };
+    },
+    // True when the player is using touch (choose hint wording with this).
+    get usingTouch() {
+      return world.game.input.usingTouch();
+    },
+    // Back to the title screen (the game is saved first).
+    async toTitle() {
+      world.save();
+      await world.game.backToTitle();
+    },
     // Glide the camera to center on tile x,y (pixels per tick `speed`), or
     // back to the player with followPlayer().
     async panCamera(x, y, speed = 2) {
@@ -230,8 +297,17 @@ export function makeApi(world) {
     playMusic(id) {
       playMusic(id);
     },
-    stopMusic() {
-      stopMusic();
+    stopMusic(fadeMs) {
+      stopMusic(fadeMs);
+    },
+    // A one-shot music cue over the current track (which dips and returns,
+    // unless { resume: false }).
+    playCue(id, opts) {
+      playCue(id, opts);
+    },
+    // How far the Wrongness has crept into the music, 0..1.
+    setWrongness(amount) {
+      setWrongness(amount);
     },
     sfx(id) {
       sfx(id);

@@ -3,7 +3,8 @@
 // parameters say so), and runs a fixed 60 Hz update with rendering on every
 // animation frame.
 
-import { Display } from './display.js';
+import { Display, WIDTH, HEIGHT } from './display.js';
+import { wrap, drawTextCentered, LINE_HEIGHT } from './text.js';
 import { Input } from './input.js';
 import { Effects } from './effects.js';
 import { TextBox } from './textbox.js';
@@ -78,6 +79,18 @@ export class Game {
     await this.effects.fade('in', 0.4);
   }
 
+  // Leave the world for the title screen (used by the end-of-slice card).
+  async backToTitle() {
+    if (this.effects.fadeAlpha < 1) await this.effects.fade('out', 0.6);
+    this.input.flush();
+    this.card = null;
+    this.world = null;
+    this.scene = new Title(this, { canContinue: hasSave() && !!loadSave() });
+    this.effects.setLight([], 0);
+    await this.effects.clear(0);
+    await this.effects.fade('in', 0.6);
+  }
+
   startWorld(state, { runNewGame }) {
     this.world = new World(this, state);
     this.scene = this.world;
@@ -131,6 +144,11 @@ export class Game {
       inventoryOpen: w.inventory.open,
       holding: w.control.holding,
       flags: { ...w.state.flags },
+      looks: { ...(w.state.looks || {}) },
+      lighting: w.lighting,
+      picture: !!w.picture,
+      card: this.card ? this.card.text : null,
+      hint: w.hintState ? w.hintState.text : null,
       items: [...w.state.inventory],
       entities: w.entities.filter((e) => !e.isPlayer).map((e) => ({ id: e.id, x: e.x, y: e.y, facing: e.facing })),
     };
@@ -146,8 +164,18 @@ export class Game {
     const ctx = this.display.bctx;
     this.scene.draw(ctx);
     this.effects.applyFade(ctx);
+    if (this.card) drawCard(ctx, this.card.text);
     this.display.present(this.effects.waveParams());
   }
+}
+
+// A centered text card on black.
+function drawCard(ctx, text) {
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(0, 0, WIDTH, HEIGHT);
+  const lines = wrap(text, WIDTH - 48);
+  const top = Math.round(HEIGHT / 2 - (lines.length * LINE_HEIGHT) / 2);
+  lines.forEach((line, i) => drawTextCentered(ctx, line, WIDTH / 2, top + i * LINE_HEIGHT, { color: 'ui_text' }));
 }
 
 export function startGame(content, parent = document.body) {

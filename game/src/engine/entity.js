@@ -6,6 +6,8 @@ import { loadSheet } from './art.js';
 import { TILE } from './tilemap.js';
 
 export const DIR_VEC = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
+const WALK_PX_PER_FRAME = 8;
+
 export const OPPOSITE = { up: 'down', down: 'up', left: 'right', right: 'left' };
 
 export function dirBetween(ax, ay, bx, by) {
@@ -15,8 +17,6 @@ export function dirBetween(ax, ay, bx, by) {
   if (dy !== 0) return dy > 0 ? 'down' : 'up';
   return null;
 }
-
-const DEFAULT_CYCLE_3 = [1, 0, 2, 0];
 
 export class Entity {
   constructor(def, isPlayer = false) {
@@ -39,29 +39,30 @@ export class Entity {
     this.fromX = this.x;
     this.fromY = this.y;
     this.t = 0;
-    this.walkDist = 0; // pixels walked in the current walk, drives animation
     this.path = null;
     this.onArrive = null;
     this.waitTicks = 0;
-    // Animation for static sprites
-    this.animTick = 0;
-    this.setSprite(def.sprite);
+    // Animation clocks (ms). `phase` keeps neighbors' idles out of step.
+    this.animMs = 0;
+    this.walkPx = 0;
+    this.phase = def.phase ?? Math.floor(Math.random() * 1000);
+    this.setSprite(typeof def.sprite === 'function' ? null : def.sprite);
   }
 
+  // sprite: { sheet, palette } for a character (idle_<dir>_<n>, walk_<dir>_<n>
+  // frames), or { sheet, palette, frame } for a static or animated object.
   setSprite(sprite) {
     this.sprite = sprite || null;
     this.art = sprite ? loadSheet(sprite.sheet, sprite.palette) : null;
     this.directional = !!(sprite && !sprite.frame);
-    this.staticFrames = sprite && sprite.frame ? this.art.anim(sprite.frame) : null;
-    this.cycles = {};
-    if (this.directional) {
-      for (const d of ['up', 'down', 'left', 'right']) {
-        const frames = [];
-        for (let i = 0; this.art.has(`${d}_${i}`); i++) frames.push(i);
-        this.cycles[d] = frames.length;
-      }
-    }
-    this.walkCycle = sprite?.walk || null;
+    this.pose = null;
+  }
+
+  // Play a named animation (e.g. 'sit_right') instead of idle/walk frames;
+  // null returns to normal.
+  setPose(base) {
+    this.pose = base || null;
+    this.poseMs = 0;
   }
 
   occupies(x, y) {
@@ -101,7 +102,6 @@ export class Entity {
   updateMove() {
     if (!this.moving) return false;
     this.t++;
-    this.walkDist += TILE / this.stepTicks;
     if (this.t >= this.stepTicks) {
       this.moving = false;
       this.fromX = this.x;
@@ -111,39 +111,56 @@ export class Entity {
     return false;
   }
 
-  currentFrame() {
-    if (!this.art) return null;
-    if (this.staticFrames) {
-      const fps = this.sprite.fps || 4;
-      const n = this.staticFrames.length;
-      return n > 1 ? this.staticFrames[Math.floor(this.animTick / (60 / fps)) % n] : this.staticFrames[0];
-    }
-    let dir = this.facing;
-    let flip = false;
-    if (!this.cycles[dir]) {
-      if (dir === 'left' && this.cycles.right) { dir = 'right'; flip = true; }
-      else if (dir === 'right' && this.cycles.left) { dir = 'left'; flip = true; }
-      else dir = 'down';
-    }
-    const n = this.cycles[dir] || 1;
-    let idx = 0;
-    if (this.walking && n > 1) {
-      const cycle = this.walkCycle || (n === 3 ? DEFAULT_CYCLE_3 : n === 2 ? [1, 0] : [...Array(n).keys()]);
-      idx = cycle[Math.floor(this.walkDist / 8) % cycle.length];
-    }
-    return { img: this.art.frame(`${dir}_${idx}`), flip };
+  // Advance animation clocks by one tick.
+  tickAnim() {
+    const dt = 1000 / 60;
+    this.animMs += dt;
+    this.poseMs = (this.poseMs || 0) + dt;
+    if (this.moving) this.walkPx += TILE / this.stepTicks;
+    else this.walkPx = 0;
   }
 
-  get walking() {
-    return this.moving || this.keepWalking;
+  currentFrame() {
+    const art = this.art;
+    if (!art) return null;
+    if (this.pose) return { img: art.frameAt(this.pose, this.poseMs), flip: false };
+    if (!this.directional) {
+      const fallback = this.sprite.fps ? 1000 / this.sprite.fps : 200;
+      return { img: art.frameAt(this.sprite.frame, this.animMs + this.phase, fallback), flip: false };
+    }
+    const kind = this.moving || this.walkPx > 0 ? 'walk' : 'idle';
+    const pick = (k, dir) => (art.has(`${k}_${dir}_0`) ? `${k}_${dir}` : null);
+    const dir = this.facing;
+    let flip = false;
+    let base = pick(kind, dir);
+    if (!base) {
+      const mirror = { left: 'right', right: 'left' }[dir];
+      if (mirror && pick(kind, mirror)) {
+        base = pick(kind, mirror);
+        flip = true;
+      } else if (kind === 'idle' && pick('walk', dir)) {
+        // No idle frames: stand on the first walk frame.
+        return { img: art.frame(`walk_${dir}_0`), flip: false };
+      } else {
+        base = pick(kind, 'down') || pick('walk', 'down');
+      }
+    }
+    if (!base) return null;
+    if (kind === 'walk') {
+      // Walk frames advance with distance (one per 8 px, a full 4-frame cycle
+      // every two tiles), so feet stay planted at any walking speed.
+      const frames = art.anim(base);
+      return { img: frames[Math.floor(this.walkPx / WALK_PX_PER_FRAME) % frames.length], flip };
+    }
+    return { img: art.frameAt(base, this.animMs + this.phase), flip };
   }
 
   draw(ctx, camX, camY) {
     if (!this.visible || !this.art) return;
     const f = this.currentFrame();
     if (!f) return;
-    const img = f.img || f;
-    const flip = !!f.flip;
+    const { img, flip } = f;
+    if (!img) return;
     const x = this.px + (this.w * TILE - img.width) / 2 + this.offset[0] - camX;
     const y = this.py + this.h * TILE - img.height + this.offset[1] - camY;
     const rx = Math.round(x);

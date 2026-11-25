@@ -49,6 +49,37 @@ export class Effects {
     this.flickerRate = 4;
     this.tweens = new Map();
     this.tick = 0;
+    // Lighting: crossfade from `lightFrom` to `lightTo` passes as lightMix goes 0 -> 1.
+    this.lightFrom = [];
+    this.lightTo = [];
+    this.lightMix = 1;
+  }
+
+  // Change the scene lighting (a list of { color, mode, amount } passes) over
+  // `seconds`; 0 is a hard cut.
+  setLight(passes, seconds = 0) {
+    // Mid-crossfade, start from whichever look currently dominates.
+    this.lightFrom = this.lightMix >= 0.5 ? this.lightTo : this.lightFrom;
+    this.lightTo = passes;
+    this.lightMix = 0;
+    return this.tween('lightMix', 1, seconds);
+  }
+
+  applyLight(ctx) {
+    const draw = (passes, k) => {
+      for (const p of passes) {
+        const a = (p.amount ?? 1) * k;
+        if (a <= 0.001) continue;
+        ctx.save();
+        ctx.globalCompositeOperation = p.mode || 'source-over';
+        ctx.globalAlpha = Math.min(1, a);
+        ctx.fillStyle = colorOf(p.color);
+        ctx.fillRect(0, 0, WIDTH, HEIGHT);
+        ctx.restore();
+      }
+    };
+    draw(this.lightFrom, 1 - this.lightMix);
+    draw(this.lightTo, this.lightMix);
   }
 
   // Animate numeric property `key` to `to` over `seconds`. Resolves at the end.

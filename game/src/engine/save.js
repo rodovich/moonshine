@@ -7,6 +7,7 @@ export function newState(start) {
     version: 1,
     flags: {},
     inventory: [],
+    looks: {}, // 'map:entity' -> times looked at
     map: start.map,
     x: start.x,
     y: start.y,
