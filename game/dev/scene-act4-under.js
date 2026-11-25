@@ -50,13 +50,21 @@ function pumphall(mode) {
   // the drive shaft along the top of the north wall (overhead)
   for (let x = 3; x <= 24; x++) L.set('overhead', x, 1, sis(x % 7 === 0 ? (run ? 'over_shaft_bearing' : 'over_shaft_bearing_still') : (run ? 'over_shaft' : 'over_shaft_still')));
   L.set('overhead', 3, 1, sis('over_shaft_end_w'));
-  // the cell grates
-  const g = burst ? 'burst' : run ? 'drain' : 'full';
+  // the cell grates: full while the Sisters sleep, draining once they run (they no longer burst)
+  const g = run ? 'drain' : 'full';
   for (const x of [4, 9, 14, 19]) { L.set('ground', x, 9, ph(`grate_${g}_l`)); L.set('ground', x + 1, 9, ph(`grate_${g}_r`)); }
+  // the big main along the west wall (x1): down the north wall's face, then along the floor to the south wall
+  const mp = f => `mainpipe:${f}`;
+  L.set('objects', 1, 1, mp('pipe_wall_top')); L.set('objects', 1, 2, mp('pipe_wall_bot'));
+  for (let y = 3; y <= 10; y++) L.set('objects', 1, y, mp(y === 10 ? 'pipe_end' : y % 3 === 0 ? 'pipe_flange' : y % 2 ? 'pipe_run' : 'pipe_run_b'));
+  if (!burst) L.set('objects', 1, 6, mp('pipe_weep'));
   if (burst) {
-    // floodwater spreading north from the grates; its front at row 6
-    for (let y = 7; y <= 10; y++) for (let x = 1; x <= 24; x++) if (y !== 9 || ![4, 5, 9, 10, 14, 15, 19, 20].includes(x)) L.set('ground', x, y, ph(y >= 8 ? 'flood' : 'flood_film'));
-    for (let x = 1; x <= 24; x++) L.set('ground', x, 6, ph('flood_edge_n'));
+    // the main splits at (1, 6) and sprays east; the water spreads from the west end, its front at x10
+    L.set('objects', 1, 6, mp('pipe_split'));
+    L.set('overhead', 1, 5, mp('over_spray_pn')); L.set('overhead', 1, 7, mp('over_spray_ps'));
+    for (const [c, x] of [['a', 2], ['b', 3]]) for (const [r, y] of [['n', 5], ['m', 6], ['s', 7]]) L.set('overhead', x, y, mp(`over_spray_${r}${c}`));
+    for (let y = 3; y <= 10; y++) for (let x = 2; x <= 9; x++) if (!(y === 9 && [4, 5, 9].includes(x))) L.set('ground', x, y, ph(x <= 6 ? 'flood' : 'flood_film'));
+    for (let y = 3; y <= 10; y++) L.set('ground', 10, y, ph('flood_edge_e'));
   }
   const title = { still: 'Pump Hall (asleep; the Middle Sister\'s throat empty)', run: 'Pump Hall (bell rung: running, draining)', burst: 'Pump Hall (the burst)' }[mode];
   return { title, ...L, hero: [21 * 16 + 8, 4 * 16, 'up'], scale: 2 };
