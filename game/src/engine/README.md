@@ -32,6 +32,7 @@ export default {
   items: { brass_key: { ... }, ... },                        // by id
   scripts: { intro: async (g) => { ... } },                  // runnable with ?run=intro
   onNewGame: async (g) => { ... },                           // optional, once per new game
+  onLoad: [async (g) => { ... }, ...],                       // optional, once per loaded game (see Old saves)
   lighting: { dusk: [ ... ] },                               // optional: add or replace lighting presets
   defaults: {
     useFail: async (g, target, itemId) => g.describe("That won't help."), // item has no effect
@@ -42,7 +43,15 @@ export default {
 
 Game state is `{ flags, inventory, looks, map, x, y, facing }` (`looks` counts how often each thing has been looked at). It saves to `localStorage` whenever a script finishes (walking through a door is a script), never in the middle of one, so a reload can't land halfway through a cutscene. The title screen offers Continue when a save exists.
 
-**Old saves.** `main` deploys on every push, so players will load saves from older builds. On load the engine fills in missing fields, drops unknown item ids, falls back to `content.start` if the saved map no longer exists, and moves the player to the map's `spawn` (or the nearest open tile) if they'd stand inside something solid or off the map. For renamed flags or items, give the content a `migrate: (state) => state` function; it runs first. Characters' positions after `moveNpc` aren't saved: they reset to the map's layout when it reloads, so put lasting moves in the entity's `x`/`y` behind a `when`, or `g.place` them in `onEnter`.
+**Old saves.** `main` deploys on every push, so players will load saves from older builds. On load the engine fills in missing fields, drops unknown item ids, falls back to `content.start` if the saved map no longer exists, and moves the player to the map's `spawn` (or the nearest open tile) if they'd stand inside something solid or off the map. For renamed flags or items, give the content a `migrate: (state) => state` function; it runs first, on the raw saved state. For fixes that need the script API, list functions in `content.onLoad`: each runs once, in order, every time a game is loaded (Continue, `?start=continue`, or a debug start with `?map=`), before the first map's `onEnter`, and never on a new game. Write them so they do nothing on a save that doesn't need them, and keep them until no player could still hold such a save. One that throws is logged and skipped. For example, retiring an item:
+
+```js
+onLoad: [
+  (g) => { if (g.hasItem('hat') && !g.flag('tourist.hasHat')) g.takeItem('hat'); },
+],
+```
+
+Item ids missing from `content.items` are dropped before `onLoad` runs, so to test for a retired item, keep its entry until the rule is gone. Characters' positions after `moveNpc` aren't saved: they reset to the map's layout when it reloads, so put lasting moves in the entity's `x`/`y` behind a `when`, or `g.place` them in `onEnter`.
 
 ## Maps
 
