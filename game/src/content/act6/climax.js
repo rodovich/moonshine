@@ -189,8 +189,8 @@ export function windlassAct6(map) {
 
   return {
     sheets: { brake, keel_hatch, windlass_drum, windlass_night, keel_lit },
-    // Act 5's brake, speaking tube, and coil step aside for Act 6's own.
-    hide: [{ when: night, ids: ['brake', 'speaking_tube', 'coil_west'] }],
+    // Act 5's brake, speaking tube, coil, drum, chain, hawse, and hatch step aside for Act 6's own.
+    hide: [{ when: night, ids: ['brake', 'speaking_tube', 'coil_west', 'drum', 'chain', 'hawse', 'keel_hatch'] }],
     entities: objects,
     exits: [0, 1].map((i) => ({ x: 7 + i, y: 2, to: 'long_keel', at: [38, 3 + i], facing: 'left', when: (g) => !!g.flag('hatch.open') })),
     patches: (g) => {
