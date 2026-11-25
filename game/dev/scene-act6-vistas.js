@@ -35,6 +35,8 @@ export function SCENE(state) {
         }
         ctx.drawImage(img('final_rim', 'rim'), 0, 0);
         // a year later: Cheryl in her tub (the Act 1 vista keeps her perched on its edge)
+        // the same sighting pins, the moon dead between them
+        if (SHEETS.vista_pins) ctx.drawImage(img('vista_pins', 'pins'), 0, 0);
         ctx.drawImage(img('vista_cheryl_bath', 'cheryl_bath'), 0, 128);
         // hold, then the title: a two-step fade
         if (t > 10500) ctx.drawImage(img('vista_title', t > 11300 ? 'title_1' : 'title_0'), 0, 0);

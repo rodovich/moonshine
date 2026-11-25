@@ -85,3 +85,5 @@ Modules: `game/src/art/act5_sprites.js` (new sheets), plus additions to `cheryl.
 | The Fishmonger handing over a bucket | `fishmonger:give_down_0/1`; walking `fishmonger:<dir>_0..2` (the Shopkeeper's body in a striped shirt and rubber apron) |
 | Two crowd residents | `crowd_a`, `crowd_b`: `down_0`, `cheer_down_0/1`, `point_down_0/1` |
 | Icons | `items_act5:bucket_empty`, `bucket_full`, `rope`, `brass_polish`, `clapper` |
+
+The QA description sweep added or changed art for this act: see [art-sweep.md](art-sweep.md).
