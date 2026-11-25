@@ -337,8 +337,13 @@ test('keyboard: Act 3', async ({ page }) => {
   const read = (opts) => readThrough(page, adv, opts);
   let log, s;
 
-  // Down the hundredth step.
+  // Down the hundredth step: step down toward it (a walkable trigger asks at once;
+  // a solid hole only turns Cheryl to face it, and Z asks).
   await page.keyboard.press('ArrowDown');
+  await waitFor(page, () => !!window.moonshine.snapshot().choice, null, 2500).catch(async () => {
+    await waitFor(page, () => window.moonshine.snapshot().idle, null, 3000);
+    await page.keyboard.press('z');
+  });
   await kbChoose(page, 0);
   await waitFor(page, () => window.moonshine.snapshot().map === 'step_gallery', null, 15000);
   log = await readUntil(page, adv, 'All this time.');
