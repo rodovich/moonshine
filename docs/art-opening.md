@@ -10,7 +10,42 @@ Rules for all of it are in [art-direction.md](art-direction.md).
 
 ## Cistern Court
 
-COURT_INDEX
+Modules: `roof.js` (sheets `roof`, `tub`, `roof_props`, `laundry`) and `court.js` (`court`, `facade`, `court_props`, `court_tree`, `court_well`). Facade walls and windows reuse `buildings:` tiles (Cheryl's side in the base palette, the Neighbor's `@white_sage`).
+
+| Design | Frame(s) | Layer |
+| --- | --- | --- |
+| `~` backdrop | `roof:backdrop_house`, `backdrop_house_window`, `backdrop_eave`, `backdrop_crown`, `backdrop_crown_buttress` | ground |
+| `=` north parapet | `roof:parapet_n`; corners `parapet_nw`, `parapet_ne` | ground |
+| `=` west / east parapets | `roof:parapet_w`, `parapet_e` | ground |
+| `=` south roof edge | `roof:roof_edge_s`, `roof_edge_sw`, `roof_edge_se` | ground |
+| `=` low wall (x9) | `roof:lowwall`; `lowwall_end_s` (y4), `lowwall_gap` (y5), `lowwall_end_n` (y6) | ground |
+| `.` roof floor | `roof:roof_floor_{nw,ne,sw,se}` (2×2 block, like street paving); `roof_floor_ne_patch`, `roof_floor_sw_cracked` | ground |
+| `C` chimney (7–8, 2) | `roof:chimney_l/r`; pots and hats `over_chimney_l/r` on row 1; rattling `over_chimney_rattle_l/r` | ground; overhead |
+| `h` herb pots | `roof_props:herb_basil`, `herb_rosemary` | objects |
+| `k` chairs | `roof_props:chair_fold` (twice) | objects |
+| `t` tap | `tub:tap`; running `tub:tap_running` | objects |
+| `T` tub states | `tub:tub_empty_l/r`, `tub_plugged_l/r`, `tub_half_l/r`; animated `tub_filling_l/r`, `tub_full_l/r`, `tub_slosh_l/r`, `tub_whirl_wrong_l/r` (the drain flickers in Wrongness colors) | objects |
+| `\|` clothesline posts | `laundry:post`; top `over_post_top_line` one row up | objects; overhead |
+| `s` sheets on the N–S lines | `laundry:over_line` (y3); `over_sheet_n`, `over_sheet_m`, `over_sheet_s` (y4–6, flutter) | overhead |
+| Bare N–S lines (after the move) | `laundry:over_line` (y4–5), `over_line_s` (y6) | overhead |
+| Back line, (11,1)–(18,1) | `laundry:backline_<state>_<a–h>_<n\|s>`: columns a–h are x11–18, `n` row 1, `s` row 2. States `sag`, `prop`, `one`, `two` (sheets going up one per beat), `sheets` (flutter), `swung` (the groan). `@grey` for the morning | objects |
+| `D` doors (3 and 14, rows 10–11) | `facade:door_top`, `door_bot` (blue moon-eye studs in the step); the Neighbor's `@sage` | ground |
+| `^` outside stair (x7) | `court:stair_head` (y8), `stair_cut` (y9), `stair` (y10–11), `stair_foot` (y12) | ground |
+| `,` cobbles | `court:cobble_a`, `cobble_b`, `cobble_c` (mix freely), `cobble_drain` | ground |
+| `#` court side walls | `court:court_wall_w`, `court_wall_e` | ground |
+| `G` Pelletiers' gate | `court:gate_w` | ground |
+| `L` `l` lemon tree | trunk `court_tree:lemon_trunk`; canopy `court_tree:over_lemon_{nw,n,ne,w,c,e,sw,s,se}` | objects; overhead |
+| `c` chess table | `court_props:chess_plug`, `chess_pepper`, `chess_slid` | objects |
+| `O` `g` stool, Gerald's chair | `court_props:stool`, `gerald_chair` | objects |
+| `W` well (2×2) | `court_well:well_nw/ne/sw/se`; mist `fx_mist:mist` | objects |
+| `o` `-` pots and hurdle | `court_tree:hurdle_l`, `hurdle_m`, `hurdle_r`; after the trade `flowerpot`, `flowerpot_kicked` | objects |
+| `b` bench | `court_props:bench_l/r` | objects |
+| `p` geraniums | `props:pot_geranium` | objects |
+| `P` piano (2×2) | top `court_props:over_piano_nw/ne` (overhead: someone standing north of it is behind it); bottom `piano_sw/se` | overhead; objects |
+| `r` lower rooftops | row 24 `court:low_{flat,tiles}_edge(_l/_r)`; row 25 `low_{flat,tiles}(_l/_r)`, `low_flat_basin` | ground |
+| `v` the Squeeze | `court:squeeze_top_l/r` (y24), `squeeze_l/r` (y25); morning `_scraped` variants | ground |
+
+`game/dev/scene-court.js` composes the whole map; `?state=morning` shows the morning state.
 
 ## Cheryl's flat (`interior.js`)
 
