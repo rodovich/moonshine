@@ -329,6 +329,14 @@ export async function bath(g) {
   await g.think('The best bath of my life is in a stone bowl at the bottom of the city, with my own plug.');
   await g.think('Nobody will ever know.');
   await g.think('Most of the best things, nobody ever knows.');
+  // The bath has happened: behind the Basin view, Cheryl is out, shoes on, and the
+  // game is saved there, so a reload from here on keeps it (and never lands her in the Basin).
+  g.setFlag('fx.shoes', null);
+  g.pose('player', null);
+  g.player.def.shadow = undefined;
+  g.place('player', 7, 7, 'up');
+  g.setFlag('bathed');
+  g.save();
   // 6. Hold, then Later.
   await g.wait(3);
   g.stopMusic(2500);
@@ -337,11 +345,6 @@ export async function bath(g) {
   await g.hidePicture({ fade: 0 });
   await g.card('Later.', 2.5);
   // 7. Cheryl beside the Basin, shoes on, hair a little damp.
-  g.setFlag('fx.shoes', null);
-  g.pose('player', null);
-  g.player.def.shadow = undefined;
-  g.place('player', 7, 7, 'up');
-  g.setFlag('bathed');
   await g.fade('in', 1.5);
   g.playMusic('keel');
 }

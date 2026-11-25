@@ -98,6 +98,11 @@ export async function dawn(g) {
   g.setFlag('fx.wellGrate', 1);
   await g.wait(0.2);
   g.setFlag('fx.wellGrate', null);
+  // She's out, standing in the court in the morning: saved here, so a reload keeps the
+  // climb (Continue reopens the court in its plain epilogue morning, not mid-scene).
+  g.setFlag('fx.dawn', 'morning');
+  g.save();
+  g.setFlag('fx.dawn', 'scene');
   g.sfx('well_grate', { volume: 0.5 });
   await g.wait(0.6);
 
