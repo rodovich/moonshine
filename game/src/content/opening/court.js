@@ -357,7 +357,8 @@ const objects = [
     id: `window_${x}`, x, y, h: 2, lookKey: 'windows',
     look: 'Blue shutters. Everyone in Tessel has blue shutters, except Her Next Door, who has green ones and opinions.',
   })),
-  ...[[11, 10], [13, 10], [16, 10], [18, 10]].map(([x, y]) => ({
+  // (Not the window at x16: the bench below it leaves nowhere to stand. The others share its line.)
+  ...[[11, 10], [13, 10], [18, 10]].map(([x, y]) => ({
     id: `window_${x}`, x, y, h: 2, lookKey: 'nb_windows',
     look: "Her green shutters. She repaints them every spring, in case anyone's forgotten they're green.",
   })),
