@@ -324,7 +324,13 @@ export function withCrown5(def) {
       const list = base.patches ? base.patches(g) : [];
       if (!started(g)) return list;
       // The tower doorway (4-5, 6), walkable: the way up to the belfry.
-      if (crownLinks.belfry) for (const x of [4, 5]) list.push(['ground', x, 6, tileAt(base, x, 6)]);
+      // The tower door standing open (4-5, 5-6), and its doorway walkable: the way up to the belfry.
+      if (crownLinks.belfry) {
+        for (let y = 0; y < 2; y++) for (let x = 0; x < 2; x++) {
+          const tile = `tower_open:tower_open_x${x}y${y}`;
+          list.push(['ground', 4 + x, 5 + y, y === 0 ? { tile, solid: true } : tile]);
+        }
+      }
       return list.map(([layer, x, y, v, ...r]) => {
         const name = typeof v === 'object' && v ? v.tile : v;
         if (!name || !name.endsWith('_eye_glow')) return [layer, x, y, v, ...r];

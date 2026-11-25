@@ -125,7 +125,7 @@ const objects = [
     when: (g) => !hasClapper(g),
     interact: async (g) => {
       if (bump(g, 'doorstop') === 0) {
-        return g.describe('A great bronze lump, propping the door. Rounded at one end, notched at the other, dark with age.', 'That notch is made to catch something.');
+        return g.describe('A great bronze lump, propping the door. Rounded at one end, notched at the other, green with age.', 'That notch is made to catch something.');
       }
       return g.describe('The bell\'s old clapper. Rounded, notched, and heavy as sin.');
     },
