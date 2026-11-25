@@ -46,6 +46,8 @@ export const SCENE = {
       const f = animFrame(SHEETS.vista_twinkle, 'twinkle', now + i * 437);
       ctx.drawImage(img('vista_twinkle', f), x - 3, y - 3);
     });
+    // the sighting pins, lined up on the Gate: our low wall and her parapet in the foreground
+    if (SHEETS.vista_pins) ctx.drawImage(img('vista_pins', 'pins'), 0, 0);
     ctx.drawImage(img('vista_cheryl', 'cheryl_tub'), 0, 128);
   },
 };

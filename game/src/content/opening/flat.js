@@ -103,8 +103,8 @@ const entities = [
     interact: (g) => g.describe(morning(g) ? 'Half past something.' : "Nearly moonrise. Roughly. That clock has never once been right, but it's always been confident."),
   },
   { id: 'window', x: 5, y: 1, w: 2, look: "My window looks at the Pelletiers' wall. I didn't buy this house for the window. I bought it for the roof." },
-  // The bookshelf sits above the bed; the hotspot reaches one tile west so it can be looked at from (8,2).
-  { id: 'bookshelf', x: 8, y: 1, w: 3, look: 'Twenty-nine years of lesson plans. In case anyone ever needs the water cycle explained in a hurry.' },
+  // The bookshelf sits above the bed; Z reaches it diagonally from (8, 2).
+  { id: 'bookshelf', x: 9, y: 1, w: 2, look: 'Twenty-nine years of lesson plans. In case anyone ever needs the water cycle explained in a hurry.' },
   {
     id: 'bed', x: 9, y: 2, w: 2, h: 2,
     interact: (g) => g.describe(morning(g)

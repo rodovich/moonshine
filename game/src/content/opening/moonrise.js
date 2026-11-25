@@ -3,6 +3,7 @@
 // Moonrise sequence". Input is locked for the whole thing (it's one script).
 
 import { fx } from '../../art/fx.js';
+import { vista_pins } from '../../art/pins.js';
 import { vista, vista_gate_cold, vista_rim, vista_glow, vista_moon, vista_path, vista_twinkle, vista_cheryl, VISTA_BASINS } from '../../art/vista.js';
 import { cheryl, cheryl_swim } from '../../art/cheryl.js';
 
@@ -11,7 +12,7 @@ import { cheryl, cheryl_swim } from '../../art/cheryl.js';
 function makeVista(g) {
   const art = {
     bowl: g.sheet(vista), cold: g.sheet(vista_gate_cold), rim: g.sheet(vista_rim), glow: g.sheet(vista_glow),
-    moon: g.sheet(vista_moon), path: g.sheet(vista_path), twinkle: g.sheet(vista_twinkle), cheryl: g.sheet(vista_cheryl),
+    moon: g.sheet(vista_moon), path: g.sheet(vista_path), twinkle: g.sheet(vista_twinkle), cheryl: g.sheet(vista_cheryl), pins: g.sheet(vista_pins),
   };
   const scene = { now: 0, glowAt: null, moonAt: null };
   const phases = VISTA_BASINS.map((_, i) => (i * 677) % 1180);
@@ -46,6 +47,8 @@ function makeVista(g) {
       else if (t >= 6) ctx.drawImage(art.path.frame('path_faint'), 0, 0);
     }
     VISTA_BASINS.forEach(([x, y], i) => ctx.drawImage(art.twinkle.frameAt('twinkle', ms + phases[i]), x - 3, y - 3));
+    // The pins in the foreground, lined up on the Gate (over the twinkles on her roof).
+    ctx.drawImage(art.pins.frame('pins'), 0, 0);
     ctx.drawImage(art.cheryl.frame('cheryl_tub'), 0, 128);
   };
   return scene;
