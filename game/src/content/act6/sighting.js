@@ -173,7 +173,8 @@ export async function trimWheel(g) {
   }
   if (g.flag('moon.true')) return g.describe("It won't go any further. It knows.");
   const from = g.flag('trim') || 0;
-  const way = await g.choose('Turn the wheel which way?', ['Toward the Gate', 'Back', 'Leave it']);
+  // Once the moon is dead in the Gate, 'on' is the way to two fingers past.
+  const way = await g.choose('Turn the wheel which way?', [from === 2 ? 'On, two fingers' : 'Toward the Gate', 'Back', 'Leave it']);
   if (way === 2) return;
   if (way === 1 && from === 0) return g.describe("It won't go back any further. The moon's as far from the Gate as it gets.");
   const step = way === 0 ? from + 1 : from - 1;

@@ -15,7 +15,7 @@ export const act6 = {
     lampRoom: 'lamp_room',      // Act 2 part 2
   },
   pos: {
-    belfry: [5, 5],
+    belfry: [5, 5], // the camera; Ambrose rings from (4, 6), where Acts 4 and 5 put him
     lampRoom: [4, 4],
   },
 };
