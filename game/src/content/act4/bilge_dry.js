@@ -80,7 +80,7 @@ function compose(g) {
 // ---------------------------------------------------------------------------
 // People and things on the mud and the quays.
 
-const boat = (id, x, frame) => ({ id, x, y: 10, w: 2, solid: false, shadow: false, sprite: { sheet: bilge_boats, frame }, look: 'Boats, lying on their sides like dogs asleep in the sun.', lookKey: 'boats' });
+const boat = (id, x, frame) => ({ unreachable: 'down on the mud', id, x, y: 10, w: 2, solid: false, shadow: false, sprite: { sheet: bilge_boats, frame }, look: 'Boats, lying on their sides like dogs asleep in the sun.', lookKey: 'boats' });
 
 const people = [
   {
@@ -111,7 +111,7 @@ const people = [
   },
   boat('boat_a', 3, 'boat_side_a'), boat('boat_b', 8, 'boat_side_b'), boat('boat_c', 19, 'boat_side_c'),
   {
-    id: 'piano', x: 15, y: 10, w: 2, solid: false, shadow: false, sprite: { sheet: bilge_piano, frame: 'piano_mud' },
+    unreachable: 'down on the mud', id: 'piano', x: 15, y: 10, w: 2, solid: false, shadow: false, sprite: { sheet: bilge_piano, frame: 'piano_mud' },
     look: "The piano, on the mud, lid open. It got to the sea after all. The sea had left.",
   },
   {
@@ -122,9 +122,9 @@ const people = [
       await g.say(self, "He says now it's dry, we don't know how to get it back UP.");
     },
   },
-  { id: 'other_mover', name: 'Other Mover', x: 17, y: 10, facing: 'down', sprite: { sheet: mover, palette: 'other', frame: 'lookup_down' }, turnToTalk: false, talk: 'Hnn.' },
+  { unreachable: 'down on the mud', id: 'other_mover', name: 'Other Mover', x: 17, y: 10, facing: 'down', sprite: { sheet: mover, palette: 'other', frame: 'lookup_down' }, turnToTalk: false, talk: 'Hnn.' },
   {
-    id: 'kid', name: 'Sweaty Kid', x: 2, y: 10, facing: 'right',
+    unreachable: 'down on the mud (he can be talked to as he passes the bridge pier)', id: 'kid', name: 'Sweaty Kid', x: 2, y: 10, facing: 'right',
     sprite: { sheet: sweaty_kid, walk: [1, 2, 3, 4] }, stepTicks: 11,
     // He runs the west reach of the mud, from the far end to the bridge pier.
     behavior: { type: 'patrol', route: [[1, 10], [11, 10]], ghost: true, stopNear: 3, nearPose: 'jog' },
@@ -135,7 +135,7 @@ const people = [
     },
   },
   ...[[6, 10], [21, 10], [28, 10]].map(([x, y], i) => ({
-    id: `crab_${i}`, x, y, solid: false, shadow: false,
+    unreachable: 'down on the mud', id: `crab_${i}`, x, y, solid: false, shadow: false,
     sprite: { sheet: critters, frame: 'crab_walk' },
     behavior: { type: 'patrol', route: [[x, 10], [x + 2, 10]], ghost: true, pause: 1.5 }, stepTicks: 40,
     look: 'A crab. It moves sideways, which is more than the rest of Tessel can manage today.', lookKey: 'crab',

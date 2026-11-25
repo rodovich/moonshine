@@ -89,7 +89,8 @@ export function withAct4Part2(maps) {
           },
         },
         {
-          id: 'piano_canal', x: 6, y: 8, w: 2, h: 2, solid: false, shadow: false, when: act4,
+          // Its look reaches up the bank to the quay, so it can be looked at from (6-7, 6).
+          id: 'piano_canal', x: 6, y: 7, w: 2, h: 3, solid: false, shadow: false, when: act4,
           sprite: (g) => ({ sheet: bilge_piano, frame: listStage(g) === 2 ? 'piano_lid' : 'piano_halfsunk' }),
           interact: (g) => g.describe(listStage(g) === 2 ? "Just the lid now. It's going down with dignity." : 'The piano, half in the canal, lid up, like a sunbather.'),
         },
@@ -127,7 +128,7 @@ export function withAct4Part2(maps) {
       // Into the shack for the coil, and back.
       g.setSprite(self, { sheet: mottArt });
       self.offset = [0, 0];
-      await g.moveNpc(self, [2, 13], { speed: 18 });
+      await g.moveNpc(self, 'r', { ghost: true, speed: 18 }); // off his crates, to the door
       g.faceNpc(self, 'up');
       g.sfx('door_open');
       await g.moveNpc(self, 'u', { ghost: true, speed: 18 });
@@ -144,7 +145,7 @@ export function withAct4Part2(maps) {
       await getItem(g, 'copper_throat');
       await g.say(self, 'Grandad said it came off "the greedy one." Never knew what that meant. Still don\'t.', "And take the jug. Square, so it don't roll. I've no more use for it.");
       await getItem(g, 'square_jug');
-      await g.moveNpc(self, 'r', { ghost: true, speed: 18 }); // back onto his crates
+      await g.moveNpc(self, 'l', { ghost: true, speed: 18 }); // back onto his crates
       g.setSprite(self, mottSits);
       self.offset = [0, -8];
     }
@@ -154,12 +155,12 @@ export function withAct4Part2(maps) {
       tileset: act4Tiles,
       hide: ['sea_cave'],
       tiles: (g, T) => {
-        T.set('detail', 3, 13, 'props:crate', true); // Mott's crates by his door
+        T.set('detail', 1, 13, 'props:crate', true); // Mott's crates, just left of his door, so (2, 13) in front of it stays free
         T.block(0, 21, false);
       },
       exits: [{ x: 0, y: 21, to: 'sea_cave', at: [4, 6], facing: 'up', sfx: 'step_stone', when: act4 }],
       entities: [{
-        id: 'mott_a4', name: 'Mott', x: 3, y: 13, facing: 'down', when: act4,
+        id: 'mott_a4', name: 'Mott', x: 1, y: 13, facing: 'down', when: act4,
         sprite: mottSits, offset: [0, -8], turnToTalk: false,
         interact: async (g, self) => {
           if (g.flag('got.throat')) return g.say(self, cycle(g, 'a4.mottAfter', ["Whatever you're doing, Cheryl, do it before she tips any further.", "I'll stay off the moonshine. I'll want to remember this."]));
@@ -196,7 +197,7 @@ export function withAct4Part2(maps) {
     out.harbor = overlayMap(harbor, {
       when: act4,
       tileset: act4Tiles,
-      hide: ['mott', 'harbor_office'],
+      hide: ['mott', 'harbor_office', 'ferry'],
       entities: [
         { id: 'bollard_a4', x: 13, y: 8, solid: false, when: act4, look: "Mott's bollard. No Mott, no jug. He'll be at his shack, up the Goat Path." },
         { id: 'harbor_office_a4', x: 12, y: 2, h: 2, solid: false, when: act4, look: 'A new note: GONE TO LOOK FOR THE LANDING. STILL.' },

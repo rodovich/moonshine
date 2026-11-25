@@ -196,7 +196,7 @@ export function withAct4(maps) {
 
   // The Fountain's rims, east and west, so the basin, the hatch, and the fish keep their own clicks.
   const fountainRim = (x) => ({
-    id: `fountain_a4_${x}`, lookKey: 'fountain_a4', x, y: 7, w: 1, h: 4, solid: false, when: act4,
+    id: `fountain_a4_${x}`, lookKey: 'fountain_a4', x, y: 7, w: 1, h: 4, solid: false, when: act4, unreachable: behindRope,
     interact: async (g) => {
       if (g.flag('pumps.burst')) {
         return g.describe('Flowing again. Fuller than before. I shut its feed down there, and the pumps found it anyway.', "There's no getting to that hatch now.");
@@ -209,8 +209,9 @@ export function withAct4(maps) {
     use: { crowbar: (g) => g.describe('Not with the whole Square watching.'), '*': cherylDeclines },
   });
 
+  const behindRope = (g) => fountainDry(g) && mayorHere(g) && 'behind the rope, while the Mayor guards it';
   const hatch = {
-    id: 'ring_hatch', x: 11, y: 8, w: 2, solid: false, when: (g) => fountainDry(g) && !g.flag('hatch.open'),
+    id: 'ring_hatch', x: 11, y: 8, w: 2, solid: false, when: (g) => fountainDry(g) && !g.flag('hatch.open'), unreachable: behindRope,
     interact: async (g) => {
       await g.describe('A bronze ring set in a square hatch, under the coins.', "On the Ship Plan, there's a shaft going down right here.");
       g.pose('player', 'reach_down');
@@ -224,7 +225,7 @@ export function withAct4(maps) {
   };
 
   const basin = {
-    id: 'basin', x: 11, y: 9, w: 2, solid: false, when: fountainDry,
+    id: 'basin', x: 11, y: 9, w: 2, solid: false, when: fountainDry, unreachable: behindRope,
     look: 'Five hundred years of wishes in a heap. Mostly buttons. Somebody wished with a whole spoon.',
   };
 
@@ -251,7 +252,7 @@ export function withAct4(maps) {
     when: (g) => fountainDry(g) && mayorHere(g) && g.player.facing === facing,
     run: async (g) => {
       await g.say('Mayor', 'Miss! Behind the rope, please. Pending an inquiry.');
-      await g.movePlayer([back]);
+      await g.movePlayer(back);
     },
   });
 
@@ -292,7 +293,7 @@ export function withAct4(maps) {
     ],
     // The hatch and basin come before the whole-Fountain hotspot, so they win on their tiles.
     entities: [hatch, basin, cordonSign, mayor4, fountainRim(10), fountainRim(13), {
-      id: 'fish_a4', x: 11, y: 7, w: 2, solid: false, kind: 'object', when: act4, offset: [0, 19], // on the rim row, drawn where Act 2 draws it
+      id: 'fish_a4', x: 11, y: 7, w: 2, solid: false, kind: 'object', when: act4, unreachable: 'up on the Fountain, above the hatch (the rims answer for the Fountain)', offset: [0, 19], // on the rim row, drawn where Act 2 draws it
       sprite: (g) => ({ sheet: fishArt, frame: fountainDry(g) ? 'fish_dry' : 'fish' }),
       interact: (g) => g.describe(fountainDry(g) ? "The bronze fish, with nothing coming out of its mouth. It looks like it's waiting to be asked." : 'The fish, spouting again. Harder than before. It looks pleased with itself.'),
     }],
