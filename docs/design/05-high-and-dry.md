@@ -318,6 +318,8 @@ Staring at the fallen display.
 - SHOPKEEPER: The telescope's lying in it like a fallen soldier. Best thing I've ever displayed.
 - After the Keeper has asked for it: SHOPKEEPER: Give it BACK? Then there's a GAP, Miss. I need something local. Something that says Tessel.
 
+**Cheryl's thought** (design rule 11; the first time he says "something that says Tessel" while she has the guidebook): "Something local that says Tessel. The guidebook says nothing else, wrongly, on every page."
+
 **Repeat:** before the Keeper has asked: SHOPKEEPER: If it goes, there's a GAP, Miss. I'd need something local. Something that says Tessel. After: SHOPKEEPER: A gap. People will talk. They'll say, "Did you see his window?"
 
 **Give guidebook** (any time in Act 5; the builder removed the wait for the Keeper, which only sent a player who reached the Shop first to the lighthouse and back) → guidebook gone; *Got Telescope.*
