@@ -476,7 +476,7 @@ export function makeApi(world) {
     // g.sfx(id) plays at full volume. g.sfx(id, { at: [x, y] or an entity id,
     // range: 12 }) fades with Cheryl's distance (in tiles) from the source,
     // silent beyond `range`: the chess tap is clear beside the table and
-    // gone on the roof. `volume` scales it further.
+    // gone on the roof. `volume` scales it further; `pan` (-1..1) places it left or right.
     sfx(id, opts = {}) {
       let volume = opts.volume ?? 1;
       if (opts.at != null) {
