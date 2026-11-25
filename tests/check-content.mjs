@@ -64,8 +64,10 @@ function resolveTile(ts, value) {
 }
 
 // Static solidity grid for a map (tiles + collision override), as the engine computes it.
-function mapInfo(id, def) {
+function mapInfo(id, def, { patches = [], quiet = false } = {}) {
   const where = `map ${id}`;
+  const report = quiet ? { err: () => {}, warn: () => {} } : { err, warn };
+  const layerSolid = { ground: [], detail: [] };
   const ground = def.ground || [];
   const h = ground.length;
   const w = Math.max(0, ...ground.map((r) => r.length));
@@ -75,26 +77,35 @@ function mapInfo(id, def) {
   for (const layer of ['ground', 'detail', 'overhead']) {
     const rows = layer === 'detail' ? def.detail || def.objects : def[layer];
     if (!rows) continue;
-    if (rows.length !== h) err(where, `${layer} has ${rows.length} rows; ground has ${h}`);
+    if (rows.length !== h) report.err(where, `${layer} has ${rows.length} rows; ground has ${h}`);
     rows.forEach((row, y) => {
-      if (row.length !== w) err(where, `${layer} row ${y} is ${row.length} wide; expected ${w}`);
+      if (row.length !== w) report.err(where, `${layer} row ${y} is ${row.length} wide; expected ${w}`);
       [...row].forEach((ch, x) => {
         if (ch === ' ') return;
         const value = def.legend?.[ch];
-        if (value === undefined) return err(where, `${layer} (${x},${y}): no legend entry for "${ch}"`);
+        if (value === undefined) return report.err(where, `${layer} (${x},${y}): no legend entry for "${ch}"`);
         let t = cache.get(ch);
         if (!t) {
           t = resolveTile(ts, value);
           cache.set(ch, t);
-          if (!t.ok) err(where, `legend "${ch}": ${t.why}`);
+          if (!t.ok) report.err(where, `legend "${ch}": ${t.why}`);
         }
         if (!t.ok) return;
         const over = t.frames.some((f) => f.startsWith('over_'));
-        if (over !== (layer === 'overhead')) warn(where, `"${t.name}" at (${x},${y}) is on ${layer}; over_* frames belong on overhead only`);
-        if (layer !== 'overhead' && t.solid && y < h && x < w) solid[y][x] = true;
+        if (over !== (layer === 'overhead')) report.warn(where, `"${t.name}" at (${x},${y}) is on ${layer}; over_* frames belong on overhead only`);
+        if (layer !== 'overhead' && y < h && x < w) (layerSolid[layer][y] ||= [])[x] = !!t.solid;
       });
     });
   }
+  // Tile patches for this story state.
+  for (const [layer0, x0, y0, value, pw = 1, ph = 1] of patches) {
+    const layer = layer0 === 'objects' ? 'detail' : layer0;
+    if (!layerSolid[layer]) continue;
+    const t = value == null ? { ok: true, solid: false } : resolveTile(ts, value);
+    if (!t.ok) { report.err(where, `patch: ${t.why}`); continue; }
+    for (let y = y0; y < y0 + ph; y++) for (let x = x0; x < x0 + pw; x++) (layerSolid[layer][y] ||= [])[x] = !!t.solid;
+  }
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) solid[y][x] = !!(layerSolid.ground[y]?.[x] || layerSolid.detail[y]?.[x]);
   (def.collision || []).forEach((row, y) => [...row].forEach((c, x) => {
     if (y < h && x < w) {
       if (c === '#') solid[y][x] = true;
@@ -103,6 +114,20 @@ function mapInfo(id, def) {
   }));
   const inBounds = (x, y) => Number.isInteger(x) && Number.isInteger(y) && x >= 0 && y >= 0 && x < w && y < h;
   return { w, h, solid, inBounds, walkable: (x, y) => inBounds(x, y) && !solid[y][x] };
+}
+
+// A map's walkability with some flags set (variants and patches follow them).
+function fakeApi(flags) {
+  const f = Object.fromEntries(flags.map((k) => [k, true]));
+  return { flag: (n) => f[n], flags: f, hasItem: () => false, items: [], looks: () => 0, usingTouch: false };
+}
+function infoWithFlags(id, flags) {
+  const def = maps[id];
+  const g = fakeApi(flags);
+  const call = (fn, fallback) => { try { return fn(g); } catch { return fallback; } };
+  const v = (def.variants || []).find((vv) => !vv.when || call(vv.when, false));
+  const merged = v ? { ...def, ...v, legend: { ...def.legend, ...(v.legend || {}) } } : def;
+  return mapInfo(id, merged, { patches: def.patches ? call(def.patches, []) || [] : [], quiet: true });
 }
 
 // ---- Scripts: collect literal ids from function sources ----
@@ -171,7 +196,9 @@ for (const [key, def] of Object.entries(maps)) {
     if (ex.run) return scan(ew, ex.run);
     if (!maps[ex.to]) return err(ew, `goes to unknown map "${ex.to}"`);
     if (!Array.isArray(ex.at)) return err(ew, 'has no `at`');
-    const dest = infos[ex.to];
+    // `checkFlags: ['act1.moonrise']` checks the arrival in that story state
+    // (when the exit can only be used then).
+    const dest = ex.checkFlags ? infoWithFlags(ex.to, ex.checkFlags) : infos[ex.to];
     const ww = ex.w || 1;
     const hh = ex.h || 1;
     for (let dy = 0; dy < hh; dy++) for (let dx = 0; dx < ww; dx++) {

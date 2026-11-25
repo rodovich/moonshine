@@ -127,8 +127,12 @@ export class Inventory {
       for (let i = 0; i < n; i++) {
         const r = this.slotRect(i);
         if (r && inRect(t, r)) {
-          if (i === s.index) return this.close({ use: s.owned[i] });
+          // The first tap on an item only selects it (even if it was already
+          // selected when the bag opened); a second tap on it uses it.
+          if (i === s.index && s.tapped === i) return this.close({ use: s.owned[i] });
           s.index = i;
+          s.tapped = i;
+          s.button = -1;
           sfx('cursor');
           return;
         }
@@ -174,7 +178,8 @@ export class Inventory {
       const img = this.icon(id);
       if (img) ctx.drawImage(img, r.x + 3, r.y + 3);
       else drawTextCentered(ctx, '?', r.x + r.w / 2, r.y + 7);
-      if (i === s.index && s.button < 0) this.drawSelection(ctx, r);
+      // With keyboard focus on the buttons, the item keeps a dim frame.
+      if (i === s.index) this.drawSelection(ctx, r, s.button >= 0);
     });
     // Buttons, inside the panel's bottom edge
     if (this.rowCount() > ROWS) {
@@ -201,9 +206,9 @@ export class Inventory {
     lines.forEach((line, i) => drawText(ctx, line, DESC.x + 8, DESC.y + 7 + (i + 1) * LINE_HEIGHT, { color: STYLES.cheryl.text }));
   }
 
-  drawSelection(ctx, r) {
+  drawSelection(ctx, r, dim = false) {
     const blink = Math.floor(this.tick / 20) % 2 === 0;
-    ctx.fillStyle = blink ? '#f8d870' : '#c8a040';
+    ctx.fillStyle = dim ? '#887048' : blink ? '#f8d870' : '#c8a040';
     ctx.fillRect(r.x, r.y, r.w, 1);
     ctx.fillRect(r.x, r.y + r.h - 1, r.w, 1);
     ctx.fillRect(r.x, r.y, 1, r.h);

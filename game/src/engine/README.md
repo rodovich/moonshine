@@ -87,7 +87,7 @@ All layers are the same size as `ground`. The legend is shared by all layers, so
 
 **Audio per map:** `ambience: ['crowd', 'wind']` starts those looping sounds when the map loads and fades out the previous map's (ids from the audio module's loops). `musicFilter: 'muffled'` and `step: 'step_stone'` (footstep sound; a tile's own `step` property wins) pass to the audio module if it supports them, and are quietly ignored until then. Scripts can also `g.startLoop(id)` / `g.stopLoop(id, fadeMs)`.
 
-**Exits** fire when the player finishes a step onto them by walking. An exit whose `when` fails but has `blocked: 'line'` (a line, a list of lines, or an async function) explains itself in Cheryl's voice and steps her back. `confirm: 'Go down?'` asks first (options `choices`, default Yes / Not yet; anything but the first steps her back). Exits don't fire during a script: `movePlayer` onto a door does nothing, so call `changeMap` yourself. Click-to-walk paths never cross an exit on the way to somewhere else, and an exit is never chosen as "the nearest reachable tile" for an unreachable click.
+**Exits** fire when the player finishes a step onto them by walking. An exit whose `when` fails but has `blocked: 'line'` (a line, a list of lines, or an async function) explains itself in Cheryl's voice and steps her back. `confirm: 'Go down?'` asks first (options `choices`, default Yes / Not yet; anything but the first steps her back). Exits don't fire during a script: `movePlayer` onto a door does nothing, so call `changeMap` yourself. Click-to-walk paths never cross an open exit (or a closed one with `blocked`) on the way to somewhere else; a closed exit without `blocked` is ordinary floor until it opens, and an exit is never chosen as "the nearest reachable tile" for an unreachable click.
 
 ```js
 exits: [
@@ -276,6 +276,8 @@ Time, camera, and screen effects (all resolve when done; durations in seconds):
 | `setLighting(name, seconds)`, `lighting` | Crossfade the scene lighting to `'day'`, `'dusk'`, `'night'`, a preset from `content.lighting`, or `null`; 0 seconds is a hard cut. Lasts until the next map load, which applies that map's own `lighting`. |
 | `showPicture(spec, { fade })` / `hidePicture({ fade })` | Replace the map with a full-screen 256×224 picture (a vista): `{ sheet, frame, palette }` or a function `(ctx, ms)` that draws it, `ms` since it appeared. Text boxes, shake, and effects still work over it. `fade` is in seconds; 0 is a hard cut. |
 | `waitForInput()` | Resolves on the next key or tap. For a picture the player dismisses: `await g.showPicture(plan, { fade: 0 }); await g.waitForInput(); await g.hidePicture({ fade: 0 });` (the Ship Plan, as an item's `examine`). |
+| `credits(lines, { picture, speed, skipAfter, hold, fade })` | A credits roll: centered lines rising over a full-screen picture (`{ sheet, frame }`, a draw function, or black) at `speed` px per second (default 14). A line is a string (`''` for a gap) or `{ text, heading: true }` in gold. The last line stops mid-screen and holds `hold` seconds; after `skipAfter` seconds any key or tap jumps to it. Then usually `await g.toTitle()`. |
+| `markComplete()` | Marks the game finished (flag `game.complete`, saved at the end of the script or by `toTitle`). Put Cheryl where the epilogue should reopen first: Continue returns her there with the flag set. |
 | `card(text, seconds)` | Centered text on black ("Cheryl did not sleep well."), drawn above fades. |
 | `bark(speaker, text, { seconds })` | One line of speech at the top of the screen that doesn't stop the player or the script (a chant, a voice from a window). |
 | `say(speaker, line, { position: 'top' })` | A normal (blocking) line with its box at the top of the screen: an off-screen voice, the Clockmaker in his belfry. `'bottom'` and `'auto'` (the default) also work. |
@@ -297,9 +299,13 @@ Maps, audio, misc:
 
 | Call | What it does |
 |---|---|
-| `changeMap(id, x, y, facing, { fade, seconds })` | Fades out, loads, fades in, then runs the map's `onEnter`, all before it resolves: `await g.changeMap('b'); await g.say(...)` shows the say after b's intro. |
+| `changeMap(id, x, y, facing, { fade, seconds })` | Fades out, loads, fades in, then runs the map's `onEnter`, all before it resolves: `await g.changeMap('b'); await g.say(...)` shows the say after b's intro. `fade: false` is a hard cut (montages). |
+| `changeMap(id, x, y, facing, { cutscene: true })` | Visits a map without Cheryl: her real map, spot, and facing are kept; she's hidden; the map's `onEnter` doesn't run (`onEnter: true` runs it); nothing is saved. `x`/`y` may be `null` (the map's spawn). Several visits in a row are fine. |
+| `restorePlayer({ fade })` | Ends a cutscene visit: back to Cheryl's own map and spot, visible. If a script ends without it, the engine restores her (with a console warning). |
+| `cameraFollow(id, speed)` | Keeps the camera on another character as they move, also across cutscene visits (the Kid's relay run); `speed` glides (px per frame), 0 snaps. `followPlayer()` returns to Cheryl. |
 | `map` | Current map id. |
 | `playMusic(id)`, `stopMusic(fadeMs)`, `sfx(id)`, `playCue(id, { resume })`, `windDownMusic(ms)`, `muffleMusic(on)`, `bendMusic(cents, ms)`, `setLoopVolume(id, v, fadeMs)`, `startLoop(id)`, `stopLoop(id, fadeMs)`, `setWrongness(0..1)` | Audio (see below and `src/audio/README.md`). |
+| `sfx(id, { at, range, volume })` | A sound placed in the world: `at` is a tile `[x, y]` or an entity id, and the volume falls off with Cheryl's distance, silent beyond `range` tiles (default 12). Use it for map-wide ambient sounds (a chess tap, the Kid's hop). |
 | `save()` | Save now (saving also happens automatically). |
 | `toTitle()` | Save and return to the title screen (end of a slice). |
 | `random(min, max)` | Integer from the game's RNG (seedable with `?seed=`). |
@@ -343,7 +349,7 @@ node tests/shot.js "?map=test_street" out.png 800 ArrowRight z   # one screensho
 
 ## Authoring aids
 
-- **`npm run check`** (`node tests/check-content.mjs`) loads the content in Node and reports errors: legend characters without entries, layers of different sizes, tile references to missing sheets, frames, or palettes, exits to unknown maps or arriving on solid tiles, `changeMap` calls to unknown maps or solid tiles, unknown item ids in scripts and `use` handlers, entity ids that aren't on any map, characters placed on solid tiles, unknown lighting. It warns about flags read but never set (typos), flags set but never read, music and sounds that don't exist yet, and `over_*` frames off the overhead layer. Script checks read each function's source, so they see literal ids only.
+- **`npm run check`** (`node tests/check-content.mjs`) loads the content in Node and reports errors: legend characters without entries, layers of different sizes, tile references to missing sheets, frames, or palettes, exits to unknown maps or arriving on solid tiles (an exit's `checkFlags: ['act1.moonrise']` checks the arrival with those flags set, through the destination's variants and patches, for exits only usable later in the story), `changeMap` calls to unknown maps or solid tiles, unknown item ids in scripts and `use` handlers, entity ids that aren't on any map, characters placed on solid tiles, unknown lighting. It warns about flags read but never set (typos), flags set but never read, music and sounds that don't exist yet, and `over_*` frames off the overhead layer. Script checks read each function's source, so they see literal ids only.
 - **The map viewer** at `/dev/map.html` draws any map whole, with solid tiles, exits (faint when closed), triggers, entity footprints, and spawn points overlaid. Enter flags and items to see a story state (variants, patches, `when`s, sprite functions, and characters' `at` all follow). Hover a tile for its coordinates, tiles, and anything defined there; click to open the game there with those flags and items.
 
 ## Engine decisions

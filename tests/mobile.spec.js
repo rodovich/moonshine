@@ -50,3 +50,16 @@ test('phone landscape fits and plays', async ({ page }) => {
   await shot(page, 'm4-landscape');
   expect(errors).toEqual([]);
 });
+
+test('phone portrait: the big bag button below the frame opens the bag', async ({ page }) => {
+  await boot(page, '?map=test_street&seed=1&flags=street_intro,saw_canal');
+  await waitIdle(page);
+  const bar = await page.evaluate(() => window.moonshine.display.touchBar);
+  expect(bar).not.toBe(null);
+  const css = await page.evaluate((r) => window.moonshine.display.toClient(r.x + r.w / 2, r.y + r.h / 2), bar);
+  const size = await page.evaluate((r) => r.w * window.moonshine.display.scale / window.moonshine.display.dpr, bar);
+  expect(size).toBeGreaterThanOrEqual(44);
+  await shot(page, 'm5-portrait-touch-bar');
+  await page.touchscreen.tap(css.x, css.y);
+  await waitFor(page, () => window.moonshine.snapshot().inventoryOpen);
+});

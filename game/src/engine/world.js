@@ -274,9 +274,10 @@ export class World {
   pathFor(mover, goals, { closest = false, ignoreEntities = false } = {}) {
     const goalKeys = new Set(goals.map(([x, y]) => `${x},${y}`));
     const avoidExits = mover.isPlayer;
+    const exits = avoidExits ? this.activeExits() : null;
     const blocked = (x, y) => {
       if (ignoreEntities ? this.map.solid(x, y) : !this.canEnter(mover, x, y)) return true;
-      return avoidExits && !goalKeys.has(`${x},${y}`) && this.isExit(x, y);
+      return avoidExits && !goalKeys.has(`${x},${y}`) && this.isExit(x, y, exits);
     };
     const start = [mover.x, mover.y];
     let path = findPath(start, goals, blocked, this.map.w, this.map.h);
@@ -339,6 +340,11 @@ export class World {
       } catch (err) {
         console.error('[world] refresh after script', err);
       }
+      // A script that ended mid-visit without restorePlayer(): bring Cheryl back.
+      if (this.cutscene && !this.queue.length) {
+        console.warn('[world] a script ended during a cutscene visit; restoring the player');
+        this.run(() => this.restorePlayer({ fade: false }));
+      }
       if (!this.queue.length) this.save();
       this.next();
     }
@@ -356,6 +362,7 @@ export class World {
 
   save() {
     if (this.game.debug.nosave) return;
+    if (this.cutscene) return; // Cheryl is away from her real spot; restorePlayer() first
     const p = this.player;
     this.state.x = p.x;
     this.state.y = p.y;
@@ -366,12 +373,34 @@ export class World {
   // Always called from inside a script (changeMap), so the new map's onEnter
   // runs inline: `await g.changeMap(...)` returns after it. No save here:
   // saves happen only between scripts, so a reload never lands mid-cutscene.
-  async transition(mapId, x, y, facing, { fade = true, seconds = 0.25 } = {}) {
+  // { cutscene: true } visits a map without Cheryl: her real map and spot are
+  // kept, she's hidden, the map's onEnter doesn't run (unless onEnter: true),
+  // and restorePlayer() brings her back. Point the camera with
+  // g.cameraFollow(id) or g.panCamera.
+  async transition(mapId, x, y, facing, { fade = true, seconds = 0.25, cutscene = false, onEnter: runEnter } = {}) {
     if (fade) await this.effects.fade('out', seconds);
-    this.loadMap(mapId, x, y, facing);
+    const p = this.player;
+    if (cutscene && !this.cutscene) this.cutscene = { map: this.state.map, x: p.x, y: p.y, facing: p.facing };
+    const spawn = this.content.maps[mapId]?.spawn || [0, 0];
+    this.loadMap(mapId, x ?? spawn[0], y ?? spawn[1], facing);
+    if (this.cutscene) {
+      p.visible = false;
+      p.solid = false;
+    }
     const onEnter = this.mapDef.onEnter;
     if (fade) await this.effects.fade('in', seconds);
-    if (onEnter) await onEnter(this.api);
+    if (onEnter && (runEnter ?? !this.cutscene)) await onEnter(this.api);
+  }
+
+  // Back from a cutscene visit: Cheryl's map, spot, and facing, visible again.
+  async restorePlayer({ fade = true, seconds = 0.25 } = {}) {
+    const c = this.cutscene;
+    if (!c) return;
+    this.cutscene = null;
+    this.camFollow = null;
+    await this.transition(c.map, c.x, c.y, c.facing, { fade, seconds, onEnter: false });
+    this.player.visible = true;
+    this.player.solid = true;
   }
 
   // Interact with or use an item on an entity (player already in place).
@@ -580,13 +609,22 @@ export class World {
     }
   }
 
-  isExit(x, y) {
-    return (this.mapDef.exits || []).some((ex) => inArea(ex, x, y));
+  // Exits that count for pathing: open ones (no `when`, or `when` holds) and
+  // closed ones that explain themselves (`blocked`). A closed exit without
+  // `blocked` is just floor until it opens.
+  activeExits() {
+    return (this.mapDef.exits || []).filter((ex) => !ex.when || ex.blocked || safeCall(ex.when, this.api));
+  }
+
+  isExit(x, y, exits = null) {
+    return (exits || this.activeExits()).some((ex) => inArea(ex, x, y));
   }
 
   // ---- Camera ---------------------------------------------------------
 
   cameraTarget() {
+    const f = this.camFollow && this.byId.get(this.camFollow);
+    if (f) return { x: f.px + (f.w * TILE) / 2, y: f.py + TILE / 2 - 8, speed: this.camFollowSpeed };
     if (this.camPan) return this.camPan;
     const p = this.player;
     return { x: p.px + TILE / 2, y: p.py + TILE / 2 - 8 };
@@ -611,9 +649,10 @@ export class World {
   updateCamera() {
     const t = this.cameraTarget();
     const want = this.clampCamera(t.x, t.y);
-    if (this.camPan && this.camPan.speed) {
+    const glide = (this.camFollow && this.camFollowSpeed) || (this.camPan && this.camPan.speed);
+    if (glide) {
       // Glide toward the pan target.
-      const s = this.camPan.speed;
+      const s = glide;
       const dx = want.x - this.camF.x;
       const dy = want.y - this.camF.y;
       const dist = Math.hypot(dx, dy);

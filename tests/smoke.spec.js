@@ -158,8 +158,11 @@ test('pointer: pick up key, use it on the locked door, go in', async ({ page }) 
   await waitFor(page, () => window.moonshine.snapshot().inventoryOpen);
   await page.waitForTimeout(300);
   await shot(page, '08-inventory');
-  // Tap the selected item again to use it.
+  // Tap an item to select it, then tap it again to use it.
   const r = await page.evaluate(() => window.moonshine.inventory.slotRect(0));
+  await clickGame(page, r.x + 10, r.y + 10);
+  await page.waitForTimeout(100);
+  expect((await snap(page)).inventoryOpen).toBe(true);
   await clickGame(page, r.x + 10, r.y + 10);
   await waitFor(page, () => window.moonshine.snapshot().holding === 'brass_key');
   await clickTile(page, 12, 7); // walk (still holding the key)

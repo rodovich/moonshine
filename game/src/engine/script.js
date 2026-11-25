@@ -10,6 +10,8 @@ import { pathToDirs } from './world.js';
 import { playMusic, stopMusic, sfx, playCue, windDownMusic, startLoop, stopLoop, setWrongness, muffleMusic, bendMusic, setLoopVolume } from './sound.js';
 import { loadSheet } from './art.js';
 import { TILE } from './tilemap.js';
+import { WIDTH, HEIGHT } from './display.js';
+import { drawTextCentered, LINE_HEIGHT } from './text.js';
 
 export function makeApi(world) {
   const fx = world.effects;
@@ -314,6 +316,61 @@ export function makeApi(world) {
     },
     // Centered text over a black screen for `seconds` (e.g. "Cheryl did not
     // sleep well."). Draws above fades, so fade out first if you like.
+    // Credits: lines of centered text rolling up over a full-screen picture
+    // (or black), at `speed` px per second. The last line stops at the
+    // middle of the screen and holds for `hold` seconds. After `skipAfter`
+    // seconds any key or tap jumps to the held last line. A line is a string
+    // ('' for a gap) or { text, heading: true } for a gold heading.
+    async credits(lines, { picture = null, speed = 14, skipAfter = 3, hold = 4, fade = 1 } = {}) {
+      const items = lines.map((l) => (typeof l === 'string' ? { text: l } : l));
+      const gap = LINE_HEIGHT + 2;
+      const last = items.length - 1;
+      const restY = Math.round(HEIGHT / 2 - LINE_HEIGHT / 2);
+      // Scroll distance at which every line but the last has left the top.
+      const endScroll = Math.max(HEIGHT + 8 + last * gap - restY, HEIGHT + 8 + (last - 1) * gap + gap);
+      let scroll = 0;
+      let skipped = false;
+      const art = picture && !(typeof picture === 'function') ? loadSheet(picture.sheet, picture.palette) : null;
+      const draw = (ctx, ms) => {
+        if (typeof picture === 'function') picture(ctx, ms);
+        else if (art) ctx.drawImage(art.frameAt(picture.frame, ms), 0, 0);
+        else {
+          ctx.fillStyle = '#000000';
+          ctx.fillRect(0, 0, WIDTH, HEIGHT);
+        }
+        scroll = skipped ? endScroll : Math.min(endScroll, (ms / 1000) * speed);
+        items.forEach((it, i) => {
+          let y = HEIGHT + 8 + i * gap - scroll;
+          if (i === last) y = Math.max(restY, y);
+          if (y < -gap || y > HEIGHT) return;
+          drawTextCentered(ctx, it.text, WIDTH / 2, Math.round(y), { color: it.heading ? 'ui_label' : 'ui_text' });
+        });
+      };
+      await g.showPicture(draw, { fade });
+      const t0 = world.picture.ms;
+      // Wait for the roll to finish, or a key or tap after skipAfter seconds.
+      let pressed = false;
+      const listen = () => g.waitForInput().then(() => { pressed = true; });
+      listen();
+      await world.until(() => {
+        const ms = world.picture.ms - t0;
+        if (pressed) {
+          if (ms / 1000 >= skipAfter) skipped = true;
+          pressed = false;
+          listen();
+        }
+        return skipped || scroll >= endScroll;
+      });
+      await g.wait(hold);
+      world.inputWaiters = [];
+    },
+    // Mark the game finished: sets the flag 'game.complete' (saved when the
+    // script ends, or by toTitle). Put Cheryl where the epilogue should reopen
+    // first; Continue returns her there with the flag set.
+    markComplete() {
+      g.setFlag('game.complete');
+      world.state.complete = true;
+    },
     async card(text, seconds = 2.5) {
       world.game.card = { text };
       await world.waitTicks(secs(seconds));
@@ -372,7 +429,20 @@ export function makeApi(world) {
       const want = world.clampCamera(world.camPan.x, world.camPan.y);
       await world.until(() => world.cam.x === want.x && world.cam.y === want.y);
     },
+    // Keep the camera on another character as they move (and across a
+    // cutscene changeMap); `speed` glides there first (px per frame), 0 snaps.
+    // followPlayer() returns it to Cheryl.
+    cameraFollow(id, speed = 0) {
+      world.camFollow = resolveEntity(id).id;
+      world.camFollowSpeed = speed;
+    },
+    // After changeMap(..., { cutscene: true }): back to Cheryl's own map and
+    // spot, visible again. { fade: false } cuts.
+    restorePlayer(opts) {
+      return world.restorePlayer(opts);
+    },
     async followPlayer(speed = 3) {
+      world.camFollow = null;
       const p = world.player;
       const t = { x: p.px + TILE / 2, y: p.py + TILE / 2 - 8 };
       world.camPan = { ...t, speed };
@@ -396,8 +466,28 @@ export function makeApi(world) {
     stopMusic(fadeMs) {
       stopMusic(fadeMs);
     },
-    sfx(id) {
-      sfx(id);
+    // g.sfx(id) plays at full volume. g.sfx(id, { at: [x, y] or an entity id,
+    // range: 12 }) fades with Cheryl's distance (in tiles) from the source,
+    // silent beyond `range`: the chess tap is clear beside the table and
+    // gone on the roof. `volume` scales it further.
+    sfx(id, opts = {}) {
+      let volume = opts.volume ?? 1;
+      if (opts.at != null) {
+        let x;
+        let y;
+        if (Array.isArray(opts.at)) [x, y] = opts.at;
+        else {
+          const e = world.entity(opts.at);
+          if (!e) return;
+          [x, y] = [e.x, e.y];
+        }
+        const p = world.player;
+        const d = Math.hypot(p.x - x, p.y - y);
+        const range = opts.range ?? 12;
+        volume *= Math.max(0, 1 - d / range) ** 1.5;
+        if (volume < 0.03) return;
+      }
+      sfx(id, { volume, pitch: opts.pitch });
     },
     // A one-shot music cue over the current track (which dips and returns,
     // unless { resume: false }).

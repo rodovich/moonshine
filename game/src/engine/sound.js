@@ -65,10 +65,11 @@ export function muffleMusic(on, opts) {
   try { audio.muffleMusic(on, opts); } catch (err) { warnOnce('muffle', '', err); }
 }
 
-export function sfx(id) {
+// opts: { volume (0..1), pitch (semitones) }, passed to the audio module.
+export function sfx(id, opts) {
   const real = SFX_ALIASES[id] ?? id;
   if (!audio.SFX_IDS.includes(real)) return warnOnce('sfx', id, 'unknown id');
-  try { audio.sfx(real); } catch (err) { warnOnce('sfx', id, err); }
+  try { audio.sfx(real, opts); } catch (err) { warnOnce('sfx', id, err); }
 }
 
 /** Start a looping sound (crowd, wind, water_pour, timer_tick). Already running: no change. */
