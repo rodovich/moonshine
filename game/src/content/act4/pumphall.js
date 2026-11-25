@@ -29,7 +29,8 @@ export const SISTERS = {
 };
 const GRATES = [4, 9, 14, 19];
 const FLOOD_STOP = 18;
-const BASIN = [11, 9]; // the flood never comes further east than this column
+const BASIN = [11, 9];
+const FLOOD_CREEP_FROM = 15; // where the burst's first rush stops; it creeps on from there // the flood never comes further east than this column
 
 const darkPlayerLight = (g) => (g.hasItem('moonglass_disc') ? { radius: 3, color: 'relic_cyan' } : { radius: 2 });
 
@@ -83,12 +84,17 @@ function compose(g) {
   const grate = { drain: 'grate_drain', dry: 'grate_dry' }[f('fx.grates')] || (f('pumps.running') ? 'grate_dry' : 'grate_full');
   for (const x of GRATES) { set(ground, x, 9, `pumphall:${grate}_l`, false); set(ground, x + 1, 9, `pumphall:${grate}_r`, false); }
 
-  // The flood, spreading east from the split main.
-  const front = f('fx.flood') || (f('pumps.burst') ? FLOOD_STOP : 0);
+  // The flood, spreading east from the split main with a ragged front. After
+  // the burst it keeps creeping east (fx.creep) but never past FLOOD_STOP.
+  const front = f('fx.flood') || (f('pumps.burst') ? FLOOD_CREEP_FROM + (f('fx.creep') || 0) : 0);
   if (front) {
-    for (let y = 3; y <= 10; y++) for (let x = 2; x <= front; x++) {
-      if (solid[y][x] && detail[y][x]) continue; // the Sisters' feet and valves stay above it
-      set(ground, x, y, x === front ? 'pumphall:flood_edge_e' : x < front - 2 ? 'pumphall:flood' : 'pumphall:flood_film', true);
+    const RAG = [0, 1, 0, 2, 1, 0, 1, 2];
+    for (let y = 3; y <= 10; y++) {
+      const edge = Math.min(FLOOD_STOP, front - RAG[y % RAG.length]);
+      for (let x = 2; x <= edge; x++) {
+        if (solid[y][x] && detail[y][x]) continue; // the Sisters' feet and valves stay above it
+        set(ground, x, y, x === edge ? 'pumphall:flood_edge_e' : x < edge - 2 ? 'pumphall:flood' : 'pumphall:flood_film', true);
+      }
     }
   }
   for (let y = 3; y <= 10; y++) for (let x = 1; x < W; x++) if (!step[y][x]) step[y][x] = 'step_stone';
@@ -144,7 +150,9 @@ async function wakeValve(g, name) {
     g.sfx('pump_cough');
     await g.wait(0.9);
     g.setFlag(`fx.cough.${name}`, null);
-    return g.describe('She shivers and goes still. She needs her throat.');
+    return g.describe(name === 'middle'
+      ? 'She shivers and goes still. She needs her throat.'
+      : "She shudders, and stops. Nothing will run with the middle one's throat gaping.");
   }
   const order = g.flag('pump.order') || 0;
   g.setFlag(`fx.cough.${name}`, 1);
@@ -285,9 +293,9 @@ async function stuckValve(g) {
   g.sfx('hatch_bang');
   g.startLoop('spray'); g.startLoop('roar'); g.startLoop('water_spread'); g.startLoop('air_whistle');
   g.shake(2, 0.8);
-  for (let x = 3; x <= FLOOD_STOP; x++) {
+  for (let x = 3; x <= FLOOD_CREEP_FROM; x++) {
     g.setFlag('fx.flood', x);
-    await g.wait(6 / (FLOOD_STOP - 2));
+    await g.wait(6 / (FLOOD_CREEP_FROM - 2));
   }
   g.setFlag('fx.flood', null);
   g.setFlag('fx.hatch', null);
@@ -317,6 +325,10 @@ export const pumpHallMap = composedMap(compose, {
     { x: 25, y: 6, h: 2, to: 'tide_wheel', at: [1, 4], facing: 'right', when: (g) => !g.flag('pumps.burst') },
     { x: 22, y: 2, to: 'emergency_shaft', at: [2, 28], facing: 'up', when: (g) => !!g.flag('pumps.burst') },
   ],
+  ambient: [{
+    every: [2.5, 3.5], when: (g) => !!g.flag('pumps.burst') && (g.flag('fx.creep') || 0) < FLOOD_STOP - FLOOD_CREEP_FROM,
+    run: (g) => g.setFlag('fx.creep', (g.flag('fx.creep') || 0) + 1),
+  }],
   triggers: [
     {
       // Walking west toward the flood.
@@ -348,16 +360,17 @@ function composeWheel(g) {
   for (let x = 1; x < 11; x++) { ground[1][x] = 'hull:face_top'; ground[2][x] = 'hull:face_base'; }
   for (let y = 3; y <= 8; y++) for (let x = 1; x < 11; x++) { ground[y][x] = 'hull:floor'; solid[y][x] = false; }
   for (const y of [4, 5]) { ground[y][0] = 'hull:floor'; solid[y][0] = false; }
-  // The channel under the wheel (x3–8), and the wheel itself standing in it.
+  // The channel under the wheel (x4–7), between stone edges (x3, x8) that can be
+  // walked on; the wheel can be looked at from the west edge.
   const ch = turning ? 'chan_rush' : 'chan_slack';
   for (let y = 3; y <= 8; y++) {
     ground[y][3] = `tide_channel:${ch}_w`; ground[y][8] = `tide_channel:${ch}_e`;
-    for (let x = 4; x <= 7; x++) ground[y][x] = `tide_channel:${ch}`;
-    for (let x = 3; x <= 8; x++) solid[y][x] = true;
+    for (let x = 4; x <= 7; x++) { ground[y][x] = `tide_channel:${ch}`; solid[y][x] = true; }
   }
   const wf = turning ? 'wheel_turn' : 'wheel';
   for (let r = 0; r < 6; r++) for (let c = 0; c < 4; c++) detail[3 + r][4 + c] = `tidewheel:${wf}_x${c}y${r}`;
-  ground[5][10] = 'tide_channel:day_grate'; solid[5][10] = true;
+  // The grate to the sea cave, in the west wall beside the archway, where it can be reached.
+  ground[7][0] = 'tide_channel:day_grate'; solid[7][0] = true;
   return { ground, detail, overhead, solid };
 }
 
@@ -370,7 +383,7 @@ export const tideWheelMap = composedMap(composeWheel, {
   playerLight: darkPlayerLight,
   lights: (g) => [
     { x: 5.5, y: 5, radius: g.flag('bell.restored') ? 3 : 2, color: 'relic_amber' },
-    { x: 10, y: 5, radius: 2 },
+    { x: 0.5, y: 7, radius: 2 },
   ],
   spawn: [1, 4],
   exits: [{ x: 0, y: 4, h: 2, to: 'pump_hall', at: [24, 6], facing: 'left' }],
@@ -383,7 +396,7 @@ export const tideWheelMap = composedMap(composeWheel, {
         : g.describe('A wheel taller than a house, standing in a channel of seawater. Bronze rim, slate paddles. Still.', "The rope from the bell comes down to here. I'd bet my plug on it, if I still had my plug.")),
       use: { moon_chart: notThatChart, '*': cherylDeclines },
     },
-    { id: 'sea_grate', x: 10, y: 5, look: "Daylight, through a grate. The back of a cave. Mott's sea cave, I'd guess." },
+    { id: 'sea_grate', x: 0, y: 7, look: "Daylight, through a grate. The back of a cave. Mott's sea cave, I'd guess." },
   ].map((o) => ({ solid: false, use: { '*': cherylDeclines }, ...o })),
 });
 

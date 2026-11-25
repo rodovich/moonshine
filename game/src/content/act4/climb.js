@@ -30,7 +30,7 @@ function composeShaft(g) {
   return { ground, detail, overhead, solid, step };
 }
 
-const climbLine = (row, flag, run) => ({ x: 2, y: row, w: 2, stop: false, when: (g) => !g.flag(flag), run: async (g) => { g.setFlag(flag); await run(g); g.pose('player', 'climb'); } });
+const climbLine = (row, flag, run) => ({ x: 2, y: row, w: 2, stop: false, when: (g) => !g.flag(flag), run: async (g) => { g.setFlag(flag); await run(g); g.pose('player', 'climb_up'); } });
 
 export const shaftMap = composedMap(composeShaft, {
   id: 'emergency_shaft',
@@ -70,14 +70,14 @@ export const shaftMap = composedMap(composeShaft, {
         g.sfx('slab_scrape');
         await g.shake(1, 0.9);
         g.setFlag('shaft.slab');
-        g.pose('player', 'climb');
+        g.pose('player', 'climb_up');
       },
     },
   ],
   onEnter: async (g) => {
     g.tilt(0, 0, 0.5);
     g.stopLoop('spray', 800); g.stopLoop('air_whistle', 800); g.stopLoop('water_spread', 0);
-    g.pose('player', 'climb');
+    g.pose('player', 'climb_up');
     g.playMusic('climb', { fadeMs: 500 });
     g.bendMusic(300, 20000);
   },
@@ -145,8 +145,8 @@ export const cellarMap = composedMap(composeCellar, {
     await g.wait(1.2);
   },
   entities: [
-    { id: 'ice', x: 1, y: 3, w: 2, h: 2, lookKey: 'ice', look: "Ice, sweating in its sawdust. Five minutes ago this cellar was flooded. It isn't now." },
-    { id: 'ice_b', x: 6, y: 3, w: 2, h: 2, lookKey: 'ice', look: "Ice, sweating in its sawdust. Five minutes ago this cellar was flooded. It isn't now." },
+    { id: 'ice', x: 1, y: 3, w: 2, h: 2, lookKey: 'ice', look: "Ice, sweating in its sawdust. There's a wet line round the walls at knee height. The water's gone down. Or I've come up." },
+    { id: 'ice_b', x: 6, y: 3, w: 2, h: 2, lookKey: 'ice', look: "Ice, sweating in its sawdust. There's a wet line round the walls at knee height. The water's gone down. Or I've come up." },
     ...[1, 2, 3, 8].map((x) => ({ id: `fish_${x}`, x, y: 1, lookKey: 'fish', look: 'Fish, hanging up, looking as surprised as I feel.' })),
     { id: 'crate', x: 8, y: 4, look: 'A crate of fish, packed in ice. Dry ice. Dry crate. Dry everything, suddenly.' },
     { id: 'hatch', x: 2, y: 6, look: "Closed. And the slab's back over it. That way's shut for good." },
