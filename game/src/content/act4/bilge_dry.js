@@ -178,10 +178,11 @@ export const bilgeDryMap = composedMap(compose, {
   ambience: ['wind'],
   step: 'step_stone',
   spawn: [4, 4],
-  // Until the act ends, the ways out decline (Act 5 opens them).
+  // Leaving the Bilge ends the act: Cheryl looks back at the bronze door first,
+  // and its lines close Act 4 (Act 5 opens these ways properly).
   exits: [
-    { x: 11, y: 0, w: 2, run: async (g) => { await g.describe(notYet); await g.movePlayer('d'); } },
-    { x: 31, y: 12, h: 3, run: async (g) => { await g.describe(notYet); await g.movePlayer('l'); } },
+    { x: 11, y: 0, w: 2, run: (g) => lookBackAtDoor(g) },
+    { x: 31, y: 12, h: 3, run: (g) => lookBackAtDoor(g) },
   ],
   onEnter: async (g) => {
     if (!g.flag('act4.risen')) return; // the reveal runs it
@@ -272,11 +273,20 @@ function endCard() {
 // Act 5 sets this to a script that carries on instead of the end card.
 export const act4End = { next: null };
 
+// On the way out, she can't leave without looking at the door properly.
+async function lookBackAtDoor(g) {
+  await g.describe('Before I go anywhere: that door.');
+  await g.panCamera(26, 8, 2);
+  await g.wait(0.6);
+  await endOfAct4(g);
+}
+
 export async function endOfAct4(g) {
   if (g.flag('act4.done') && act4End.next) return act4End.next(g);
   await g.describe('At the bottom of the Water Stairs, where the sea used to be: a door.', 'Bronze, barnacled, as big as a cart. A glass eye in the middle.', 'The last flight of stairs is broken. Of course it is.');
   await g.describe('A door at the bottom of the sea. Well. The bottom of the canal.', 'Same thing, this week.');
   g.setFlag('act4.done');
+  await g.followPlayer(3); // back from the door, if the camera went to look at it
   if (act4End.next) return act4End.next(g);
   g.stopMusic(1500);
   await g.fade('out', 1.5);

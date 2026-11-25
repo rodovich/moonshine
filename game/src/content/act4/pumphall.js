@@ -323,7 +323,7 @@ export const pumpHallMap = composedMap(compose, {
   exits: [
     // Up to the dry Fountain's basin (walkable only in Act 4's state of the Square, so it's passed as a variable).
     { x: 2, y: 2, when: (g) => !g.flag('pumps.burst'), sfx: 'step_stairs', run: (g) => g.changeMap('fountain_square', ...BASIN, 'down') },
-    { x: 25, y: 6, h: 2, to: 'tide_wheel', at: [1, 4], facing: 'right', when: (g) => !g.flag('pumps.burst') },
+    { x: 25, y: 6, h: 2, to: 'tide_wheel', at: [1, 4], facing: 'right' },
     { x: 22, y: 2, to: 'emergency_shaft', at: [2, 28], facing: 'up', when: (g) => !!g.flag('pumps.burst') },
   ],
   ambient: [{
