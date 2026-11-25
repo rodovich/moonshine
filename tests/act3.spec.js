@@ -425,6 +425,7 @@ test('keyboard: Act 3', async ({ page }) => {
   await kbChoose(page, 0);
   log = await read();
   expect(joined(log)).toContain('There. A back door.');
+  expect(joined(log)).toContain('It comes up through the grate in the gallery');
 
   // The valve: the crowbar slips off the square spindle.
   await kbInteract(page, 'valve');
@@ -659,7 +660,7 @@ test('pointer: Act 3', async ({ page }) => {
   // The crypt: Ottilie gives her paper.
   await ptrExit(page, 7, 2, [7, 3], 'crypt');
   log = await read();
-  expect(joined(log)).toContain('take rubbings. Here.');
+  expect(joined(log)).toContain('Floors, Cheryl, where the light falls. Here.');
   expect((await snap(page)).items).toContain('paper_charcoal');
 
   // Back down through the Founders' Door for the rubbing.
