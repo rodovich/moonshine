@@ -110,10 +110,9 @@ test('keyboard: the whole opening', async ({ page }) => {
   await read();
   await page.keyboard.press('ArrowDown');
   await waitFor(page, () => (window.moonshine.snapshot().text || '').includes('Down, then.'), null, 5000);
-  await read({ stop: (s) => s.flags['act1.done'] });
-  await page.waitForTimeout(1800);
-  await shot(page, 'opening-15-end-card');
-  await waitFor(page, () => window.moonshine.snapshot().scene === 'title', null, 15000);
+  // Act 2 picks up on Lamp Street.
+  await read({ stop: (s) => s.map === 'lamp_street' });
+  expect((await snap(page)).map).toBe('lamp_street');
   expect(errors).toEqual([]);
 });
 
@@ -207,7 +206,23 @@ test('pointer: the whole opening', async ({ page }) => {
   log = await read();
   expect(pageTexts(log)).toContain('BREATHED');
   await ptrWalk(page, 16, 25);
-  await read({ stop: (s) => s.flags['act1.done'] });
+  await read({ stop: (s) => s.map === 'lamp_street' });
+  expect((await snap(page)).map).toBe('lamp_street');
+  expect(errors).toEqual([]);
+});
+
+// Without Act 2's maps, the Squeeze ends the slice with the end card. The
+// switch is the opening module's `squeezeTo`; clearing it stands in for a
+// build without Lamp Street.
+test('without Act 2, the Squeeze shows the end card and returns to the title', async ({ page }) => {
+  const errors = await boot(page, '?map=cistern_court&x=15&y=24&facing=down&flags=act1.moonrise,n.squeezeSeen');
+  await page.evaluate(async () => { (await import('/src/content/opening/court.js')).opening.squeezeTo = null; });
+  await waitFor(page, () => window.moonshine.snapshot().idle);
+  await page.keyboard.press('ArrowDown');
+  await waitFor(page, () => (window.moonshine.snapshot().text || '').includes('Down, then.'), null, 5000);
+  await readThrough(page, kbAdvance(page), { stop: (s) => s.flags['act1.done'] });
+  await page.waitForTimeout(1800);
+  await shot(page, 'opening-15-end-card');
   await waitFor(page, () => window.moonshine.snapshot().scene === 'title', null, 15000);
   expect(errors).toEqual([]);
 });

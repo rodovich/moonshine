@@ -382,7 +382,7 @@ A thin, precise man in a waistcoat, with a jeweler's loupe on a cord. He was the
 
 ### The belfry objects
 
-- **The bell**: "The bell. Green and enormous, and much older than the tower around it. It looks like it's listening."
+- **The bell**: "The bell. Green and enormous, and much older than the tower around it. It looks like it's listening." / "A new steel clapper hangs inside it. The old one was bronze, Ambrose says. This one sounds like a saucepan, he says." (When the Clockmaker fitted his clock, he fitted the steel clapper too and kept the old bronze one as a doorstop; see Act 5.)
 - **The clock drive** (before the lever): First: "The Clockmaker's machine, clamped onto the old bell linkage like a leech. Tick, tick, tick." Then: "It's got its hooks in the bell. Ambrose is right."
 - **The lever** (8, 4): First: "A lever. A card hung on it, in his handwriting: DO NOT TOUCH. VERY IMPORTANT." / "Every pupil I ever had knew what a sign like that is for." Then: pull → `clock.lifted`: a clank, a whir winding down, and the ticking stops. The clamp lifts off the linkage and the old rope swings free. "There. Unclamped." / "In thirty years of teaching, I never once touched a sign that said DO NOT TOUCH. I'm making up for lost time."
 - **The clock drive** (after): "Still. Not even a tick. It looks embarrassed."

@@ -142,7 +142,7 @@ The summit plaza. The Bell Tower stands to the northwest, with its new clock fac
     3  ~~##CC##~RRRRR~#w#ww#w#~
     4  ##########w#w###w#ww#w##   shop facade (9-13); dome facade (15-22)
     5  ##########w#w###w#ww#w##
-    6  ####DD#####D######DD####   tower door (4-5); shop door (11); Dome door (18-19)
+    6  ####DD######D#####DD####   tower door (4-5); shop door (12); Dome door (18-19)
     7  ........................
     8  ........................
     9  ...........SS...........   SS the sundial (11-12, 9-10)
