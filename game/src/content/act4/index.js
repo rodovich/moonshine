@@ -8,11 +8,11 @@ import { pumpHallMap, tideWheelMap } from './pumphall.js';
 import { shaftMap, cellarMap } from './climb.js';
 import { bilgeDryMap, act4End, endOfAct4, revealFromCellar } from './bilge_dry.js';
 import { seaCaveMap, seaCave } from './seacave.js';
-import { surfaceMaps, startAct4 } from './surface.js';
+import { withAct4, startAct4 } from './surface.js';
 import { ship_plan } from '../../art/chartroom.js';
 
+// Act 4's own maps. Its states of earlier acts' maps come from withAct4(maps).
 export const act4Maps = {
-  ...surfaceMaps,
   belfry: belfryMap,
   pump_hall: pumpHallMap,
   tide_wheel: tideWheelMap,
@@ -54,7 +54,7 @@ export function shipPlanAct4(item) {
   };
 }
 
-export { act4Items, act4End, seaCave, startAct4, listStage };
+export { act4Items, act4End, seaCave, startAct4, listStage, withAct4 };
 
 export const act4Scripts = {
   // ?map=flat&x=8&y=4&flags=act3.surfaced,halls.valve&items=ship_plan,guidebook,moon_chart&run=act4_start

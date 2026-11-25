@@ -29,7 +29,8 @@ export const act4Items = {
 // ---------------------------------------------------------------------------
 // The act's state.
 
-export const act4 = (g) => !!g.flag('act4.started');
+// Act 4's states yield to Act 5's (which takes over these maps) and to the epilogue.
+export const act4 = (g) => !!g.flag('act4.started') && !g.flag('act5.started') && !g.flag('epilogue');
 export const risen = (g) => !!g.flag('act4.risen');
 // Before the reveal: the list is getting worse.
 export const listing = (g) => act4(g) && !risen(g);

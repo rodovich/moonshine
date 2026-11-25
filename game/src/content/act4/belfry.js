@@ -53,7 +53,10 @@ function compose(g) {
 // ---------------------------------------------------------------------------
 
 const objects = [
-  { id: 'bell', x: 3, y: 2, w: 2, h: 2, look: 'The bell. Green and enormous, and much older than the tower around it. It looks like it\'s listening.' },
+  {
+    id: 'bell', x: 3, y: 2, w: 2, h: 2,
+    look: ["The bell. Green and enormous, and much older than the tower around it. It looks like it's listening.", 'A new steel clapper hangs inside it. The old one was bronze, Ambrose says. This one sounds like a saucepan, he says.'],
+  },
   {
     id: 'drive', x: 6, y: 3, w: 2, h: 2,
     interact: (g) => {

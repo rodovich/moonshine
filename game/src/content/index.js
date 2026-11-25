@@ -6,11 +6,11 @@ import { testMaps, testItemDefs, testScripts, testCharacters } from './test/inde
 import { openingMaps, openingItems, openingScripts, openingIntro, opening } from './opening/index.js';
 import { cherylDeclines } from './opening/common.js';
 import { act2Maps, act2Items, act2Scripts, act2 } from './act2/index.js';
-import { act4Maps, act4Items, act4FallbackItems, act4Scripts, shipPlanAct4, seaCave } from './act4/index.js';
+import { act4Maps, act4Items, act4FallbackItems, act4Scripts, shipPlanAct4, seaCave, withAct4 } from './act4/index.js';
 import { cheryl } from '../art/cheryl.js';
 
-// Act 4's maps include its states of earlier maps (overlays over the same ids), so it comes after them.
-const maps = { ...openingMaps, ...act2Maps, ...act4Maps, ...testMaps };
+// withAct4 lays Act 4's states over earlier acts' maps (by id).
+const maps = withAct4({ ...openingMaps, ...act2Maps, ...act4Maps, ...testMaps });
 // The Squeeze leads on to Lamp Street once Act 2 registers it; until then it ends the slice.
 opening.squeezeTo = maps.lamp_street ? 'lamp_street' : null;
 // The ladder under the hundredth step leads into Act 3 once it registers the Step Gallery; until then Act 2 ends on a card.
