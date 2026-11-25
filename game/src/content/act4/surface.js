@@ -248,7 +248,9 @@ export function withAct4(maps) {
       const art = g.flag('hatch.open') ? 'fountain_coins_open' : 'fountain_coins_closed';
       for (let y = 0; y < 4; y++) for (let x = 0; x < 4; x++) T.set('detail', 10 + x, 7 + y, `square4:${art}_x${x}y${y}`, true);
       // The basin floor and the step-over in the south rim are walkable; the fish and rim aren't.
-      for (const [x, y] of [[11, 8], [12, 8], [11, 9], [12, 9], [11, 10], [12, 10]]) T.block(x, y, false);
+      for (const [x, y] of [[11, 9], [12, 9], [11, 10], [12, 10]]) T.block(x, y, false);
+    // The hatch blocks until it's lifted; then it's the way down.
+    for (const x of [11, 12]) T.block(x, 8, !g.flag('hatch.open'));
       // The cordon.
       const { x0, y0, x1, y1 } = CORDON;
       for (const [x, y] of [[x0, y0], [x1, y0], [x0, y1], [x1, y1]]) T.set('detail', x, y, 'square4:cordon_post', true);
