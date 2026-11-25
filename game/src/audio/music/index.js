@@ -14,6 +14,11 @@ import pumps from './pumps.js';
 import neighborhood_thin from './neighborhood_thin.js';
 import climb from './climb.js';
 import relay from './relay.js';
+import hauling from './hauling.js';
+import keel from './keel.js';
+import moon_true from './moon_true.js';
+import bath from './bath.js';
+import ending from './ending.js';
 
 export const SONGS = {
   title,
@@ -32,4 +37,9 @@ export const SONGS = {
   neighborhood_thin,
   climb,
   relay,
+  hauling,
+  keel,
+  moon_true,
+  bath,
+  ending,
 };
