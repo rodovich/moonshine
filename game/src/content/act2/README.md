@@ -86,7 +86,7 @@ Lines the build adds for the new states (the writer has them): the window with t
 
 **The boarded step:** from Act 4 on (`act4.started` or `epilogue`), the open hundredth step is boarded over in steps.js, flush and walkable (`steps_lid:boarded_l/_r`, chalked in the epilogue), with `step_bonk` underfoot and the writer's lines the first time Cheryl walks over it. steps.js owns it for every act, since it lasts across all of them. Between Act 2 and Act 4 it's still the hole with "Go down?". (Design: the client's rule that blockers must be earned; the writer's revision.)
 
-**Other acts on the new path:** to keep main playable, this branch moved Act 4's Mott to the yard (2, 16), its sea cave exit to (1, 37) (back out at (2, 37)), and Act 6's epilogue landing to (14, 39); the owners have the details.
+**Other acts on the new path:** to keep main playable, this branch moved Act 4's Mott to the yard (2, 16), its sea cave exit to (1, 37) (back out at (2, 37)); Act 4 has since built on them.
 
 ## Art and audio
 
