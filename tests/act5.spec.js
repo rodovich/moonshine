@@ -284,6 +284,8 @@ async function ptrGo(page, to) {
   }
   const [ox, oy] = DIRS[a.dir];
   await clickTileAt(page, a.x + ox, a.y + oy);
+  // A door may say something before it opens (the Clockmaker's, the tower): read on.
+  await readThrough(page, () => clickGame(page, 128, 112), { stop: (st) => st.map === to, timeout: 20000 });
   await waitFor(page, (m) => window.moonshine.snapshot().map === m, to, 10000);
   await waitFor(page, () => { const s = window.moonshine.snapshot(); return s.idle || !!s.text || !!s.choice; }, null, 20000);
 }
