@@ -47,7 +47,7 @@ Draw in this order:
 
 3. `basin_cliffs:cliffs` at (0, 0), over the moon, so it sits behind the cliffs and inside the notch.
 4. Moon true: `basin_rimlit:rimlit_0` … `rimlit_3` at (0, 0), about 400 ms apart. The inlay lights cyan from the bottom of the ring all the way round, with a bright leading edge. Hold `rimlit_3`.
-5. The bath: `basin_ripples:ripple` (4 frames, 260 ms) and then `basin_cheryl:reflection` (2 frames, 900 ms, a 1-px settle), both at (0, 0). Her reflection leans in from the lower left of the rim: the silver bun with its coral tie, her face turned to the water, a coral shoulder. The ripples spread as broken arcs from where she sits. She bathes here in her clothes, not the costume: the costume is at home and she hadn't planned a bath (the writer's call; see the Act 6 design doc).
+5. The bath: `basin_ripples:ripple` (4 frames, 260 ms) and then `basin_cheryl:reflection` (2 frames, 900 ms, a 1-px settle), both at (0, 0). Her reflection leans in from the lower left of the rim: her ash-and-silver bun with its coral tie, her face turned to the water, a coral shoulder. The ripples spread as broken arcs from where she sits. She bathes here in her clothes, not the costume: the costume is at home and she hadn't planned a bath (the writer's call; see the Act 6 design doc).
 
 ### The final vista
 
