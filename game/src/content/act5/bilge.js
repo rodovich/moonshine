@@ -24,7 +24,7 @@ import { sweaty_kid } from '../../art/opening_npcs.js';
 import { mover } from '../../art/act2_npcs.js';
 import { withSheets } from './tiles.js';
 import {
-  started, doorOpen, ropeTied, afloat, WRONGNESS, LAUNDRY_AMBIENCE,
+  started, after5, doorOpen, ropeTied, afloat, WRONGNESS, LAUNDRY_AMBIENCE,
   bump, cycle, getItem, cherylDeclines, firstMeet, talking,
   both, not, morePatches, untilAct5, valueOf, openTiles,
 } from './common.js';
@@ -223,7 +223,7 @@ async function climbDown(g) {
   g.facePlayer('right');
   if (!g.flag('n.climbedDown')) {
     g.setFlag('n.climbedDown', 1);
-    await g.describe('Fifty-eight years old, going down a rope into a canal.', 'Never again. I said that at nineteen, too.');
+    await g.describe('Down a rope into a canal, on a weekday.', "I've done worse. I've taken thirty children on a nature walk.");
   }
 }
 
@@ -278,7 +278,7 @@ async function kidGives(g, self) {
   g.sfx('give');
   g.setFlag('kid.gaveDisc');
   await getItem(g, 'moonglass_disc');
-  await g.say(self, "Fifty-two seconds, Miss! And I jumped! Off the QUAY! Don't tell Mum.");
+  await g.say(self, "Fifteen seconds, Miss! And I jumped! Off the QUAY! Don't tell Mum.");
 }
 
 async function kidThrowsDisc(g) {
@@ -293,7 +293,7 @@ async function kidThrowsDisc(g) {
   g.pose('player', null);
   g.setFlag('kid.gaveDisc');
   await getItem(g, 'moonglass_disc');
-  await g.say(kid, "Fifty-two seconds, Miss! And I jumped! Off the QUAY! Don't tell Mum.");
+  await g.say(kid, "Fifteen seconds, Miss! And I jumped! Off the QUAY! Don't tell Mum.");
 }
 
 // ---------------------------------------------------------------------------
@@ -457,8 +457,10 @@ export function withBilge5(def) {
     lighting: (g) => (started(g) ? 'day' : valueOf(def.lighting, g)),
     patches: morePatches(base.patches, act5Patches),
     // The door's lower row is the way in once it opens; the door itself (an
-    // entity until then) keeps it shut.
-    collision: openTiles(base, [[26, 9], [27, 9]]),
+    // entity until then) keeps it shut. The strip of mud by the door, where
+    // the rope comes down, is walkable (Act 4 keeps the mud solid; it can't
+    // be reached before the rope).
+    collision: openTiles(base, [[26, 9], [27, 9], [24, 10], [25, 10], [26, 10], [27, 10]]),
     exits: [
       ...(base.exits || []).map(untilAct5),
       { x: 11, y: 0, w: 2, to: 'fountain_square', at: [11, 15], facing: 'up', when: started, sfx: 'step_stone' },
@@ -475,6 +477,7 @@ export function withBilge5(def) {
     ],
     onEnter: async (g) => {
       if (started(g)) return entering5(g);
+      if (after5(g)) act5Loops(g, []);
       if (music) g.playMusic(music);
       if (base.onEnter) await base.onEnter(g);
     },

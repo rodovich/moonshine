@@ -428,7 +428,7 @@ test('keyboard: Act 5', async ({ page }) => {
   await kbFace(page, 'down');
   await page.keyboard.press('ArrowDown');
   log = await read();
-  expect(joined(log)).toContain('going down a rope into a canal');
+  expect(joined(log)).toContain('Down a rope into a canal, on a weekday');
   s = await snap(page);
   expect([s.x, s.y]).toEqual([25, 10]);
   await kbInteract(page, 'bronze_door', 'moonglass_disc');
@@ -688,7 +688,7 @@ test('pointer: Act 5', async ({ page }) => {
   await read();
   await ptrChoose(page, 0);
   log = await read();
-  expect(joined(log)).toContain('Never again');
+  expect(joined(log)).toContain('thirty children');
   await ptrGo(page, 'bow_passage');
   await read();
   await ptrGo(page, 'windlass_room');

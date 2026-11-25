@@ -11,7 +11,11 @@ export { bump, cycle, getItem, cherylDeclines, firstMeet, talking, layout };
 // ---------------------------------------------------------------------------
 // Story state
 
-export const started = (g) => !!g.flag('act5.started');
+// Act 5's world (the dry canals, the risen Harbor, the wind) lasts through
+// Act 6's night and gives way to the plain daytime town in the epilogue.
+export const started = (g) => !!g.flag('act5.started') && !g.flag('epilogue');
+// Act 5 is over and its loops should stop (the epilogue).
+export const after5 = (g) => !!g.flag('act5.started') && !!g.flag('epilogue');
 export const doorOpen = (g) => !!g.flag('door.open');
 export const ropeTied = (g) => !!g.flag('rope.tied');
 export const afloat = (g) => !!g.flag('boatman.afloat');

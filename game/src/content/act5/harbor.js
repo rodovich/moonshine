@@ -25,12 +25,13 @@ import { keeper } from '../../art/act5_sprites.js';
 import { fx } from '../../art/fx.js';
 import { pave } from '../act2/common.js';
 import {
-  started, doorOpen, stage, WRONGNESS, LAUNDRY_AMBIENCE,
+  started, after5, doorOpen, stage, WRONGNESS, LAUNDRY_AMBIENCE,
   layout, bump, cycle, cherylDeclines, firstMeet,
   both, not, morePatches, untilAct5,
 } from './common.js';
 import { act5Loops } from './loops.js';
 import { relay, kidAtHarbor, chargeDisc } from './relay.js';
+import { teethLook, showTeeth, SURF } from './teeth.js';
 
 const W = 32, H = 15;
 const V8 = (x) => 'abcdefgh'[x % 8];
@@ -87,29 +88,6 @@ function compose() {
   return L.done();
 }
 
-// ---------------------------------------------------------------------------
-// The Teeth
-
-const TEETH_LOOKS = {
-  1: ['The Teeth. A white line of surf out at the mouth of the Bowl. Closer than they\'ve ever been. Than we\'ve ever been.'],
-  2: ['Closer. I can see the rocks between the surf.'],
-  3: ['I can hear them. The sea, chewing.'],
-};
-const teethLook = (g) => g.describe(...TEETH_LOOKS[stage(g)]);
-
-const SURF = { 1: 0.35, 2: 0.65, 3: 1 };
-
-// The first time Cheryl comes out onto the quay at each stage, the camera
-// takes her eye out to the Teeth.
-async function showTeeth(g) {
-  const s = stage(g);
-  g.setFlag('teeth.seen', s);
-  await g.wait(0.4);
-  await g.panCamera(13, 10, 0.7);
-  await g.wait(0.6);
-  await teethLook(g);
-  await g.followPlayer(2);
-}
 
 // ---------------------------------------------------------------------------
 // Captain Mott, at the quay edge
@@ -323,7 +301,10 @@ export function withLampRoom5(def) {
       ...[...lampObjects, keeperNpc].map((e) => ({ ...e, when: both(e.when, started) })),
     ],
     onEnter: async (g) => {
-      if (!started(g)) return base.onEnter && base.onEnter(g);
+      if (!started(g)) {
+        if (after5(g)) act5Loops(g, []);
+        return base.onEnter && base.onEnter(g);
+      }
       g.setWrongness(WRONGNESS);
       act5Loops(g, ['wind', 'lamp_hum']);
       g.setLoopVolume('wind', 0.4, 0);

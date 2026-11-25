@@ -185,7 +185,8 @@ function windlassLights(g) {
   return [
     { x: 2, y: 2.6, radius: 3, color: 'moonglass_light' },
     { x: 19, y: 2.6, radius: 3, color: 'moonglass_light' },
-    { x: 20.4, y: 3.8, radius: 2.2, color: late(g) ? 'dusk_violet' : 'moonglass_dim' },
+    // The evening through the hawse (Act 6 brings its own moonlight).
+    ...(g.flag('act6.started') ? [] : [{ x: 20.4, y: 3.8, radius: 2.2, color: late(g) ? 'dusk_violet' : 'moonglass_dim' }]),
   ];
 }
 
@@ -401,6 +402,8 @@ export const windlassMap = composedMap(composeWindlass, {
     { every: [7, 12], when: (g) => !toothSet(g), run: (g) => { g.sfx('drum_creak'); g.shake(1, 0.25); } },
   ],
   onEnter: async (g) => {
+    // From Act 6 on, the room is Act 6's (its own loops, light, and Cheryl).
+    if (g.flag('act6.started')) return act5Loops(g, []);
     g.setWrongness(WRONGNESS);
     act5Loops(g, toothSet(g) ? ['chain_creak', 'hawse_wind', 'tube_wind'] : ['chain_creak', 'hawse_wind', 'drum_strain']);
     g.setLoopVolume('chain_creak', 1, 0);

@@ -9,7 +9,7 @@ import { counting_woman } from '../../art/act2_npcs.js';
 import { withSheets } from './tiles.js';
 import { LOOKS } from '../act2/common.js';
 import {
-  started, WRONGNESS, SURFACE_AMBIENCE, LAUNDRY_AMBIENCE,
+  started, after5, WRONGNESS, SURFACE_AMBIENCE, LAUNDRY_AMBIENCE,
   cycle, getItem, cherylDeclines, firstMeet,
   morePatches, untilAct5, openTiles, valueOf,
 } from './common.js';
@@ -49,7 +49,7 @@ function windOnEnter(base, loops = SURFACE_AMBIENCE) {
     if (started(g)) {
       g.setWrongness(WRONGNESS);
       act5Loops(g, loops);
-    }
+    } else if (after5(g)) act5Loops(g, []);
     if (base.onEnter) await base.onEnter(g);
   };
 }
@@ -308,7 +308,10 @@ export function withCrown5(def) {
     triggers: (base.triggers || []).map(untilAct5),
     entities: [...entities, ambrose5, crownDoor5],
     onEnter: async (g) => {
-      if (!started(g)) return base.onEnter && base.onEnter(g);
+      if (!started(g)) {
+        if (after5(g)) act5Loops(g, []);
+        return base.onEnter && base.onEnter(g);
+      }
       g.setWrongness(WRONGNESS);
       g.playMusic('neighborhood');
       act5Loops(g, SURFACE_AMBIENCE);
@@ -318,7 +321,7 @@ export function withCrown5(def) {
 
 // The belfry (Act 4's map), if it's registered: Ambrose there instead.
 export function withBelfry5(def) {
-  return { ...def, entities: act5Talk(def.entities, 'ambrose', ambroseTalk, ambroseUse5) };
+  return { ...def, entities: act5Talk(def.entities, 'ambrose_belfry', ambroseTalk, ambroseUse5) };
 }
 
 // ---------------------------------------------------------------------------

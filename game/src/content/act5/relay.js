@@ -8,8 +8,10 @@ import { critters } from '../../art/act4_sprites.js';
 import { sweaty_kid } from '../../art/opening_npcs.js';
 import { ship_plan } from '../../art/chartroom.js';
 import { fx } from '../../art/fx.js';
-import { started, doorOpen, advanceTeeth, cycle, firstMeet } from './common.js';
+import { started, doorOpen, advanceTeeth, stage, cycle, firstMeet } from './common.js';
 import { act5Loops } from './loops.js';
+import { showTeeth } from './teeth.js';
+import { RELAY_DING } from '../../audio/music/relay.js';
 
 const kidHasDisc = (g) => doorOpen(g) && !g.flag('kid.gaveDisc');
 const running = (g) => !!g.flag('relay.run');
@@ -40,8 +42,8 @@ export async function chargeDisc(g) {
   await g.spawnEffect({ sprite: { sheet: disc_fx, frame: 'disc_dim' }, at, offset: [0, -14], seconds: 0.8, layer: 'top' });
   g.pose('player', null);
   g.facePlayer('right');
-  await g.describe("And it's fading already. The canal's the length of the town away.", "I'll never get it there in time. Not at fifty-eight.");
-  await g.say(k, "Then GIVE it to someone who can! There's a boy outside doing laps. He's done forty.");
+  await g.describe("And it's fading already. The canal's the length of the town away.", 'Nobody could walk that in a minute. Somebody would have to run it flat out and jump off the quay.');
+  await g.say(k, "Then give it to someone who runs everywhere! There's a boy outside doing laps. He's done forty.");
   g.setFlag('disc.charged');
   g.setFlag('relay.ready');
   g.sfx('step_stairs');
@@ -56,7 +58,7 @@ async function kidTalk(g, self) {
   if (g.flag('kid.gaveDisc')) {
     return g.say(self, cycle(g, 'kid5.after', [
       'The Stair Race is going to be EASY after that.',
-      "Fifty-two seconds, Miss! And I jumped! Off the QUAY! Don't tell Mum.",
+      "Fifteen seconds, Miss! And I jumped! Off the QUAY! Don't tell Mum.",
     ]));
   }
   if (firstMeet(g, 'kid5')) {
@@ -152,8 +154,7 @@ export async function relay(g) {
   await g.wait(0.9);
   g.startLoop('timer_tick');
   await g.say(kid, 'Ready. Steady. EGG.');
-  g.stopMusic(0);
-  g.playMusic('relay');
+  g.playMusic('relay', { fadeMs: 0 });
   const t0 = Date.now();
   g.setFlag('relay.run');
 
@@ -195,9 +196,9 @@ export async function relay(g) {
   g.spawnEffect({ sprite: { sheet: critters, frame: 'mud_splash' }, at: [18, 10], seconds: 0.6, layer: 'top' });
   g.shake(1, 0.2);
   g.bark('Other Mover', 'Hnn!', { seconds: 1.2 });
-  await g.wait(0.6);
+  await g.wait(0.45);
   g.setSprite(r, { sheet: kid_relay, frame: 'splat_down_1' });
-  await g.wait(0.4);
+  await g.wait(0.25);
   // Along the mud, hurdling the boats.
   g.setSprite(r, dash('right'));
   await hurdle(g, r, 'r r r');
@@ -217,7 +218,11 @@ export async function relay(g) {
   g.faceNpc(r, 'up');
   await g.moveNpc(r, 'l l', { speed: 8, ghost: true });
   g.faceNpc(r, 'up');
-  // The eye flares; the barnacles crack; the door grinds open.
+  // The eye flares; the barnacles crack; the door grinds open (3 s), timed
+  // to finish just before the relay's last note, the egg timer's DING.
+  const lead = RELAY_DING - 3.3 - (Date.now() - t0) / 1000;
+  if (lead > 0) await g.wait(lead);
+  else console.warn(`[act5] the relay run is ${(-lead).toFixed(1)} s late for the ding`);
   g.sfx('barnacles_crack');
   g.shake(1, 0.5);
   await g.wait(0.9);
@@ -230,12 +235,6 @@ export async function relay(g) {
   g.setFlag('door.open');
   g.sfx('light_spill');
   g.stopLoop('timer_tick', 0);
-  // The relay's last note is the egg timer's ding. If the run beat the music,
-  // cut it short and let the timer ding by itself.
-  if (Date.now() - t0 < 47000) {
-    g.stopMusic(200);
-    g.sfx('timer_ding');
-  }
   await g.wait(1.2);
   g.setSprite(r, { sheet: sweaty_kid, frame: 'arms_up' });
   await g.say(r, '...I BEAT THE EGG. I BEAT THE EGG!');
@@ -253,6 +252,8 @@ export async function relay(g) {
   g.playMusic('harbor');
   act5Loops(g, ['wind', 'hull_far', 'laundry', 'surf']);
   await g.describe("He did it. I heard him from here. Half of Tessel heard him from here.");
+  // The door's open: the Teeth are a stage closer.
+  if ((g.flag('teeth.seen') || 0) < stage(g)) await showTeeth(g);
 }
 
 export const relayScripts = { chargeDisc, relay };
