@@ -245,7 +245,7 @@ for (const [key, def] of Object.entries(maps)) {
     if (e.name && !interactive) warn(ewh, 'has a name but nothing to say or show');
     scanAll(ewh, e);
   });
-  for (const k of ['onEnter', 'patches', 'lighting']) if (typeof def[k] === 'function') scan(`${where}.${k}`, def[k]);
+  for (const k of ['onEnter', 'patches', 'lighting', 'music', 'ambience']) if (typeof def[k] === 'function') scan(`${where}.${k}`, def[k]);
 }
 
 // ---- Characters placed by story state ----

@@ -260,3 +260,22 @@ test('credits roll over a picture, skip after a moment, then back to the title',
   const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('moonshine.save.v1')));
   expect(saved.flags['game.complete']).toBe(true);
 });
+
+test('ambient script events and music as a function of state', async ({ page }) => {
+  await boot(page, `${STREET}&x=12&y=8`);
+  await waitIdle(page);
+  await page.evaluate(() => {
+    const def = window.moonshine.world.mapDef;
+    def.ambient = [...(def.ambient || []), { every: [0.3, 0.3], when: (g) => !g.flag('bell'), script: true, run: async (g) => { g.setFlag('bell'); await g.say('Bell', 'BONG.'); } }];
+  });
+  await waitFor(page, () => window.moonshine.snapshot().speaker === 'Bell', null, 5000);
+  await readAll(page);
+  await waitIdle(page);
+  const r = await runScript(page, `
+    const def = window.moonshine.world.mapDef;
+    def.music = (g) => (g.flag('bell') ? 'title' : 'cistern_court');
+    await g.changeMap('test_street', 12, 8, 'down', { fade: false });
+    return (await import('/src/audio/index.js')).currentMusic();
+  `);
+  expect(r.v).toBe('title');
+});
