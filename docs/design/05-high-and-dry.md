@@ -60,7 +60,7 @@ The Harbor from Act 2, after the rise. The quay now stands six feet above the wa
 ```
 
 - **The ferry** (10–15, 11–12) hangs lower than the quay, tilted, its mooring ropes running taut up to the bollards.
-- **The Teeth** (an overhead sprite along row 14): stage 1, a thin white line of surf on dark rocks, small; stage 2, larger and clearer, rocks distinct; stage 3, large, the surf visibly breaking. Never a fail state: the city never reaches them.
+- **The Teeth** (an overhead sprite, 176×48, drawn with its top-left at (128, 192) px, so it covers x8–18 of rows 12–14 and rises into the near sea at stage 3): stage 1, a thin white line of surf on dark rocks, small; stage 2, larger and clearer, rocks distinct; stage 3, large, the surf visibly breaking. Never a fail state: the city never reaches them.
 - **Entities:** Captain Mott at the quay edge (13, 8), facing the sea. The Sweaty Kid running laps of the Prow road (patrol: (18, 6) → (26, 6) → (26, 4) → (18, 4)), stopping for Cheryl as usual. Bollards, crates, nets as before. Laundry streaming.
 - **Exits:** west (0, 6–8) → `bilge_dry` (30, 12–14); Goat stair (2–3, 0) → Goat Path; lighthouse door (27–28, 3) → lamp room.
 
@@ -84,10 +84,10 @@ A narrow workshop full of clocks, every one showing a slightly different time. T
     4  #........#
     5  #......d.#   d the doorstop: the bell's old clapper (7, 5), holding the door
     6  #........#
-    7  ####DD####   door (4-5, 7) → the Crown (11, 7)
+    7  ####DD####   door (4-5, 7) → the Crown (12, 7)
 ```
 
-The Crown's shop door (11, 6) → Clockmaker's Shop (4–5, 6), facing up. Once the clapper is taken, the door swings shut behind Cheryl when she leaves (a bang, and the Clockmaker's yelp).
+The Crown's shop door (12, 6; as built in Act 2) → Clockmaker's Shop (4–5, 6), facing up. Once the clapper is taken, the door swings shut behind Cheryl when she leaves (a bang, and the Clockmaker's yelp).
 
 ### Fountain Square (Act 5 state)
 
@@ -536,6 +536,8 @@ The run is fully scripted and always succeeds.
 **Item icons:** bucket (empty and full), rope coil, brass polish tin, clapper
 
 ## Audio needed
+
+All of this is built (audio/foundation, 0518c2a); ids and a suggested order are in [audio-direction.md](../audio-direction.md). Two timing notes for the build: start `relay` with `playMusic('relay', { fadeMs: 0 })` as the Kid says "EGG," and time the slap so the door opens in its last bars (its final note is the egg timer's ding). Raise the `surf` loop with `setLoopVolume` at each Teeth stage, and stop `drum_strain` with `clapper_seat` so the creaking stops when the clapper seats.
 
 **Music**
 - `neighborhood` and `harbor` at Wrongness 0.5, with the wind loop under them

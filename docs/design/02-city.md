@@ -1062,9 +1062,15 @@ The Clockmaker is heard, not seen, in this slice.
 
 The Act 2 part 1 builder (5DfQsiqAZf) built Lamp Street through the Shop on `content/act2a`; its full list of build decisions is in `game/src/content/act2/README.md`. This document follows them:
 
-- The scrape marks run down x3 from the Squeeze stair's foot, then east along y12 (the parapet edge) to the Steps, not along y10, so their look hotspot never sits on a row the player walks.
+- The scrape marks run along y10 as designed (x3–28), turning down x27–28 to the Steps; their look hotspot is only at x3–5, so it doesn't eat walking clicks.
 - After it slides, the piano rests against the Fountain's **east** rim at (14–15, 8–9), with the Movers at (16, 8) and (15, 10). (On the north rim, the bronze fish stood across its keys.)
-- The Tourist sits at (19, 14), facing her table at (18–19, 13). The Man on Bench sits at the bench's left end (20, 12).
+- The Skipping Girls are at (10–12, 6): turners at 10 and 12, the jumper at 11, the rope over all three.
+- Lamp Street's bench is at (20–21, 11); the Man on Bench sits on it from (20, 12).
+- The Woman with Basin's door is (7, 15) and she stands at (7, 16); her water runs east along row 18 from x7 and slips into the joint at (10, 18), above the hollow step.
+- The Clockmaker's shop door on the Crown is at x12 (the painted clock and a window of clocks take x10–11).
+- The Tourist sits at (19, 14) on a café chair facing her table at (19, 13); the tables are at (19, 13) and (22, 13).
+- The Shop's barometer hangs at (7, 0).
+- Lamp Street and the Square use the audio task's lighter `town` ambience, not the festival `crowd`.
 - Each NPC's look line plays once, as Cheryl's description, before their first talk.
 - The Skipping Girls' chant shows as two short barks, one per half of the couplet.
 - In part 1, the Goat Path gate and the rope to the Bilge decline with the lines the builder wrote (the goats have the path; CANAL CLEANING). Its added lines for objects the design didn't cover (the yard wall, the bay tree, the lamps, the views, and a few wrong combinations) are adopted as written.
