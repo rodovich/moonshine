@@ -370,6 +370,8 @@ The ferry *Persistence* is tied up at the landing, level, as it should be. Two n
 
 Plain and short, in the game's font, over the final vista. The list of credits is the orchestrator's to fill (the project, the tasks, the client). End with: **No one ever knew.**
 
+**Engine calls** (engine/core, b2a59cb): `await g.credits(lines, { picture, speed: 14, skipAfter: 3, hold: 4 })`, with headings as `{ text, heading: true }` and the final vista as the picture; the last line ("No one ever knew.") holds mid-screen. Before returning to the title, place Cheryl in the flat at (5, 7) in the morning state and call `g.markComplete()`, then `await g.toTitle()`. Continue reopens her there with `game.complete` set, and every map follows its epilogue state. Montage cuts to maps that aren't already at night also call `g.setLighting('night', 0)`.
+
 ## Items
 
 | Item | Icon idea | Inventory description |
