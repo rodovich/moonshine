@@ -23,8 +23,14 @@ test('phone portrait: tap to walk, tap NPC, tap through text, inventory button',
     await page.waitForTimeout(80);
   }
   await waitFor(page, () => window.moonshine.textbox.active?.choice?.rects.length > 0);
-  const opt = await page.evaluate(() => window.moonshine.textbox.active.choice.rects[1]);
-  await tapGame(page, opt.x + opt.w / 2, opt.y + opt.h / 2);
+  // On tall phones the dialogue (and its options) sits below the frame.
+  const pos = await page.evaluate(() => {
+    const m = window.moonshine;
+    const r = m.textbox.active.choice.rects[1];
+    const f = m.display.dialogArea && m.textbox.below ? m.display.dialogToClient.bind(m.display) : m.display.toClient.bind(m.display);
+    return f(r.x + r.w / 2, r.y + r.h / 2);
+  });
+  await page.touchscreen.tap(pos.x, pos.y);
   for (let i = 0; i < 10 && ((await snap(page)).text || (await snap(page)).busy); i++) {
     await tapGame(page, 128, 60);
     await page.waitForTimeout(80);
