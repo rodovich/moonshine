@@ -802,7 +802,7 @@ export const courtMap = composedMap(compose, {
     {
       x: 15, y: 25, w: 2, when: morning,
       run: async (g) => {
-        await g.think('Down, then.');
+        if (!g.flag('act2.started')) await g.think('Down, then.'); // only the first time out
         if (opening.squeezeTo) return g.changeMap(opening.squeezeTo, 3 + g.player.x - 15, 1, 'down');
         return endOfSlice(g);
       },
