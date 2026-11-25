@@ -36,14 +36,14 @@ A round mirror of still water in the Basin's slate rim, holding what the Founder
 Draw in this order:
 
 1. `basin_view:basin` at (0, 0): the sky in the water, the reflected Bowl, the rim (its moonglass inlay dim), the floor beyond.
-2. `basin_moon:moon` (24×24, 2-frame shimmer, 700 ms), centred on one of `BASIN_MOON_POS` (exported by the module). Two nights past full, it's a waning gibbous: slightly warm, its upper-right edge a hair flattened (see [art-direction.md](art-direction.md), Skies).
+2. `basin_moon:moon` (24×24, 2-frame shimmer, 700 ms), centred on one of `BASIN_MOON_POS` (exported by the module). Two nights past full, it's a waning gibbous: slightly warm, its upper-right edge a hair flattened (see [art-direction.md](art-direction.md), Skies). Drawn like the vistas' moons: a clean disc with a lit limb on the lower left, soft mares in its own shade, and no dithered halo, which broke up its edge against the cliffs. Positions 2 and 3 sit at y 122, high enough that the moon shows whole in the Gate.
 
    | Trim step | Moon centre | Reads as |
    | --- | --- | --- |
    | 0 | (176, 112) | just risen over the cliffs, off to the right of the Gate |
    | 1 | (150, 114) | closer, dipping toward the Gate's right wall |
-   | 2 | (128, 130) | dead in the Gate, framed by its walls |
-   | 3 (true) | (121, 130) | two fingers past the middle, touching the left wall |
+   | 2 | (128, 122) | dead in the Gate, framed by its walls |
+   | 3 (true) | (121, 122) | two fingers past the middle, touching the left wall |
 
 3. `basin_cliffs:cliffs` at (0, 0), over the moon, so it sits behind the cliffs and inside the notch.
 4. Moon true: `basin_rimlit:rimlit_0` … `rimlit_3` at (0, 0), about 400 ms apart. The inlay lights cyan from the bottom of the ring all the way round, with a bright leading edge. Hold `rimlit_3`.
@@ -58,7 +58,7 @@ The Act 1 composition made right. Draw in this order:
 3. `final_moon:moon` (32×32, 2-frame shimmer, 500 ms; pale peach-gold, as in Act 1; `moon_mid` and `moon_high` are its whiter stages if it ever climbs higher) centred on x = 128, rising from y = 126 (hidden behind the cliffs) at about 6 px/s, from 2 s, and stopping at y = 92: dead in the Gate, framed by its walls. (A new moon sprite: the Act 1 moon's markings read as a face once the whole disc is visible.)
 4. `vista_rim:rim` at (0, 0), over the moon.
 5. `vista_twinkle:twinkle` on the `VISTA_BASINS` points (as in Act 1), if wanted.
-6. `vista_cheryl_bath:cheryl_bath` at (0, 128): a year later, Cheryl sits in her tub, seen from behind and slightly above. The tub is an oval of white enamel with dark water inside, the moon's light lying on the water ahead and to her right. Above the water: a small head in the bathing cap (cream band, the bun a bump on top), bare shoulders nearly three times its width with the costume's two navy straps and its striped back, and her arms out along the tub's sides. (At play size, a big head over narrow shoulders read as an egg on a plinth; keep the head small and the tub's rim curved.) (The Act 1 vista keeps `vista_cheryl:cheryl_tub`, perched on the edge in the same costume and cap.)
+6. `vista_cheryl_bath:cheryl_bath` at (0, 128): a year later, Cheryl sits in her tub, seen from behind and slightly above. The tub is an oval of white enamel with dark water inside, the moon's light lying on the water ahead and to her right. Above the water: a small head in the bathing cap, striped cream and navy like the costume, with the bun a bump on top, a little ash hair at the nape, and her cheek and nose showing as she turns slightly toward the moon, bare shoulders nearly three times its width with the costume's two navy straps and its striped back, and her arms out along the tub's sides. (At play size, a big head over narrow shoulders read as an egg on a plinth; keep the head small and the tub's rim curved. A solid navy cap went to a dark block against the night; the stripes and the turned cheek make it read as a woman at 1x.) (The Act 1 vista keeps `vista_cheryl:cheryl_tub`, perched on the edge in the same costume and cap.)
 7. The title, once the moon has settled and the music has landed: `vista_title:title_0` (a half-dissolved first step) and then `title_1` (full), at (0, 0). MOONSHINE in cream with a dark outline and a soft violet glow, with a thin rule and a small moon-in-a-notch ornament beneath. The dev scene shows it at 10.5 s and 11.3 s. The credits roll over this picture.
 
 ## Underground
