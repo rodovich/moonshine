@@ -34,15 +34,27 @@ const q = (x, y) => `${y % 2 ? 's' : 'n'}${x % 2 ? 'e' : 'w'}`;
 function compose(g) {
   const L = layout(W, H, blankGrid);
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) L.set('ground', x, y, pave(x, y));
-  // The north quay's houses: the fish market's backs, the Fishmonger's door at x4.
-  house(L, 0, 0, { roofRows: 2, top: '#D#wD#wD#w#', base: '#D##D##D###', palette: 'sky' });
-  house(L, 13, 0, { roofRows: 2, top: '##wD#wD#wD#wD#wD#w#', base: '###D##D##D##D##D###', palette: 'ochre' });
-  for (let y = 0; y < 4; y++) for (const x of [11, 12]) L.set('ground', x, y, pave(x, y), false);
-  // Fish stalls on the north quay.
-  for (const x of [2, 5, 8]) {
-    L.set('overhead', x, 5, 'square_props:over_stall_nw'); L.set('overhead', x + 1, 5, 'square_props:over_stall_ne');
-    L.set('detail', x, 6, 'square_props:stall_sw', true); L.set('detail', x + 1, 6, 'square_props:stall_se', true);
+  // The north quay's houses, stalls, posts, and the stair up to the Square, drawn
+  // exactly as Act 2's wet Bilge draws them (act2/bilge.js), so the reveal is
+  // the same street with the sea gone.
+  for (let x = 0; x < W; x++) if (x !== 11 && x !== 12) L.set('ground', x, 0, lowRoof(x, 0), true);
+  const DOORS = [1, 4, 7, 16, 19, 22, 25, 28];
+  const front = (x0, w, pal) => {
+    const top = Array.from({ length: w }, (_, i) => (DOORS.includes(x0 + i) ? 'D' : (x0 + i) % 3 === 2 ? 'w' : '#')).join('');
+    house(L, x0, 1, { roofRows: 1, top, base: top.replace(/w/g, '#'), palette: pal });
+  };
+  front(0, 3, 'sky'); front(3, 3, 'ochre'); front(6, 5, 'rose');
+  front(13, 5, 'white_sage'); front(18, 4, 'ochre'); front(22, 5, 'sky'); front(27, 5, 'rose');
+  for (let y = 0; y <= 3; y++) {
+    L.set('ground', 11, y, 'street:stairs_l', false); L.set('ground', 12, y, 'street:stairs_r', false);
+    L.step[y][11] = L.step[y][12] = 'step_stairs';
   }
+  [2, 5, 8].forEach((x0, i) => {
+    const pal = ['', '@blue', '@green'][i];
+    L.set('overhead', x0, 4, `fish_stall:over_stall_l${pal}`); L.set('overhead', x0 + 1, 4, `fish_stall:over_stall_r${pal}`);
+    L.set('detail', x0, 5, 'fish_stall:stall_l', true); L.set('detail', x0 + 1, 5, 'fish_stall:stall_r', true);
+  });
+  for (const [x, y] of [[10, 6], [17, 6], [28, 6]]) L.set('detail', x, y, 'canal:mooring_post', true);
   // Laundry streaming hard to the east.
   'abcdef'.split('').forEach((c, i) => L.set('overhead', 14 + i, 4, `cloth:over_wind_${c}`));
   // The trench: quay wall, two rows of Founder hull, the mud, the near lip.
@@ -75,7 +87,7 @@ function compose(g) {
   for (let y = 0; y < 2; y++) for (let x = 0; x < 2; x++) L.set('ground', 30 + x, 9 + y, `reveal_mouth:mouth_x${x}y${y}`, true);
   // The south quay, wet where the flood was, with stranded fish; the roofs below.
   for (let y = 12; y <= 14; y++) for (let x = 0; x < W; x++) if (x < 10) L.set('ground', x, y, `bilge_flood:wet_${q(x, y)}`, false);
-  for (const [x, y, k] of [[3, 13, 'a'], [18, 12, 'b'], [8, 5, 'a'], [27, 13, 'b']]) L.set('detail', x, y, `bilge_flood:fish_stranded_${k}`);
+  for (const [x, y, k] of [[3, 13, 'a'], [18, 12, 'b'], [14, 5, 'a'], [27, 13, 'b']]) L.set('detail', x, y, `bilge_flood:fish_stranded_${k}`);
   for (let y = 15; y < H; y++) for (let x = 0; x < W; x++) L.set('ground', x, y, lowRoof(x, y), true);
   // Mooring ropes running taut down to the boats.
   for (const x of [4, 9, 20]) L.set('detail', x, 11, 'reveal:rope_taut_v');

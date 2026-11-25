@@ -79,7 +79,8 @@ export function withAct4(maps) {
   };
 
   const clockmakerDoor = {
-    id: 'clockmaker_door', name: 'Clockmaker', x: 4, y: 7, facing: 'down',
+    // In the doorway itself (the door tile), so he never lands on Cheryl below it.
+    id: 'clockmaker_door', name: 'Clockmaker', x: 4, y: 6, facing: 'down',
     sprite: { sheet: clockmakerArt },
     when: (g) => act4(g) && !!g.flag('clockmaker.atDoor') && !g.flag('clockmaker.out'),
     interact: (g, self) => clockmaker(g, self, cycle(g, 'clockmaker.door', [
@@ -166,12 +167,19 @@ export function withAct4(maps) {
 
   const crown4 = overlayMap(crown, {
     when: act4,
-    hide: ['ambrose', 'tower_door'],
+    hide: ['ambrose', 'tower_door', 'sundial'],
     tiles: (g, T) => {
       if (g.flag('clockmaker.out')) { T.block(4, 6, false); T.block(5, 6, false); }
     },
     exits: [{ x: 4, y: 6, w: 2, to: 'belfry', at: [1, 7], facing: 'up', when: (g) => act4(g) && !!g.flag('clockmaker.out') }],
-    entities: [towerDoor, clockmakerDoor, clockmakerSundial, mayorCrown, ambrose4],
+    entities: [{
+      // The sundial points at the guidebook's page on Tessel time (the key to the Clockmaker).
+      id: 'sundial_a4', x: 11, y: 9, w: 2, h: 2, solid: false, when: act4,
+      looks: [
+        ['The sundial and the clock disagree by eleven minutes.', "That guidebook of mine has a page about Tessel keeping its own time. He'd have opinions about that page."],
+        "The sundial has been here five hundred years. The clock arrived last month. I know which one I'd ask for directions.",
+      ],
+    }, towerDoor, clockmakerDoor, clockmakerSundial, mayorCrown, ambrose4],
     onEnter: async (g) => {
       await surfaceAudio(g);
       if (g.flag('clock.lifted')) g.stopLoop('clock_tick', 0);

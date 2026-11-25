@@ -190,7 +190,8 @@ export async function ringTheBell(g) {
 }
 
 const ambroseBelfry = {
-  id: 'ambrose_belfry', name: 'Ambrose', x: 4, y: 3, facing: 'up',
+  // At the rope, below the hole it runs through, not behind the bell.
+  id: 'ambrose_belfry', name: 'Ambrose', x: 4, y: 6, facing: 'up',
   sprite: { sheet: ambroseArt },
   when: (g) => !!g.flag('ambrose.inBelfry'),
   interact: async (g, self) => {
