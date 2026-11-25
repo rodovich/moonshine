@@ -2,6 +2,8 @@
 
 This is the build-ready design for Act 4 ([overview](overview.md), [story bible](../story-bible.md)). It picks up the morning after [03-downstairs.md](03-downstairs.md) ends, with the Fountain stopped and the doorsteps glowing at night. It ends with the act's big moment and the game's changed-surface reveal: Cheryl climbs out of the Fishmonger's ice cellar into a Bilge where every canal has run dry, because she made the city rise six feet out of the sea.
 
+> **Structure pass (client feedback).** [structure-pass.md](structure-pass.md) adds to this act: Ottilie's reading of the Ship Plan names four leads (the bell, Mott's copper, the Fountain, the Girls; see "Ottilie Brask" below); the Man on Bridge is the Man on Bench (on his bench on Lamp Street until the reveal, then on the Bilge bridge); the Shop window shows the Keeper's telescope, and the Tourist wears the Shop's straw hat; the Goat Path is rebuilt, with Mott's shack and the sea cave on the new path; and the Bilge has a west exit to the Goat Path (on `bilge_dry`, (0, 12–14), declining until the act ends). The Shopkeeper declines the guidebook in this act ("My window is complete."), because the Clockmaker needs it.
+
 ## The slice in brief
 
 Tessel is listing. The Bilge floods a little deeper every time Cheryl looks, the piano has slid off the Fountain into a canal, and the town has decided this all started when the Fountain stopped, which Cheryl knows she did. Her rubbing of the Chart Room floor shows three bars low in the hull, where the water is, and a rope from the bell going down to a wheel. *Pumps. And something to drive them. And Ambrose's bell.*
@@ -87,7 +89,7 @@ The top of the tower: the great bell hanging in the middle, the Clockmaker's mec
 - A cordon: rope posts at the corners (9, 6), (14, 6), (9, 11), (14, 11) with rope between them, solid all round. A sign on the south rope: PENDING AN INQUIRY.
 - The Mayor on his crate at (8, 11), as in Act 2, now addressing the Fountain. While he's here, walking into the rope plays his "behind the rope" line. Once `mayor.atCrown`, the south rope (11–12, 11) is walkable ("stepped over").
 - The piano is gone from the Fountain. It's in the Bilge (see below). The Movers are gone too.
-- The Stranded Tourist is still at the café (wearing the hat).
+- The Stranded Tourist is still at the café (wearing the Shop's straw hat).
 
 ### The Bilge (Act 4 states)
 
@@ -441,8 +443,14 @@ He sits on the crates by his door at (3, 13), sober, shaking a little. The jug a
 - OTTILIE: Your rubbing! Let me— oh. Oh, Cheryl. That's a FISH. A big, hollow, ceremonial fish.
 - OTTILIE: And glyphs! Founder glyphs! I know these three. This one's "thin." This one's "stout." This one's "middle."
 - OTTILIE: Thin, Stout, and Middle. Types of eel, obviously. A thin eel, a stout eel, and a medium eel.
+- OTTILIE: And a rope from the eels right up to… the bell tower? Ambrose will be unbearable.
+- OTTILIE: The middle eel has a collar. Copper, it says. Who has that much copper? Mott. In his still.
+- OTTILIE: A pipe from the eels straight up to the Fountain. The Founders' wine cellar. Hence the Mayor's rope.
+- OTTILIE: Thin, Stout, Middle. That's the skipping rhyme! Those girls have been singing about eels for centuries.
 - OTTILIE: This is the most important document in Tessel. I'm going to need a bigger monograph.
 - "Thin, Stout, and Middle. The three bars. The three sisters in the rhyme."
+
+**Lead repeat** (structure pass): until all three are done, her first repeat names the first lead not yet followed, in this order: the bell (`bell.restored`), Mott (`got.throat`), the Girls (`girls.heard` under 3), using the matching line above.
 
 **Repeat after** (alternate)
 - OTTILIE: Three eels, side by side, in the belly of a ceremonial fish. It all fits.
