@@ -9,9 +9,10 @@ import { act6Items, epilogue } from './common.js';
 import { act6 } from './state.js';
 import { extendMap, joined } from './extend.js';
 import { windlassAct6, act6Start, bell, hauling, brakeLever, speakingTube } from './climax.js';
-import { pianoScene, stairRace, courtEpilogue, lampStreetEpilogue, crownEpilogue, archiveEpilogue, cryptEpilogue, squareEpilogue, shopEpilogue, stepsEpilogue } from './epilogue.js';
+import { pianoScene, stairRace, courtEpilogue, lampStreetEpilogue, crownEpilogue, archiveEpilogue, cryptEpilogue, squareEpilogue, shopEpilogue, stepsEpilogue, bilgeEpilogue, harborEpilogue } from './epilogue.js';
 import { flatEnding, finalScene, endingVista } from './ending.js';
 import { dawn } from './dawn.js';
+import { bilgeDryNight, bilgeNight, lampRoomNight, belfryNight, harborRisenNight } from './night.js';
 import { lurchMontage, refillMontage } from './montage.js';
 
 export { act6Items };
@@ -21,6 +22,12 @@ export const act6Maps = { long_keel: keelMap, sighting_room: sightingMap };
 // Act 6's states on other acts' maps, by map id.
 const EXTENSIONS = {
   [act6.ids.windlass]: windlassAct6,
+  [act6.ids.bilgeDry]: bilgeDryNight,
+  [act6.ids.lampRoom]: lampRoomNight,
+  [act6.ids.belfry]: belfryNight,
+  [act6.ids.harborRisen]: harborRisenNight,
+  [act6.ids.bilge]: [bilgeNight, bilgeEpilogue],
+  [act6.ids.harbor]: harborEpilogue,
   cistern_court: courtEpilogue,
   flat: flatEnding,
   lamp_street: lampStreetEpilogue,
@@ -36,8 +43,8 @@ const EXTENSIONS = {
 // states to the maps that exist, and links the Long Keel to the Windlass Room
 // once Act 5 has built it.
 export function addAct6(maps) {
-  for (const [id, ext] of Object.entries(EXTENSIONS)) {
-    if (maps[id]) maps[id] = extendMap(maps[id], ext(maps[id]));
+  for (const [id, exts] of Object.entries(EXTENSIONS)) {
+    for (const ext of [].concat(exts)) if (maps[id]) maps[id] = extendMap(maps[id], ext(maps[id]));
   }
   // The audio's Wrongness isn't saved, and earlier acts set theirs on entering
   // their maps; from the epilogue on, every map sets it back to 0 after its own onEnter.
@@ -53,13 +60,6 @@ export function addAct6(maps) {
   return maps;
 }
 
-// Dawn: pale pink and gold (Cistern Court, from the lift until she first leaves the court).
-export const act6Lighting = {
-  dawn: [
-    { color: '#e890a8', mode: 'multiply', amount: 0.45 },
-    { color: '#f8c870', mode: 'screen', amount: 0.16 },
-  ],
-};
 
 // Every Act 6 script is also a named script, runnable with ?run=<name>, which
 // also lets `npm run check` see the ids they use.

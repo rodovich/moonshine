@@ -43,8 +43,7 @@ function finalVista(g) {
 }
 
 export const CREDITS = [
-  { text: 'MOONSHINE', heading: true },
-  '', '',
+  // The title itself has just shown over the vista, so the roll starts with the roles.
   { text: 'Story and design', heading: true }, 'Claude (Anthropic)', '',
   { text: 'Art', heading: true }, 'Claude (Anthropic)', '',
   { text: 'Music and sound', heading: true }, 'Claude (Anthropic)', '',

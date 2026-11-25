@@ -5,9 +5,9 @@ import { chromium } from '@playwright/test';
 import { spawn } from 'node:child_process';
 
 const dir = process.argv[2] || '/tmp';
-const FLAGS = 'act1.moonrise,act2.started,piano.slid,step.open,counter.left,basin.inside,act3.started,act3.surfaced,founders.unbolted,act6.started,epilogue,epi.leftCourt,epi.race';
+const FLAGS = 'act1.moonrise,act2.started,piano.slid,step.open,counter.left,basin.inside,act3.started,act3.surfaced,founders.unbolted,act4.started,act4.risen,act6.started,epilogue,epi.leftCourt,epi.race';
 const SCENES = [
-  ['fountain_square', 15, 12], ['shop', 4, 5], ['crown', 11, 12], ['archive', 7, 7], ['crypt', 3, 4], ['lamp_street', 12, 8], ['hundred_steps', 9, 22],
+  ['fountain_square', 15, 12], ['shop', 4, 5], ['crown', 11, 12], ['archive', 7, 7], ['crypt', 3, 4], ['lamp_street', 12, 8], ['hundred_steps', 9, 22], ['bilge', 14, 12], ['harbor', 16, 7],
 ];
 const port = 8126 + Math.floor(Math.random() * 50);
 const server = spawn(process.execPath, [new URL('./serve.js', import.meta.url).pathname, String(port)], { stdio: 'ignore' });

@@ -19,7 +19,7 @@ export const act6Items = {
   },
   new_plug: {
     name: 'Bath Plug',
-    icon: { sheet: items2, frame: 'bath_plug' },
+    icon: { sheet: items2, frame: 'bath_plug_new' },
     description: "A new plug. Brass, with a little chain. It isn't the same. It'll do.",
   },
 };

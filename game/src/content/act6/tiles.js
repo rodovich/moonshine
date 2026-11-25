@@ -3,9 +3,9 @@
 
 import { hull } from '../../art/underground.js';
 import { keel_hatch } from '../../art/act5_under.js';
-import { basin, moonbeam, sight_wall, sight_props, keel, keel_lit } from '../../art/act6_under.js';
+import { basin, moonbeam, sight_wall, sight_props, keel, keel_lit, sight_lamp } from '../../art/act6_under.js';
 
 export const act6Tiles = {
-  sheets: { hull, keel_hatch, basin, moonbeam, sight_wall, sight_props, keel, keel_lit },
+  sheets: { hull, keel_hatch, basin, moonbeam, sight_wall, sight_props, keel, keel_lit, sight_lamp },
   tiles: {},
 };

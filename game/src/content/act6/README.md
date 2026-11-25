@@ -11,6 +11,7 @@ The climax and the ending: the bell and the hauling in the Windlass Room, the Lo
 | `sighting.js` | The Sighting Room (16 × 13): the Basin, the trim wheel, moon true, the master stop, the sighting log, the bath, the lift. |
 | `climax.js` | The Windlass Room's Act 6 state (Act 5's map): the bell, the brake, the hauling, the hatch to the Long Keel. |
 | `montage.js` | The two montages (the lurch and the refill): instant cuts to other acts' maps at night. |
+| `night.js` | The montage cuts' night props on other acts' maps (the dry Bilge's lanterns and crowd, the piano and the Boatman's boat, the canals refilling; the wet Bilge's crowd; the Keeper at the lamp room's window; Ambrose at the rope), shown only during a cut. |
 | `dawn.js` | The lift ride, Cheryl climbing out of the well, "Morning." |
 | `epilogue.js` | Act 6's states of the surface maps: everyone's morning-after line, the piano, the Stair Race, the Shopkeeper's plug, the door home. |
 | `ending.js` | The tick on the chart, the final vista, the credits, back to the title. |
@@ -25,8 +26,9 @@ Act 6 owns two maps (`long_keel`, `sighting_room`); everything else it touches b
 
 What Act 6 relies on, by map:
 
-- **`windlass_room`** (Act 5, not built yet): the layout in docs/design/05-high-and-dry.md (brake 17,8; speaking tube 15,2; drum 5-20,4-7; hawse 21,3-4; hatch 7-8,1-2; coils 3-4,10). Act 5 calls `content.scripts.act6_start` after its Moonrise card, with Cheryl on the west coil. Until the map exists, the Long Keel's east exit is left out.
-- **`belfry`**, **`bilge_dry`** (Act 4), **`harbor`**, **`lamp_room`**, **`bilge`** (Act 2 part 2, and Act 5's states of them): the montage cuts. A cut whose map isn't built is skipped. Their ids and camera points are in `state.js`, to confirm with those builders.
+- **`windlass_room`** (Act 5, `content/act5`, not merged yet): the layout in docs/design/05-high-and-dry.md (drum 5-20,4-7; hawse 21,3-4; hatch 7-8,1-2), with Act 5's entities `brake` (17,8), `speaking_tube` (15,2), and `coil_west` (3-4,10), which Act 6 hides at night and replaces. Act 5 exports `act5 = { next }`; `src/content/index.js` should set `act5.next = act6Start` (the `act6_start` script) when Act 5 is merged. Act 5 calls it right after its Moonrise card, the screen still black, with Cheryl sitting on the west coil. Until the map exists, the Long Keel's east exit is left out.
+- **`belfry`** (Act 4; Ambrose there is `ambrose_belfry`), **`bilge_dry`** (Act 4), **`lamp_room`**, **`bilge`** (Act 2), **`harbor_risen`** (Act 5): the montage cuts, centred on walkable tiles given in `montage.js`. Act 6's props there (`night.js`) show only while `fx.montage` is set. A cut whose map isn't built (`harbor_risen`, for Mott's toast) is skipped.
+- **`bilge`**, **`harbor`** (Act 2): the epilogue. Hidden there: `fishmonger`, `boatman`, `canal_0`, `canal_16`, `canal_26`, `water_stairs`; `mott`.
 - **`cistern_court`**, **`flat`** (the opening), **`lamp_street`**, **`crown`**, **`archive`**, **`crypt`**, **`hundred_steps`**, **`fountain_square`**, **`shop`** (Act 2): the epilogue. Entity ids hidden there: `old_man`, `neighbor_morning`, `cat_morning`, `tub`, `well`, `kid_morning`; `girl_1..3`, `bench_man`, `watering_woman`; `ambrose`; `ottilie`; `founders_door`; `mayor`, `tourist`, `counting_woman_square`, the Movers and the piano, `fountain`; `shopkeeper`, `hat_display`; `counting_woman`, `basin_woman`, `kid`, `kid_after`.
 
 The other builders were asked to make their own world states (dry canals, the dry Fountain, laundry, the risen Harbor, the Teeth, hull-creak loops, Act 3's Crown at dusk) come out false once `epilogue` is set, so every surface map falls back to its plain Act 2 daytime look.
@@ -64,15 +66,15 @@ Where the design left something open, or didn't work in play, this is what the b
 - **The Long Keel's lamps sit in the upper wall row (y1), glowing on the floor below (y3)**, as the art draws them, not on row 2 as in the design's sketch. They wake when Cheryl is three tiles away, each with a chime panned by where it is; ribs at x4, 8, 16, 20, 24, 28, 36.
 - **The grooves are a line, not a hotspot**: Cheryl remarks on them the first time she walks in them, well along. A hotspot down the middle row caught every click meant for walking.
 - **The Sighting Room's door slides up in a short scene** when Cheryl reaches x5, with her line. (Ambient timers pause while text shows, so it can't animate in the background.)
-- **The Sighting Room has two moonglass lamps on its north wall (x5 and x10)**, dark until the moon sits true, so "the lamps all along the walls flare" has lamps to flare. The art has no other wall lamps there.
-- **The plug's glint** is the disc's flare effect over the dry Basin every few seconds, with the `plug_glint` sound, until the plug is taken. (A smaller silver glint is asked of the art task.)
+- **The Sighting Room has two Keepers' sconces (`sight_lamp`) on its north wall (x5 and x10)**, dark until the moon sits true, so "the lamps all along the walls flare" has lamps to flare.
+- **The plug's glint** is `plug_glint:glint` over the dry Basin every few seconds, with the `plug_glint` sound, until the plug is taken. It draws among the characters, so the moonbeam overhead softens it.
 - **Looking into the full Basin** shows the Basin view at the current trim, with a line for each position, so the player can check the moon before turning the wheel.
 - **The moon glides between trim positions** (about 1.6 s) rather than jumping.
 - **The master stop is pulled from below it (9, 7)**; the room's "1 px tilt" is `g.tilt(0, 1)` easing back over two seconds.
 - **The bath**: Cheryl steps to (6, 6) beside the Basin, takes her shoes off there (the shoes stay on that tile while she bathes), and sits in the middle of the Basin. After **Later.** she stands at (7, 7) and the Long Keel's `keel` music plays in the room.
 - **The lift doesn't work before the bath**, and says so ("Not yet. Not with the moon off to one side like that.").
 - **The lift ride** is a full-screen picture of the shaft wall sliding down past her disc's pool of light, about four seconds.
-- **Dawn is a lighting preset of Act 6's own** (`dawn`, pink with a gold lift), on Cistern Court from the climb out of the well until Cheryl first leaves the court; it's plain day after that.
+- **Dawn is the art task's `dawn` lighting** (pink with a gold lift), on Cistern Court from the climb out of the well until Cheryl first leaves the court; it's plain day after that.
 - **Cheryl climbs out at the well's mouth**, her cut-off frames drawn 20 px up from (9, 17) so the cut sits on the rim, and steps down to (9, 18).
 - **The door home is a scripted exit** in the epilogue: "Not yet" until the piano has come, then the final scene; after the credits it's an ordinary door again.
 - **The piano stands at (4-5, 12)**, east of Cheryl's door (the design's position; the art index's suggested spot west of it would cover the door). The Movers wait at (6, 12) and (7, 13) and leave down the Squeeze.
@@ -81,13 +83,13 @@ Where the design left something open, or didn't work in play, this is what the b
 - **The Woman with Basin tips her basin when talked to**, on her doorstep (7, 16).
 - **The Tourist stands at (18, 14) with her luggage at (19, 15)**, by the café.
 - **The Crown's clock tick stops** in the epilogue (the clock is gone).
-- **The final vista's title fades out again before the credits**, and the picture dims a little under them, so the lines read where they cross the moon. MOONSHINE is still the credits' first line.
+- **The final vista's title fades out again before the credits**, and the picture dims a little under them, so the lines read where they cross the moon. The roll starts with the roles: the title has just shown, so it isn't repeated as a line of text.
 - **After the credits**, Cheryl is saved in the flat at (5, 7) with `act6.done` and `game.complete`; every map keeps its epilogue state.
-- **The bell's 15-second timer** counts seconds Cheryl spends in the Windlass Room outside a scene. Scripts can't yet be started from a timer through the script API, so `queueScript` in `state.js` uses the running game (`window.moonshine`); asked of the engine task.
+- **The bell's 15-second timer** is an ambient event with `script: true`: it counts only while no scene plays, and resets when the map loads.
+- **The montage cuts** follow the art task's composed scenes: lanterns on poles along both quays of the dry Bilge with pools of light, the crowd on the north quay (they sit down hard in the lurch and cheer in the refill), the Mayor on the bridge, the piano rolling along the mud into the Boatman's boat. The court cut starts at the chess table and pans up to the Neighbor's sheets. Ambrose pulls the rope from below the bell. The lamp room cut shows the Keeper at the window; the Teeth themselves aren't visible through it.
+- **The Bilge and Harbor epilogue**: the Boatman afloat in his own (empty) boat; the Pelletiers at (15-16, 6) on the Harbor quay with their luggage at (17, 6); Mott on his bollard; the Keeper on the quay at (21, 7).
 - **Lines added for states the design doesn't cover:** looking into the full Basin at each trim; the shaft's repeat; the walls; the log's signed repeat; the lift before the bath; the master stop after it's pulled; the Basin after the bath (a second repeat); the Long Keel's lamps and the shut door; the Windlass drum and hawse before the hauling, the coil, the sealed hatch, the tube's repeat; the Old Man after the piano ("Play it when you're ready..."); the tub with the new plug; the Movers ("Delivered."); the Stair Race runners and crowd; the Tourist's luggage; the Clockmaker's, Ambrose's, Ottilie's, and the Shopkeeper's answers to items.
 
 ## Stand-ins and gaps
 
-- **The Windlass Room climax and both montages** wait for Acts 4, 5 and 2 part 2's maps. The scripts are written to the design's positions; the montage's night props (the crowd, the lanterns, the piano rolling into the boat, Mott's mug, the Teeth receding, the canals refilling) are still to be placed on those maps once they exist.
-- **The epilogue on the Bilge and the Harbor** (the Fishmonger, the Boatman afloat, the Pelletiers, the ferry level, Mott, the Keeper on the quay) waits for Act 2 part 2's maps.
-- **The plug's glint** uses the disc's flare.
+- **The Windlass Room climax** (the bell, the brake, the hauling, the hatch) and the risen Harbor's cut (Mott's toast, the Teeth receding) wait for Act 5's maps. The bell's cut to the belfry and the other four montage cuts play now (`?run=act6_bell`, `act6_lurch`, `act6_refill`).

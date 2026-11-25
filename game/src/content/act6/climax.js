@@ -15,7 +15,7 @@
 import { brake, keel_hatch, windlass_drum } from '../../art/act5_under.js';
 import { windlass_night, keel_lit } from '../../art/act6_under.js';
 import { bump, cherylDeclines, night } from './common.js';
-import { act6, HAULING_LINKS, queueScript } from './state.js';
+import { act6, HAULING_LINKS } from './state.js';
 import { lurchMontage } from './montage.js';
 
 const Q = [['nw', 0, 0], ['ne', 1, 0], ['sw', 0, 1], ['se', 1, 1]];
@@ -24,21 +24,23 @@ const BELL_AFTER = 15; // seconds of anything else before the bell rings on its 
 // ---------------------------------------------------------------------------
 // The start of the act (after Act 5's Moonrise card): Cheryl on the west coil.
 
+// Act 5 calls this (its `act5.next`) straight after the card, the screen still
+// black, with Cheryl sitting on the coil (sitcoil_down at (3, 10)).
 export async function act6Start(g) {
   g.setFlag('act6.started');
   g.setWrongness(0.5);
-  bellClock = 0;
-  if (g.map !== act6.ids.windlass) return;
-  g.startLoop('tube_wind', { fadeMs: 1000 });
+  g.setLighting('night', 0);
+  g.startLoop('tube_wind', { fadeMs: 1500 });
   g.setLoopVolume('tube_wind', 0.5, 0);
-  await g.wait(1);
+  await g.fade('in', 1.5);
+  await g.wait(1.2);
+  // She gets up off the coil.
   g.pose('player', null);
+  g.place('player', 3, 11, 'up');
 }
 
 // ---------------------------------------------------------------------------
 // The bell
-
-let bellClock = 0;
 
 export async function bell(g) {
   if (g.flag('bell.final')) return;
@@ -187,7 +189,8 @@ export function windlassAct6(map) {
 
   return {
     sheets: { brake, keel_hatch, windlass_drum, windlass_night, keel_lit },
-    hide: [{ when: night, ids: act6.windlassHide || [] }],
+    // Act 5's brake, speaking tube, coil, drum, chain, hawse, and hatch step aside for Act 6's own.
+    hide: [{ when: night, ids: ['brake', 'speaking_tube', 'coil_west', 'drum', 'chain', 'hawse', 'keel_hatch'] }],
     entities: objects,
     exits: [0, 1].map((i) => ({ x: 7 + i, y: 2, to: 'long_keel', at: [38, 3 + i], facing: 'left', when: (g) => !!g.flag('hatch.open') })),
     patches: (g) => {
@@ -209,21 +212,13 @@ export function windlassAct6(map) {
     },
     // Moonlight, silver, through the hawse.
     lights: [{ x: 20.5, y: 3.5, radius: 2, color: 'moon_light', when: night }],
-    ambient: [{
-      every: [1, 1],
-      when: (g) => night(g) && !g.flag('bell.final'),
-      run: (g) => {
-        bellClock++;
-        if (bellClock >= BELL_AFTER) {
-          bellClock = -1000;
-          queueScript(bell);
-        }
-      },
-    }],
+    // The bell rings on its own after 15 seconds of the player doing anything else
+    // (ambient timers only count while no scene is playing).
+    ambient: [{ every: [BELL_AFTER, BELL_AFTER], when: (g) => night(g) && !g.flag('bell.final'), script: true, run: bell }],
+    lighting: (g) => (night(g) ? 'night' : undefined),
     onEnter: async (g, base) => {
       if (!night(g)) return base(g);
       g.setWrongness(0.5);
-      bellClock = 0;
       if (!g.flag('brake.thrown')) g.startLoop('tube_wind', { fadeMs: 1000 });
       if (g.flag('chain.home')) g.playMusic('keel');
     },
