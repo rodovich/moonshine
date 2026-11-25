@@ -264,6 +264,7 @@ const mirror = {
 export const galleryMap = composedMap(composeGallery, {
   ...UNDER,
   id: 'step_gallery',
+  lightArea: [[1, 1, 22, 9]], // light stays inside the room and its walls
   name: 'The Step Gallery',
   tileset: act3Tiles,
   spawn: [3, 3],
@@ -368,6 +369,7 @@ const cradleObjects = [
 export const cradleMap = composedMap(composeCradle, {
   ...UNDER,
   id: 'cradle',
+  lightArea: [[1, 1, 6, 4], [3, 5, 2, 1]], // light stays inside the room and its walls
   name: 'The Cradle',
   tileset: act3Tiles,
   spawn: [3, 4],

@@ -173,7 +173,8 @@ export async function trimWheel(g) {
   }
   if (g.flag('moon.true')) return g.describe("It won't go any further. It knows.");
   const from = g.flag('trim') || 0;
-  const way = await g.choose('Turn the wheel which way?', ['Toward the Gate', 'Back', 'Leave it']);
+  // Once the moon is dead in the Gate, 'on' is the way to two fingers past.
+  const way = await g.choose('Turn the wheel which way?', [from === 2 ? 'On, two fingers' : 'Toward the Gate', 'Back', 'Leave it']);
   if (way === 2) return;
   if (way === 1 && from === 0) return g.describe("It won't go back any further. The moon's as far from the Gate as it gets.");
   const step = way === 0 ? from + 1 : from - 1;
@@ -329,6 +330,14 @@ export async function bath(g) {
   await g.think('The best bath of my life is in a stone bowl at the bottom of the city, with my own plug.');
   await g.think('Nobody will ever know.');
   await g.think('Most of the best things, nobody ever knows.');
+  // The bath has happened: behind the Basin view, Cheryl is out, shoes on, and the
+  // game is saved there, so a reload from here on keeps it (and never lands her in the Basin).
+  g.setFlag('fx.shoes', null);
+  g.pose('player', null);
+  g.player.def.shadow = undefined;
+  g.place('player', 7, 7, 'up');
+  g.setFlag('bathed');
+  g.save();
   // 6. Hold, then Later.
   await g.wait(3);
   g.stopMusic(2500);
@@ -337,11 +346,6 @@ export async function bath(g) {
   await g.hidePicture({ fade: 0 });
   await g.card('Later.', 2.5);
   // 7. Cheryl beside the Basin, shoes on, hair a little damp.
-  g.setFlag('fx.shoes', null);
-  g.pose('player', null);
-  g.player.def.shadow = undefined;
-  g.place('player', 7, 7, 'up');
-  g.setFlag('bathed');
   await g.fade('in', 1.5);
   g.playMusic('keel');
 }

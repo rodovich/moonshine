@@ -33,7 +33,7 @@ export function SCENE(state) {
           const cy = Math.max(92, Math.round(126 - 6 * (t - 2000) / 1000));
           ctx.drawImage(anim('final_moon', 'moon', now), 128 - 16, cy - 16);
         }
-        ctx.drawImage(img('vista_rim', 'rim'), 0, 0);
+        ctx.drawImage(img('final_rim', 'rim'), 0, 0);
         // a year later: Cheryl in her tub (the Act 1 vista keeps her perched on its edge)
         ctx.drawImage(img('vista_cheryl_bath', 'cheryl_bath'), 0, 128);
         // hold, then the title: a two-step fade

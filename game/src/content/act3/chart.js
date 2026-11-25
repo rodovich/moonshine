@@ -230,6 +230,7 @@ const keeperObjects = [
 export const chartMap = composedMap(composeChart, {
   ...UNDER,
   id: 'chart_room',
+  lightArea: [[1, 1, 14, 12], [7, 13, 2, 1]], // light stays inside the room and its walls
   name: 'The Chart Room',
   tileset: act3Tiles,
   spawn: [7, 12],

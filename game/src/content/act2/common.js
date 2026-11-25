@@ -20,7 +20,7 @@ export const act2Items = {
   guidebook: {
     name: 'Guidebook',
     icon: { sheet: items_act2, frame: 'guidebook' },
-    description: 'Tessel: A Pocket Companion. Confidently wrong on every page. I\'ve grown fond of it.',
+    description: 'Tessel: A Pocket Companion. Confidently wrong on every page, from the Steps to the time of day. I\'ve grown fond of it.',
     // One entry per look, in order (docs/design/02-city.md, "Reading the guidebook").
     looks: [
       ["'The Hundred Steps (there are, in fact, 99). A charming climb.'", "In fact. In print. Somebody's going to be upset about that."],

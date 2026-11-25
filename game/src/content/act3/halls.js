@@ -252,6 +252,7 @@ const pipes = PIPES.map((x) => ({
 export const hallsMap = composedMap(composeHalls, {
   ...UNDER,
   id: 'lamp_halls',
+  lightArea: [[1, 4, 28, 7], [24, 0, 4, 6], [17, 11, 2, 3]], // light stays inside the room and its walls
   name: 'The Lamp Halls',
   tileset: act3Tiles,
   spawn: [3, 7],
@@ -353,6 +354,7 @@ const bunkObjects = [
 export const bunkMap = composedMap(composeBunk, {
   ...UNDER,
   id: 'bunk_room',
+  lightArea: [[1, 0, 8, 6], [4, 6, 2, 1]], // light stays inside the room and its walls
   name: 'The Bunk Room',
   tileset: act3Tiles,
   spawn: [4, 5],
