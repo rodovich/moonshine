@@ -37,11 +37,14 @@ export class Game {
     this.rng = makeRng(this.debug.seed ?? Date.now());
     this.display = new Display(parent);
     this.input = new Input(this.display);
-    this.input.onFirstInput = unlockAudio;
+    this.input.onGesture = unlockAudio;
     this.effects = new Effects();
     this.textbox = new TextBox();
     this.inventory = new Inventory(content.items || {});
     this.ticks = 0;
+    // Smoothed milliseconds per update tick and per rendered frame (CPU time
+    // in our code; the browser's compositing comes on top). ?debug=1 shows it.
+    this.perf = { update: 0, render: 0, worstRender: 0 };
     this.scene = null;
 
     if (this.debug.start) {
@@ -109,12 +112,18 @@ export class Game {
     this.acc += dt;
     let n = 0;
     while (this.acc >= STEP - 0.01 && n < 8) {
+      const t0 = performance.now();
       guard('update', () => this.update());
+      this.perf.update = this.perf.update * 0.95 + (performance.now() - t0) * 0.05;
       this.acc -= STEP;
       n++;
     }
     if (n === 8) this.acc = 0;
+    const t1 = performance.now();
     guard('render', () => this.render());
+    const ms = performance.now() - t1;
+    this.perf.render = this.perf.render * 0.95 + ms * 0.05;
+    this.perf.worstRender = Math.max(this.perf.worstRender * 0.999, ms);
   }
 
   update() {

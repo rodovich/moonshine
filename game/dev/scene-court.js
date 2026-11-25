@@ -60,16 +60,21 @@ export function SCENE(state = 'dusk') {
   // ---------------- Facades (rows 10–11) and the stair at x7 ----------------
   const cheryl = ['wall_l', 'window_box', 'wall', 'door_top', 'wall', 'window', 'wall_r'];
   const cherylBase = ['wall_base_l', 'wall_base', 'wall_base', 'door_bot', 'wall_base', 'wall_base', 'wall_base_r'];
+  // The facades take the dimmer 'facade' plaster so the drop below the roof's coping reads.
+  // At dusk a few windows are lit (the _lit swaps put warm glass in them).
+  const litC = morning ? [] : [5], litN = morning ? [] : [3, 8];
   cheryl.forEach((f, x) => {
-    set(ground, x, 10, f.startsWith('door') ? `facade:${f}` : `buildings:${f}`);
-    set(ground, x, 11, cherylBase[x].startsWith('door') ? `facade:${cherylBase[x]}` : `buildings:${cherylBase[x]}`);
+    const pal = litC.includes(x) ? 'facade_lit' : 'facade';
+    set(ground, x, 10, f.startsWith('door') ? `facade:${f}@dim` : `buildings:${f}@${pal}`);
+    set(ground, x, 11, cherylBase[x].startsWith('door') ? `facade:${cherylBase[x]}@dim` : `buildings:${cherylBase[x]}@facade`);
   });
   const nb = ['wall_l', 'wall', 'wall', 'window', 'wall', 'window_box', 'door_top', 'wall', 'window', 'wall', 'window_box', 'wall_r'];
   const nbBase = ['wall_base_l', 'wall_base', 'wall_base', 'wall_base', 'wall_base', 'wall_base', 'door_bot', 'wall_base', 'wall_base', 'wall_base', 'wall_base', 'wall_base_r'];
   nb.forEach((f, i) => {
     const x = 8 + i;
-    set(ground, x, 10, f.startsWith('door') ? 'facade:door_top@sage' : `buildings:${f}@white_sage`);
-    set(ground, x, 11, nbBase[i].startsWith('door') ? 'facade:door_bot@sage' : `buildings:${nbBase[i]}@white_sage`);
+    const pal = litN.includes(i) ? 'facade_sage_lit' : 'facade_sage';
+    set(ground, x, 10, f.startsWith('door') ? 'facade:door_top@sage_dim' : `buildings:${f}@${pal}`);
+    set(ground, x, 11, nbBase[i].startsWith('door') ? 'facade:door_bot@sage_dim' : `buildings:${nbBase[i]}@facade_sage`);
   });
   set(ground, 7, 8, 'court:stair_head'); set(ground, 7, 9, 'court:stair_cut');
   set(ground, 7, 10, 'court:stair'); set(ground, 7, 11, 'court:stair');

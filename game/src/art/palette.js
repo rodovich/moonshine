@@ -27,6 +27,7 @@ export const COLORS = {
   // Surface: plaster. Whitewash is the default; the others are for variety.
   white_light: '#f8f8f0',
   white: '#e8e8e0',
+  white_dim: '#d0d0c8',
   white_shade: '#c0c0d0',
   white_deep: '#8888a8',
 
@@ -189,6 +190,31 @@ export const COLORS = {
   // Lilac: Cheryl's lavender soap.
   lilac_light: '#d8b8e8',
   lilac: '#a888c8',
+
+  // Underground (art): Founder bronze gone to verdigris, moonglass glow, amber warning light,
+  // and the hullstone's honeycomb where a block is broken.
+  bronze_light: '#d8a870',
+  bronze: '#a87848',
+  bronze_shade: '#704830',
+  bronze_deep: '#402828',
+  moonglass_light: '#c8f8f0',
+  moonglass_dim: '#308890',
+  amber_dim: '#a06020',
+  hull_cell: '#586878',
+  hull_water: '#183848',
+
+  // Downstairs (art): daylight falling into the dark, and the charcoal rubbing of the Ship Plan.
+  daylight: '#f8f0c8',
+  daylight_dim: '#c8b880',
+  paper_light: '#f8f0e0',
+  charcoal_light: '#a09898',
+  charcoal: '#686068',
+  charcoal_deep: '#302830',
+
+  // Act 4 (art): the canal bed laid bare.
+  mud_light: '#988870',
+  mud: '#685848',
+  mud_deep: '#403028',
 
   // UI (engine)
   ui_ink: '#201828',

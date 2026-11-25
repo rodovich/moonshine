@@ -1,5 +1,6 @@
 // Buildings sheet: whitewashed walls, flat roofs, windows, doors, balcony, arch, dome.
-// Swap palettes for plaster colors: ochre, rose, sky, white_sage.
+// Swap palettes for plaster colors: ochre, rose, sky, white_sage; facade (a dimmer wall under a walkable roof),
+// facade_sage; and _lit versions with warm window glass for dusk and night.
 // Frames named over_* belong on the overhead layer. See docs/art-direction.md.
 
 export const buildings = {
@@ -25,6 +26,12 @@ export const buildings = {
     rose: { a: 'rose_light', b: 'rose', c: 'rose_shade', e: 'rose_deep', "1": 'sage_light', "2": 'sage', "3": 'sage_shade', "4": 'sage_deep', g: 'glass_dark', G: 'glass_light', s: 'stone', m: 'stone_mid', l: 'leaf', r: 'bloom_red', k: 'ink' },
     sky: { a: 'sky_light', b: 'sky', c: 'sky_shade', e: 'sky_deep', "1": 'wood_light', "2": 'wood', "3": 'wood_shade', "4": 'wood_deep', g: 'glass_dark', G: 'glass_light', s: 'stone', m: 'stone_mid', l: 'leaf', r: 'bloom_red', k: 'ink' },
     white_sage: { a: 'white_light', b: 'white', c: 'white_shade', e: 'white_deep', "1": 'sage_light', "2": 'sage', "3": 'sage_shade', "4": 'sage_deep', g: 'glass_dark', G: 'glass_light', s: 'stone', m: 'stone_mid', l: 'leaf', r: 'bloom_red', k: 'ink' },
+    lit: { a: 'white_light', b: 'white', c: 'white_shade', e: 'white_deep', "1": 'cobalt_light', "2": 'cobalt', "3": 'cobalt_shade', "4": 'cobalt_deep', g: 'lamp_warm', G: 'lamp_glow', s: 'stone', m: 'stone_mid', l: 'leaf', r: 'bloom_red', k: 'ink' },
+    white_sage_lit: { a: 'white_light', b: 'white', c: 'white_shade', e: 'white_deep', "1": 'sage_light', "2": 'sage', "3": 'sage_shade', "4": 'sage_deep', g: 'lamp_warm', G: 'lamp_glow', s: 'stone', m: 'stone_mid', l: 'leaf', r: 'bloom_red', k: 'ink' },
+    facade: { a: 'white', b: 'white_dim', c: 'white_shade', e: 'white_deep', "1": 'cobalt_light', "2": 'cobalt', "3": 'cobalt_shade', "4": 'cobalt_deep', g: 'glass_dark', G: 'glass_light', s: 'stone', m: 'stone_mid', l: 'leaf', r: 'bloom_red', k: 'ink' },
+    facade_lit: { a: 'white', b: 'white_dim', c: 'white_shade', e: 'white_deep', "1": 'cobalt_light', "2": 'cobalt', "3": 'cobalt_shade', "4": 'cobalt_deep', g: 'lamp_warm', G: 'lamp_glow', s: 'stone', m: 'stone_mid', l: 'leaf', r: 'bloom_red', k: 'ink' },
+    facade_sage: { a: 'white', b: 'white_dim', c: 'white_shade', e: 'white_deep', "1": 'sage_light', "2": 'sage', "3": 'sage_shade', "4": 'sage_deep', g: 'glass_dark', G: 'glass_light', s: 'stone', m: 'stone_mid', l: 'leaf', r: 'bloom_red', k: 'ink' },
+    facade_sage_lit: { a: 'white', b: 'white_dim', c: 'white_shade', e: 'white_deep', "1": 'sage_light', "2": 'sage', "3": 'sage_shade', "4": 'sage_deep', g: 'lamp_warm', G: 'lamp_glow', s: 'stone', m: 'stone_mid', l: 'leaf', r: 'bloom_red', k: 'ink' },
   },
   size: [16, 16],
   frames: {

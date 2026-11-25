@@ -256,6 +256,11 @@ export function makeApi(world) {
     shake(amount = 3, seconds = 0.4) {
       return fx.shake(amount, seconds);
     },
+    // A slow, held screen offset (not a jitter): eases to (dx, dy) pixels
+    // over `seconds` and stays until tilt(0, 0, seconds) eases it back.
+    tilt(dx, dy, seconds = 1) {
+      return fx.tilt(dx, dy, seconds);
+    },
     // Color wash. mode: 'source-over' (default), 'multiply', 'screen',
     // 'color', 'hue', 'saturation', 'difference'. Amount 0 removes it.
     tint(color, amount = 0.5, seconds = 0.5, mode) {

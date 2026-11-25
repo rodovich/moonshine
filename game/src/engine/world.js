@@ -845,7 +845,8 @@ export class World {
     for (const [x, y] of this.control.path || []) ctx.fillRect(x * TILE + 6 - cx, y * TILE + 6 - cy, 4, 4);
     ctx.restore();
     const p = this.player;
-    drawText(ctx, `${this.state.map} ${p.x},${p.y}`, 4, HEIGHT - 12, { color: 'ui_select' });
+    const perf = this.game.perf;
+    drawText(ctx, `${this.state.map} ${p.x},${p.y}  upd ${perf.update.toFixed(2)}ms  draw ${perf.render.toFixed(2)}ms`, 4, HEIGHT - 12, { color: 'ui_select' });
   }
 }
 
