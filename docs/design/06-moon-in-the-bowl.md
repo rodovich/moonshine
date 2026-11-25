@@ -6,11 +6,11 @@ This is the build-ready design for Act 6, the last act ([overview](overview.md),
 
 The bell rings at the turn. Cheryl throws the brake, and the tide hauls Tessel home: the chain comes in link by link, each one a thunderclap, while all over the city the Dry Canal Day crowd falls over, the piano rolls into the Boatman's boat, the Old Man's chess pieces fly, and from the lighthouse the Teeth slide away into the dark. The sealed hatch opens onto the **Long Keel**, the straight spine of the hull, and its lamps wake ahead of her all the way to the **Sighting Room** under Cistern Court.
 
-Moonlight falls down a shaft onto a dry stone bowl big enough to sit in, and at the bottom of the bowl is her bath plug. *My plug.* It fits. The Basin fills. In the water: the Gate, and the moon, off to one side. She turns the trim wheel until the moon sits true (two fingers past the Gate, three nights past full, as the Keepers' log says), and the Basin's rim lights, and every lamp Downstairs blazes. The Keepers' master stop comes free: *put her back to bed.* The Middle Sister goes quiet, the city settles to its proper waterline, and far above, the canals come rushing back. "I'M AFLOAT! AND I'VE GOT A PIANO!"
+Moonlight falls down a shaft onto a dry stone bowl big enough to sit in, and at the bottom of the bowl is her bath plug. *My plug.* It fits. The Basin fills. In the water: the Gate, and the moon, off to one side. She turns the trim wheel until the moon sits true (two fingers past the Gate, two nights past full, as the Keepers' log says), and the Basin's rim lights, and every lamp Downstairs blazes. The Keepers' master stop comes free: *put her back to bed.* The Middle Sister goes quiet, the city settles to its proper waterline, and far above, the canals come rushing back. "I'M AFLOAT! AND I'VE GOT A PIANO!"
 
 Cheryl takes off her shoes and gets into the Basin. The best bath of her life, at the bottom of the city, with her own plug, the moon in the water around her. Nobody will ever know.
 
-At dawn she rides the Keepers' lift up and climbs out of the well in Cistern Court. The Old Man looks up from his chess: "Morning." Then a last walk through a town explaining the night to itself, wrongly, in a dozen different ways: the Mayor's clock, Ottilie's bootleggers, a seiche, the Pelletier boys. The Stair Race. The ferry docking first time. The piano, delivered at last, "from Gerald." And at her kitchen table, a tick on the moon chart, dead in the Gate. It isn't Moonshine Night. *But it counts.*
+At dawn she rides the Keepers' lift up and climbs out of the well in Cistern Court. The Old Man looks up from his chess: "Morning." Then a last walk through a town explaining the night to itself, wrongly, in a dozen different ways: the Mayor's clock, Ottilie's bootleggers, a seiche, the Pelletier boys. The Stair Race. The ferry docking first time. The piano, delivered at last, "from Gerald." And at her kitchen table, a tick on the moon chart, in the Gate. It isn't Moonshine Night. *But it counts.* Then a year later, on the next Moonshine Night: Cheryl in her own tub on the roof, with a new plug, and the moon rising dead in the Gate.
 
 **Playtime:** 15–25 minutes (the epilogue walk is as long as the player likes). **Maps:** 2 new (Long Keel, Sighting Room), plus night states for the montage and morning states for the whole town. **New items:** the bath plug (found, then left behind). **Wrongness:** 0.5, falling to 0 the moment the moon sits true.
 
@@ -88,7 +88,7 @@ Short cutaways, 2–3 seconds each, cut in without fades. Each is an existing ma
 - **`bilge_dry`, Dry Canal Day:** lanterns on poles along both quays (lights, warm); a crowd of six to eight residents on the north quay; the Mayor on the bridge (13, 9) with a lantern; the Movers and the piano on the mud; the Boatman in his boat at the foot of the stairs.
 - **Cistern Court, night:** the Old Man at his chess; the Neighbor on her roof with her sheets on the back line.
 - **Lamp room, night:** the Keeper at the window; through it, the Teeth (stage 3).
-- **Risen Harbor, night:** Mott alone at the quay edge with his empty jug; the moon over the Rim.
+- **Risen Harbor, night:** Mott alone at the quay edge with a mug of tea (his jug is the Clockmaker's doorstop now); the moon over the Rim.
 - **Belfry, night:** Ambrose at the rope, moonlight through the openings.
 - **The wet Bilge, night** (for the refill montage): the canals filling, the Boatman's boat rising with the piano in it.
 
@@ -147,7 +147,7 @@ Control returns after the Moonrise card, with Cheryl on the chain coil.
    1. **`bilge_dry`, Dry Canal Day.** The Mayor on the bridge, lantern raised. MAYOR: …and so, citizens, tonight Tessel steps FORWARD— → a lurch (3 px), and the whole crowd sits down at once (a falling-over pose). The piano rolls along the mud, gathering speed, and drops into the Boatman's boat with a crash of chords. BOATMAN: …I've got a piano.
    2. **Cistern Court.** The lurch. The Old Man's chess pieces fly off the board. OLD MAN: GERALD! On the roof, the Neighbor's sheets stand straight out like flags.
    3. **Lamp room.** The Keeper at the window. Through it, the Teeth (stage 3) slide slowly away to one side and shrink into the dark. LIGHTHOUSE KEEPER: It's going. It's GOING.
-   4. **Risen Harbor.** Mott at the quay edge. On the Rim beyond the Bowl, the moon. He raises his empty jug to it. No line.
+   4. **Risen Harbor.** Mott at the quay edge. On the Rim beyond the Bowl, the moon. He raises a mug of tea to it. No line.
    5. **Belfry.** Ambrose still holding the rope, eyes shut. AMBROSE: HOME AGAIN.
 5. Back to the Windlass Room. The booms slow. The last link comes in. The drum stops. Silence, except for the sea through the hawse, which is calmer now. → `chain.home`.
 6. In the north wall, the moon-in-bowl emblem on the hatch lights cyan, and the hatch grinds open (7–8, 1–2).
@@ -187,14 +187,14 @@ On entering, the nearest lamps wake one by one ahead of Cheryl (a chime each). A
 - **The trim wheel** (3–4, 1–2), before the Basin is full: "A bronze wheel, marked with a moon and an arrow. It won't turn. It wants something to look at first."
 - **The trim wheel**, once the Basin is full: each interaction turns it one step (a deep creak, a 1 px shake as the whole hull swings a hair on its chain), then shows the Basin view with the moon moved, then a description:
   - **Step 1:** the moon slides left, toward the Gate. "Closer."
-  - **Step 2:** the moon sits dead in the middle of the Gate. "Dead in the Gate. Like every Moonshine Night of my life." / "But it isn't Moonshine Night. It's three nights past full. 'Allow two fingers.'"
+  - **Step 2:** the moon sits dead in the middle of the Gate. "Dead in the Gate. Like every Moonshine Night of my life." / "But it isn't Moonshine Night. It's two nights past full. 'Allow two fingers.'"
   - **Step 3:** the moon slides on, two fingers past the middle → `moon.true`. See "Moon true."
   - Once true, the wheel won't turn further: "It won't go any further. It knows."
 - **The sighting log** (14, 4): a stone stand with a bronze-bound book. Each look reads one entry, newest first:
   1. "'Moon true in the bowl.' Signed with a B. The last entry. Three hundred years ago."
   2. "'Past full: allow two fingers. Past half: allow a hand.' A rule, written large, for anyone who comes after."
   3. "Pages of it. 'Moon true. Moon true. A finger west; corrected. Moon true.'"
-  - After `moon.true`, use (or interact again) → `log.signed`: "There's a pen in the stand, and ink, somehow still wet." / "I write under his: 'Rang at the turn. Moon true in the bowl. All well.' And a C." / "Somebody should."
+  - After `moon.true`, use (or interact again) → `log.signed`: "There's a stub of pencil in the stand. Pencils keep." / "I write under his: 'Rang at the turn. Moon true in the bowl. All well.' And a C." / "Somebody should."
 
 ### Moon true
 
@@ -265,7 +265,7 @@ The flat's door, before `epi.piano`: "Not yet. I want to see the town first."
 - NEIGHBOR (repeat): Mother's recipe. Vinegar and something. And a straight moon. That's the secret.
 - **The well**: "The well. Quiet again. Not breathing. Just a well, as far as anyone knows."
 - **The Pelletiers' cat**: "Back on the bench, in the sun. There's no uphill side any more."
-- **The tub** (on the roof): "My tub. No plug. Of course." / "It can wait till next year."
+- **The tub** (on the roof): without the Shopkeeper's plug: "My tub. No plug. Of course." / "It can wait till next year." With it: "A new plug. It'll do. Next year."
 
 ### Lamp Street
 
@@ -311,7 +311,7 @@ The first time Cheryl enters the Steps in the epilogue, the Stair Race is under 
 
 ### Shop
 
-- SHOPKEEPER: Miss! I heard you lost your plug. In all the excitement. I've got one. Display stock.
+- SHOPKEEPER: Miss! The Old Man says you've lost your plug. I've got one. Display stock.
 - SHOPKEEPER: …Oh, take it. Take it. My first sale in thirty years. Well, my first gift. I feel wonderful.
 - → *Got Bath Plug.* (`got.newPlug`) "A new plug. Brass, with a little chain. It isn't the same. It'll do."
 - SHOPKEEPER (repeat): Two transactions in one week. I'll have to have a lie down.
@@ -349,7 +349,7 @@ The ferry *Persistence* is tied up at the landing, level, as it should be. Two n
 8. OLD MAN: Gerald thought you should have it.
 9. "Gerald has very good manners for a man who doesn't exist." → `epi.piano`.
 
-**The piano** afterward: First: "Middle C." / "In tune. Somebody's had it tuned." Then: → it plays a short phrase of the rhyme (four notes), in tune: "Later. I'll play later."
+**The piano** afterward: First: → one note, flat. "Middle C. Flat, after the week it's had." / "I'll tune it." Then: "Later. I'll play later."
 
 ## The final scene
 
@@ -360,8 +360,8 @@ The ferry *Persistence* is tied up at the landing, level, as it should be. Two n
 3. She adds the tick (a short writing animation).
 4. "It isn't Moonshine Night."
 5. "But it counts."
-6. Fade to black.
-7. **The final vista:** the Bowl at moonrise, from Cheryl's roof, the Act 1 vista composition: Cheryl's silhouette on the tub's edge in the foreground, rooftop basins twinkling, the Rim, and the moon rising **dead in the Gate**. The music box plays the rhyme, whole and in tune, and the home motif lands.
+6. Fade to black. Card: **Moonshine Night. A year later.**
+7. **The final vista:** the Bowl at moonrise, from Cheryl's roof, the Act 1 vista composition, on the next Moonshine Night: Cheryl's silhouette **in** her tub this time, not perched on its edge (she has a new plug, whether the Shopkeeper gave it to her or not; a year is long enough to buy one), rooftop basins twinkling, the Rim, and the moon rising **dead in the Gate**, as it should on Moonshine Night with the city where it belongs. The music box plays the rhyme, whole and in tune, and the home motif lands. It closes the Act 1 loop: the ritual bath that was stolen in the opening, finally taken. The Basin bath stays the unexpected one.
 8. Hold. Then the title **MOONSHINE** fades in over the sky.
 9. The credits roll over the vista (see "Credits").
 10. After the credits, the title screen. The save is marked complete; Continue reopens the flat in the morning state, with everyone's epilogue lines available.
@@ -410,12 +410,12 @@ Plain and short, in the game's font, over the final vista. Roles, not people (de
 
 **Full-screen images**
 - **The Basin view**: a circle of still water in a stone rim, reflecting the Rim's silhouette, the notch of the Gate, and the night sky, with the moon as a separate sprite so it can sit at four positions (far right, nearer, dead center, two fingers past); a variant with Cheryl's reflection at the edge and ripples
-- **The final vista**: the Act 1 vista (the Bowl from Cheryl's roof) with the moon rising dead in the Gate, the sky a little clearer and kinder than in Act 1; the title MOONSHINE over it
+- **The final vista**: the Act 1 vista (the Bowl from Cheryl's roof) with the moon rising dead in the Gate, the sky a little clearer and kinder than in Act 1; the title MOONSHINE over it. **New:** Cheryl's silhouette sitting *in* the tub (head and shoulders above the rim, from behind), replacing the edge-sitting silhouette
 
 **Sprites**
 - A generic "sitting down hard" pose for residents (the crowd falling over), and a flying chess piece or two
 - The Boatman with the piano in his boat (seen from the quay)
-- Mott raising an empty jug
+- Mott raising a mug of tea
 - Ambrose at the rope at night (reuse the ringing frames)
 - The Keeper at the window (reuse)
 - Cheryl: sitting in the Basin, in water; taking off her shoes; climbing out of the well; sitting at the table and writing; turning a wheel; pulling a rod (reuse the lever heave)
@@ -481,9 +481,10 @@ All of this is built (audio/foundation, 865415c); ids and a step-by-step order f
 - **The montage is two short sets of instant cuts** (the lurch and the refill), showing the whole cast without leaving the underground for long.
 - **The piano lands in the Boatman's boat during the lurch, and he delivers it by boat.** It resolves the piano's journey, and his.
 - **Cheryl leaves her plug in the Basin.** It's the Basin's plug now; the Shopkeeper gives her a new one, his first "sale," if she visits.
-- **The trim targets "two fingers past" the Gate, not the middle,** because the climax is three nights after full moon; the Keepers' rule ("Past full: allow two fingers") was planted in Act 3 and is repeated in the sighting log here.
+- **The trim targets "two fingers past" the Gate, not the middle,** because the climax is two nights after full moon (Moonshine Night is night 0; Acts 2–3 are day 1; Acts 4–5 are day 2; Act 6 is that night); the Keepers' rule ("Past full: allow two fingers") was planted in Act 3 and is repeated in the sighting log here.
 - **The Brannoc grace note is in the sighting log,** which is in the Sighting Room itself, so the player doesn't have to detour. Cheryl signs "C." under his "B." Optional, never pointed out.
 - **Ambrose's epilogue line is the last Keeper's last entry, word for word: "RANG AT THE TURN. ALL WELL."** Neither of them knows.
 - **The epilogue is a free walk with one gentle gate** (leave the court once), so players can linger or go straight home.
-- **The final image is the Act 1 vista, made right:** the moon in the Gate, the rhyme in tune.
+- **The final image is the Act 1 vista, made right, a year later on the next Moonshine Night,** with Cheryl in her tub. The moon is dead in the Gate because it's Moonshine Night again; on the climax night it was correctly two fingers past. (From review by xaKh8TS_PJ.)
+- **Revised after review:** the bell got a steel clapper when the clock was fitted (Act 4), so it can ring without its old bronze one; Ambrose points at the doorstop; Mott toasts the moon with tea, since his jug is a doorstop; the climax is two nights past full; the sighting log has a pencil, not wet ink; the piano arrives flat and Cheryl will tune it; the Shopkeeper heard about the plug from the Old Man.
 - **The credits end with "No one ever knew."**
