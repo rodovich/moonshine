@@ -231,7 +231,7 @@ const onScreen = (page, tx, ty) => page.evaluate(([x, y]) => {
 
 // Click toward (x, y), via on-screen tiles along the path if it's far.
 async function ptrWalk(page, x, y, { exit = false } = {}) {
-  for (let guard = 0; guard < 16; guard++) {
+  for (let guard = 0; guard < 40; guard++) {
     const s = await snap(page);
     if (s.x === x && s.y === y) return;
     if (await onScreen(page, x, y)) {
@@ -248,7 +248,7 @@ async function ptrWalk(page, x, y, { exit = false } = {}) {
         }
         return best;
       }, [x, y]);
-      if (!step) throw new Error(`no on-screen step toward ${x},${y}`);
+      if (!step) { await page.waitForTimeout(300); continue; } // someone (the Kid) is in the way for a moment
       await clickTileAt(page, step[0], step[1]);
     }
     await page.waitForTimeout(120);
@@ -538,7 +538,8 @@ test('keyboard: Act 2 part 1', async ({ page }) => {
   await kbWalk(page, 9, 17);
 
   // Down the ladder: "Go down?" — Not yet, then Yes.
-  await kbInteract(page, 'hundredth_step');
+  await kbWalk(page, 10, 18);
+  await page.keyboard.press('ArrowDown'); // stepping onto the open step asks
   await waitFor(page, () => !!window.moonshine.snapshot().choice, null, 4000);
   await settle(page);
   await shot(page, 'act2-17-go-down');
@@ -546,7 +547,8 @@ test('keyboard: Act 2 part 1', async ({ page }) => {
   await page.keyboard.press('z');
   await waitFor(page, () => window.moonshine.snapshot().idle, null, 4000);
   expect((await snap(page)).flags['act2.done']).toBeFalsy();
-  await kbInteract(page, 'hundredth_step');
+  await kbWalk(page, 10, 18);
+  await page.keyboard.press('ArrowDown'); // stepping onto the open step asks
   await waitFor(page, () => !!window.moonshine.snapshot().choice, null, 4000);
   await settle(page);
   await page.keyboard.press('z');
@@ -781,7 +783,8 @@ test('keyboard: the long way round, the Count thread first', async ({ page }) =>
   await kbStepDownAndUse(page, 9, 'crowbar');
   log = await read();
   expect(joined(log)).toContain('And the hundredth step goes down.');
-  await kbInteract(page, 'hundredth_step');
+  await kbWalk(page, 10, 18);
+  await page.keyboard.press('ArrowDown'); // stepping onto the open step asks
   await waitFor(page, () => !!window.moonshine.snapshot().choice, null, 4000);
   await settle(page);
   await page.keyboard.press('z');
