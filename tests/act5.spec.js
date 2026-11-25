@@ -807,3 +807,17 @@ test("the Keepers' ladder: up by keyboard, down by pointer", async ({ page }) =>
   await waitFor(page, () => window.moonshine.snapshot().map === 'belfry', null, 5000);
   expect(errors).toEqual([]);
 });
+
+// ---- the jug on the Boatman ------------------------------------------------
+// From the step above him (23, 7), facing down onto the broken edge, by
+// keyboard: his own jug line, not his catch-all.
+
+test('the square jug on the Boatman, from the step above him', async ({ page }) => {
+  const errors = await start(page, `?map=bilge_dry&x=23&y=7&facing=down&flags=${PRIOR},act5.started,teeth.stage=1,got.bucket,met.boatman5,n.edge=1&items=square_jug,bucket`);
+  await kbHold(page, 'square_jug');
+  await page.keyboard.press('z');
+  const log = await readThrough(page, () => page.keyboard.press('z'));
+  expect(joined(log)).toContain("Mott's jug? It'd make the boat drunk.");
+  expect(joined(log)).not.toContain("It's not water");
+  expect(errors).toEqual([]);
+});
