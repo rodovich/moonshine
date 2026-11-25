@@ -154,3 +154,9 @@ export function firstMeet(g, id) {
   g.setFlag(`met.${id}`);
   return true;
 }
+
+// Act 2's Wrongness: faint (story bible: about 0.1 after Act 1). Each Act 2 map
+// sets it on entry while Act 2 is the current act; later acts set their own.
+export function actWrongness(g) {
+  if (!g.flag('act2.done')) g.setWrongness(0.1);
+}

@@ -14,7 +14,7 @@
 
 import { composedMap, blankGrid } from '../opening/grid.js';
 import { act2Tiles } from './tiles.js';
-import { layout, bump, firstMeet, getItem, talking, cherylDeclines } from './common.js';
+import { layout, bump, firstMeet, getItem, talking, cherylDeclines, actWrongness } from './common.js';
 import { ottilie } from '../../art/named_npcs.js';
 
 // A room in the Archive's or crypt's own art: row 0 the top of the north wall,
@@ -154,7 +154,7 @@ export const archiveMap = composedMap(composeArchive, {
     { x: 7, y: AH - 1, w: 2, to: 'crown', at: [18, 7], facing: 'down' },
     { x: 13, y: 11, to: 'crypt', at: [2, 5], facing: 'right', sfx: 'step_stairs' },
   ],
-  onEnter: async (g) => { g.stopLoop('door_hum', 400); },
+  onEnter: async (g) => { actWrongness(g); g.stopLoop('door_hum', 400); },
   entities: [...archiveObjects, teapot, ottilieNpc],
 });
 
@@ -217,6 +217,7 @@ export const cryptMap = composedMap(composeCrypt, {
   ],
   spawn: [2, 5],
   exits: [{ x: 1, y: 5, to: 'archive', at: [12, 11], facing: 'left', sfx: 'step_stairs' }],
+  onEnter: async (g) => { actWrongness(g); },
   // The Founders' Door hums when Cheryl stands next to it.
   ambient: [{
     every: [0.5, 0.5],
