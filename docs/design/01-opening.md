@@ -166,7 +166,7 @@ Every examinable object also keeps a look counter, so that its first look, secon
    - *Moonshine Night.*
    - *A tub on the roof and the moon on its way. Thirty-one years, and I haven't missed one.*
    - *Everything's ready. Nearly. On Moonshine Night there's always a nearly.*
-3. Control is given. A one-time control hint fades in at the bottom for about six seconds: "Arrows: walk   Z: look/talk   X: bag" (on touch devices: "Tap to walk. Tap things to look."). The font has no "·", so don't use it in game text.
+3. Control is given. A one-time control hint fades in at the bottom for about six seconds: "Arrows: walk   Z: look/talk   X: bag" (on touch devices: "Tap to walk. Tap things to look."). (Engine calls: `g.hint(...)` for both hints, with `{ untilBag: true }` for the second; `g.card('Morning.', 2)` for the card; `g.say(speaker, text, { auto: 1.2 })` for auto-advancing boxes; a patrol with `stopNear: 2` for the Kid.)
 4. **Item hint.** The first time anything goes into the satchel, a second one-time hint appears and stays until the player opens the bag: "X: bag. Pick something, then use it on someone or something." (Touch: "Tap the bag, pick something, then tap where it goes.").
 
 The first thing most players touch is the tub, and its first description names the problem and who has the plug.

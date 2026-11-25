@@ -430,7 +430,7 @@ NPCs:
 - Internal monologue is in italics or a distinct soft color, with no label (the engine's choice).
 - Ambrose's lines are always written in capitals. Nobody else shouts like that except at peak moments (one word, rarely).
 - One "line" in a script equals one text box, and must fit in three wrapped lines (see Brevity).
-- The font has no "·", "×", "–" (en dash), or "→". Use them in docs, never in game text.
+- Check unusual characters against the font (`game/src/art/font.js`) before using them in game text. As of this writing it lacks "×", "–" (en dash), and "→"; it has "·", "…", "—", and "♪".
 - American English spelling.
 
 ## Decisions log
