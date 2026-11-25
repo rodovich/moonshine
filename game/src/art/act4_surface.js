@@ -4174,12 +4174,12 @@ export const keepers_hatch = {
 
 export const belfry_bell = {
   palette: {
-    Y: 'bronze_light',
-    B: 'bronze',
-    b: 'bronze_shade',
-    D: 'bronze_deep',
-    v: 'verdigris',
-    V: 'verdigris_light',
+    Y: 'verdigris_light',
+    B: 'verdigris',
+    b: 'teal_shade',
+    D: 'sage_deep',
+    v: 'bronze',
+    V: 'bronze_light',
     o: 'wood_light',
     O: 'wood',
     p: 'wood_shade',
