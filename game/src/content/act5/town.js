@@ -218,12 +218,17 @@ async function giveGuidebook(g, self) {
 
 function shopPatches(g) {
   if (!started(g)) return [];
-  const f = guideIn(g) ? 'display_guide' : 'display_fallen';
-  return [['detail', 7, 5, { tile: `shop5:${f}_l`, solid: true }], ['detail', 8, 5, { tile: `shop5:${f}_r`, solid: true }]];
+  // The fallen display, empty (the telescope rolled away), or with the guidebook in it.
+  const f = guideIn(g) ? 'display_guide' : 'display_fallen_empty';
+  const out = [['detail', 7, 5, { tile: `shop5:${f}_l`, solid: true }], ['detail', 8, 5, { tile: `shop5:${f}_r`, solid: true }]];
+  // Brass glinting under the counter's east end until it's fished out.
+  if (!fetched(g)) out.push(['detail', 6, 3, { tile: 'shop:counter_r_glint', solid: true, counter: true }]);
+  return out;
 }
 
 const shopkeeper5 = {
-  id: 'shopkeeper5', name: 'Shopkeeper', x: 6, y: 4, facing: 'right',
+  // Over his fallen display (7, 5), and clear of the glint under the counter's east end (6, 3).
+  id: 'shopkeeper5', name: 'Shopkeeper', x: 7, y: 4, facing: 'down',
   sprite: LOOKS.shopkeeper,
   when: started,
   interact: shopkeeperTalk,
