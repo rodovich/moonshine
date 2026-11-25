@@ -1,25 +1,69 @@
 # Art index: Downstairs (Act 3)
 
-Where to find the art for the Act 3 pieces the writer listed ahead of `docs/design/03-downstairs.md`. References are `sheet:frame`; modules are `game/src/art/downstairs.js`, `chartroom.js`, `underground.js`, and `machines.js`. "Layer" is the map layer, or "sprite" for an entity. Animated frames are listed by base name. See them composed on the dev page: `/dev/art.html?only=scene:downstairs` and `?only=scene:chartroom` (add `&state=open` for the drawn bolt). Positions will follow the design doc once it lands.
+Where to find the art for every item in the "Art needed" list of [design/03-downstairs.md](design/03-downstairs.md). References are `sheet:frame`; the modules are `game/src/art/downstairs.js`, `chartroom.js`, `underground.js`, `machines.js`, `cheryl.js`, `named_npcs.js`, `items.js`, and `vista2.js`. "Layer" is the map layer, or "sprite" for an entity. Animated frames are listed by base name (`flood` means `flood_0`, `flood_1`, …).
 
-| # | Piece | Frames | Layer |
-| --- | --- | --- | --- |
-| 1 | Bronze ladder up into daylight (underside of the hundredth step) | `ds_day:day_ladder_top`, `day_ladder_bot` (1×2 on the wall face); `ds_day:day_spot` on the floor below | ground |
-| 2 | Wall lever; light-shaft lid; daylight | `ds:lever_jammed`, `lever_ready`, `lever_pulled` (lower wall-face tile); `ds_day:over_shaft_shut` / `over_shaft_open`; `ds_day:over_column` (3 frames) over `day_spot`; beams `over_beam_h`, `over_beam_v` (2 frames, tile along the path) with ends `over_beam_end_e`, `_w`, `_s` | ground; overhead |
-| 3 | Bronze mirror on a pedestal, 3 positions | `ds_mirror:mirror_e`, `mirror_s`, `mirror_w` | sprite (16×32) |
-| 4 | Moon-lock hatch | `ds:moonhatch` (dark), `moonhatch_lit`, `moonhatch_opening` (2 frames), `moonhatch_open` | ground |
-| 5 | Cradle and moonglass disc | `ds:cradle`, `cradle_disc`, `cradle_glow` (2 frames); icon `items3:moonglass_disc` | objects; inventory |
-| 6 | Chute | `ds:chute` (lower wall-face tile) | ground |
-| 7 | Niche lamps | `ds:niche_dead`, `niche_lit` (2 frames); `hull:floor_glow` below a lit one | ground |
-| 8 | Light-pipes from the ceiling | `ds_rod:rod` (3 frames), `rod_dark`; `hull:floor_glow` beneath | sprite (16×32) |
-| 9 | Ceiling ribs | `hull:over_rib_v`, `over_rib_h`; crossing `ds:over_rib_x` | overhead |
-| 10 | Wall inlays (2 wide, upper wall row) | moon phases `ds:inlay_moon_l/r`; the Three Sisters `inlay_sisters_l/r`; bell and wave `inlay_roster_l/r` | ground |
-| 11 | Valve, gushing pipe, flooded passage | valve `machines:valve_big_*`; `ds_water:gush` (4 frames, objects over a lower wall-face tile), `flood` and `flood_edge_n` and `flood_splash` (4 frames), `floor_drained`, `floor_soaked` | ground; objects |
-| 12 | Counterweighted ladder | hooked up `ds:cw_ladder_up_top/bot` (with chain and cleat); dropped `cw_ladder_down_top/bot` | ground |
-| 13 | Speaking tubes | `ds:horn` (upper wall-face tile); also `machines:speaking_tube` | ground; objects |
-| 14 | Black still water on a slope | `ds_water:slope_steps`, `black_edge` (2 frames, steps going under), `black` (2 frames) | ground |
-| 15 | Keepers' bunk room | `ds:bunk_l/r` (2×1), `tool_rack` (upper wall-face tile), `cup` | objects; ground |
-| 16 | The Chart Room | inlay `chart:inlay_x0y0` … `inlay_x9y5` (10×6); light pool with the teapot's shadow `chart:pool_x<x>y<y>` (removable, same cells); the Founders' Door inside `chart:fdoor_in_x<0-1>y<0-1>` (bolted) / `fdoor_in_open_x..y..` (bolt drawn); `chart:stone_desk_l/r` (ledger and cup), `keeper_cup`, `keeper_ledger`; `chart_chair:keeper_stone_chair` (sprite); eight sides from `hull:top_chamfer_*` on the diagonals | ground; objects; sprite |
-| 17 | The Ship Plan rubbing | `ship_plan:plan` (256×224) | full screen |
+On the dev page: `/dev/art.html?only=scene:downstairs` (the Step Gallery; `&state=dark` before the lever, `&state=halls` for the Lamp Halls), `scene:chartroom` (`&state=open` bolt drawn, `&state=opened` door open), `scene:crown` (`&state=day` for plain studs), `scene:vista2`.
 
-Also redrawn: the ballast pump (`machines:pump_*`, now a beam pump) and the windlass chain (`machines:windlass_*`, `chain_v`, with interlocking links).
+## How the walls work
+
+A north wall face is two tiles tall: an upper row (`hull:face_top`) over a lower row (`hull:face_base`). The design's maps mark wall features on the lower row (y2 in the Step Gallery, y5 in the Lamp Halls, y1 in the Bunk Room). Pieces drawn for the **lower row** go exactly there: the lever, the chute, the chain, the cradle niche, the gushing pipe. Pieces drawn for the **upper row** (lamp niches, inlays, the speaking horn, the tool rack) go one tile above, in the same column; their interaction tile stays where the design puts it. The sealed hatch and the Founders' Door are 2×2 and fill both rows.
+
+## Tiles and objects
+
+| Design item | Frame(s) | Layer, placement |
+| --- | --- | --- |
+| Slate wall faces: plain / with a lamp niche / cracked | `hull:face_top`, `face_base` (and `_b` offset seams); `ds:niche_dead` / `niche_lit` (2 frames) on the upper row; `ds:wall_cracked` (lower row) | ground |
+| Floor plates (variants, wet) | `hull:floor`, `floor_worn`, `floor_glyph`, `floor_broken`, `floor_wet` | ground |
+| Rock void | `hull:top` | ground |
+| Chamfered 45° corner walls (Chart Room) | `hull:top_chamfer_nw/ne/sw/se`; the north face's ends `hull:face_base_end_l/r` | ground |
+| Ceiling ribs | `hull:over_rib_v` (across an east–west deck: one per row at the rib's x), `over_rib_h`; crossing `ds:over_rib_x` | overhead |
+| Bronze ladder up into daylight (Step Gallery, 3, 3) | `ds_mirror:dropladder_down` (16×32 sprite at the tile) under `ds_day:over_shaft_open` (one tile north, overhead) and `ds_day:over_column` (on the tile, overhead), with `ds_day:day_spot` on the floor. A wall-face version also exists: `ds_day:day_ladder_top/bot` | sprite; overhead; ground |
+| Wall lever: seized / open (Step Gallery, 10, 2) | `ds:lever_jammed` / `lever_ready` / `lever_pulled` (lower row) | ground |
+| The lid over the mirror: closed / open | `ds_day:over_shaft_shut` / `over_shaft_open`, two tiles north of the mirror (11, 4) | overhead |
+| Mirror on a pedestal, four angles (11, 6) | `ds_mirror:mirror_s` (resting, facing south), `mirror_w` (to the west lamp), `mirror_e` (to the east lamp), `mirror_ne` (to the hatch) | sprite |
+| Vertical daylight column | `ds_day:over_column` (3 frames) on (11, 5); `ds_day:day_spot` on (11, 6) | overhead; ground |
+| Beams to the three targets, with the glow where they land | `ds_beams:beam_lamp_w`, `beam_lamp_e`, `beam_hatch` (2 frames each; 336×96). Draw with its top-left at map pixel (32, 16), i.e. tile (2, 1). Short straight beams for other rooms: `ds_day:over_beam_h`, `over_beam_v`, ends `over_beam_end_e/w/s` | overhead (or a sprite drawn after the overhead layer) |
+| Inlays (2 wide), with lit variants | Three Sisters `ds:inlay_sisters_l/r`, lit `inlay_sisters_lit_l/r` (Step Gallery 6–7); moon phases `ds:inlay_moon_l/r`, lit `inlay_moon_lit_l/r` (14–15); duty roster `ds:inlay_roster_l/r` (Bunk Room 4–5). All on the upper row | ground |
+| Sealed hatch with a moon-lock eye: dark / glowing / open (Step Gallery, 19–20) | `ds:seal_nw/ne/sw/se`, `seal_lit_*`, `seal_open_*` (2×2: nw/ne on y1, sw/se on y2) | ground |
+| Disc cradle: with and without the disc, glowing (Cradle, 5, 2) | wall niche (lower row): `ds:cradle_niche`, `cradle_niche_disc`, `cradle_niche_glow` (2 frames). A freestanding version: `ds:cradle`, `cradle_disc`, `cradle_glow` | ground (objects for the freestanding one) |
+| Chute mouth (Cradle 2–3, 2; Lamp Halls 3–4, 5) | `ds:chute_l`, `chute_r` (2 wide, lower row); a 1-wide `ds:chute` | ground |
+| Moonglass lamps in niches: dead / lit | `ds:niche_dead`, `niche_lit` (upper row); put `hull:floor_glow` on the floor below a lit one | ground |
+| Light-pipes from the ceiling, with a pool below (Lamp Halls 5, 12, 20 on y8) | `ds_rod:rod` (3 frames), `rod_dark` (16×32 sprites); `hull:floor_glow` under each | sprite; ground |
+| Drop-ladder: hooked up / down (Lamp Halls, 8, 6) | `ds:over_dropladder_hooked` / `ds_mirror:dropladder_down` | overhead / sprite |
+| The drop-ladder's chain on the wall (Lamp Halls, 7, 5) | `ds:wall_chain` (lower row) | ground |
+| Floor grate (Step Gallery, 6, 8): closed / open with the ladder top | `ds:grate_closed` / `grate_open` | ground |
+| Speaking tube, a bronze horn (Lamp Halls, 22) | `ds:horn` (upper row); also `machines:speaking_tube` | ground; objects |
+| Valve wheel: seized / turned (Lamp Halls, 23) | `machines:valve_big_nw/ne/sw/se` frame `_0` (seized) / `_1` (turned), 2×2; or the 1×1 `machines:valve_0` / `valve_1` | objects |
+| Gushing pipe (27, 2) / stopped | `ds_water:gush` (4 frames) / `gush_stopped`, over `hull:face_base` | objects |
+| Flooded fast water (north passage 25–26, 1–6) | `ds_water:flood` (4 frames); where it meets dry floor `flood_edge_n`; under the pipe `flood_splash` | ground |
+| Drained wet floor (after the valve) | `ds_water:floor_drained`, `floor_soaked` | ground |
+| Still black deep water sloping away (17–18, 11–13) | `ds_water:black_edge` (the steps going under, top row), `black` (2 frames, very slow) | ground |
+| Bunk Room: stone bunks (1–2, 7–8 on y3), tool rack (7–8, y1), stone table with a cup (3, 4) | `ds:bunk_l/r` (2×1); `ds:tool_rack` (upper row, use twice or once); `ds:stone_table` | objects; ground |
+| Chart Room floor inlay (3–12, 5–10) | `chart:inlay_x<0-9>y<0-5>`: column = map x − 3, row = map y − 5. Laid out to the hotspot table: town (6–9, 5), mast (7, 5–6), hull (4–11, 7–8), Sisters (8–9, 8), chain (11–12, 7–10), shaft and bowl (5, 5–10), waterline (row 9), teapot shadow (7–8, 7–8) | ground |
+| The Eye's pool of light with the teapot shadow (an overlay) | `chart:pool_x<c>y<r>` on the same cells as the inlay (only the cells it touches exist) | objects |
+| The Keeper's stone chair (2, 4) | `chart_chair:keeper_stone_chair` | sprite |
+| Table with a cup and a bronze-bound ledger (3, 4) | `ds:stone_table` with `chart:keeper_ledger`; or the 2×1 `chart:stone_desk_l/r` | objects |
+| The Founders' Door, inside (7–8, 1–2): bolt shot / drawn / door open | `chart:fdoor_in_x<0-1>y<0-1>` / `fdoor_in_open_x..y..` / `fdoor_in_opened_x..y..` | ground |
+| Crypt: the Founders' Door open, steps going down | `founders_door_open:founders_door_open_x<0-1>y<0-1>` (replaces `landmarks:founders_door_*`) | ground |
+| Crown: moon-eye studs in the plaza paving and stair, plain / glowing | `moon_eyes:pave_<q>_eye` / `pave_<q>_eye_glow` (2 frames), where `<q>` is the paving quadrant for that tile (`nw` on even x and y, `ne` odd x, `sw` odd y, `se` both odd); stair `moon_eyes:stairs_l_eye` / `stairs_r_eye` / `stairs_eye` and `_glow` | ground |
+
+## Sprites
+
+| Design item | Frame(s) |
+| --- | --- |
+| Cheryl sitting on the floor (after the chute) | `cheryl:sitfloor_down` |
+| Cheryl heaving on a lever | `cheryl:heave_up_0` (hands high on the grip), `heave_up_1` (hauled down, leaning back) |
+| Cheryl kneeling (the rubbing; the hundredth step) | `cheryl:kneel_down`, `kneel_up` |
+| Ottilie walking with a lamp | `ottilie:lamp_<dir>_0..2` (engine walk names: `_0` stands, `_1`/`_2` step; the lamp is in her right hand, and `lamp_right` is drawn so it's on the near side). Without the lamp: `ottilie:<dir>_0..2`. Idles: `teacup_down` (2 frames, sipping), `lamp_idle_down` (2 frames, lamp raised) |
+| The disc's light | drawn by the engine; the disc item icon is `items3:moonglass_disc` |
+
+## Full-screen images
+
+| Design item | Frame(s) |
+| --- | --- |
+| The Ship Plan, a charcoal rubbing of the inlay | `ship_plan:plan` (256×224) |
+| Vista: Tessel from the Crown at dusk, every doorstep glowing | `vista2:crown_dusk` (256×224); then `vista2_light:light` (8×8, 3 frames) centered on each point of `VISTA2_LIGHTS` (exported by `vista2.js`, offset −4, −4), each with its own phase. `game/dev/scene-vista2.js` turns them on in a wave from the Crown down to the water |
+
+## Notes for the design
+
+- **Ribs over the light-pipes.** In the Lamp Halls the ribs at x12 and x20 fall on the light-pipes at (12, 8) and (20, 8), so the overhead ribs hide the rods and their pools. Moving the ribs to x13 and x21, or the pipes to x11 and x19, avoids it.

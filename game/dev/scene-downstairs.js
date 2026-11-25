@@ -1,78 +1,95 @@
-// Act 3, Downstairs: a Keepers' hall under the hundredth step and the flooded passage below it,
-// composed from downstairs.js with underground.js and machines.js. Format as in art-scene.js.
+// Act 3 Downstairs, laid out as docs/design/03-downstairs.md's maps (for judging the art in place).
+// Default: the Step Gallery (24 x 11), with the lever pulled and the beam on the hatch.
+// ?state=halls: the Lamp Halls (32 x 14). ?state=dark: the Step Gallery before the lever.
 
-const W = 20, H = 14;
-const blank = () => Array.from({ length: H }, () => Array(W).fill(null));
-const ground = blank(), objects = blank(), overhead = blank();
-const set = (layer, x, y, ref) => { if (x >= 0 && x < W && y >= 0 && y < H) layer[y][x] = ref; };
-const hull = f => `hull:${f}`, ds = f => `ds:${f}`, day = f => `ds_day:${f}`, dw = f => `ds_water:${f}`, mach = f => `machines:${f}`;
+export function SCENE(state) {
+  return state === 'halls' ? halls() : gallery(state === 'dark');
+}
 
-for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) set(ground, x, y, hull('top'));
+const hull = f => `hull:${f}`, ds = f => `ds:${f}`, day = f => `ds_day:${f}`, wat = f => `ds_water:${f}`;
+function grid(W, H) {
+  const blank = () => Array.from({ length: H }, () => Array(W).fill(null));
+  const L = { ground: blank(), objects: blank(), overhead: blank() };
+  L.set = (layer, x, y, ref) => { if (x >= 0 && x < W && y >= 0 && y < H) L[layer][y][x] = ref; };
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) L.set('ground', x, y, hull('top'));
+  return L;
+}
+// a north wall face two rows tall (upper row y, lower row y+1) from x0 to x1
+function wall(L, x0, x1, y) {
+  for (let x = x0; x <= x1; x++) {
+    L.set('ground', x, y, hull(x % 3 ? 'face_top' : 'face_top_b'));
+    L.set('ground', x, y + 1, hull(x % 3 ? 'face_base' : 'face_base_b'));
+  }
+}
+function floor(L, x0, x1, y0, y1) {
+  // mostly plain plates; a worn or inlaid one now and then (by a hash, so no pattern shows)
+  for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
+    const h = (x * 73 + y * 151) % 29;
+    L.set('ground', x, y, hull(h === 0 ? 'floor_glyph' : h === 7 ? 'floor_worn' : h === 13 ? 'floor_broken' : 'floor'));
+  }
+}
 
-// ---- The hall: north face rows 1–2, floor rows 3–7, x 1–18. ----
-const fTop = ['face_top', 'face_top_b', 'niche', 'tool_rack', 'inlay_roster_l', 'inlay_roster_r', 'horn', 'face_rib_top',
-  'face_top', 'lever', 'inlay_moon_l', 'inlay_moon_r', 'niche_lit', 'inlay_sisters_l', 'inlay_sisters_r', 'face_top_b', 'face_top', 'face_top_line'];
-fTop.forEach((f, i) => {
-  const x = 1 + i;
-  const top = { niche: ds('niche_dead'), tool_rack: ds('tool_rack'), horn: ds('horn'), niche_lit: ds('niche_lit'),
-    lever: hull('face_top') }[f] || (f.startsWith('inlay') ? ds(f) : hull(f));
-  set(ground, x, 1, top);
-  set(ground, x, 2, f === 'lever' ? ds('lever_ready') : f === 'face_rib_top' ? hull('face_rib_base') : hull(i % 2 ? 'face_base_b' : 'face_base'));
-});
-set(ground, 1, 1, day('day_ladder_top')); set(ground, 1, 2, day('day_ladder_bot'));   // up into the daylight under the step
-for (let y = 3; y <= 7; y++) for (let x = 1; x <= 18; x++) set(ground, x, y, hull('floor'));
-set(ground, 1, 3, day('day_spot'));
-[[3, 5, 'floor_worn'], [4, 5, 'floor_worn'], [10, 4, 'floor_glyph'], [7, 7, 'floor_broken'], [16, 5, 'floor_glow'], [13, 3, 'floor_glow']]
-  .forEach(([x, y, f]) => set(ground, x, y, hull(f)));
-set(ground, 12, 6, day('day_spot'));
-set(ground, 10, 7, ds('moonhatch_lit'));
-for (let y = 1; y <= 7; y++) { set(ground, 0, y, hull('top_edge_e')); set(ground, 19, y, hull('top_edge_w')); }
-for (let x = 1; x <= 18; x++) set(ground, x, 8, hull('top_edge_n'));
-// a rib across the hall
-for (let y = 3; y <= 7; y++) set(overhead, 8, y, hull('over_rib_v'));
-// the light shaft: lid open in the ceiling, a column of daylight onto the mirror, a beam off to the east
-set(overhead, 12, 3, day('over_shaft_open'));
-set(overhead, 12, 4, day('over_column')); set(overhead, 12, 5, day('over_column'));
-for (let x = 13; x <= 17; x++) set(overhead, x, 6, day('over_beam_h'));
-set(overhead, 18, 6, day('over_beam_end_e'));
-// the bunk room end: bunks, a cup
-set(objects, 3, 4, ds('bunk_l')); set(objects, 4, 4, ds('bunk_r'));
-set(objects, 3, 6, ds('bunk_l')); set(objects, 4, 6, ds('bunk_r'));
-set(objects, 6, 4, ds('cup'));
-set(objects, 14, 3, ds('cradle_glow'));
+function gallery(dark) {
+  const W = 24, H = 11, L = grid(W, H);
+  wall(L, 1, 22, 1);
+  floor(L, 1, 22, 3, 9);
+  // Wall pieces sit on the doc's x; upper-row pieces (niches, inlays) on y1, lower-row pieces (lever) on y2.
+  L.set('ground', 2, 1, ds(dark ? 'niche_dead' : 'niche_lit'));
+  L.set('ground', 22, 1, ds('niche_dead'));
+  L.set('ground', 6, 1, ds('inlay_sisters_l')); L.set('ground', 7, 1, ds('inlay_sisters_r'));
+  L.set('ground', 14, 1, ds('inlay_moon_l')); L.set('ground', 15, 1, ds('inlay_moon_r'));
+  L.set('ground', 10, 2, ds(dark ? 'lever_jammed' : 'lever_pulled'));
+  const seal = dark ? 'seal' : 'seal_lit';
+  L.set('ground', 19, 1, ds(`${seal}_nw`)); L.set('ground', 20, 1, ds(`${seal}_ne`));
+  L.set('ground', 19, 2, ds(`${seal}_sw`)); L.set('ground', 20, 2, ds(`${seal}_se`));
+  // the ladder up to the Hundred Steps at (3,3), in its column of daylight
+  L.set('ground', 3, 3, day('day_spot'));
+  L.set('overhead', 3, 2, day('over_shaft_open'));
+  L.set('overhead', 3, 3, day('over_column'));
+  // the floor grate (6,8), closed
+  L.set('ground', 6, 8, ds('grate_closed'));
+  // ceiling ribs at x5, 9, 13, 17, 21 across the deck
+  for (const x of [5, 9, 13, 17, 21]) for (let y = 3; y <= 9; y++) L.set('overhead', x, y, hull('over_rib_v'));
+  // the light shaft over the mirror (11,6)
+  L.set('overhead', 11, 4, day(dark ? 'over_shaft_shut' : 'over_shaft_open'));
+  if (!dark) { L.set('overhead', 11, 5, day('over_column')); L.set('ground', 11, 6, day('day_spot')); }
+  const sprites = [
+    { sheet: 'ds_mirror', frame: dark ? 'mirror_s' : 'mirror_ne', x: 11 * 16 + 8, y: 7 * 16 },
+    { sheet: 'ds_mirror', frame: 'dropladder_down', x: 3 * 16 + 8, y: 4 * 16 },
+  ];
+  if (!dark) sprites.push({ sheet: 'ds_beams', frame: 'beam_hatch', x: 32, y: 16, topLeft: true });
+  return { title: 'Step Gallery' + (dark ? ' (before the lever)' : ' (beam on the hatch)'), ...L, sprites, hero: [9 * 16, 4 * 16 + 14, 'up'], scale: 2 };
+}
 
-// ---- The lower passage: north face rows 9–10, floor rows 11–13. ----
-const lTop = ['face_top', 'lightpipe', 'face_top_b', 'face_top', 'face_top', 'face_top', 'cw_ladder_up_top', 'face_top_b',
-  'face_top', 'face_top', 'face_top', 'face_top', 'face_top_b', 'face_top', 'face_top', 'face_top', 'face_top', 'face_top'];
-lTop.forEach((f, i) => {
-  const x = 1 + i;
-  set(ground, x, 9, f.startsWith('cw_') ? ds(f) : hull(f));
-  set(ground, x, 10, f.startsWith('cw_') ? ds('cw_ladder_up_bot') : hull(i % 2 ? 'face_base_b' : 'face_base'));
-});
-set(ground, 5, 10, ds('chute'));
-for (let y = 9; y <= 13; y++) { set(ground, 0, y, hull('top_edge_e')); set(ground, 19, y, hull('top_edge_w')); }
-// black still water where the passage slopes down to the west and north
-for (let x = 1; x <= 4; x++) { set(ground, x, 11, dw('black')); set(ground, x, 12, dw('black_edge')); set(ground, x, 13, dw('slope_steps')); }
-// drained and soaked plates between
-for (let y = 11; y <= 13; y++) for (let x = 5; x <= 9; x++) set(ground, x, y, hull('floor'));
-[[6, 11, 'floor_drained'], [8, 12, 'floor_soaked'], [9, 11, 'floor_soaked']].forEach(([x, y, f]) => set(ground, x, y, dw(f)));
-// the flooded passage, fed by a gushing pipe, with the big valve beside it
-for (let x = 10; x <= 18; x++) { set(ground, x, 11, dw('flood_edge_n')); set(ground, x, 12, dw('flood')); set(ground, x, 13, dw('flood')); }
-set(ground, 12, 11, dw('flood_splash'));
-set(objects, 12, 10, dw('gush'));
-set(objects, 13, 9, mach('valve_big_nw')); set(objects, 14, 9, mach('valve_big_ne'));
-set(objects, 13, 10, mach('valve_big_sw')); set(objects, 14, 10, mach('valve_big_se'));
-set(objects, 11, 10, mach('pipe_wall'));
-
-export const SCENE = {
-  title: 'Downstairs: the Keepers\' hall under the hundredth step, and the flooded passage',
-  ground, objects, overhead,
-  sprites: [
-    { sheet: 'ds_mirror', frame: 'mirror_e', x: 12 * 16 + 8, y: 6 * 16 + 15 },
-    { sheet: 'ds_rod', frame: 'rod', x: 16 * 16 + 8, y: 5 * 16 + 10 },
-    { sheet: 'ds_rod', frame: 'rod', x: 13 * 16 + 8, y: 3 * 16 + 10, phase: 300 },
-  ],
-  hero: [6 * 16 + 8, 7 * 16 + 14, 'right'],
-  patrol: [[2 * 16 + 8, 7 * 16 + 14], [10 * 16 + 8, 7 * 16 + 14]],
-  scale: 3,
-};
+function halls() {
+  const W = 32, H = 14, L = grid(W, H);
+  wall(L, 1, 23, 4); wall(L, 27, 27, 4);
+  floor(L, 1, 28, 6, 10);
+  // the flooded north passage (25–26, 1–6) with the gushing pipe at (27,2)
+  for (let y = 1; y <= 6; y++) { L.set('ground', 25, y, wat('flood')); L.set('ground', 26, y, wat('flood')); }
+  L.set('ground', 25, 0, hull('floor')); L.set('ground', 26, 0, hull('floor'));
+  for (let y = 1; y <= 3; y++) { L.set('ground', 24, y, hull('top_edge_w')); L.set('ground', 27, y, hull('top_edge_e')); }
+  L.set('ground', 27, 2, hull('face_base')); L.set('objects', 27, 2, wat('gush'));
+  L.set('ground', 25, 2, wat('flood_splash'));
+  // wall features on row 5: chute (3–4), chain (7), lamps (9, 18), the bunk room doorway (13–14), speaking tube (22), valve (23)
+  L.set('ground', 3, 5, ds('chute_l')); L.set('ground', 4, 5, ds('chute_r'));
+  L.set('ground', 7, 5, ds('wall_chain'));
+  L.set('ground', 9, 4, ds('niche_dead')); L.set('ground', 18, 4, ds('niche_lit'));
+  L.set('ground', 13, 4, hull('hatch_open_top')); L.set('ground', 14, 4, hull('hatch_open_top'));
+  L.set('ground', 13, 5, hull('hatch_open_bot')); L.set('ground', 14, 5, hull('hatch_open_bot'));
+  L.set('ground', 22, 4, ds('horn'));
+  L.set('ground', 6, 4, ds('inlay_roster_l')); L.set('ground', 7, 4, ds('inlay_roster_r'));
+  L.set('objects', 22, 5, 'machines:valve_big_nw'); L.set('objects', 23, 5, 'machines:valve_big_ne');
+  L.set('objects', 22, 6, 'machines:valve_big_sw'); L.set('objects', 23, 6, 'machines:valve_big_se');
+  // the drop-ladder hooked against the ceiling at (8,6)
+  L.set('overhead', 8, 6, ds('over_dropladder_hooked'));
+  // light-pipes at (5,8), (12,8), (20,8), each with its pool
+  for (const x of [5, 12, 20]) L.set('ground', x, 8, hull('floor_glow'));
+  // the drowned corridor south (17–18, 11–13): steps going under black water
+  L.set('ground', 17, 11, wat('black_edge')); L.set('ground', 18, 11, wat('black_edge'));
+  for (let y = 12; y <= 13; y++) { L.set('ground', 17, y, wat('black')); L.set('ground', 18, y, wat('black')); }
+  for (const x of [4, 8, 12, 16, 20, 24]) for (let y = 6; y <= 10; y++) L.set('overhead', x, y, hull('over_rib_v'));
+  const sprites = [5, 12, 20].map(x => ({ sheet: 'ds_rod', frame: 'rod', x: x * 16 + 8, y: 9 * 16 - 2 }));
+  sprites.push({ sheet: 'cheryl', frame: 'sitfloor_down', x: 3 * 16 + 8, y: 8 * 16 });
+  return { title: 'Lamp Halls', ...L, sprites, scale: 2 };
+}
