@@ -246,6 +246,7 @@ At the window, facing out.
 - LIGHTHOUSE KEEPER: I turned round this morning to see what the shouting was. I've never turned round. And THERE IT WAS.
 - LIGHTHOUSE KEEPER: I've lit the lamp. In the afternoon. For the reef. I've polished it twelve times. I've run out of polish.
 - LIGHTHOUSE KEEPER: Nobody touches the lamp. Not without polish. If I can't polish it after, I'll go to pieces.
+- LIGHTHOUSE KEEPER: The Shop has polish. He won't sell it. He never sells anything.
 
 **Repeat** (alternate)
 - LIGHTHOUSE KEEPER: Polish. I need polish. The Shop has polish. He won't sell it. He never sells anything.
@@ -409,6 +410,7 @@ At his bench, repairing the clock drive she unclamped. Calm now, in a brittle wa
 - **The bronze door** (from the quay): "The door. Bronze, barnacled, a glass eye in the middle. At the bottom of a canal that's been full for five hundred years." / "It opens onto the mud. And the stairs don't reach the mud."
 - **The bronze door** (from the mud, eye dark): "A glass eye, the size of a dinner plate. Like the lock in the Step Gallery, only hungrier."
 - **Disc on the door's eye** (uncharged). It works from the stair tiles (22–25, 7) as well as from the mud, so this clue doesn't wait on the rope. From the stairs: "I hold the disc out over the edge. The eye glints, and goes dark again." / "It wants more than I've got. It wants the brightest light in Tessel." From the mud: "The eye stays dark. It wants more than my disc has in it." / "Brighter. It wants the brightest light in Tessel."
+- **The square jug for water** (it reads as the wrong container, not the wrong idea): on the Boatman, "Mott's jug? It'd make the boat drunk." (the blind playtester's line); on the Fountain, "In Mott's jug it'd come out moonshine. I want something that smells of fish, not of Mott."
 - **Other water, for the bucket:** the trickle at the canal mouth, from the quay: "It's on the mud. So is the Boatman. That's the problem." The sea, from the risen Harbor's quay edge: "Six feet down. My arms aren't." The ice in the Fishmonger's cellar: "I'd be here till Tuesday waiting for it to melt."
 - **The stair ring** (25, 7): "A bronze mooring ring, set in the last good step." With the rope: use → `rope.tied`: "A round turn and two half hitches. My father taught me that, on a lake a long way from here." Then: "Tied. I'm not proud. I'm not not proud."
 - **The rope climb** (first time down): "Down a rope into a canal, on a weekday." / "I've done worse. I've taken thirty children on a nature walk."
@@ -497,7 +499,7 @@ The run is fully scripted and always succeeds.
 **Engine calls** (engine/core, 3fd9f41): `g.cameraFollow('kid')` on the Harbor while Cheryl stands at the lighthouse door; `await g.changeMap('bilge_dry', x, y, facing, { cutscene: true })` to follow him without her (her map, spot, and facing are kept; nothing is saved); `await g.restorePlayer()` to come back to her at the lighthouse door.
 
 **The Kid afterward** (on the mud by the door, then back at the Harbor):
-- SWEATY KID: Fifty-two seconds, Miss! And I jumped! Off the QUAY! Don't tell Mum.
+- SWEATY KID: Fifteen seconds, Miss! And I jumped! Off the QUAY! Don't tell Mum.
 - Repeat: SWEATY KID: The Stair Race is going to be EASY after that.
 
 ## The end of Act 5
@@ -578,6 +580,8 @@ The Act 5 builder (b_30JU3Nrc) built this act on `content/act5`; its full list i
 
 - **The disc after the relay:** the Kid keeps it on the mud by the open door and hands it back when Cheryl talks to him there, or throws it up to her ("CATCH!") if she talks to him from the broken edge before she has the rope. It doesn't sit in the eye.
 - **The Fishmonger's door is a look** ("The Fishmonger's door, down to her cellar. Ice. Fish. A hatch I'm not opening."), not a way back in.
+- **The Teeth on screen:** the first time Cheryl is on the Harbor at each stage (arriving, or back at the lighthouse door after the relay), the camera pans to the reef, holds two seconds while the surf swells, shows her stage line in a box at the top of the screen, and returns to her.
+- **The relay's length:** the `relay` cue was cut to 15.8 seconds to fit the run, so the Kid's time is "Fifteen seconds."
 - **The Kid's route:** west along the Harbor quay (MOTT: Mind the edge, boy!), into the Bilge on the south quay, over the bridge, east along the north quay, off the quay onto the mud by the Movers (OTHER MOVER: Hnn!), hurdling a beached boat and the Boatman's (BOATMAN: Go on, lad!).
 - **Placements:** the Clockmaker at (2, 4), back to us at his bench; the Counting Woman at (12, 17); the banner over x16–21. The open hundredth step is a hole Cheryl walks round ("The hundredth step, open, and the ladder down. Not today. My business is at the bottom of the canal.").
 - **The act opens** with the card "That afternoon." and: "The wind's getting up. Every line of washing on the quay is pointing out to sea." / "A door at the bottom of the canal, and stairs that don't reach it. Well. One thing at a time."

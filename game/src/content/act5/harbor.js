@@ -193,7 +193,8 @@ async function keeperTalk(g, self) {
       "There's a REEF. Why is there a REEF? Twenty-two years and nobody mentions a REEF?",
       "I turned round this morning to see what the shouting was. I've never turned round. And THERE IT WAS.",
       "I've lit the lamp. In the afternoon. For the reef. I've polished it twelve times. I've run out of polish.",
-      "Nobody touches the lamp. Not without polish. If I can't polish it after, I'll go to pieces.");
+      "Nobody touches the lamp. Not without polish. If I can't polish it after, I'll go to pieces.",
+      'The Shop has polish. He won\'t sell it. He never sells anything.');
   }
   return g.say(self, cycle(g, 'keeper5.repeat', [
     "Polish. I need polish. The Shop has polish. He won't sell it. He never sells anything.",

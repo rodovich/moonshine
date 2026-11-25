@@ -198,6 +198,7 @@ async function discFromStairs(g) {
 const edgeUse = {
   bucket: (g) => g.describe("An empty bucket. He'd only look at it sadly. I'd better fill it first."),
   bucket_water: lowerBucket,
+  square_jug: (g) => g.say('Boatman', "Mott's jug? It'd make the boat drunk."),
   rope: tieRope,
   moonglass_disc: discFromStairs,
   brass_polish: (g) => g.describe("It's for a lighthouse. It says so on the tin."),
@@ -221,6 +222,11 @@ async function climbDown(g) {
   g.sfx('step_stone');
   g.pose('player', null);
   g.facePlayer('right');
+  // The Kid, waiting on the mud with the disc, gives it back straight away.
+  if (kidHasDisc(g)) {
+    const kid = g.npc('kid_mud');
+    if (kid) { g.facePlayer('left'); await kidGives(g, kid); }
+  }
   if (!g.flag('n.climbedDown')) {
     g.setFlag('n.climbedDown', 1);
     await g.describe('Down a rope into a canal, on a weekday.', "I've done worse. I've taken thirty children on a nature walk.");
@@ -304,7 +310,7 @@ const objects = [
     id: 'bucket5', x: 6, y: 4, kind: 'object',
     sprite: { sheet: items_act5, frame: 'bucket_empty' },
     when: (g) => !g.flag('got.bucket'),
-    look: "A bucket, upside down by her stall. Nothing to put in it.",
+    look: "A bucket, upside down by her stall. It's hers. I'd have to ask.",
     use: { '*': cherylDeclines },
   },
   {
@@ -369,7 +375,7 @@ const objects = [
     use: { bucket: (g) => g.describe("Ice. I'd be here till Tuesday waiting for it to melt."), '*': cherylDeclines },
   },
   // Her own stall (5-6) has no hotspot: talking across it reaches her.
-  ...[2, 8].map((x) => ({ id: `stall5_${x}`, x, y: 6, w: 2, solid: true, lookKey: 'stalls5', look: 'Fish on ice. The ice is the wettest thing in the Bilge.' })),
+  ...[2, 8].map((x) => ({ id: `stall5_${x}`, x, y: 5, w: 2, solid: true, lookKey: 'stalls5', look: 'Fish on ice. The ice is the wettest thing in the Bilge.' })),
 ].map((o) => ({ use: { '*': cherylDeclines }, ...o }));
 
 const fishmongerNpc = {
@@ -387,12 +393,10 @@ const boatman = {
   sprite: (g) => ({ sheet: boatman_mud, frame: afloat(g) ? 'afloat' : 'mud' }),
   emote: { frame: 'note', every: [5, 9] },
   // From above, with the Kid on the mud holding the disc, he throws it up first.
-  interact: (g) => (kidHasDisc(g) ? kidThrowsDisc(g) : boatmanTalk(g)),
-  use: {
-    bucket: (g) => g.describe("An empty bucket. He'd only look at it sadly. I'd better fill it first."),
-    bucket_water: lowerBucket,
-    '*': edgeUse['*'],
-  },
+  // His footprint overlaps the broken edge, and characters answer first, so he
+  // answers for the edge too: its first look, the Kid's throw, and every item.
+  interact: edgeLook,
+  use: edgeUse,
 };
 
 const boatBlock = { id: 'boat5_boatman', x: 22, y: 10, w: 2, solid: true, shadow: false };
@@ -422,7 +426,8 @@ async function moversTalk(g) {
 const movers = [
   { id: 'big_mover5', name: 'Big Mover', x: 14, y: 10, facing: 'left', sprite: { sheet: mover, palette: 'big' } },
   // Reaching up to the quay wall (17, 7), so he can be called down to from the quay.
-  { id: 'other_mover5', name: 'Other Mover', x: 17, y: 7, h: 4, solid: false, facing: 'down', sprite: { sheet: mover, palette: 'other', frame: 'lookup_down' } },
+  // A tile wider to the west (a mooring post stands above him at (17, 6)), drawn back over his own tile.
+  { id: 'other_mover5', name: 'Other Mover', x: 16, y: 7, w: 2, h: 4, solid: false, offset: [8, 0], facing: 'down', sprite: { sheet: mover, palette: 'other', frame: 'lookup_down' } },
 ].map((m) => ({ ...m, interact: moversTalk, use: { '*': (g) => g.say('Big Mover', "Very nice, Miss. It won't lift a piano.") } }));
 
 const piano = {
