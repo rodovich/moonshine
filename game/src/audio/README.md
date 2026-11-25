@@ -12,6 +12,7 @@ The engine calls these through its bridge, `src/engine/sound.js`, which also for
 | `playMusic(id, { fadeMs = 800 })` | Crossfades to a music track. Asking for the track already playing does nothing. Called before `initAudio()`, it remembers the request and starts when audio is ready, so you can request the title music at load. |
 | `stopMusic(fadeMs = 800)` | Fades the music out. |
 | `muffleMusic(on = true, { fadeMs = 400 })` | Muffles the music as if heard through a wall (the Shop), or brings it back. Music only. |
+| `setMusicFilter(name)` | The same, by name, for a map's `musicFilter` field: `'muffled'` or `null`. |
 | `windDownMusic(ms = 4000)` | The current music runs down like a music box: it slows, sags flat, and stops wherever it has got to, with its last notes left to ring. For the moonrise. |
 | `playCue(id, { resume = true })` | Interrupts with a one-shot cue (`'wrongness'`): the music dips out, the cue plays, and the music fades back (or stays stopped with `resume: false`). |
 | `sfx(id, { pitch, volume })` | Plays a sound effect. `pitch` is in semitones. Does nothing before `initAudio()`. |
@@ -33,7 +34,7 @@ The engine calls these through its bridge, `src/engine/sound.js`, which also for
 - ambience: `swifts`, `dog_bark`, `gull`, `clock_strike`, `well_breath`
 - the Wrongness: `wrong_sting`, `groan`, `crack`, `rattle`, `piano_tumble`, `drain` (or its parts `drain_glunk`, `drain_gurgle`, `drain_echo`)
 
-- the wider city: `knock`, `shop_bell`, `stone_scrape`, `slab_lift`, `piano_slide`, `sink_gurgle`, `step_splash`, `goat`, `boatman_sing`, `girls_chant`
+- the wider city: `knock`, `shop_bell`, `stone_scrape`, `scrub`, `skip_rope`, `slab_lift`, `piano_slide`, `sink_gurgle`, `step_splash`, `goat`, `boatman_sing`, `girls_chant`
 - downstairs: `step_hullstone`, `step_rung`, `lever_pull`, `lid_open`, `lid_pry`, `mirror_turn`, `light_beam`, `moonlock_open`, `hatch_open`, `disc_get`, `disc_glow`, `lamp_relight`, `chute_slide`, `ladder_drop`, `tube_voice`, `bolt_draw`, `founders_door`, `rubbing`
 - machines and water: `valve_turn`, `valve_jam`, `far_gurgle`, `pump_cough`, `chain_rattle`
 

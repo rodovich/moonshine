@@ -155,7 +155,7 @@ test('the required sound effects exist', () => {
   for (const id of ids) assert.ok(SFX[id], id);
   // docs/design/02-city.md, "Audio needed", and the underground's machines
   const act2 = [
-    'knock', 'shop_bell', 'stone_scrape', 'slab_lift', 'piano_slide', 'trickle', 'sink_gurgle', 'step_splash',
+    'knock', 'shop_bell', 'stone_scrape', 'scrub', 'skip_rope', 'slab_lift', 'piano_slide', 'trickle', 'sink_gurgle', 'step_splash',
     'door_hum', 'town', 'canal', 'gulls', 'goat', 'goats', 'clock_tick', 'boatman_sing', 'girls_chant',
     'step_hullstone', 'step_rung', 'lid_pry', 'hatch_open', 'light_beam', 'mirror_turn', 'moonlock_open', 'disc_glow',
     'chute_slide', 'ladder_drop', 'tube_voice', 'lever_pull', 'lid_open', 'beam_hum', 'moonglass_hum', 'disc_get', 'lamp_relight', 'tube_murmur', 'bolt_draw', 'founders_door', 'rubbing', 'glow_shimmer', 'valve_turn', 'valve_jam', 'water_gush', 'far_gurgle', 'drips', 'hull',

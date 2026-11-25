@@ -61,7 +61,24 @@ export const CITY_SFX = {
     ],
   },
   // Prying at stone and mortar with the crowbar (three variants).
-  stone_scrape: { gain: 0.85, layers: stoneScrape },
+  stone_scrape: { gain: 0.85, jitter: 150, layers: stoneScrape },
+  // Soap rubbed hard on wooden runners: two strokes.
+  scrub: {
+    gain: 0.9,
+    layers: () => [0, 0.38].map((t, i) => [
+      { type: 'noise', at: t, dur: 0.3, gain: 0.16, filter: { type: 'bandpass', freq: [rand(1100, 1400), rand(1700, 2100)], q: 1.6 }, env: { a: 0.05, d: 0.25, s: 0.7, r: 0.05 } },
+      { type: 'tone', wave: 'sawtooth', at: t, freq: rand(90, 120), dur: 0.28, gain: 0.04, vibrato: { rate: 24, depth: 70 }, filter: { type: 'bandpass', freq: 900, q: 3 } },
+      { type: 'noise', at: t + 0.05, dur: 0.2, gain: 0.03 * (1 + i), filter: { type: 'highpass', freq: 6000 } },
+    ]).flat(),
+  },
+  // A skipping rope slapping the paving, once.
+  skip_rope: {
+    mono: true, jitter: 120, gain: 0.8,
+    layers: [
+      { type: 'noise', dur: 0.05, gain: 0.25, filter: { type: 'bandpass', freq: 1500, q: 1 }, env: { a: 0.002, d: 0.045, s: 0, r: 0.02 } },
+      { type: 'noise', dur: 0.15, gain: 0.03, filter: { type: 'bandpass', freq: [3000, 1200], q: 2, time: 0.12 } },
+    ],
+  },
   // A stone slab lifting away: a grind, the weight coming free, and air moving.
   slab_lift: {
     gain: 0.85, echo: 0.25,

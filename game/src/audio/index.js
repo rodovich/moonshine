@@ -384,6 +384,15 @@ export function muffleMusic(on = true, { fadeMs = 400 } = {}) {
   graph.muffleGain.gain.setTargetAtTime(muffled ? 0.6 : 1, now, tc);
 }
 
+/**
+ * A named filter over the music, for map definitions: 'muffled' (as heard through a wall) or
+ * null for none. The engine calls this from a map's `musicFilter` field.
+ */
+export function setMusicFilter(name) {
+  if (name !== null && name !== 'muffled') throw new Error(`unknown music filter "${name}"`);
+  muffleMusic(name === 'muffled');
+}
+
 /** Set 'master', 'music', or 'sfx' volume, 0..1. Saved in localStorage. */
 export function setVolume(kind, v) {
   if (!(kind in settings) || kind === 'muted') throw new Error(`unknown volume "${kind}"`);
