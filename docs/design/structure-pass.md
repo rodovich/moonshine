@@ -117,7 +117,7 @@ All three threads open from the start. The soap is already in the bag, and the g
   - SHOPKEEPER: …Display for display. That isn't selling. That's curating. I've never curated before.
   - SHOPKEEPER: I feel quite light-headed. Take the hat, Miss, before I come to my senses. → *Got Straw Hat.*
   - (The "first swap in thirty years" beat moves here from Act 5.)
-  - The telescope in the window is flag `telescope.inWindow`: Act 2 sets it, Acts 4 and 5 read it for the window art, Act 5 clears it at the swap back, and the old-save rule sets it.
+  - Flags: `got.telescope` is set when the Keeper gives it away (Act 2). The telescope in the window is `window.telescope`: Act 2 sets it, Acts 4 and 5 read it for the window art, the old-save rule sets it, and Act 5 clears it at the swap back, which sets `telescope.back`.
 - **The Tourist** takes the straw hat: STRANDED TOURIST: A hat! A real, wearable— you got it out of the WINDOW? → *Got Guidebook.*
 
 ### Retiring Cheryl's hat

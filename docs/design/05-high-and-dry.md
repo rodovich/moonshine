@@ -157,7 +157,7 @@ The machine that holds Tessel to its anchor. A bronze drum the size of a chapel 
 | `boatman.afloat` | Full bucket lowered to the Boatman | He's AFLOAT; Cheryl has the rope |
 | `rope.tied` | Rope used on the stair ring | The rope climb at (25, 8) |
 | `keeper.asked` | First talk with the Keeper | The Shopkeeper will now swap the telescope |
-| `got.telescope` | Guidebook given to the Shopkeeper | Guidebook gone; the telescope in the bag |
+| `telescope.back` | Guidebook given to the Shopkeeper | Guidebook gone; the telescope in the bag; `window.telescope` cleared. (`got.telescope` is Act 2's flag, already set when this act begins.) |
 | `keeper.telescope` | Telescope given to the Keeper | The lamp is usable |
 | `disc.charged` | The disc held in the lamp, after `keeper.telescope` | Starts the relay scene |
 | `door.open` | The relay scene ends | The bronze door open; Bow Passage lamps lit; the disc back, dim |
