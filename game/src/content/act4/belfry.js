@@ -227,6 +227,7 @@ export const belfryMap = composedMap(compose, {
     if (!g.flag('clock.lifted')) g.startLoop('belfry_tick');
     else g.stopLoop('belfry_tick', 0);
   },
-  entities: [rope, ...objects, ambroseBelfry],
+  // Ambrose first: he stands at (4, 3) inside the bell's look area, and talking to him should reach him.
+  entities: [ambroseBelfry, rope, ...objects],
 });
 
