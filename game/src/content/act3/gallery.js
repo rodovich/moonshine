@@ -23,7 +23,7 @@ import { composedMap } from '../opening/grid.js';
 import { act3Tiles } from './tiles.js';
 import { ds_mirror } from '../../art/downstairs.js';
 import {
-  UNDER, WRONGNESS, deck, wall, floor, ribs, lever, hatchOpen, hasDisc, valveTurned,
+  UNDER, WRONGNESS, deck, wall, floor, lever, hatchOpen, hasDisc, valveTurned,
   wallHotspots, lampEntity, nicheTile, founderUse, getItem, cherylDeclines, ladderDeclines,
   discLight, keepLoops, bump,
 } from './common.js';
@@ -34,6 +34,7 @@ import {
 const GW = 24, GH = 11;
 const RIBS = [5, 17, 21]; // the design's x9 and x13 would cut the beams (see README)
 const mirrorPos = (g) => g.flag('gallery.mirror') || 0;
+let arrivalDark = null; // darker while her eyes adjust on the first arrival
 
 // The beam's overhead tiles for each mirror position, and where it lands.
 const BEAMS = {
@@ -71,8 +72,8 @@ function composeGallery(g) {
   // The floor grate: the drop-ladder's top once it's down.
   L.set('ground', 6, 8, g.flag('halls.ladder') ? 'ds:grate_open' : 'ds:grate_closed', false);
 
-  // Ceiling ribs; the flat beam (position 0) crosses under two of them.
-  ribs(L, RIBS, 3, 9, (x, y) => beam && pos === 0 && y === 6);
+  // The ribs are drawn as rib faces on the wall (see wall()); even the art's
+  // see-through beams overhead left Cheryl hard to see in this dark room.
   // The light shaft over the mirror: its lid, and the daylight column once open.
   L.set('overhead', 11, 4, lever(g) ? 'ds_day:over_shaft_open' : 'ds_day:over_shaft_shut');
   if (lever(g)) {
@@ -86,7 +87,7 @@ function composeGallery(g) {
 // Light: the daylight at the ladder; lamps once lit; the shaft, the beam, and
 // a glow where it lands once the lever is pulled.
 function galleryLights(g) {
-  const out = [{ x: 3, y: 2.6, radius: 2.2, color: 'daylight' }];
+  const out = [{ x: 3, y: 3, radius: 1.8, color: 'daylight' }];
   if (g.flag('lamp.gallery_w')) out.push({ x: 2, y: 2.5, radius: 3, color: 'relic_cyan' });
   if (g.flag('lamp.gallery_e')) out.push({ x: 22, y: 2.5, radius: 3, color: 'relic_cyan' });
   if (hatchOpen(g)) out.push({ x: 15, y: 2.6, radius: 1.6, color: 'relic_cyan' });
@@ -216,7 +217,7 @@ const galleryObjects = [
   })),
   {
     id: 'hatch', x: 15, y: 2, when: (g) => !hatchOpen(g), solid: true,
-    looks: [["A square hatch, sealed flush. No handle. A round glass eye in the middle.", "It looks like it's waiting for something."], "A glass eye in the middle. It looks like it's waiting for something."],
+    looks: [["A square hatch, sealed flush. No handle. A round glass eye in the middle, looking down at the mirror.", "It looks like it's waiting for something."], "A glass eye in the middle, looking down at the mirror. It looks like it's waiting for something."],
     use: { crowbar: (g) => g.describe("No seam. Whoever made this didn't make doors for crowbars."), '*': cherylDeclines },
   },
   {
@@ -266,7 +267,7 @@ export const galleryMap = composedMap(composeGallery, {
   name: 'The Step Gallery',
   tileset: act3Tiles,
   spawn: [3, 3],
-  darkness: 0.6,
+  darkness: () => arrivalDark ?? 0.6,
   lights: galleryLights,
   playerLight: discLight(3),
   exits: [
@@ -284,8 +285,19 @@ export const galleryMap = composedMap(composeGallery, {
     keepLoops(g, lever(g) ? ['beam_hum'] : []);
     if (g.flag('act3.started')) return;
     g.setFlag('act3.started');
-    await g.wait(2);
-    await g.think('Under the Steps.', 'All this, under the Steps. All this time.');
+    // First arrival: her eyes adjust, then the gallery shows how far it goes.
+    g.facePlayer('down');
+    for (let k = 0; k <= 30; k++) {
+      arrivalDark = 0.96 - (0.36 * k) / 30;
+      await g.wait(k < 10 ? 0.12 : 0.06);
+    }
+    arrivalDark = null;
+    await g.wait(0.5);
+    await g.think('Under the Steps.');
+    await g.panCamera(15, 5, 0.7);
+    await g.wait(1.2);
+    await g.followPlayer(1.4);
+    await g.think('Thirty-one years I\'ve gone up and down those Steps. Every day, most days twice.', 'And all this was underneath. All this time.');
   },
   entities: [...galleryObjects, mirror],
 });
@@ -362,7 +374,7 @@ export const cradleMap = composedMap(composeCradle, {
   darkness: 0.6,
   lights: [
     { x: 5, y: 2.6, radius: 2.2, color: 'relic_cyan', when: (g) => !g.flag('got.disc') },
-    { x: 3.5, y: 6, radius: 2, color: 'daylight' }, // daylight from the gallery, through the hatch
+    { x: 3.5, y: 4.6, radius: 1.2, color: 'daylight' }, // daylight from the gallery, through the hatch (kept inside the room)
   ],
   playerLight: discLight(3),
   exits: [{ x: 3, y: 5, w: 2, to: 'step_gallery', at: [15, 3], facing: 'down', sfx: 'step_hullstone' }],
