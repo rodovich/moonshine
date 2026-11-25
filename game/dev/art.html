@@ -18,42 +18,49 @@
   .frame .pair { display: flex; align-items: flex-end; gap: 6px; }
   .frame .label { font-size: 10px; color: #a8a0b8; max-width: 120px; text-align: center; word-break: break-all; }
   .frame.anim .label { color: #f0d890; }
-  .bg-check canvas.x3 { background: repeating-conic-gradient(#2c2838 0 25%, #34303f 0 50%) 0 0 / 12px 12px; }
+  .bg-check canvas.big { background: repeating-conic-gradient(#2c2838 0 25%, #34303f 0 50%) 0 0 / 12px 12px; }
   .swatches { display: flex; flex-wrap: wrap; gap: 4px; }
   .sw { width: 92px; font-size: 10px; }
   .sw div { height: 22px; border: 1px solid #00000040; }
-  .bgpick { margin: 6px 0; }
-  .bgpick button { font: inherit; background: #2c2838; color: inherit; border: 1px solid #4a4458; padding: 2px 8px; cursor: pointer; }
-  #scene { width: 768px; height: 672px; outline: 1px solid #3a3448; }
+  .controls { margin: 6px 0; }
+  .controls button { font: inherit; background: #2c2838; color: inherit; border: 1px solid #4a4458; padding: 2px 8px; cursor: pointer; }
+  .controls button.on { border-color: #f0d890; color: #f0d890; }
+  .scenes { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }
+  .scene canvas { outline: 1px solid #3a3448; }
   body.only main > *:not(.keep):not(#sheets) { display: none; }
   body.only main { padding: 0; }
-  body.only #scene { outline: none; }
+  body.only h2 { display: none; }
+  body.only .scenes { gap: 0; }
+  body.only .scene canvas { outline: none; }
 </style>
 </head>
 <body>
 <main>
   <h1>Moonshine art sheets</h1>
-  <p class="note">Every sheet in <code>game/src/art/</code>, each frame at 1× and 3×. Animations (frames ending <code>_0</code>, <code>_1</code>, …) play in place, labeled in gold. Arrow keys walk Cheryl in the scene. <code>?only=scene</code> shows just the scene; <code>?only=&lt;sheet&gt;</code> just one sheet.</p>
+  <p class="note">Every sheet in <code>game/src/art/</code>, each frame at 1× and zoomed. Animations (frames ending <code>_0</code>, <code>_1</code>, …) play in place, labeled in gold. Arrow keys walk Cheryl in the scenes.
+  URL options: <code>only=scene</code> (all scenes) or <code>only=scene:court</code> (one), <code>only=&lt;sheet&gt;</code>, <code>zoom=8</code>, <code>expand</code> (every frame separately), <code>filter=a,b</code> (frame names containing a or b), <code>bg=e0c8a0</code>, <code>tint=dusk|night|day</code>, <code>still</code>, <code>state=morning</code> (scenes that support it).</p>
   <div id="errors" class="errors keep"></div>
-  <section id="scene-section" class="keep-scene">
-    <h2>Composed street scene (256×224 at 3×)</h2>
-    <canvas id="scene" width="256" height="224"></canvas>
-  </section>
+  <div class="controls keep" id="tint-controls">Tint: </div>
+  <section id="scene-section"><h2>Composed scenes</h2><div class="scenes" id="scenes"></div></section>
   <section id="palette-section"><h2>Master palette</h2><div id="swatches" class="swatches"></div></section>
-  <div class="bgpick">Sheet background:
+  <div class="controls">Sheet background:
     <button data-bg="check">checker</button> <button data-bg="#e0c8a0">stone</button> <button data-bg="#f8f8f0">white</button> <button data-bg="#202020">dark</button>
   </div>
   <div id="sheets"></div>
 </main>
 <script type="module">
 import { COLORS } from '../src/art/palette.js';
-import { SCENE } from './art-scene.js';
 
-const MODULES = ['street', 'buildings', 'rooftiles', 'canal', 'props', 'cloth', 'cheryl', 'npcs', 'items'];
+const MODULES = ['street', 'buildings', 'rooftiles', 'canal', 'props', 'cloth', 'roof', 'court', 'interior',
+  'cheryl', 'npcs', 'opening_npcs', 'items', 'fx', 'vista'];
+const SCENE_MODULES = [['court', './scene-court.js'], ['flat', './scene-flat.js'], ['vista', './scene-vista.js'], ['street', './art-scene.js']];
 const params = new URLSearchParams(location.search);
 const only = params.get('only');
 const errors = [];
 const ZOOM = +params.get('zoom') || 3;
+
+let TINTS = {};
+try { ({ TINTS } = await import('../src/art/tints.js')); } catch (e) { /* not yet */ }
 
 // ---- Tiny renderer for the art module format (self-contained; the engine has its own loader). ----
 const cache = new Map();
@@ -62,7 +69,7 @@ function hexToRgba(hex) {
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255, 255];
 }
 function paletteFor(sheet, alt) {
-  const names = alt ? { ...sheet.palette, ...sheet.palettes[alt] } : sheet.palette;
+  const names = alt ? { ...sheet.palette, ...(sheet.palettes || {})[alt] } : sheet.palette;
   const map = {};
   for (const [ch, name] of Object.entries(names)) map[ch] = COLORS[name] ? hexToRgba(COLORS[name]) : [255, 0, 255, 255];
   return map;
@@ -78,26 +85,22 @@ function frameCanvas(sheetName, sheet, frame, alt = null) {
   const pal = paletteFor(sheet, alt);
   const rows = sheet.frames[frame];
   for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-    const ch = rows[y][x];
-    if (ch === '.') continue;
-    const rgba = pal[ch] || [255, 0, 255, 255];
-    img.data.set(rgba, (y * w + x) * 4);
+    const ch = rows[y] && rows[y][x];
+    if (!ch || ch === '.') continue;
+    img.data.set(pal[ch] || [255, 0, 255, 255], (y * w + x) * 4);
   }
   ctx.putImageData(img, 0, 0);
   cache.set(key, c);
   return c;
 }
 
-// ---- Validation: the rules in docs/decisions.md and docs/art-direction.md. ----
+// ---- Validation (the same rules as tests/check-art.mjs, shown inline). ----
 function validate(name, sheet) {
   const [w, h] = sheet.size;
-  const pals = [sheet.palette, ...Object.values(sheet.palettes || {})];
+  const pals = [sheet.palette, ...Object.values(sheet.palettes || {}).map(p => ({ ...sheet.palette, ...p }))];
   for (const p of pals) {
     if (Object.keys(p).length > 15) errors.push(`${name}: palette has ${Object.keys(p).length} colors (max 15)`);
-    for (const [ch, cn] of Object.entries(p)) {
-      if (ch === '.') errors.push(`${name}: '.' is reserved for transparency`);
-      if (!COLORS[cn]) errors.push(`${name}: unknown color '${cn}'`);
-    }
+    for (const cn of Object.values(p)) if (!COLORS[cn]) errors.push(`${name}: unknown color '${cn}'`);
   }
   for (const [fn, rows] of Object.entries(sheet.frames)) {
     if (rows.length !== h) errors.push(`${name}.${fn}: ${rows.length} rows, expected ${h}`);
@@ -107,9 +110,6 @@ function validate(name, sheet) {
     });
   }
 }
-for (const [n, hex] of Object.entries(COLORS)) {
-  if (!/^#[0-9a-f]{6}$/.test(hex) || [1, 3, 5].some(i => parseInt(hex.slice(i, i + 2), 16) % 8)) errors.push(`palette: ${n} ${hex} is not 15-bit`);
-}
 
 // ---- Load sheets. ----
 const SHEETS = {};
@@ -117,9 +117,8 @@ for (const m of MODULES) {
   try {
     const mod = await import(`../src/art/${m}.js`);
     for (const [k, v] of Object.entries(mod)) if (v && v.frames && v.palette) { SHEETS[k] = v; validate(k, v); }
-  } catch (e) { if (!String(e).includes('Failed to fetch')) errors.push(`${m}.js: ${e}`); }
+  } catch (e) { if (!/Failed to fetch|Importing a module script failed/.test(String(e))) errors.push(`${m}.js: ${e}`); }
 }
-document.getElementById('errors').textContent = errors.join('\n');
 
 // ---- Animation timing. ----
 function animInfo(sheet, frame) {
@@ -151,16 +150,16 @@ for (const [n, hex] of Object.entries(COLORS)) {
 
 // ---- Sheet listings. ----
 const animated = [];
-// ?expand lists every animation frame separately instead of playing it in one cell.
 const sheetsEl = document.getElementById('sheets');
 for (const [name, sheet] of Object.entries(SHEETS)) {
-  if (only && only !== 'scene' && only !== name) continue;
+  if (only && (only.startsWith('scene') || only !== name)) continue;
   const sec = document.createElement('section');
-  sec.className = 'bg-check' + (only === name ? ' keep' : '');
-  const colorCount = Object.keys(sheet.palette).length;
-  sec.innerHTML = `<h2>${name} <span class="note">— ${sheet.size[0]}×${sheet.size[1]}, ${Object.keys(sheet.frames).length} frames, ${colorCount} colors</span></h2>`;
+  sec.className = 'bg-check';
+  sec.innerHTML = `<h2>${name} <span class="note">— ${sheet.size[0]}×${sheet.size[1]}, ${Object.keys(sheet.frames).length} frames, ${Object.keys(sheet.palette).length} colors</span></h2>`;
   const alts = [null, ...Object.keys(sheet.palettes || {})];
+  const big = Math.max(sheet.size[0], sheet.size[1]) > 64 ? 1 : ZOOM;
   for (const alt of alts) {
+    if (params.get('alt') && (alt || 'base') !== params.get('alt')) continue;
     if (alts.length > 1) { const h = document.createElement('h3'); h.textContent = alt ? `palette: ${alt}` : 'palette: base'; sec.appendChild(h); }
     const wrap = document.createElement('div');
     wrap.className = 'frames';
@@ -177,11 +176,11 @@ for (const [name, sheet] of Object.entries(SHEETS)) {
       const pair = document.createElement('div');
       pair.className = 'pair';
       const ctxs = [];
-      for (const s of [1, ZOOM]) {
+      for (const s of big === 1 ? [1] : [1, big]) {
         const c = document.createElement('canvas');
         c.width = sheet.size[0]; c.height = sheet.size[1];
         c.style.width = sheet.size[0] * s + 'px'; c.style.height = sheet.size[1] * s + 'px';
-        c.className = 'x' + s;
+        if (s > 1 || big === 1) c.className = 'big';
         const ctx = c.getContext('2d');
         ctx.drawImage(frameCanvas(name, sheet, frame, alt), 0, 0);
         ctxs.push(ctx);
@@ -190,118 +189,168 @@ for (const [name, sheet] of Object.entries(SHEETS)) {
       el.appendChild(pair);
       const label = document.createElement('div');
       label.className = 'label';
-      label.textContent = info && info.count > 1 ? `${info.base} (${info.count}×${info.dur}ms)` : frame;
+      label.textContent = info && info.count > 1 && !params.has('expand') ? `${info.base} (${info.count}×${info.dur}ms)` : frame;
       el.appendChild(label);
       wrap.appendChild(el);
-      if (info && info.count > 1) animated.push({ ctxs, name, sheet, base: info.base, alt });
+      if (info && info.count > 1 && !params.has('expand')) animated.push({ ctxs, name, sheet, base: info.base, alt });
     }
     sec.appendChild(wrap);
   }
   sheetsEl.appendChild(sec);
 }
 if (params.get('bg')) document.querySelectorAll('.bg-check canvas').forEach(c => c.style.background = '#' + params.get('bg'));
-document.querySelectorAll('.bgpick button').forEach(b => b.onclick = () => {
-  document.querySelectorAll('.bg-check canvas.x3').forEach(c => c.style.background = b.dataset.bg === 'check' ? '' : b.dataset.bg);
+document.querySelectorAll('[data-bg]').forEach(b => b.onclick = () => {
+  document.querySelectorAll('.bg-check canvas.big').forEach(c => c.style.background = b.dataset.bg === 'check' ? '' : b.dataset.bg);
 });
+if (only) document.body.classList.add('only');
+if (only && only.startsWith('scene')) document.getElementById('scene-section').classList.add('keep');
 
-// ---- Composed scene. ----
-const sceneCanvas = document.getElementById('scene');
-const sctx = sceneCanvas.getContext('2d');
-if (only === 'scene') {
-  document.body.classList.add('only');
-  document.getElementById('scene-section').classList.add('keep');
-  document.getElementById('scene-section').querySelector('h2').style.display = 'none';
-} else if (only) {
-  document.body.classList.add('only');
+// ---- Tints, applied the way the engine's effects.tint() does. ----
+let tintName = params.get('tint') || null;
+const tintBar = document.getElementById('tint-controls');
+for (const n of ['scene default', 'none', ...Object.keys(TINTS)]) {
+  const b = document.createElement('button');
+  b.textContent = n;
+  b.onclick = () => { tintName = n === 'scene default' ? null : n; tintBar.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); };
+  tintBar.appendChild(b);
+}
+if (only) tintBar.style.display = 'none';
+function applyTint(ctx, w, h, name) {
+  const t = TINTS[name];
+  if (!t || !t.amount) return;
+  ctx.save();
+  ctx.globalCompositeOperation = t.mode || 'source-over';
+  ctx.globalAlpha = Math.min(1, t.amount);
+  ctx.fillStyle = t.color;
+  ctx.fillRect(0, 0, w, h);
+  ctx.restore();
 }
 
+// ---- Composed scenes. ----
 function resolveTile(ref, now) {
   // ref: 'sheet:frame' or 'sheet:frame@alt'; an animation base name animates.
-  let [sheetName, rest] = ref.split(':');
+  const [sheetName, rest] = ref.split(':');
   let [frame, alt] = rest.split('@');
   const sheet = SHEETS[sheetName];
   if (!sheet) return null;
   if (!sheet.frames[frame] && sheet.frames[frame + '_0']) frame = animFrame(sheet, frame, now);
-  if (!sheet.frames[frame]) { return null; }
+  if (!sheet.frames[frame]) return null;
   return frameCanvas(sheetName, sheet, frame, alt || null);
 }
+function drawSprite(ctx, s, now) {
+  const sheet = SHEETS[s.sheet];
+  if (!sheet) return;
+  let frame = s.frame;
+  if (!sheet.frames[frame] && sheet.frames[frame + '_0']) frame = animFrame(sheet, frame, now + (s.phase || 0));
+  if (!sheet.frames[frame]) return;
+  const c = frameCanvas(s.sheet, sheet, frame, s.alt || null);
+  if (s.topLeft) ctx.drawImage(c, s.x, s.y);
+  else ctx.drawImage(c, s.x - (sheet.size[0] >> 1), s.y - sheet.size[1]);
+}
+const API = { SHEETS, frameCanvas, animFrame, drawSprite, resolveTile };
 
-const hero = { x: SCENE.hero[0], y: SCENE.hero[1], dir: 'down', moving: false, t: 0 };
 const keys = new Set();
 addEventListener('keydown', e => { if (e.key.startsWith('Arrow')) { keys.add(e.key); e.preventDefault(); } });
 addEventListener('keyup', e => keys.delete(e.key));
-let autoT = 0;
 
-function drawLayer(layer, now) {
+// Character frames: '<dir>_0' stands; walking cycles 1, 0, 2, 0 (the engine's convention).
+function heroFrame(hero) {
+  const sheet = SHEETS.cheryl;
+  if (!sheet) return '';
+  if (!hero.moving) return sheet.frames[`idle_${hero.dir}_0`] ? `idle_${hero.dir}` : `${hero.dir}_0`;
+  const cycle = [1, 0, 2, 0];
+  return `${hero.dir}_${cycle[Math.floor(hero.t / 133) % 4]}`;
+}
+
+const scenes = [];
+const scenesEl = document.getElementById('scenes');
+for (const [key, path] of SCENE_MODULES) {
+  if (only && only.startsWith('scene:') && only !== `scene:${key}`) continue;
+  let SCENE;
+  try { ({ SCENE } = await import(path)); } catch (e) { if (!/Failed to fetch|Importing a module script failed/.test(String(e))) errors.push(`${path}: ${e}`); continue; }
+  const state = params.get('state') || 'dusk';
+  const S = typeof SCENE === 'function' ? SCENE(state) : SCENE;
+  const w = S.width || S.ground[0].length * 16, h = S.height || S.ground.length * 16;
+  const div = document.createElement('div');
+  div.className = 'scene';
+  const scale = +params.get('scale') || S.scale || 2;
+  div.innerHTML = `<h3>${S.title || key} (${w}×${h})</h3>`;
+  const canvas = document.createElement('canvas');
+  canvas.width = w; canvas.height = h;
+  canvas.style.width = w * scale + 'px'; canvas.style.height = h * scale + 'px';
+  div.appendChild(canvas);
+  scenesEl.appendChild(div);
+  const hero = S.hero ? { x: S.hero[0], y: S.hero[1], dir: S.hero[2] || 'down', moving: false, t: 0, autoT: 0 } : null;
+  scenes.push({ S, ctx: canvas.getContext('2d'), w, h, hero });
+}
+document.getElementById('errors').textContent = errors.join('\n');
+
+function drawLayer(ctx, layer, now) {
+  if (!layer) return;
   layer.forEach((row, ty) => row.forEach((ref, tx) => {
     if (!ref) return;
     for (const r of ref.split('+')) {
       const c = resolveTile(r, now);
-      if (c) sctx.drawImage(c, tx * 16, ty * 16);
+      if (c) ctx.drawImage(c, tx * 16, ty * 16);
     }
   }));
 }
 
-function drawScene(now) {
-  sctx.fillStyle = '#000';
-  sctx.fillRect(0, 0, 256, 224);
-  drawLayer(SCENE.ground, now);
-  drawLayer(SCENE.detail, now);
-  // Characters and standing sprites, sorted by feet y.
-  const sprites = SCENE.sprites.map(s => ({ ...s }));
-  sprites.push({ sheet: 'cheryl', frame: heroFrame(now), x: Math.round(hero.x), y: Math.round(hero.y) });
-  sprites.sort((a, b) => a.y - b.y);
-  for (const s of sprites) {
-    const sheet = SHEETS[s.sheet];
-    if (!sheet) continue;
-    let frame = s.frame;
-    if (!sheet.frames[frame] && sheet.frames[frame + '_0']) frame = animFrame(sheet, frame, now + (s.phase || 0));
-    if (!sheet.frames[frame]) continue;
-    const c = frameCanvas(s.sheet, sheet, frame, s.alt || null);
-    sctx.drawImage(c, s.x - (sheet.size[0] >> 1), s.y - sheet.size[1]);
+function drawScene(sc, now) {
+  const { S, ctx, w, h, hero } = sc;
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, w, h);
+  if (S.draw) {
+    S.draw(ctx, now, API);
+  } else {
+    drawLayer(ctx, S.ground, now);
+    drawLayer(ctx, S.objects || S.detail, now);
+    const sprites = (S.sprites || []).map(s => ({ ...s }));
+    if (hero) sprites.push({ sheet: 'cheryl', frame: heroFrame(hero), x: Math.round(hero.x), y: Math.round(hero.y) });
+    sprites.sort((a, b) => a.y - b.y);
+    for (const s of sprites) drawSprite(ctx, s, now);
+    drawLayer(ctx, S.overhead, now);
+    if (S.after) S.after(ctx, now, API);
   }
-  drawLayer(SCENE.overhead, now);
-}
-
-function heroFrame(now) {
-  if (!SHEETS.cheryl) return '';
-  if (!hero.moving) return SHEETS.cheryl.frames[`idle_${hero.dir}_0`] ? `idle_${hero.dir}` : `walk_${hero.dir}_0`;
-  const n = 4, dur = (SHEETS.cheryl.durations && SHEETS.cheryl.durations[`walk_${hero.dir}`]) || 150;
-  return `walk_${hero.dir}_${Math.floor(hero.t / dur) % n}`;
+  applyTint(ctx, w, h, tintName || S.tint);
 }
 
 let last = performance.now();
 function tick(now) {
   const dt = Math.min(50, now - last); last = now;
-  let dx = 0, dy = 0;
-  if (keys.has('ArrowLeft')) dx -= 1; if (keys.has('ArrowRight')) dx += 1;
-  if (keys.has('ArrowUp')) dy -= 1; if (keys.has('ArrowDown')) dy += 1;
-  if (!keys.size && SCENE.patrol && !params.has('still')) {
-    // Wander along the patrol route so the walk cycle shows without input.
-    autoT += dt;
-    const [a, b] = SCENE.patrol;
-    const len = Math.hypot(b[0] - a[0], b[1] - a[1]);
-    const period = len / 0.04 * 2;
-    const ph = (autoT % period) / period;
-    const f = ph < 0.5 ? ph * 2 : 2 - ph * 2;
-    const tx = a[0] + (b[0] - a[0]) * f, ty = a[1] + (b[1] - a[1]) * f;
-    dx = Math.sign(Math.round(tx - hero.x)); dy = Math.sign(Math.round(ty - hero.y));
+  for (const sc of scenes) {
+    const hero = sc.hero;
+    if (hero) {
+      let dx = 0, dy = 0;
+      if (keys.has('ArrowLeft')) dx -= 1; if (keys.has('ArrowRight')) dx += 1;
+      if (keys.has('ArrowUp')) dy -= 1; if (keys.has('ArrowDown')) dy += 1;
+      if (!keys.size && sc.S.patrol && !params.has('still')) {
+        // Wander along the patrol route so the walk cycle shows without input.
+        hero.autoT += dt;
+        const [a, b] = sc.S.patrol;
+        const len = Math.hypot(b[0] - a[0], b[1] - a[1]);
+        const period = len / 0.04 * 2;
+        const ph = (hero.autoT % period) / period;
+        const f = ph < 0.5 ? ph * 2 : 2 - ph * 2;
+        const tx = a[0] + (b[0] - a[0]) * f, ty = a[1] + (b[1] - a[1]) * f;
+        dx = Math.sign(Math.round(tx - hero.x)); dy = Math.sign(Math.round(ty - hero.y));
+      }
+      hero.moving = !!(dx || dy);
+      if (hero.moving) {
+        hero.t += dt;
+        if (dx) hero.dir = dx < 0 ? 'left' : 'right'; else hero.dir = dy < 0 ? 'up' : 'down';
+        hero.x = Math.max(8, Math.min(sc.w - 8, hero.x + dx * dt * 0.04));
+        hero.y = Math.max(32, Math.min(sc.h, hero.y + dy * dt * 0.04));
+      } else hero.t = 0;
+    }
+    drawScene(sc, now);
   }
-  hero.moving = !!(dx || dy);
-  if (hero.moving) {
-    hero.t += dt;
-    if (dx) hero.dir = dx < 0 ? 'left' : 'right'; else hero.dir = dy < 0 ? 'up' : 'down';
-    hero.x = Math.max(8, Math.min(248, hero.x + dx * dt * 0.04));
-    hero.y = Math.max(32, Math.min(224, hero.y + dy * dt * 0.04));
-  } else hero.t = 0;
-  drawScene(now);
   for (const a of animated) {
     const c = frameCanvas(a.name, a.sheet, animFrame(a.sheet, a.base, now), a.alt);
     for (const ctx of a.ctxs) { ctx.clearRect(0, 0, c.width, c.height); ctx.drawImage(c, 0, 0); }
   }
   requestAnimationFrame(tick);
 }
-if (params.has('hero')) { const [x, y, d] = params.get('hero').split(','); hero.x = +x; hero.y = +y; hero.dir = d || 'down'; }
 requestAnimationFrame(tick);
 window.artReady = true;
 </script>
