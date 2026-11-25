@@ -6,13 +6,21 @@ import { testMaps, testItemDefs, testScripts, testCharacters } from './test/inde
 import { openingMaps, openingItems, openingScripts, openingIntro, opening } from './opening/index.js';
 import { cherylDeclines } from './opening/common.js';
 import { act2Maps, act2Items, act2Scripts, act2 } from './act2/index.js';
+import { act4Maps, act4Items, act4FallbackItems, act4Scripts, shipPlanAct4, seaCave } from './act4/index.js';
 import { cheryl } from '../art/cheryl.js';
 
-const maps = { ...openingMaps, ...act2Maps, ...testMaps };
+// Act 4's maps include its states of earlier maps (overlays over the same ids), so it comes after them.
+const maps = { ...openingMaps, ...act2Maps, ...act4Maps, ...testMaps };
 // The Squeeze leads on to Lamp Street once Act 2 registers it; until then it ends the slice.
 opening.squeezeTo = maps.lamp_street ? 'lamp_street' : null;
 // The ladder under the hundredth step leads into Act 3 once it registers the Step Gallery; until then Act 2 ends on a card.
 act2.stepTo = maps.step_gallery ? 'step_gallery' : null;
+// The sea cave's mouth opens onto the Goat Path once Act 2 part 2 registers it.
+seaCave.goatPath = maps.goat_path ? 'goat_path' : null;
+
+const items = { ...act4FallbackItems, ...openingItems, ...act2Items, ...act4Items, ...testItemDefs };
+// The Ship Plan (Act 3's) gains its Act 4 looks.
+items.ship_plan = shipPlanAct4(items.ship_plan);
 
 export default {
   title: 'Moonshine',
@@ -26,10 +34,10 @@ export default {
   maps,
   // People defined once and placed by story state (see the engine README).
   characters: { ...testCharacters },
-  items: { ...openingItems, ...act2Items, ...testItemDefs },
+  items,
 
   // Named scripts, runnable with ?run=<name> for testing.
-  scripts: { ...openingScripts, ...act2Scripts, ...testScripts },
+  scripts: { ...openingScripts, ...act2Scripts, ...act4Scripts, ...testScripts },
 
   // Runs once when a new game starts.
   onNewGame: openingIntro,
