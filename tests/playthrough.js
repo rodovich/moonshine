@@ -2,7 +2,7 @@
 // and later acts' specs). Keyboard helpers press arrows and Z only; pointer
 // helpers click and tap only.
 import { expect } from '@playwright/test';
-import { boot, snap, waitFor } from './helpers.js';
+import { boot, snap, waitFor, stepKey } from './helpers.js';
 
 export const DIRKEY = { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' };
 
@@ -89,7 +89,7 @@ export async function kbWalk(page, x, y) {
     }
     blockedFor = 0;
     const dir = next[0] > s.x ? 'right' : next[0] < s.x ? 'left' : next[1] > s.y ? 'down' : 'up';
-    await page.keyboard.press(DIRKEY[dir]);
+    await stepKey(page, dir);
     await waitFor(page, ([nx, ny]) => {
       const p = window.moonshine.snapshot();
       return (p.x === nx && p.y === ny && !p.moving) || !!p.text || p.busy;
@@ -133,7 +133,7 @@ export async function kbInteract(page, id, item = null) {
     const s = await snap(page);
     const [nx, ny] = spot.next;
     const dir = nx > s.x ? 'right' : nx < s.x ? 'left' : ny > s.y ? 'down' : 'up';
-    await page.keyboard.press(DIRKEY[dir]);
+    await stepKey(page, dir);
     await page.waitForTimeout(60);
     await waitFor(page, () => !window.moonshine.snapshot().moving, null, 4000);
   }

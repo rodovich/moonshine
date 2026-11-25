@@ -8,7 +8,7 @@
 // pointer run also takes the drop-ladder shortcut both ways before the valve,
 // and both runs check that the passage's water shuts the hall's west end after it.
 import { test, expect } from '@playwright/test';
-import { snap, waitFor, shot } from './helpers.js';
+import { snap, waitFor, shot, stepKey } from './helpers.js';
 
 const DIRKEY = { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' };
 const STEP_FLAGS = 'act1.moonrise,act1.done,act2.started,piano.slid,movers.met,counter.left,step.found,step.open,basin.inside,got.crowbar,ottilie.met,n.stepsArrived=1';
@@ -101,7 +101,7 @@ async function kbWalk(page, x, y) {
     }, [x, y]);
     if (!next) { await page.waitForTimeout(200); continue; }
     const dir = next[0] > s.x ? 'right' : next[0] < s.x ? 'left' : next[1] > s.y ? 'down' : 'up';
-    await page.keyboard.press(DIRKEY[dir]);
+    await stepKey(page, dir);
     await waitFor(page, ([nx, ny]) => {
       const p = window.moonshine.snapshot();
       return (p.x === nx && p.y === ny && !p.moving) || !!p.text || p.busy;
@@ -115,7 +115,7 @@ async function kbWalk(page, x, y) {
 
 async function kbExit(page, x, y, dir, map) {
   await kbWalk(page, x, y);
-  await page.keyboard.press(DIRKEY[dir]);
+  await stepKey(page, dir);
   await waitFor(page, (m) => window.moonshine.snapshot().map === m, map, 8000);
   await waitFor(page, () => { const s = window.moonshine.snapshot(); return s.idle || !!s.text || !!s.choice; }, null, 15000);
 }
@@ -181,7 +181,7 @@ async function kbInteract(page, id, item = null) {
     const s = await snap(page);
     const [nx, ny] = spot.next;
     const dir = nx > s.x ? 'right' : nx < s.x ? 'left' : ny > s.y ? 'down' : 'up';
-    await page.keyboard.press(DIRKEY[dir]);
+    await stepKey(page, dir);
     await page.waitForTimeout(60);
     await waitFor(page, () => !window.moonshine.snapshot().moving, null, 4000);
   }
@@ -194,7 +194,7 @@ async function kbInteract(page, id, item = null) {
 async function kbApproach(page, x, y, dir, item = null) {
   const [dx, dy] = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] }[dir];
   await kbWalk(page, x - 2 * dx, y - 2 * dy);
-  await page.keyboard.press(DIRKEY[dir]);
+  await stepKey(page, dir);
   await waitFor(page, ([nx, ny]) => { const p = window.moonshine.snapshot(); return p.x === nx && p.y === ny && !p.moving; }, [x - dx, y - dy], 3000);
   if (item) await kbHold(page, item);
   await page.keyboard.press('z');
@@ -339,7 +339,7 @@ test('keyboard: Act 3', async ({ page }) => {
 
   // Down the hundredth step: step down toward it (a walkable trigger asks at once;
   // a solid hole only turns Cheryl to face it, and Z asks).
-  await page.keyboard.press('ArrowDown');
+  await stepKey(page, 'ArrowDown');
   await waitFor(page, () => !!window.moonshine.snapshot().choice, null, 2500).catch(async () => {
     await waitFor(page, () => window.moonshine.snapshot().idle, null, 3000);
     await page.keyboard.press('z');
@@ -467,7 +467,7 @@ test('keyboard: Act 3', async ({ page }) => {
 
   // The passage's water has run down the hall over the ladder's foot: the west end is shut.
   await kbWalk(page, 13, 8);
-  await page.keyboard.press('ArrowLeft');
+  await stepKey(page, 'ArrowLeft');
   await waitFor(page, () => !!window.moonshine.snapshot().text, null, 4000);
   log = await read();
   expect(joined(log)).toContain("That way's shut. North, then.");
@@ -550,7 +550,7 @@ test('keyboard: Act 3', async ({ page }) => {
 
   // The south parapet: the vista, and the end.
   await kbWalk(page, 16, 12);
-  await page.keyboard.press('ArrowDown');
+  await stepKey(page, 'ArrowDown');
   await waitFor(page, () => window.moonshine.snapshot().picture, null, 10000);
   log = await readUntil(page, adv, 'That was me.');
   await page.waitForTimeout(300);
