@@ -199,7 +199,7 @@ const objects = [
       ? g.describe("Boarded over, and somebody's chalked 100 on it. Twice.")
       : g.describe('MIND THE STEP. BY ORDER.', "The Mayor's handwriting. He's never forgiven a step.")),
     use: {
-      crowbar: (g) => g.describe("I opened it with this. The Mayor nailed it shut again. That's fair. It's his step too."),
+      crowbar: (g) => g.describe("I opened it with this once. The Mayor's nailed it shut, and fair enough: down there it all ends in water now."),
       '*': cherylDeclines,
     },
   },
