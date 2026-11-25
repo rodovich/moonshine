@@ -449,7 +449,7 @@ test('keyboard: Act 3', async ({ page }) => {
   await read();
   await kbChoose(page, 0); // pull the chain
   log = await read();
-  expect(joined(log)).toContain("That'll save my knees.");
+  expect(joined(log)).toContain('There. A back door.');
   await kbInteract(page, 'drop_ladder');
   log = await read();
   expect(joined(log)).toContain('I want to see where that passage goes.');
