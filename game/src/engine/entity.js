@@ -101,6 +101,7 @@ export class Entity {
     this.t++;
     if (this.t >= this.stepTicks) {
       this.moving = false;
+      this.lastFrom = [this.fromX, this.fromY]; // where the finished step began
       this.fromX = this.x;
       this.fromY = this.y;
       return true;
@@ -163,14 +164,20 @@ export class Entity {
     const rx = Math.round(x);
     const ry = Math.round(y);
     this.lastDrawn = { x: rx + camX, y: ry + camY, w: img.width, h: img.height, img, flip };
+    ctx.save();
+    if (this.clipBelow) {
+      // Sinking into a hole: nothing below the footprint's bottom edge shows.
+      ctx.beginPath();
+      ctx.rect(0, 0, ctx.canvas.width, this.py + this.h * TILE - camY);
+      ctx.clip();
+    }
     if (flip) {
-      ctx.save();
       ctx.scale(-1, 1);
       ctx.drawImage(img, -rx - img.width, ry);
-      ctx.restore();
     } else {
       ctx.drawImage(img, rx, ry);
     }
+    ctx.restore();
   }
 
   // A small oval shadow under a character's feet, drawn before any sprite so

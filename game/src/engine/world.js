@@ -8,13 +8,14 @@ import { Entity, DIR_VEC, dirBetween } from './entity.js';
 import { findPath, nearestReachable } from './pathfind.js';
 import { makeApi } from './script.js';
 import { Control } from './control.js';
+import { Ambient } from './ambient.js';
 import { writeSave } from './save.js';
 import { colorOf, loadSheet, rgbSetOf } from './art.js';
 import { uiSmall } from '../art/ui.js';
 import { TINTS, EMISSIVE } from '../art/tints.js';
 import { drawText, measure, wrap, LINE_HEIGHT } from './text.js';
 import { STYLES, drawBox } from './ui.js';
-import { playMusic, stopMusic } from './sound.js';
+import { playMusic, stopMusic, setAmbience, setMusicFilter } from './sound.js';
 
 export class World {
   constructor(game, state) {
@@ -34,6 +35,7 @@ export class World {
     this.marker = null;
     this.api = makeApi(this);
     this.control = new Control(this);
+    this.ambient = new Ambient(this);
     this.small = loadSheet(uiSmall);
     this.player = new Entity({ id: 'player', x: state.x, y: state.y, facing: state.facing, ...this.content.player }, true);
     this.player.name = this.content.player.name || 'Cheryl';
@@ -46,7 +48,8 @@ export class World {
     const def = this.content.maps[id];
     if (!def) throw new Error(`no map "${id}"`);
     this.mapDef = def;
-    this.map = new TileMap(def);
+    this.variant = this.pickVariant(def);
+    this.map = new TileMap(this.layerDef());
     this.state.map = id;
     const p = this.player;
     p.x = p.fromX = x;
@@ -62,9 +65,13 @@ export class World {
     this.refreshEntities();
     this.placeSafely(def);
     this.control.reset();
+    this.ambient.reset();
     this.camPan = null;
     this.snapCamera();
     this.applyLighting(0);
+    // Audio: ambience beds and a music filter per map (see sound.js).
+    setAmbience(def.ambience || []);
+    setMusicFilter(def.musicFilter || null);
     if (def.music !== undefined) {
       if (def.music) playMusic(def.music);
       else stopMusic();
@@ -121,27 +128,84 @@ export class World {
         if (!sameSprite(sprite, e.sprite)) e.setSprite(sprite);
       }
     }
+    this.placeCharacters();
     this.applyPatches();
   }
 
-  // A map's `patches(g)` returns [layer, x, y, tile] changes for the current
-  // state (a taken item leaves a bare counter, a moved piano clears the stair).
+  // content.characters: people defined once, placed by story state.
+  //   kid: { name, sprite, talks, ..., at: (g) => ({ map, x, y, facing, behavior }) or null }
+  // When `at` changes (after a script, or setFlag), the character appears,
+  // leaves, or moves to the new spot.
+  placeCharacters() {
+    for (const [id, ch] of Object.entries(this.content.characters || {})) {
+      const at = ch.at ? safeCall(ch.at, this.api) : null;
+      let e = this.byId.get(id);
+      const here = at && at.map === this.state.map;
+      const key = here ? `${at.x},${at.y},${at.facing || ''},${JSON.stringify(at.behavior || null)}` : null;
+      if (!here) {
+        if (e && e.character) this.removeEntity(e);
+        continue;
+      }
+      if (e && !e.character) continue; // a map entity with the same id wins
+      if (e && e.atKey === key) continue;
+      const def = { ...ch, id, x: at.x, y: at.y, facing: at.facing || ch.facing, behavior: at.behavior !== undefined ? at.behavior : ch.behavior };
+      delete def.at;
+      if (e) this.removeEntity(e);
+      e = new Entity(def);
+      e.character = true;
+      e.atKey = key;
+      e.home = { x: def.x, y: def.y, facing: e.facing };
+      this.entities.push(e);
+      this.byId.set(id, e);
+    }
+  }
+
+  // Map variants: `variants: [{ when, ground, detail, overhead, collision,
+  // legend }]` replace whole layers while `when` holds (the first match wins):
+  // the canals drained, the fountain dry. Layers a variant leaves out come
+  // from the base map; its legend adds to the base legend.
+  pickVariant(def) {
+    const list = def.variants || [];
+    return list.findIndex((v) => !v.when || safeCall(v.when, this.api));
+  }
+
+  layerDef() {
+    const def = this.mapDef;
+    const v = this.variant >= 0 ? def.variants[this.variant] : null;
+    if (!v) return def;
+    return { ...def, ...v, legend: { ...def.legend, ...(v.legend || {}) }, id: def.id, tileset: def.tileset };
+  }
+
+  // A map's `patches(g)` returns [layer, x, y, value] changes for the current
+  // state (a taken item leaves a bare counter, a moved piano clears the
+  // stair). [layer, x, y, value, w, h] fills a rectangle.
   applyPatches() {
+    // A different variant now? Rebuild the tiles first.
+    const v = this.pickVariant(this.mapDef);
+    if (v !== this.variant) {
+      this.variant = v;
+      this.map = new TileMap(this.layerDef());
+      this.patched = [];
+    }
     const fn = this.mapDef.patches;
     if (!fn) return;
     // Undo previous patches, then apply the current list.
     for (const [layer, x, y, tile] of [...(this.patched || [])].reverse()) this.map.setTile(layer, x, y, tile);
     this.patched = [];
-    for (const [layer, x, y, value] of safeCall(fn, this.api) || []) {
-      this.patched.push([layer, x, y, this.originalTile(layer, x, y)]);
-      this.map.setTile(layer, x, y, value);
+    for (const [layer, x0, y0, value, w = 1, h = 1] of safeCall(fn, this.api) || []) {
+      for (let y = y0; y < y0 + h; y++) {
+        for (let x = x0; x < x0 + w; x++) {
+          this.patched.push([layer, x, y, this.originalTile(layer, x, y)]);
+          this.map.setTile(layer, x, y, value);
+        }
+      }
     }
   }
 
   originalTile(layer, x, y) {
-    const rows = this.mapDef[layer];
-    const ch = rows?.[y]?.[x];
-    return ch && ch !== ' ' ? this.mapDef.legend[ch] : null;
+    const def = this.layerDef();
+    const ch = def[layer]?.[y]?.[x];
+    return ch && ch !== ' ' ? def.legend[ch] : null;
   }
 
   // The map's lighting: `lighting` is a preset name ('dusk', 'night', 'day')
@@ -347,14 +411,41 @@ export class World {
     }
   }
 
+  // Using an item on something. Precedence: the target's use[item]; the
+  // item's own useOn.npc / useOn.object (e.g. "Crowbar on any NPC: No.");
+  // the target's use['*']; the target's `decline` line(s); defaults.useFail.
   async useItemOn(e, itemId) {
     const g = this.api;
     const use = e.def.use || {};
     if (use[itemId]) return use[itemId](g, e, itemId);
+    const kind = e.def.kind || (e.directional ? 'npc' : 'object');
+    const itemUse = this.content.items?.[itemId]?.useOn?.[kind];
+    if (itemUse) return typeof itemUse === 'function' ? itemUse(g, e, itemId) : this.sayOrDescribe(e, itemUse);
     if (use['*']) return use['*'](g, e, itemId);
+    if (e.def.decline) return this.sayOrDescribe(e, e.def.decline);
     const fallback = this.content.defaults?.useFail;
     if (fallback) return fallback(g, e, itemId);
     return g.describe("That doesn't do anything.");
+  }
+
+  // Characters say a line in their own voice; objects get Cheryl's description.
+  sayOrDescribe(e, lines) {
+    const list = Array.isArray(lines) ? lines : [lines];
+    return e.directional && e.name ? this.api.say(e, ...list) : this.api.describe(...list);
+  }
+
+  // Looking at an item in the bag: items.x.examine(g, looks) or items.x.looks
+  // ([first, second, ..., then]; `looksRepeat: 'cycle'` cycles after the first).
+  async examineItem(id) {
+    const def = this.content.items?.[id];
+    if (!def) return;
+    const key = `item:${id}`;
+    this.state.looks = this.state.looks || {};
+    const n = this.state.looks[key] || 0;
+    this.state.looks[key] = n + 1;
+    if (def.examine) return def.examine(this.api, n);
+    const entry = pickByCount(def.looks || [def.description || def.name], n, def.looksRepeat);
+    return this.api.describe(...(Array.isArray(entry) ? entry : [entry]));
   }
 
   // ---- Per-tick update ------------------------------------------------
@@ -381,6 +472,7 @@ export class World {
     if (!this.textbox.open && !this.inventory.open && !this.busy) this.control.afterMove(input);
     else this.control.afterMove(null);
     for (const e of this.entities) e.tickAnim();
+    this.ambient.update();
     if (this.picture) this.picture.ms += 1000 / 60;
     // Hints wait (and stay hidden) while a text box or the bag is open.
     if (this.hintState && !this.textbox.open && !this.inventory.open) this.hintState.t++;
@@ -435,7 +527,9 @@ export class World {
     const p = this.player;
     const near = b.stopNear && Math.abs(p.x - e.x) + Math.abs(p.y - e.y) <= b.stopNear;
     const approached = this.control.pending && this.control.pending.entity === e;
-    if (near || approached) {
+    // noStop: [[x, y, w, h], ...] areas where he finishes the stretch first.
+    const mayStop = !(b.noStop || []).some(([ax, ay, aw, ah]) => e.x >= ax && e.y >= ay && e.x < ax + aw && e.y < ay + ah);
+    if ((near || approached) && mayStop) {
       e.facing = dirBetween(e.x, e.y, p.x, p.y) || e.facing;
       const pose = b.nearPose || b.blockedPose;
       if (pose && e.pose !== pose) e.setPose(pose);
@@ -534,6 +628,7 @@ export class World {
       this.drawWorld(ctx);
     }
     if (!this.busy && !this.textbox.open && !this.inventory.open && !this.picture) this.control.drawHud(ctx);
+    if (!this.picture) this.ambient.drawBark(ctx);
     this.drawHint(ctx);
     this.inventory.draw(ctx);
     this.textbox.draw(ctx, this.picture ? 0 : this.player.py - this.cam.y);
@@ -553,6 +648,7 @@ export class World {
     this.map.draw(ctx, 'ground', cx, cy, WIDTH, HEIGHT, ms);
     this.map.draw(ctx, 'detail', cx, cy, WIDTH, HEIGHT, ms);
     this.drawMarker(ctx, cx, cy);
+    this.ambient.drawEffects(ctx, cx, cy, 'ground');
     const lit = this.effects.hasLight();
     if (lit) {
       this.effects.applyLight(ctx, 1);
@@ -568,6 +664,7 @@ export class World {
     const sprites = lit ? this.layer('sprites') : ctx;
     for (const e of sorted) e.drawShadow(sprites, cx, cy);
     for (const e of sorted) e.draw(sprites, cx, cy);
+    this.ambient.drawEffects(sprites, cx, cy, 'top');
     if (lit) this.compositeLit(ctx, sprites, this.content.spriteLight ?? SPRITE_LIGHT);
     const over = lit ? this.layer('overhead') : ctx;
     this.map.draw(over, 'overhead', cx, cy, WIDTH, HEIGHT, ms);
@@ -575,6 +672,8 @@ export class World {
       this.compositeLit(ctx, over, 1);
       this.map.drawGlow(ctx, 'overhead', cx, cy, WIDTH, HEIGHT, ms, this.emissive());
     }
+    this.drawDarkness(ctx, cx, cy);
+    this.ambient.drawEmotes(ctx, cx, cy);
     if (this.game.debug.debug) this.drawDebug(ctx, cx, cy);
     this.effects.applyWorld(ctx);
   }
@@ -583,6 +682,43 @@ export class World {
   emissive() {
     if (!this.emissiveSet) this.emissiveSet = rgbSetOf(this.content.emissive || EMISSIVE);
     return this.emissiveSet;
+  }
+
+  // Darkness with light sources (the Lamp Halls). A map's `darkness` (0..1, or
+  // a function of the state) covers the screen in near-black, with holes
+  // around lights: the map's `lights(g)` ([{ x, y, radius }] in tiles),
+  // entities with `light: radius`, and the player's `playerLight` (a number
+  // or (g) => number, on the map or the content). Holes fade in three bands.
+  drawDarkness(ctx, cx, cy) {
+    const def = this.mapDef;
+    let dark = def.darkness;
+    if (typeof dark === 'function') dark = safeCall(dark, this.api);
+    if (!dark) return;
+    const lights = [...(safeCall(def.lights || (() => []), this.api) || [])].map((l) => ({
+      px: l.x * TILE + TILE / 2, py: l.y * TILE + TILE / 2, r: l.radius,
+    }));
+    for (const e of this.entities) {
+      if (e.def.light && e.visible) lights.push({ px: e.px + (e.w * TILE) / 2, py: e.py + (e.h * TILE) / 2 - 8, r: e.def.light });
+    }
+    let pl = def.playerLight ?? this.content.playerLight;
+    if (typeof pl === 'function') pl = safeCall(pl, this.api);
+    if (pl) lights.push({ px: this.player.px + TILE / 2, py: this.player.py, r: pl });
+    const layer = this.layer('dark');
+    layer.fillStyle = colorOf(def.darkColor || 'void');
+    layer.fillRect(0, 0, WIDTH, HEIGHT);
+    layer.globalCompositeOperation = 'destination-out';
+    for (const l of lights) {
+      for (const [k, a] of [[1, 0.4], [0.75, 0.6], [0.5, 1]]) {
+        layer.globalAlpha = a;
+        layer.drawImage(discImage(Math.round(l.r * TILE * k)), Math.round(l.px - cx - l.r * TILE * k), Math.round(l.py - cy - l.r * TILE * k));
+      }
+    }
+    layer.globalAlpha = 1;
+    layer.globalCompositeOperation = 'source-over';
+    ctx.save();
+    ctx.globalAlpha = Math.min(1, dark);
+    ctx.drawImage(layer.canvas, 0, 0);
+    ctx.restore();
   }
 
   // A cleared, transparent offscreen layer the size of the screen.
@@ -682,6 +818,24 @@ export class World {
   }
 }
 
+// A filled pixel disc of radius r (crisp edges, no anti-aliasing), cached.
+const discs = new Map();
+function discImage(r) {
+  let c = discs.get(r);
+  if (c) return c;
+  c = document.createElement('canvas');
+  c.width = c.height = Math.max(1, r * 2);
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#000';
+  for (let y = 0; y < r * 2; y++) {
+    const dy = y - r + 0.5;
+    const half = Math.floor(Math.sqrt(Math.max(0, r * r - dy * dy)));
+    ctx.fillRect(r - half, y, half * 2, 1);
+  }
+  discs.set(r, c);
+  return c;
+}
+
 // Call a content callback (a `when`, a sprite or lighting function); a throw
 // is logged and counts as a falsy result instead of stopping the game.
 export function safeCall(fn, ...args) {
@@ -695,7 +849,15 @@ export function safeCall(fn, ...args) {
 
 export function isInteractable(e) {
   const d = e.def;
-  return !!(d.interact || d.use || d.look || d.looks || d.talk);
+  return !!(d.interact || d.use || d.look || d.looks || d.talk || d.talks);
+}
+
+// Entry `n` (0-based) of a first/second/.../then list. repeat: 'last' (the
+// last entry repeats) or 'cycle' (after the first, cycle through the rest).
+export function pickByCount(list, n, repeat = 'last') {
+  if (n < list.length) return list[n];
+  if (repeat === 'cycle' && list.length > 1) return list[1 + ((n - 1) % (list.length - 1))];
+  return list[list.length - 1];
 }
 
 function sameSprite(a, b) {
@@ -720,8 +882,13 @@ async function runInteract(g, e, looks) {
   if (d.interact) return d.interact(g, e, looks);
   if (d.looks) {
     // looks: [first, second, ..., then]; each entry a line or a list of lines.
-    const entry = d.looks[Math.min(looks, d.looks.length - 1)];
+    const entry = pickByCount(d.looks, looks, d.looksRepeat);
     return g.describe(...(Array.isArray(entry) ? entry : [entry]));
+  }
+  if (d.talks) {
+    // talks: the same for things the entity says.
+    const entry = pickByCount(d.talks, looks, d.talksRepeat);
+    return g.say(e, ...(Array.isArray(entry) ? entry : [entry]));
   }
   if (d.talk) {
     const lines = Array.isArray(d.talk) ? d.talk : [d.talk];

@@ -77,9 +77,17 @@ All layers are the same size as `ground`. The legend is shared by all layers, so
 
 **Layering rule (3/4 view).** Ground, then detail, then characters sorted by their feet, then overhead (frames named `over_*`; the engine warns if one lands on another layer). Use the overhead layer only for things that are always above anyone walking there: roof eaves, arch tops, awnings, canopies, lamp tops. A lamp post is a detail tile with its top on the overhead layer. Anything a character can stand both in front of and behind (statues, people) should be an entity with a sprite, so it sorts by y.
 
-**Patches** change tiles as the story moves on: a taken pepper mill leaves a bare counter, the piano's tiles clear from the Squeeze. `patches(g)` returns `[layer, x, y, value]` entries for the current state (`value` as in the legend, or `null` to clear); the engine re-applies them on map load and after every script, restoring tiles whose patch no longer applies. `g.setTile(...)` makes a one-off change that lasts until the map reloads.
+**Patches** change tiles as the story moves on: a taken pepper mill leaves a bare counter, the piano's tiles clear from the Squeeze. `patches(g)` returns `[layer, x, y, value]` entries for the current state (`value` as in the legend, or `null` to clear), or `[layer, x, y, value, w, h]` to fill a rectangle; the engine re-applies them on map load, after every script, and on `setFlag`, restoring tiles whose patch no longer applies. `g.setTile(...)` makes a one-off change that lasts until the map reloads.
 
-**Exits** fire when the player finishes a step onto them by walking (not during a script: `movePlayer` onto a door does nothing, so call `changeMap` yourself). Click-to-walk paths never cross an exit on the way to somewhere else, and an exit is never chosen as "the nearest reachable tile" for an unreachable click.
+**Variants** replace whole layers for big changes (the canals drained, the fountain dry, the Teeth in three stages): `variants: [{ when, ground, detail, overhead, collision, legend }]`. The first variant whose `when` holds is used; layers it leaves out come from the base map, and its `legend` adds to the base legend. Patches apply on top. The map re-checks its variant whenever patches are re-applied, so a scene can drain a canal mid-script with `g.setFlag`.
+
+**Darkness** (the Lamp Halls): `darkness: 0.9` (or a function of the state) covers the map in near-black (`darkColor`, default `void`) with holes around lights: `lights: (g) => [{ x, y, radius }]` (tiles), entities with `light: radius`, and `playerLight` (a number or a function, on the map or the content; e.g. `(g) => g.hasItem('disc') && 3`). Light fades out in three bands.
+
+**Ambient events** happen on a timer without stopping the player: `ambient: [{ every: [18, 24], when, run: (g) => ... }]` (seconds, a random interval in the range). `run` is a plain callback, not a script, so use non-blocking calls there: `g.bark`, `g.emote`, `g.spawnEffect`, `g.sfx`, `g.setTile`. Timers pause while a script runs.
+
+**Audio per map:** `ambience: ['town_murmur', 'gulls']` (looping beds), `musicFilter: 'muffled'`, and `step: 'step_stone'` (footstep sound; a tile's own `step` property wins). These pass through `engine/sound.js` to the audio module if it provides `setAmbience`, `setMusicFilter`, and the step sounds; until then they're quietly ignored.
+
+**Exits** fire when the player finishes a step onto them by walking. An exit whose `when` fails but has `blocked: 'line'` (a line, a list of lines, or an async function) explains itself in Cheryl's voice and steps her back. `confirm: 'Go down?'` asks first (options `choices`, default Yes / Not yet; anything but the first steps her back). Exits don't fire during a script: `movePlayer` onto a door does nothing, so call `changeMap` yourself. Click-to-walk paths never cross an exit on the way to somewhere else, and an exit is never chosen as "the nearest reachable tile" for an unreachable click.
 
 ```js
 exits: [
@@ -145,9 +153,14 @@ Everything you can talk to, look at, or bump into that isn't a plain tile is an 
 ```
 
 Shortcuts instead of `interact`:
+- `talks: [first, second, ..., then]`: what it says each time (each entry a line or a list of lines); `talksRepeat: 'cycle'` cycles through the entries after the first instead of repeating the last.
 - `talk: ['line', 'line']`: the entity says them.
 - `look: 'text'` or `look: ['box', 'box']`: Cheryl describes it, the same every time.
-- `looks: [first, second, …, then]`: a different description each time it's looked at; the last repeats. Each entry is a line or a list of lines (boxes).
+- `looks: [first, second, …, then]`: a different description each time it's looked at; the last repeats (`looksRepeat: 'cycle'` cycles). Each entry is a line or a list of lines (boxes).
+- `decline: 'line'`: the catch-all for items with no handler (said by a character, described for an object); see Items for the full order.
+- `bark: { lines, range: 3, every: [4, 8], once, speaker }`: says lines at the top of the screen, without stopping anything, while Cheryl is within `range` (chanting girls, a busker).
+- `emote: { frame: 'note', every: [3, 6], seconds }`: an icon over its head now and then (`note`, `exclaim`, `question`, or a frame from `sheet`).
+- `light: radius`: lights up darkness around it (see Maps).
 
 **Look counters.** Every interaction (not item use) bumps a counter saved in the game state, keyed by map and entity id. `interact` gets the count before this look as its third argument, and `g.looks(id)` reads it. Entities with the same `lookKey` share a counter (all the windows on a facade). Hotspots for wall features or groups of tiles are entities with no sprite: give them a footprint (`w`, `h`) over the tiles and `look`/`looks`.
 
@@ -167,6 +180,8 @@ Shortcuts instead of `interact`:
 
 Characters turn to face the player when talked to (`turnToTalk: false` to prevent it), and wandering and patrols pause while any script runs.
 
+**Characters who move between maps.** Define a person once in `content.characters`, with `at: (g) => ({ map, x, y, facing, behavior })` (or `null` when they're nowhere): the Kid in Cistern Court during Act 1 and at the Steps in Act 2. The engine places them on whichever map is loaded and moves them when `at` changes (after a script or a `setFlag`). Everything else on a character is the same as a map entity. A map entity with the same id wins, if you need a one-off.
+
 **Things that change.** To make something disappear for good (a picked-up item), give it `when: (g) => !g.flag('got_key')` and set the flag. To swap an object's look, use a sprite function, two entities with opposite `when`s, or `g.setSprite(id, sprite)`. Entities are re-checked after every script.
 
 ## Items
@@ -181,7 +196,9 @@ items: {
 }
 ```
 
-The player opens the inventory with X/Escape or the bag button (top right), picks an item, and chooses **Use**. They are then "holding" it (a banner shows `Use Brass Key on…`). Keyboard: Z uses it on whatever Cheryl faces; X cancels. Pointer: click a character or object to walk over and use it there; click the banner to cancel. The target's `use[itemId]` handler runs, else `use['*']`, else `defaults.useFail`.
+The player opens the inventory with X/Escape or the bag button (top right), picks an item, and chooses **Use**. They are then "holding" it (a banner shows `Use Brass Key on…`). Keyboard: Z uses it on whatever Cheryl faces; X cancels. Pointer: click a character or object to walk over and use it there; click the banner to cancel. The order: the target's `use[itemId]`; else the item's own `useOn.npc` or `useOn.object` (a line, lines, or a function: "Crowbar on any NPC: No. Absolutely not."); else the target's `use['*']`; else its `decline`; else `defaults.useFail`. An entity counts as an NPC if it has a character sprite; `kind: 'npc'` or `'object'` overrides.
+
+**Look** (a button in the bag; keyboard: Down from the last row to the buttons) examines the selected item: `examine: async (g, looks) => ...`, or `looks: [first, ..., then]` (with `looksRepeat`), or else its `description`. Looks are counted in the save like object looks, and the bag reopens afterwards. `g.trade(take, give)` swaps one item for another.
 
 ## Scripts
 
@@ -258,6 +275,15 @@ Time, camera, and screen effects (all resolve when done; durations in seconds):
 | `setLighting(name, seconds)`, `lighting` | Crossfade the scene lighting to `'day'`, `'dusk'`, `'night'`, a preset from `content.lighting`, or `null`; 0 seconds is a hard cut. Lasts until the next map load, which applies that map's own `lighting`. |
 | `showPicture(spec, { fade })` / `hidePicture({ fade })` | Replace the map with a full-screen 256×224 picture (a vista): `{ sheet, frame, palette }` or a function `(ctx, ms)` that draws it, `ms` since it appeared. Text boxes, shake, and effects still work over it. `fade` is in seconds; 0 is a hard cut. |
 | `card(text, seconds)` | Centered text on black ("Cheryl did not sleep well."), drawn above fades. |
+| `bark(speaker, text, { seconds })` | One line of speech at the top of the screen that doesn't stop the player or the script (a chant, a voice from a window). |
+| `say(speaker, line, { position: 'top' })` | A normal (blocking) line with its box at the top of the screen: an off-screen voice, the Clockmaker in his belfry. `'bottom'` and `'auto'` (the default) also work. |
+| `emote(id, frame, { seconds })` | An icon over a character's head (`'note'`, `'exclaim'`, `'question'`). |
+| `spawnEffect({ sprite, path or at, speed, seconds, offset, layer })` | A short-lived sprite moving along tiles (a trickle into a joint, a puff of mist); resolves when it's gone. `layer: 'top'` draws it among the characters instead of on the ground. |
+| `tween(id, { offset, seconds, clipBelow })` | Slides an entity's drawing by `offset` pixels; `clipBelow` hides whatever goes below its footprint (lowering into a hole). |
+| `cycle(flag, values)` | Steps a flag to the next value in a list and returns it (a mirror's three positions, a valve). Pair it with a sprite function. |
+| `talk([[speaker, line], [null, line], ...])` | A conversation with several speakers; `null` (or a plain string) is Cheryl's description. |
+| `trade(takeId, giveId)` | Take one item and give another. |
+| `refresh()` | Re-check entities, characters, variants, and patches now. |
 | `hint(text, seconds = 6, { untilBag })` | A small box at the bottom (wrapped if long) that fades in and out without blocking anything (control hints). It hides, and its clock stops, while dialog or the bag is open. `untilBag: true` removes it when the player opens the bag; pass `Infinity` seconds to keep it until then. |
 | `usingTouch` | True when the player is on a touch screen (to word hints). |
 
@@ -311,8 +337,14 @@ Examples:
 npm install
 npx playwright install chromium
 npm test                 # desktop and phone smoke tests (own server on port 8131); screenshots in tests/screenshots/
+npm run check            # content validator (also part of npm test)
 node tests/shot.js "?map=test_street" out.png 800 ArrowRight z   # one screenshot after some keys
 ```
+
+## Authoring aids
+
+- **`npm run check`** (`node tests/check-content.mjs`) loads the content in Node and reports errors: legend characters without entries, layers of different sizes, tile references to missing sheets, frames, or palettes, exits to unknown maps or arriving on solid tiles, `changeMap` calls to unknown maps or solid tiles, unknown item ids in scripts and `use` handlers, entity ids that aren't on any map, characters placed on solid tiles, unknown lighting. It warns about flags read but never set (typos), flags set but never read, music and sounds that don't exist yet, and `over_*` frames off the overhead layer. Script checks read each function's source, so they see literal ids only.
+- **The map viewer** at `/dev/map.html` draws any map whole, with solid tiles, exits (faint when closed), triggers, entity footprints, and spawn points overlaid. Enter flags and items to see a story state (variants, patches, `when`s, sprite functions, and characters' `at` all follow). Hover a tile for its coordinates, tiles, and anything defined there; click to open the game there with those flags and items.
 
 ## Engine decisions
 

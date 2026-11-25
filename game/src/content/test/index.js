@@ -44,11 +44,20 @@ export const testItemDefs = {
     name: 'Brass Key',
     icon: { sheet: items, frame: 'key' },
     description: "Warm from the sun. Somebody lost it, and somebody's going to want it back.",
+    // Used on any character with no handler of their own for it.
+    useOn: { npc: "I'm not handing my keys to strangers. Even someone else's keys." },
   },
   letter: {
     name: 'Sealed Letter',
     icon: { sheet: items, frame: 'letter' },
     description: 'Addressed to "The Shop." The wax seal has a little crescent moon pressed into it. I\'m not going to open it. Probably.',
+    // Look (in the bag): a different line each time, then cycling after the first.
+    looks: [
+      'I hold it up to the light. Nothing. Good paper.',
+      'It smells faintly of cedar.',
+      'The moon on the seal has a crack in it. Probably the wax.',
+    ],
+    looksRepeat: 'cycle',
   },
 };
 
@@ -163,7 +172,11 @@ const streetMap = {
     { x: 12, y: 4, to: 'test_shop', at: [4, 8], facing: 'up' },
     // A two-tile edge exit: the player keeps their offset across it.
     { x: 16, y: 17, w: 2, to: 'test_lane', at: [8, 1], facing: 'down' },
+    // A closed exit that explains itself, then steps Cheryl back.
+    { x: 0, y: 5, h: 5, to: 'test_lane', at: [2, 2], when: () => false, blocked: "The west end's closed off for repairs. It has been since spring." },
   ],
+  // Every few seconds the cat wonders about something (non-blocking).
+  ambient: [{ every: [6, 10], run: (g) => g.emote('cat', 'question') }],
   triggers: [
     {
       x: 0, y: 12, w: 24,
@@ -188,6 +201,8 @@ const streetMap = {
       x: 9, y: 7, facing: 'down',
       sprite: { sheet: old_man },
       behavior: 'face',
+      emote: { frame: 'note', every: [5, 9] }, // hums now and then
+      decline: "No, no. I've got everything I need. Except my key.",
       interact: async (g, self, looks) => {
         if (g.flag('letter_delivered')) {
           await g.say(self, 'Getting dark early tonight. Darker than it ought to.');
@@ -209,15 +224,6 @@ const streetMap = {
           await g.say(self, 'My key! Keep it, keep it. The shop door, with the awning. My knees won\'t do it.');
         },
       },
-    },
-    {
-      id: 'kid',
-      name: 'Sweaty Kid',
-      x: 14, y: 6,
-      sprite: { sheet: kid },
-      // Stops and faces Cheryl when she's within 2 tiles or walking over to him.
-      behavior: { type: 'patrol', route: [[14, 6], [19, 6], [19, 9], [14, 9]], stopNear: 2 },
-      talk: ["I'm not running. I'm walking really fast in a square.", "Don't tell my mum."],
     },
     {
       id: 'cat',
@@ -286,6 +292,9 @@ const shopMap = {
   name: 'Test Shop',
   tileset: testTileset,
   spawn: [4, 8],
+  // After the letter, the shop goes dark except around Cheryl.
+  darkness: (g) => (g.flag('letter_delivered') ? 0.85 : 0),
+  playerLight: 3,
   legend: { x: 'inwall_top', v: 'void', w: 'inwall', '.': 'floor', r: 'rug', c: 'counter', m: 'doormat' },
   ground: [
     'xxxxxxxxxx',
@@ -345,6 +354,28 @@ const laneMap = {
     '....................',
     '--------------------',
     '~~~~~~~~~~~~~~~~~~~~',
+  ],
+  // After the letter, the canal has drained: a whole-map variant replaces the
+  // ground layer (placeholder: shaded paving for the canal bed).
+  variants: [
+    {
+      when: (g) => g.flag('letter_delivered'),
+      legend: { ',': 'street:pave_se_shade' },
+      ground: [
+        '========<>==========',
+        '________<>__________',
+        '....................',
+        '....................',
+        '....................',
+        '....................',
+        '..............!.....',
+        '....................',
+        '....................',
+        '....................',
+        '--------------------',
+        ',,,,,,,,,,,,,,,,,,,,',
+      ],
+    },
   ],
   // The lane's sides are walls the art doesn't show yet.
   collision: [
@@ -466,6 +497,24 @@ async function moonrise(g) {
   await g.setLighting(null, 0);
   g.hint('Lighting returns to the map\'s own on the next map load.', 3);
 }
+
+// A character defined once and placed by story state: the Sweaty Kid laps the
+// street until the letter is delivered, then waits in the lane.
+export const testCharacters = {
+  kid: {
+    name: 'Sweaty Kid',
+    sprite: { sheet: kid },
+    // Stops and faces Cheryl when she's within 2 tiles or walking over to him.
+    behavior: { type: 'patrol', route: [[14, 6], [19, 6], [19, 9], [14, 9]], stopNear: 2 },
+    talks: ["I'm not running. I'm walking really fast in a square.", "Don't tell my mum.", 'Forty laps! Or thirty.'],
+    talksRepeat: 'cycle',
+    decline: "Nah. I need SPEED, not stuff.",
+    bark: { lines: ['Faster! Faster!', 'Lap... a lot!'], range: 4, every: [5, 9] },
+    at: (g) => (g.flag('letter_delivered')
+      ? { map: 'test_lane', x: 12, y: 5, facing: 'down', behavior: 'face' }
+      : { map: 'test_street', x: 14, y: 6 }),
+  },
+};
 
 export const testMaps = { test_street: streetMap, test_shop: shopMap, test_lane: laneMap };
 

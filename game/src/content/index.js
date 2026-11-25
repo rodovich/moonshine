@@ -1,7 +1,7 @@
 // The game's content, handed to the engine at boot (see src/main.js).
 // Until the opening area exists, the game starts in the engine test street.
 
-import { testMaps, testItemDefs, testScripts } from './test/index.js';
+import { testMaps, testItemDefs, testScripts, testCharacters } from './test/index.js';
 import { cheryl } from '../art/cheryl.js';
 
 export default {
@@ -14,6 +14,8 @@ export default {
   player: { name: 'Cheryl', sprite: { sheet: cheryl } },
 
   maps: { ...testMaps },
+  // People defined once and placed by story state (see the engine README).
+  characters: { ...testCharacters },
   items: { ...testItemDefs },
 
   // Named scripts, runnable with ?run=<name> for testing.

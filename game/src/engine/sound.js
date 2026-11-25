@@ -47,6 +47,27 @@ export function sfx(id) {
   try { audio.sfx(real); } catch (err) { warnOnce('sfx', id, err); }
 }
 
+// Looping ambience beds for a map (town murmur, canal and gulls). Passed on
+// to the audio module's setAmbience if it has one; otherwise ignored.
+export function setAmbience(ids) {
+  if (typeof audio.setAmbience !== 'function') return;
+  try { audio.setAmbience(ids || []); } catch (err) { warnOnce('ambience', String(ids), err); }
+}
+
+// A filter over the music ('muffled' indoors, null for none). Passed on to
+// the audio module's setMusicFilter if it has one; otherwise ignored.
+export function setMusicFilter(name) {
+  if (typeof audio.setMusicFilter !== 'function') return;
+  try { audio.setMusicFilter(name || null); } catch (err) { warnOnce('filter', String(name), err); }
+}
+
+// Footsteps: quiet unless the audio module defines the id.
+export function step(id) {
+  const real = SFX_ALIASES[id] ?? id;
+  if (!audio.SFX_IDS.includes(real)) return;
+  try { audio.sfx(real); } catch { /* ignore */ }
+}
+
 export function currentMusic() {
   return audio.currentMusic();
 }

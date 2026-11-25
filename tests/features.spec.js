@@ -1,0 +1,158 @@
+// Engine features for Act 2 and later: item looks, item use precedence,
+// barks and emotes, characters placed by story state, blocked and confirm
+// exits, map variants, darkness, tweens, effects, and the map viewer.
+import { test, expect } from '@playwright/test';
+import { boot, snap, waitIdle, waitFor, waitText, readAll, press, clickTile, shot } from './helpers.js';
+
+const STREET = '?map=test_street&seed=1&flags=street_intro,saw_canal';
+
+async function runScript(page, body, ms = 8000) {
+  return page.evaluate(([src, ms]) => {
+    const fn = new Function('g', `return (async () => { ${src} })();`);
+    return Promise.race([
+      window.moonshine.world.run(fn).then((v) => ({ done: true, v })),
+      new Promise((r) => setTimeout(() => r({ done: false }), ms)),
+    ]);
+  }, [body, ms]);
+}
+
+test('Look in the bag cycles an item\'s descriptions and returns to the bag', async ({ page }) => {
+  await boot(page, `${STREET}&items=letter`);
+  await waitIdle(page);
+  const seen = [];
+  await press(page, 'x');
+  for (let i = 0; i < 4; i++) {
+    await waitFor(page, () => window.moonshine.snapshot().inventoryOpen);
+    // Keyboard: down to the buttons (Look is selected first? Use is), left to Look, Z.
+    await press(page, 'ArrowDown');
+    await press(page, 'ArrowLeft');
+    if (i === 0) await shot(page, '24-bag-look-button');
+    await press(page, 'z');
+    await waitText(page);
+    seen.push((await snap(page)).text);
+    // Dismiss the text (not readAll: Z in the reopened bag would mean Use).
+    while ((await snap(page)).text) await press(page, 'z');
+  }
+  expect(seen[0]).toContain('hold it up');
+  expect(seen[1]).toContain('cedar');
+  expect(seen[2]).toContain('crack');
+  expect(seen[3]).toContain('cedar'); // cycles after the first
+});
+
+test('item use precedence: target, item useOn, decline, default', async ({ page }) => {
+  await boot(page, `${STREET}&x=8&y=7&facing=right&items=brass_key,letter`);
+  await waitIdle(page);
+  const said = async (body) => {
+    page.evaluate((b) => window.moonshine.world.run(new Function('g', `return (async () => { ${b} })();`)), body).catch(() => {});
+    await waitText(page);
+    const t = (await snap(page)).text;
+    await readAll(page, 'z', 6);
+    await waitIdle(page);
+    return t;
+  };
+  const om = "window.moonshine.world.interactWith(window.moonshine.world.byId.get('old_man'), ";
+  void om;
+  expect(await said("await g.npc('old_man'); return window.moonshine.world.useItemOn(g.npc('old_man'), 'brass_key');")).toContain('My key');
+  expect(await said("return window.moonshine.world.useItemOn(g.npc('old_man'), 'letter');")).toContain('everything I need');
+  expect(await said("return window.moonshine.world.useItemOn(g.npc('kid'), 'brass_key');")).toContain('strangers');
+  expect(await said("return window.moonshine.world.useItemOn(g.npc('cat'), 'letter');")).toContain('going to help');
+});
+
+test('barks and emotes don\'t stop the player', async ({ page }) => {
+  await boot(page, `${STREET}&x=13&y=8`);
+  await waitIdle(page);
+  await runScript(page, "g.bark('Skipping Girls', 'One for the steps and two for the tide!', { seconds: 3 }); g.emote('old_man', 'note', { seconds: 3 });");
+  await page.waitForTimeout(200);
+  await shot(page, '25-bark-emote');
+  expect(await page.evaluate(() => !!window.moonshine.world.ambient.barkState)).toBe(true);
+  await press(page, 'ArrowLeft'); // still walks while the bark shows
+  await waitIdle(page);
+  expect((await snap(page)).x).toBe(12);
+});
+
+test('characters move between maps by story state', async ({ page }) => {
+  await boot(page, STREET);
+  await waitIdle(page);
+  expect((await snap(page)).entities.some((e) => e.id === 'kid')).toBe(true);
+  await runScript(page, "g.setFlag('letter_delivered');");
+  expect((await snap(page)).entities.some((e) => e.id === 'kid')).toBe(false);
+  await runScript(page, "g.setFlag('lane_intro'); await g.changeMap('test_lane', 9, 2, 'down');", 15000);
+  await waitIdle(page, 15000);
+  const kid = (await snap(page)).entities.find((e) => e.id === 'kid');
+  expect(kid).toMatchObject({ x: 12, y: 5 });
+});
+
+test('a blocked exit explains itself and steps back; confirm asks first', async ({ page }) => {
+  await boot(page, `${STREET}&x=1&y=7`);
+  await waitIdle(page);
+  await press(page, 'ArrowLeft');
+  await waitText(page);
+  expect((await snap(page)).text).toContain('closed off');
+  await readAll(page);
+  await waitIdle(page);
+  expect([(await snap(page)).x, (await snap(page)).map]).toEqual([1, 'test_street']);
+  // A confirm exit, added on the fly: "Not yet" stays, "Yes" goes.
+  await page.evaluate(() => window.moonshine.world.mapDef.exits.push({ x: 2, y: 8, to: 'test_shop', at: [4, 8], facing: 'up', confirm: 'Go in?' }));
+  await press(page, 'ArrowDown');
+  await waitIdle(page);
+  await press(page, 'ArrowRight');
+  // Wait for the options themselves (the prompt types out first).
+  await waitFor(page, () => window.moonshine.textbox.active?.choice?.rects.length > 0);
+  await press(page, 'ArrowDown');
+  await press(page, 'z');
+  await waitIdle(page);
+  expect((await snap(page)).map).toBe('test_street');
+  expect([(await snap(page)).x, (await snap(page)).y]).not.toEqual([2, 8]);
+  await page.evaluate(() => window.moonshine.world.mapDef.exits.pop());
+});
+
+test('map variant: the canal drains, and the shop goes dark around Cheryl', async ({ page }) => {
+  await boot(page, '?map=test_lane&x=9&y=9&flags=lane_intro,letter_delivered');
+  await waitIdle(page);
+  expect(await page.evaluate(() => window.moonshine.world.map.solid(5, 11))).toBe(false);
+  await shot(page, '26-variant-drained');
+  await boot(page, '?map=test_shop&x=4&y=6&flags=letter_delivered');
+  await waitIdle(page);
+  await shot(page, '27-darkness');
+  const dark = await page.evaluate(() => {
+    const c = window.moonshine.display.buffer.getContext('2d');
+    const corner = c.getImageData(30, 40, 1, 1).data;
+    return corner[0] + corner[1] + corner[2];
+  });
+  expect(dark).toBeLessThan(120);
+});
+
+test('tween, clip, effects, and cycle finish', async ({ page }) => {
+  await boot(page, `${STREET}&x=12&y=8`);
+  await waitIdle(page);
+  const r = await runScript(page, `
+    await g.tween('player', { offset: [0, 16], seconds: 0.5, clipBelow: true });
+    await g.tween('player', { offset: [0, 0], seconds: 0.2, clipBelow: false });
+    const fx = g.spawnEffect({ sprite: { sheet: g.npc('cat').def.sprite.sheet, frame: 'cat_sleep' }, path: [[12, 9], [16, 9]], speed: 2 });
+    await fx;
+    const a = g.cycle('mirror', ['n', 'e', 's']);
+    const b = g.cycle('mirror', ['n', 'e', 's']);
+    return a + b;
+  `);
+  expect(r).toEqual({ done: true, v: 'ne' });
+});
+
+test('map viewer renders every map without errors', async ({ page }) => {
+  const errs = [];
+  page.on('pageerror', (e) => errs.push(e.message));
+  for (const id of ['test_street', 'test_shop', 'test_lane']) {
+    await page.goto(`/dev/map.html?map=${id}&zoom=1`);
+    await page.waitForFunction(() => document.getElementById('info').textContent.length > 0);
+    expect(await page.evaluate(() => document.getElementById('errors').textContent)).toBe('');
+  }
+  await page.goto('/dev/map.html?map=test_street&zoom=2');
+  await page.waitForTimeout(300);
+  await shot(page, '28-map-viewer');
+  expect(errs).toEqual([]);
+});
+
+test('content validator passes', async () => {
+  const { execFileSync } = await import('node:child_process');
+  const out = execFileSync(process.execPath, ['tests/check-content.mjs'], { encoding: 'utf8' });
+  expect(out).toContain('0 error(s)');
+});
