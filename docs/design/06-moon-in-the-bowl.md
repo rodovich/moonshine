@@ -306,7 +306,7 @@ The first time Cheryl enters the Steps in the epilogue, the Stair Race is under 
 - MAYOR: Citizens! Last night, my clock steadied the city. The clock has since been removed. Its legacy remains!
 - MAYOR (repeat): Dry Canal Day will be held again. When the canals are dry. Which they won't be. Tessel: Forward!
 - STRANDED TOURIST (with a suitcase): The ferry's in! It found us! I'm going home. I'm never coming back.
-- STRANDED TOURIST (repeat): …I'll come back next year. For Moonshine Night. Keep the guidebook. I'm keeping your hat.
+- STRANDED TOURIST (repeat): …I'll come back next year. For Moonshine Night. Keep the guidebook. I'm keeping this hat.
 - **The Fountain**: "Flowing, as it has for five hundred years, apart from a week nobody will mention."
 
 ### Shop
@@ -333,7 +333,9 @@ The ferry *Persistence* is tied up at the landing, level, as it should be. Two n
 - MOTT (by the ferry): Morning, Cheryl. Landed first go, this morning. Right where I left her.
 - MOTT: Lovely view of the Gate. Same as ever. → he looks at the Gate for a long moment, and says nothing else.
 - MOTT (repeat): …
-- LIGHTHOUSE KEEPER (on the quay, for once): It's lovely, isn't it. The sea. Twenty-two years. Who knew.
+- LIGHTHOUSE KEEPER (on the quay, for once, with her telescope): It's lovely, isn't it. The sea. Twenty-two years. Who knew.
+- LIGHTHOUSE KEEPER (repeat): I look at the sea now. Twice a day. Then I polish the telescope.
+- (Structure pass: the Bilge and Harbor epilogue states follow the new geography: the Bilge has a west exit to the Goat Path, (0, 11–13), and the Harbor has no goat stair. See [structure-pass.md](structure-pass.md).)
 
 ### The piano
 

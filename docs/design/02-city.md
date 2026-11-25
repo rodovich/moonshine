@@ -2,6 +2,8 @@
 
 This is the build-ready design for Act 2 ([overview](overview.md), [story bible](../story-bible.md)). It picks up where [01-opening.md](01-opening.md) ends: the morning after Moonshine Night, when Cheryl walks out of Cistern Court through the Squeeze. It ends when she pries up the hundredth step and climbs down into the dark.
 
+> **Structure pass (client feedback after playing to Act 4).** [structure-pass.md](structure-pass.md) changes this act, and where the two disagree, it wins. In short: the Count thread now needs two printed sources (the guidebook, now reached by the telescope and straw-hat chain, and the Tide-Sheet from the Man on Bench); Cheryl's own hat is retired; the step gets a staged beat and a "bonk"; Ottilie's rubbing instruction is "floors, where the light falls"; and the Goat Path is rebuilt as a natural cliff path that comes down into the Bilge's west end, so the Harbor becomes a spur. The sections below are updated where marked; the dialog for the new threads is in the structure pass, sections 3 and 4.
+
 ## The slice in brief
 
 Tessel is open. Cheryl follows the piano's scrape marks from the Squeeze to the Hundred Steps, where two problems block her lead:
@@ -46,7 +48,7 @@ Around the two threads, the player meets nearly everyone who matters later, and 
                          └─────────────┘                 └─────────────┘
 ```
 
-All maps are in the **day** tint. Until the piano is moved, the only way from the upper town to Fountain Square is the long loop: Lamp Street → Goat Path → Harbor → Bilge → Square. That loop takes about two minutes of walking and passes Mott, the sea cave, the Keeper, the Fishmonger, and the Boatman, which is the point.
+All maps are in the **day** tint. Until the piano is moved, the only way from the upper town to Fountain Square is the long loop: Lamp Street → Goat Path → Bilge → Square (structure pass). It passes Mott's shack, the sea cave, the Fishmonger, and the Boatman. The Harbor and the lamp room are a spur east of the Bilge; the Shopkeeper, the Tourist, and the signs send the player there for the telescope. (The map above still shows the old Goat Path → Harbor link; the structure pass's map in the [overview](overview.md) replaces it.)
 
 ### Exits
 
@@ -55,7 +57,7 @@ All maps are in the **day** tint. Until the piano is moved, the only way from th
 | Cistern Court, Squeeze | (15–16, 25) | Lamp Street | (3–4, 1), down |
 | Lamp Street, Squeeze stair | (3–4, 0) | Cistern Court | (15–16, 23), up |
 | Lamp Street, Crown stair | (22–23, 0) | The Crown | (11–12, 13), up |
-| Lamp Street, west gate | (0, 9–11) | Goat Path | (13–14, 1), down |
+| Lamp Street, west gate | (0, 9–11) | Goat Path | (14, 1), left (structure pass) |
 | Lamp Street, Steps | (27–28, 15) | Hundred Steps | (6–7, 1), down |
 | The Crown, south stair | (11–12, 15) | Lamp Street | (22–23, 5), down |
 | The Crown, Dome door | (18–19, 6) | Archive | (7–8, 12), up |
@@ -70,12 +72,12 @@ All maps are in the **day** tint. Until the piano is moved, the only way from th
 | Fountain Square, south | (11–12, 17) | The Bilge | (11–12, 4), down |
 | The Bilge, north | (11–12, 0) | Fountain Square | (11–12, 15), up |
 | The Bilge, east | (31, 11–13) | Harbor | (1, 6–8), right |
+| The Bilge, west (structure pass) | (0, 11–13) | Goat Path | (14, 40), left |
 | Harbor, west | (0, 6–8) | The Bilge | (30, 11–13), left |
-| Harbor, Goat stair | (2–3, 0) | Goat Path | (1–2, 22), up |
 | Harbor, lighthouse door | (27–28, 3) | Lamp room | (3–4, 6), up |
 | Lamp room, stair door | (3–4, 7) | Harbor | (27–28, 4), down |
-| Goat Path, top | (13–14, 0) | Lamp Street | (1, 9–11), right |
-| Goat Path, bottom | (1–2, 23) | Harbor | (2–3, 4), down |
+| Goat Path, top | the top right | Lamp Street | (1, 9–11), right |
+| Goat Path, bottom (structure pass) | east edge, (15, 39–41) | The Bilge | (1, 12), right |
 
 ## Maps
 
@@ -388,7 +390,9 @@ The quay, the ferry, harbor-front houses, and the road out along the Prow to the
 
 **Entities:** the Lighthouse Keeper at (5, 3), facing the lamp (left), with her back to the windows. **Music:** `harbor`, quieter.
 
-### Goat Path (16 × 24), down the Back
+### Goat Path (16 × 24), down the Back — replaced
+
+**Replaced by the structure pass** ([structure-pass.md](structure-pass.md), section 5): a natural cliff path, 16 × 42, with irregular switchbacks, entered at the top right from Lamp Street and leaving by the east edge into the Bilge's west end. The Harbor loses its goat stair. The old grid below is kept only for Mott's shack and the sea cave mouth, which move onto the new path.
 
 A switchback path down the steep back of the island, through terrace gardens and goats, past Mott's shack, to a sea cave and the Harbor.
 
@@ -449,23 +453,23 @@ Look counters work as in the opening (first, second, then).
 
 ## The puzzle
 
+Structure pass: three required threads. The dialog and states are in [structure-pass.md](structure-pass.md), section 3.
+
 ```
- PIANO THREAD                                COUNT THREAD
- soap (from Act 1) ─┐                         hat (Cheryl's wardrobe) ─┐
- talk to Movers (opt)┴► use soap on piano      talk to Tourist (opt) ───┴► give hat to Tourist
-                          │                                                  │
-                          ▼                                                  ▼
-                 piano slides into the Square;                          GUIDEBOOK
-                 CROWBAR left on the landing;                                │
-                 the arch opens                       show guidebook to the Counting Woman
-                          │                                                  │
-                          │                              she storms off to the Mayor
-                          │                                                  │
-                          │                         look at her step: the water drains into it
-                          │                                                  │
-                          └──────────────► use crowbar on the hollow step ◄──┘
-                                                       │
-                                               END OF ACT 2
+ PIANO THREAD               GUIDEBOOK THREAD                     TIDE-SHEET THREAD
+ soap ─► the Movers         Shop: "something brass, nautical"    Man on Bench: lost his glasses
+   │                        (Tourist and Mott point east)        his wife: glasses in her hair
+ piano slides into          Keeper ─► TELESCOPE                  (a Girl: "why's she got glasses on?")
+ the Square; CROWBAR;       telescope into the window ─► HAT     talk to her ─► she gives them back
+ the arch opens             Tourist ─► GUIDEBOOK                 he reads ─► TIDE-SHEET (the letter)
+   │                             │                                  │
+   │                             └──► show both to the Counting Woman (either order) ◄──┘
+   │                                    first: shaken, stays, and names the other source
+   │                                    second: storms off to the Mayor
+   │                                    the camera holds on her step: the water vanishes
+   │                                                   │
+   └────────────────────► crowbar on the hollow step ◄─┘
+                                       END OF ACT 2
 ```
 
 - The two threads are independent and can be done in either order, or interleaved.
