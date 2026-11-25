@@ -21,8 +21,8 @@ act3.next = null;
 export default {
   title: 'Moonshine',
 
-  // Where a new game begins: Cheryl on her roof, facing the tub.
-  start: { map: 'cistern_court', x: 3, y: 6, facing: 'up' },
+  // Where a new game begins: Cheryl on her roof, by the tub.
+  start: { map: 'cistern_court', x: 3, y: 6, facing: 'down' }, // facing the player (client feedback)
 
   // Sitting on the tub's edge, she sits on its rim, a little above her tile.
   player: { name: 'Cheryl', sprite: { sheet: cheryl }, poseOffsets: { sit_right: [0, -4], rise_right: [0, -2] } },

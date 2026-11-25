@@ -31,12 +31,12 @@ Both are 256×224, drawn as stacked layers. Module: `game/src/art/act6_vistas.js
 
 ### The Basin view
 
-A round mirror of still water in the Basin's slate rim, holding what the Founders' mirror at the top of the shaft sees: the night sky with stars, the Rim with the Gate's notch, the dark Bowl below. It is drawn upright, like a picture in a round frame (a periscope shows the world the right way up), so the Gate and the moon's steps read at once.
+A round mirror of still water in the Basin's slate rim, holding what the Founders' mirror at the top of the shaft sees: the night sky in full dark, about an hour after sunset (indigo, stars, no glow, only a faint blue-grey along the Rim), the Rim with the Gate's notch, the dark Bowl below. It is drawn upright, like a picture in a round frame (a periscope shows the world the right way up), so the Gate and the moon's steps read at once.
 
 Draw in this order:
 
 1. `basin_view:basin` at (0, 0): the sky in the water, the reflected Bowl, the rim (its moonglass inlay dim), the floor beyond.
-2. `basin_moon:moon` (24×24, 2-frame shimmer, 700 ms), centred on one of `BASIN_MOON_POS` (exported by the module):
+2. `basin_moon:moon` (24×24, 2-frame shimmer, 700 ms), centred on one of `BASIN_MOON_POS` (exported by the module). Two nights past full, it's a waning gibbous: slightly warm, its upper-right edge a hair flattened (see [art-direction.md](art-direction.md), Skies).
 
    | Trim step | Moon centre | Reads as |
    | --- | --- | --- |
@@ -47,18 +47,18 @@ Draw in this order:
 
 3. `basin_cliffs:cliffs` at (0, 0), over the moon, so it sits behind the cliffs and inside the notch.
 4. Moon true: `basin_rimlit:rimlit_0` … `rimlit_3` at (0, 0), about 400 ms apart. The inlay lights cyan from the bottom of the ring all the way round, with a bright leading edge. Hold `rimlit_3`.
-5. The bath: `basin_ripples:ripple` (4 frames, 260 ms) and then `basin_cheryl:reflection` (2 frames, 900 ms, a 1-px settle), both at (0, 0). Her reflection leans in from the lower left of the rim: the silver bun with its coral tie, her face turned to the water, a coral shoulder. The ripples spread as broken arcs from where she sits.
+5. The bath: `basin_ripples:ripple` (4 frames, 260 ms) and then `basin_cheryl:reflection` (2 frames, 900 ms, a 1-px settle), both at (0, 0). Her reflection leans in from the lower left of the rim: the silver bun with its coral tie, her face turned to the water, a coral shoulder. The ripples spread as broken arcs from where she sits. She bathes here in her clothes, not the costume: the costume is at home and she hadn't planned a bath (the writer's call; see the Act 6 design doc).
 
 ### The final vista
 
 The Act 1 composition made right. Draw in this order:
 
-1. `vista_final:bowl_moonrise` at (0, 0): the Act 1 Bowl and roofs under the same eastern dusk sky (the Earth's shadow and the Belt of Venus; see [art-direction.md](art-direction.md), Skies), with more stars and the moon's silver path laid straight down the water from the Gate. The warmth comes from the alpenglow on the Rim and the lit town, not the sky.
+1. `vista_final:bowl_moonrise` at (0, 0): the Act 1 Bowl and roofs under the same eastern dusk sky (the Earth's shadow and the Belt of Venus; see [art-direction.md](art-direction.md), Skies), with more stars and the moon's pale gold path laid straight down the water from the Gate. The warmth comes from the alpenglow on the Rim and the lit town, not the sky.
 2. `vista_glow:glow_<0-2>` (the Act 1 glow) bottom-centred on (128, 112), so it gathers in the Gate: `glow_0` from about 0.8 s, `glow_1` from 1.8 s, `glow_2` from 2.8 s.
-3. `final_moon:moon` (32×32, 2-frame shimmer, 500 ms) centred on x = 128, rising from y = 126 (hidden behind the cliffs) at about 6 px/s, from 2 s, and stopping at y = 92: dead in the Gate, framed by its walls. (A new moon sprite: the Act 1 moon's markings read as a face once the whole disc is visible.)
+3. `final_moon:moon` (32×32, 2-frame shimmer, 500 ms; pale peach-gold, as in Act 1; `moon_mid` and `moon_high` are its whiter stages if it ever climbs higher) centred on x = 128, rising from y = 126 (hidden behind the cliffs) at about 6 px/s, from 2 s, and stopping at y = 92: dead in the Gate, framed by its walls. (A new moon sprite: the Act 1 moon's markings read as a face once the whole disc is visible.)
 4. `vista_rim:rim` at (0, 0), over the moon.
 5. `vista_twinkle:twinkle` on the `VISTA_BASINS` points (as in Act 1), if wanted.
-6. `vista_cheryl_bath:cheryl_bath` at (0, 128): a year later, Cheryl sits in her tub, seen from behind with only her head (the bun and its coral tie) and bare shoulders above the water, the moon's glint on the water beside her. (The Act 1 vista keeps `vista_cheryl:cheryl_tub`, perched on the edge.)
+6. `vista_cheryl_bath:cheryl_bath` at (0, 128): a year later, Cheryl sits in her tub, seen from behind with only her head, in the bathing cap, and her shoulders, with the costume's two navy straps and a stripe of its back, above the water, the moon's glint on the water beside her. (The Act 1 vista keeps `vista_cheryl:cheryl_tub`, perched on the edge in the same costume and cap.)
 7. The title, once the moon has settled and the music has landed: `vista_title:title_0` (a half-dissolved first step) and then `title_1` (full), at (0, 0). MOONSHINE in cream with a dark outline and a soft violet glow, with a thin rule and a small moon-in-a-notch ornament beneath. The dev scene shows it at 10.5 s and 11.3 s. The credits roll over this picture.
 
 ## Underground
