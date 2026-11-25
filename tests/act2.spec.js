@@ -533,16 +533,20 @@ test('keyboard: Act 2 part 1', async ({ page }) => {
   expect(s.flags['step.open']).toBeTruthy();
   await shot(page, 'act2-16-open-step');
 
+  // The Steps aren't cut off: Cheryl can still go down past the hole on its west half.
+  await kbWalk(page, 9, 21);
+  await kbWalk(page, 9, 17);
+
   // Down the ladder: "Go down?" — Not yet, then Yes.
-  await page.keyboard.press('ArrowDown');
+  await kbInteract(page, 'hundredth_step');
   await waitFor(page, () => !!window.moonshine.snapshot().choice, null, 4000);
   await settle(page);
   await shot(page, 'act2-17-go-down');
   await page.keyboard.press('ArrowDown'); await page.waitForTimeout(80);
   await page.keyboard.press('z');
   await waitFor(page, () => window.moonshine.snapshot().idle, null, 4000);
-  await expect.poll(async () => (await snap(page)).y).toBe(18);
-  await page.keyboard.press('ArrowDown');
+  expect((await snap(page)).flags['act2.done']).toBeFalsy();
+  await kbInteract(page, 'hundredth_step');
   await waitFor(page, () => !!window.moonshine.snapshot().choice, null, 4000);
   await settle(page);
   await page.keyboard.press('z');
@@ -654,7 +658,7 @@ test('the Kid never blocks the gap beside the Counting Woman', async ({ page }) 
 // checked where they start.
 for (const [map, flags] of [
   ['lamp_street', 'act2.started'], ['crown', 'act2.started'], ['archive', 'act2.started'], ['crypt', 'act2.started'],
-  ['hundred_steps', 'act2.started,n.stepsArrived'], ['hundred_steps', 'act2.started,n.stepsArrived,piano.slid,counter.left'],
+  ['hundred_steps', 'act2.started,n.stepsArrived'], ['hundred_steps', 'act2.started,n.stepsArrived,piano.slid,counter.left'], ['hundred_steps', 'act2.started,n.stepsArrived,piano.slid,counter.left,step.open,basin.inside'],
   ['fountain_square', 'act2.started'], ['fountain_square', 'act2.started,piano.slid,counter.left'], ['shop', 'act2.started'],
   ['goat_path', 'act2.started'], ['harbor', 'act2.started'], ['lamp_room', 'act2.started'], ['bilge', 'act2.started'],
 ]) {
@@ -777,7 +781,7 @@ test('keyboard: the long way round, the Count thread first', async ({ page }) =>
   await kbStepDownAndUse(page, 9, 'crowbar');
   log = await read();
   expect(joined(log)).toContain('And the hundredth step goes down.');
-  await page.keyboard.press('ArrowDown');
+  await kbInteract(page, 'hundredth_step');
   await waitFor(page, () => !!window.moonshine.snapshot().choice, null, 4000);
   await settle(page);
   await page.keyboard.press('z');
