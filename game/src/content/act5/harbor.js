@@ -49,6 +49,8 @@ function compose() {
     L.set('ground', x, 10, `harbor_hull:hull_${V8(x)}`, true);
   }
   for (let ty = 0; ty < 2; ty++) for (let tx = 0; tx < 2; tx++) L.set('ground', 30 + tx, 9 + ty, `keyhole:keyhole_x${tx}y${ty}`, true);
+  // The Bilge's canal comes out under the quay here; dry now, with no outflow.
+  L.set('ground', 1, 9, 'harbor_culvert:culvert_dry_l', true); L.set('ground', 2, 9, 'harbor_culvert:culvert_dry_r', true);
   // The sea, lower; paler and hazier toward the horizon, where the Teeth sit.
   for (let x = 0; x < W; x++) {
     L.set('ground', x, 11, `sea:wash_${x % 2 ? 'b' : 'a'}`, true);
