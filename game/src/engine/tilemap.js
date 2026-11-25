@@ -6,7 +6,7 @@
 // 'sheet:frame' or 'sheet:frame@palette' (sheets listed in tileset.sheets),
 // or an object { tile, solid, counter } adding properties to either.
 
-import { loadSheet, frameIndexAt } from './art.js';
+import { loadSheet, frameIndexAt, glowMask } from './art.js';
 
 export const TILE = 16;
 export const LAYERS = ['ground', 'detail', 'overhead'];
@@ -182,7 +182,13 @@ export class TileMap {
     return !!((g && g.counter) || (d && d.counter));
   }
 
-  draw(ctx, layer, camX, camY, viewW, viewH, ms) {
+  // Draw only the emissive pixels (colors in `rgbSet`) of a layer's tiles,
+  // after lighting, so they keep their full brightness.
+  drawGlow(ctx, layer, camX, camY, viewW, viewH, ms, rgbSet) {
+    this.draw(ctx, layer, camX, camY, viewW, viewH, ms, (img) => glowMask(img, rgbSet));
+  }
+
+  draw(ctx, layer, camX, camY, viewW, viewH, ms, transform = null) {
     const grid = this.layers[layer];
     const x0 = Math.max(0, Math.floor(camX / TILE));
     const y0 = Math.max(0, Math.floor(camY / TILE));
@@ -192,7 +198,8 @@ export class TileMap {
       for (let x = x0; x <= x1; x++) {
         const t = grid[y * this.w + x];
         if (!t) continue;
-        const img = t.image(x, y, ms);
+        let img = t.image(x, y, ms);
+        if (img && transform) img = transform(img);
         if (img) ctx.drawImage(img, x * TILE - camX, y * TILE - camY);
       }
     }

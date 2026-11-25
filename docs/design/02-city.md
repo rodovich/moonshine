@@ -205,7 +205,7 @@ A low storeroom of council records. The back wall holds the **Founders' Door**: 
 
 ### Hundred Steps (16 × 42), three screens tall
 
-The great stair, in four flights with three landings and a bottom landing. Some risers are set with moon-eyes (round blue glass studs). The **hollow step** is the first step of flight 3, at (9–10, 20).
+The great stair, in four flights with three landings and a bottom landing. Some risers are set with moon-eyes (round blue glass studs). The **hollow step** is at (9–10, 19), the top of flight 3. It sits flush with landing 2 and is paved like the landing, so it reads as the landing's edge and everyone steps over it without counting it. That's why everyone counts ninety-nine. Once it's open, it really is a step, and it goes down.
 
 ```
      x 0         1
@@ -229,8 +229,8 @@ The great stair, in four flights with three landings and a bottom landing. Some 
    16  ................   LANDING 2 (y16-18)
    17  ................
    18  ................
-   19  =========^^=====   FLIGHT 3 (x9-10)
-   20  rrrrrrrr=HH=rrrr   HH THE HOLLOW STEP (9-10, 20)
+   19  =========HH=====   HH THE HOLLOW STEP (9-10, 19), paved like the landing
+   20  rrrrrrrr=^^=rrrr   FLIGHT 3 (x9-10)
    21  rrrrrrrr=^^=rrrr
    22  rrrrrrrr=^^=rrrr
    23  rrrrrrrr=^^=rrrr
@@ -257,11 +257,11 @@ The great stair, in four flights with three landings and a bottom landing. Some 
 **Entities:**
 - Landing 1: pots at (1, 8) and (15, 8); a cat at (12, 7).
 - Landing 2: Woman with Basin at (11, 16), facing down; pots at (1, 17), (14, 17).
-- Flight 3: the Counting Woman, sitting on the hollow step at (9, 20), facing down. The right half of the step (10, 20) stays walkable, so the player can get past her.
-- Landing 3: the Sweaty Kid, running laps: down flight 3 from (10, 19) to the landing, along to (13, 27), back, and up again. He passes the Counting Woman each lap. A bench at (2–3, 27). A view parapet on the east edge.
+- Top of flight 3: the Counting Woman, sitting on the hollow step at (9, 19), facing down. The right half of the step (10, 19) stays walkable, so the player can get past her.
+- Landing 3: the Sweaty Kid, running laps: from landing 2 at (10, 18), down column x10 through the gap beside the Counting Woman and down flight 3 to landing 3, along to (13, 27), back, and up again. He passes the Counting Woman each lap. **He never stops on the narrow stretch (x10, y18–24).** If Cheryl comes within two tiles while he's there, he finishes the stretch first and stops on the next landing tile, so he can never block the one-tile gap. A bench at (2–3, 27). A view parapet on the east edge.
 - Bottom landing: Big Mover at (4, 39) and Other Mover at (9, 39), facing the piano.
 
-**The water trickle.** Every 20 seconds or so, and whenever Cheryl talks to her, the Woman with Basin tips her basin. An animated trickle sprite runs from (11, 17) across the landing to (10, 19) and down onto the hollow step, where it shrinks into the joint and disappears. While the Counting Woman is sitting there, it runs around her feet.
+**The water trickle.** Every 20 seconds or so, and whenever Cheryl talks to her, the Woman with Basin tips her basin. An animated trickle sprite runs from (11, 17) across the landing to the hollow step at (10, 19), where it shrinks into the joint and disappears instead of running on down flight 3. While the Counting Woman is sitting there, it runs around her feet.
 
 **Music:** `neighborhood`.
 
@@ -481,7 +481,8 @@ Look counters work as in the opening (first, second, then).
 | Follow the piano | The scrape marks on Lamp Street, on first arrival |
 | The piano needs grease | Big Mover; then Cheryl's piano description mentions her soap |
 | The Square is reachable another way | Cheryl at the blocked arch: "The Goat Path goes round the long way." |
-| The Tourist wants a hat; the Shop won't sell its hat | The Tourist; the Shopkeeper; Cheryl at the shop window ("I have a perfectly good hat at home.") |
+| The Tourist wants a hat; the Shop won't sell its hat | The Tourist; the Shopkeeper; Cheryl at the shop window, on the second look ("I have a perfectly good hat at home.") |
+| The guidebook is what will move the Counting Woman | Reading the guidebook: its first entry is the "in fact, 99" line |
 | The Counting Woman cares about the number above all | Her own lines |
 | Something's odd about *her* step | Her wet feet; the Woman with Basin; the Kid's "bonk" |
 | A step goes *down* | Ottilie's saying; the opening's last line, "Wrong like a step that isn't there" |
@@ -534,7 +535,7 @@ Two turn the rope; the third jumps; every so often they swap. They chant the fir
 
 - First: MAN ON BENCH: Says here the moon was "refracted by unusual atmospheric conditions." Refracted. I said refracted. Last night.
 - Repeat: MAN ON BENCH: Refracted. Look it up.
-- Look: "He's read the same page of the Tide-Sheet since Thursday. He's hoping it changes its mind."
+- Look: "He's read the same page of the Tide-Sheet three times this morning. He's hoping it changes its mind."
 
 ### Ambrose Tull (the Crown)
 
@@ -563,7 +564,7 @@ Sits on the tower step with his ledger on his knees. Idle: looks up at the clock
 He's inside the bolted Bell Tower. Interacting with the tower door:
 - First: "Bolted from inside. There's a card in the keyhole: CLOCK IN PROGRESS. NO ADMITTANCE." → Cheryl knocks (knock sound).
 - CLOCKMAKER: Go away! I'm calibrating!
-- CLOCKMAKER: …Is that Miss? Go away, Miss! Respectfully!
+- CLOCKMAKER: …I know that knock. Is that Miss? Go away, Miss! Respectfully!
 - Repeat (knock): CLOCKMAKER: Eleven minutes! The sun is ELEVEN MINUTES WRONG! I've written to the observatory!
 - Second repeat: CLOCKMAKER: Is it time yet? No. Don't answer that. I KNOW what time it is.
 
@@ -690,7 +691,7 @@ Idle: gestures grandly at nobody.
 - Repeat: MAYOR: There will be a committee. There is always a committee.
 
 **Items**
-- Guidebook: MAYOR: "A charming town with a quaint, unreliable clock." UNRELIABLE? Who wrote this? I want them found.
+- Guidebook: MAYOR: "The Mayor's office boasts the island's only telephone." Boasts. It does boast. It's a very good telephone.
 - Moon chart: MAYOR: Very nice, Miss. Gold star. Please disperse.
 
 **Look:** "The Mayor. Duncan, when he was seven. I taught him long division. Twice."
@@ -780,7 +781,7 @@ Sits on a bollard by his ferry with a square jug. Idle: takes a swig; looks east
 **First talk**
 - MOTT: Cheryl. Sit down. No, don't. Nobody sits with me this week. I'm the man who says the island moves.
 - MOTT: It moves. The whole island. I came in Tuesday and the landing wasn't where I left it. A hand to the left.
-- MOTT: Don't look at me like that. I'm only a little drunk. I'm only drunk because I'm right.
+- MOTT: I know that face. Everyone makes that face. I'm only a little drunk, and only because I'm right.
 - MOTT: Everyone says "That's moonshine, Mott." Well, it is. I make it. Doesn't mean I'm wrong.
 
 **Repeat** (cycle)
@@ -789,7 +790,7 @@ Sits on a bollard by his ferry with a square jug. Idle: takes a swig; looks east
 - MOTT: My grandfather found copper in the sea cave, down the Back. Built a still around it. Best thing he ever did.
 
 **Items**
-- Moon chart: MOTT: Can't read it. Can't read anything while the island's moving. Come back when I'm sober. Or when it stops.
+- Moon chart: MOTT: …Thirty-one years of moons. Huh. → he takes a long swig → MOTT: No. Not today. Today I'm drinking. *(In Act 4 the Bilge is flooding and the doorsteps glow at night; he has sobered up out of fright, and the same chart convinces him.)*
 - Hat: MOTT: Keep it. You'll want it. Bright out here, drifting.
 - Guidebook: MOTT: "The friendly ferryman." Ha.
 
@@ -813,7 +814,7 @@ Polishes the lamp with her back to the windows. Idle: a polishing loop; she brea
 ### Goats (Goat Path)
 
 - GOAT: Meh.
-- Look: "A goat. It looks at me the way the Mayor did when I handed back his long division."
+- Look: "A goat. It's eating a geranium and making eye contact."
 
 ## Objects and descriptions
 
@@ -832,7 +833,7 @@ Cheryl's descriptions unless labeled. "First / then" follows the look counter.
 ### The Crown
 
 - **Bell Tower door**: see the Clockmaker.
-- **Clock face**: First: "The Mayor's clock. The plaque says TESSEL ENTERS THE MODERN AGE." / "It's eleven minutes ahead of the sundial and very pleased about it." Then: "It ticks loud enough to hear from the plaza. Ambrose says it ticks like a cow. I don't know what that means. I agree with it."
+- **Clock face**: First: "The Mayor's clock. The plaque says TESSEL ENTERS THE MODERN AGE." / "It's eleven minutes ahead of the sundial and very pleased about it." Then: "It rings the hours loud enough to rattle the plaza. Ambrose says it rings like a cow. I don't know what that means. I agree with it."
 - **Sundial**: First: "The sundial and the clock disagree by eleven minutes." / "The sundial has been here five hundred years. The clock arrived last month. I know which one I'd ask for directions." Then: the second line.
 - **Clockmaker's shop door**: First: "The Clockmaker's shop. A sign: AT THE BELFRY. CLOCK IS PERFECT. DO NOT ASK." Then: "He was the boy who asked 'is it time yet?' every four minutes. Now it's his job."
 - **Blue Dome** (facade): "The Blue Dome. The Archive's inside it, and Ottilie is inside the Archive, and that's where she'll stay."
@@ -863,13 +864,13 @@ Cheryl's descriptions unless labeled. "First / then" follows the look counter.
 - **On first arrival** (trigger at the top): "The Hundred Steps. Ninety-nine of them. Everybody knows that, and everybody calls them the Hundred Steps anyway." / "That's Tessel."
 - **Moon-eyes** (riser tiles with glass studs, any of them): First: "A moon-eye: a round blue glass stud set in the step. They're all over town. For luck, people say." Then: "Thirty-one years I've walked over these and never wondered what was under them. I'm wondering now."
 - **Paper and charcoal on a moon-eye**: "A rubbing of a glass bump. Ottilie would frame it. No."
-- **The hollow step** (9–10, 20)
-  - While the Counting Woman sits there (looked at from 10, 20 or beside it): "The step she's sitting on. Water has pooled along its edge, just there, by her feet."
-  - After `counter.left`, first look → `step.found`: "Water is running down from the landing and into the joint of this step. Not over it. *Into* it." / "Steps don't drink." / "I tap it with my foot. Every other step goes tap. This one goes bonk."
+- **The hollow step** (9–10, 19)
+  - While the Counting Woman sits there (looked at from 10, 19 or beside it): "The edge of the landing, where she's sitting. Water has pooled along it, just there, by her feet."
+  - After `counter.left`, first look → `step.found`: "It's paved like the landing, but it's a step. Thirty-one years and I never noticed." / "Water is running across the landing and into its joint. Not over it. *Into* it. Steps don't drink." / "I tap it with my foot. Every other step goes tap. This one goes bonk."
   - Then: "Bonk."
-  - Crowbar while she's sitting there: "She's sitting on it. I'm brave, not suicidal."
+  - Crowbar while she's sitting there: "She's sitting on it. I'm brave, not rude."
 - **Crowbar on any other step**: "These steps are older than the Mayor's great-grandmother. I'm not prying them up at random."
-- **The piano** (bottom landing, before it slides): First: "The piano, wedged in the arch like a cork. The label still says No. 9, Cistern Court." Then: "Somebody sent me a piano, and the piano has other ideas." After `movers.met`, while Cheryl has the soap: "Grease, he said. My soap is slippery enough to lose in a bath."
+- **The piano** (bottom landing, before it slides): First: "The piano, wedged in the arch like a cork. The label still says No. 9, Cistern Court." Then: "Somebody sent me a piano, and the piano has other ideas." After `movers.met`, first look: "Grease. Where would I get grease on a Moonshine morning?" Second and later looks, while Cheryl has the soap: "Grease, he said. My soap is slippery enough to lose in a bath." (The soap stays on the washstand in Cheryl's flat until taken, if the player skipped it in Act 1.)
 - **The blocked arch** (walking into it): "I'm not climbing over a piano at my age. The Goat Path goes round the long way."
 - **The crowbar** (after the piano slides) → take: "Their crowbar. They'll want it back. They'll have to catch a piano first."
 - **Landing 3 view parapet**: "Halfway down Tessel. Halfway up, if you're the Kid."
@@ -879,7 +880,7 @@ Cheryl's descriptions unless labeled. "First / then" follows the look counter.
 
 - **The Fountain**: First: "The Fountain of the Fish. Five hundred years of water from nowhere. Every child in Tessel has been dared to drink it." / "It's lower than it should be. A finger's width. You'd only notice if you'd stared at it for thirty years." Then: the second line. After `piano.slid`: "The piano has come to rest against the Fountain. The fish looks offended."
 - **The bronze fish**: "A bronze fish, spouting. Its fins look like oars, if you squint. I've never squinted at it before."
-- **The arch** (before `piano.slid`): "The back end of a piano, wedged in the arch from the Steps side. I'd know that label anywhere."
+- **The arch** (before `piano.slid`): First: "The back end of a piano, wedged in the arch from the Steps side. I'd know that label anywhere." Then: "The Movers are on the other side of this. They'll want it moved more than I do."
 - **The piano** (after it slides): "Half a ton of piano, resting against the Fountain with its lid open, as if it's thinking of a tune."
 - **Market stalls**: "Lemons, onions, and yesterday's gossip, all fresh." / "Moonshine Night basins, half price. Nobody's buying. Bad luck, apparently."
 - **Café tables**: "Tessel's real government meets here every morning, over coffee."
@@ -888,10 +889,10 @@ Cheryl's descriptions unless labeled. "First / then" follows the look counter.
 
 ### Shop
 
-- **Window hat display**: First: "A wide straw hat, in the window. Display stock. It's been in that window since before I went grey." After `tourist.met`: "Display stock. I have a perfectly good hat at home, in the wardrobe."
+- **Window hat display**: First: "A wide straw hat, in the window. Display stock. It's been in that window since before I went grey." After `tourist.met`, first look: "Display stock. She'll be peeling by lunchtime." Second and later looks: "Display stock. I have a perfectly good hat at home, in the wardrobe."
 - **Marble jar**: First: "A jar of marbles. Every single marble has rolled to the same side of the jar." / "The jar is level. I checked." Then: "Every marble, on the same side. Downhill, if the floor was a hill. It isn't."
 - **Shelves**: "Brass polish, lamp oil, string, lanterns. Everything a lighthouse could want. All display."
-- **Barometer**: "The barometer says FAIR. It's said FAIR for eleven years. He won't tap it in case it changes its mind."
+- **Barometer**: "The barometer says FAIR. It's said FAIR for nine years. He won't tap it in case it changes its mind."
 - **Counter**: "A counter, polished by a lifetime of not selling things."
 
 ### The Bilge
@@ -966,7 +967,19 @@ Every NPC answers an item they have no line for in their own voice, never with C
 | Guidebook | A small red paperback with a gold crest | "Tessel: A Pocket Companion. Confidently wrong on every page. I've grown fond of it." |
 | Crowbar | An iron bar with a hooked end | "The Movers' crowbar. Heavy, honest, and slightly bent." |
 
-The hat, moon chart, and soap carry over from the opening.
+The hat, moon chart, and soap carry over from the opening. The soap stays on the washstand and the hat in the wardrobe until taken, so a player who skipped them in Act 1 can still get them.
+
+### Reading the guidebook
+
+Examining the guidebook in the inventory reads one entry per look, cycling in this order. The first look always lands on the Steps entry, which is what the Count thread needs. The fourth entry plants the Act 4 Clockmaker lure.
+
+1. "'The Hundred Steps (there are, in fact, 99). A charming climb.'" / "In fact. In print. Somebody's going to be upset about that."
+2. "'The Bell: rung at random by a local eccentric.'" / "Ambrose would like a word."
+3. "'The Prow Light, at the western tip of the island.'" / "Eastern. Southeast. Not western."
+4. "'Tessel keeps its own time, eleven minutes behind the mainland.'" / "Somebody at the Crown would like a word about that too."
+5. "'Founded by fishermen in the year of the Great Shoal.'" / "Ottilie will scream."
+
+The inventory's one-line description stays: "Tessel: A Pocket Companion. Confidently wrong on every page. I've grown fond of it."
 
 ## End of Act 2: the hundredth step
 
@@ -1040,6 +1053,9 @@ The Clockmaker is heard, not seen, in this slice.
 - [ ] The scrape marks lead the player to the Steps without being told.
 - [ ] A player who misses Ottilie still finishes the act (the paper and charcoal are needed only in Act 3).
 - [ ] Every line fits in its box.
+- [ ] The Kid never blocks the gap beside the Counting Woman: walk up and down flight 3 toward him from both directions, with keyboard and with pointer.
+- [ ] The first look at the guidebook in the inventory shows the "ninety-nine" entry.
+- [ ] A player who skipped the soap or the hat in Act 1 can still get them from the flat.
 - [ ] First-time players finish in 30–40 minutes.
 
 ## Decisions
@@ -1051,4 +1067,7 @@ The Clockmaker is heard, not seen, in this slice.
 - **Former pupils call Cheryl "Miss."** It's a warm, cheap way to show her history with the town.
 - **The Clockmaker is only heard in Act 2.** He appears in Act 4, when his thread starts, which saves a sprite for this slice.
 - **The Founders' Door is seen (bolted) in Act 2** and opened from the other side in Act 3. It's the player's first look at Founder architecture.
+- **Build Act 2 in two parts** (suggested by the reviewer, xaKh8TS_PJ). **2a:** Lamp Street, the Crown, the Archive and crypt, the Hundred Steps, Fountain Square, and the Shop. The Goat Path gate is shut ("The goats have the path today.") and the Square's way down to the Bilge is roped off ("CANAL CLEANING. KEEP OUT. — by order of the Mayor"). Both threads work, provided the piano goes first, and the act can be finished. **2b:** the Goat Path, Harbor, lamp room, and Bilge loop; then open the gate and the rope. That gets a polished, playable Act 2 out sooner. In 2a, the blocked arch line drops its Goat Path half: "I'm not climbing over a piano at my age."
+- **The hollow step is flush with landing 2 and paved like it,** so everyone steps over it without counting. That's why the count is ninety-nine. (From review.)
+- **The guidebook can be read,** one entry per look, so the Count thread and the Act 4 Clockmaker lure are discoverable rather than found by trying every item on everyone. (From review.)
 - **Residents refuse to notice the open step.** It extends the "wrong explanations" running joke to its limit: some things Tessel just won't see.

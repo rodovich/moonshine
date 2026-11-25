@@ -36,6 +36,33 @@ export const INSTRUMENTS = {
     noise: { gain: 0.05, decay: 0.012, filter: { type: 'highpass', freq: 3000 } },
     gain: 0.33,
   },
+  // Nylon-string guitar: warm pluck, for waltz accompaniment ("oom-pah-pah").
+  guitar: {
+    osc: [{ wave: 'guitar' }, { wave: 'guitar', detune: 5, gain: 0.4 }],
+    env: { a: 0.003, d: 0.9, s: 0, r: 0.15 },
+    filter: { freq: 650, env: 2200, decay: 0.15, q: 0.7, track: 0.6 },
+    noise: { gain: 0.04, decay: 0.01, filter: { type: 'bandpass', freq: 2500, q: 1 } },
+    gain: 0.4,
+  },
+  // Music box: a steel comb. Bright tine, a high inharmonic partial, and a tiny click.
+  musicbox: {
+    osc: [
+      { wave: 'sine' },
+      { wave: 'sine', ratio: 2, gain: 0.12, env: { a: 0.001, d: 0.5, s: 0, r: 0.1 } },
+      { wave: 'sine', ratio: 4.2, gain: 0.16, env: { a: 0.001, d: 0.12, s: 0, r: 0.05 } },
+    ],
+    env: { a: 0.001, d: 1.6, s: 0, r: 0.5 },
+    noise: { gain: 0.05, decay: 0.006, filter: { type: 'highpass', freq: 5000 } },
+    gain: 0.34,
+  },
+  // Upright piano, a bit out of the way: two slightly detuned strings, hammer thump.
+  piano: {
+    osc: [{ wave: 'piano', detune: -3 }, { wave: 'piano', detune: 4, gain: 0.7 }],
+    env: { a: 0.002, d: 1.4, s: 0.08, r: 0.3 },
+    filter: { freq: 900, env: 3500, decay: 0.35, q: 0.6, track: 0.6 },
+    noise: { gain: 0.07, decay: 0.015, filter: { type: 'bandpass', freq: 1800, q: 0.8 } },
+    gain: 0.3,
+  },
   // Wooden mallet: marimba-like, short and warm.
   marimba: {
     osc: [{ wave: 'marimba' }],
@@ -67,7 +94,7 @@ export const INSTRUMENTS = {
     env: { a: 0.03, d: 0.3, s: 0.8, r: 0.08 },
     filter: { freq: 1700, q: 0.6, track: 0.5 },
     vibrato: { rate: 5.8, depth: 3, delay: 0 },
-    gain: 0.2,
+    gain: 0.28,
   },
   // Slow string pad (two detuned saw-like voices, filtered).
   strings: {
@@ -87,7 +114,7 @@ export const INSTRUMENTS = {
   },
   // Round fingered bass.
   bass: {
-    osc: [{ wave: 'bass' }, { wave: 'sine', ratio: 0.5, gain: 0.25 }],
+    osc: [{ wave: 'bass' }, { wave: 'sine', gain: 0.3 }],
     env: { a: 0.006, d: 0.7, s: 0.45, r: 0.07 },
     filter: { freq: 500, env: 900, decay: 0.12, q: 0.9, track: 0.5 },
     gain: 0.6,
@@ -143,6 +170,9 @@ export const INSTRUMENTS = {
         { type: 'noise', dur: 0.14, gain: 0.13, filter: { type: 'bandpass', freq: 9000, q: 1.5 }, env: { a: 0.002, d: 0.11, s: 0, r: 0.04 } },
         { type: 'noise', dur: 0.04, gain: 0.06, filter: { type: 'highpass', freq: 5000 } },
       ],
+      // Clock tick and tock (Morning After).
+      tick: [{ type: 'tone', wave: 'triangle', freq: 2600, dur: 0.012, gain: 0.16 }, { type: 'noise', dur: 0.008, gain: 0.05, filter: { type: 'bandpass', freq: 4000, q: 3 } }],
+      tock: [{ type: 'tone', wave: 'triangle', freq: 1900, dur: 0.014, gain: 0.16 }, { type: 'noise', dur: 0.008, gain: 0.05, filter: { type: 'bandpass', freq: 3000, q: 3 } }],
       // Low tom for fills and the title's swells.
       tom: [{ type: 'tone', wave: 'sine', freq: [190, 110], sweep: 0.2, dur: 0.3, gain: 0.55, env: { a: 0.002, d: 0.28, s: 0, r: 0.05 } }],
       // Soft cymbal swell (long noise with slow attack).

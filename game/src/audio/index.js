@@ -2,7 +2,7 @@
 
 import { compileSong } from './sequencer.js';
 import { MusicTrack } from './player.js';
-import { playLayers, makeEcho } from './synth.js';
+import { playLayers, makeEcho, startBed } from './synth.js';
 import { SONGS } from './music/index.js';
 import { SFX } from './sfx.js';
 
@@ -85,7 +85,9 @@ export function startSfx(ctx, graph, id, when, opts = {}) {
   }
   const j = def.jitter ?? 0;
   const cents = (opts.pitch ?? 0) * 100 + (j ? (Math.random() * 2 - 1) * j : 0);
-  const voice = playLayers(ctx, def.layers, when, { dest: g, pitch: Math.pow(2, cents / 1200) });
+  if (def.loop) throw new Error(`"${id}" is a loop; use startLoop`);
+  const layers = typeof def.layers === 'function' ? def.layers() : def.layers;
+  const voice = playLayers(ctx, layers, when, { dest: g, pitch: Math.pow(2, cents / 1200) });
   if (def.duck !== undefined) {
     // Dip the music so jingles and stings don't clash with it, then bring it back.
     const p = graph.musicDuck.gain;
@@ -103,6 +105,56 @@ export function startSfx(ctx, graph, id, when, opts = {}) {
   return voice;
 }
 
+/**
+ * Start a looping effect (ambience, running water, ticking) at context time `when`.
+ * A loop has continuous `beds` and/or one-shot `layers` repeated every `period` seconds
+ * (plus up to `jitter` seconds at random). Returns { schedule(until), stop(time, fadeSec), stopped }.
+ */
+export function startLoopOn(ctx, graph, id, when, fadeSec = 0.3) {
+  const def = SFX[id];
+  if (!def?.loop) throw new Error(`unknown loop "${id}"`);
+  const L = def.loop;
+  const g = ctx.createGain();
+  g.gain.value = def.gain ?? 1;
+  g.connect(graph.sfx);
+  let send = null;
+  if (def.echo) {
+    send = ctx.createGain();
+    send.gain.value = def.echo;
+    g.connect(send);
+    send.connect(graph.sfxEcho.input);
+  }
+  // Repeated layers go through their own gain so stopping can cut their tails.
+  const rep = ctx.createGain();
+  rep.connect(g);
+  const beds = (L.beds || []).map((b) => startBed(ctx, b, when, g, fadeSec));
+  let next = when + (L.offset ?? 0);
+  let count = 0;
+  const handle = {
+    stopped: false,
+    schedule(until) {
+      if (handle.stopped || !L.layers) return;
+      while (next < until) {
+        const layers = typeof L.layers === 'function' ? L.layers(count++) : L.layers;
+        playLayers(ctx, layers, next, { dest: rep });
+        next += L.period + Math.random() * (L.jitter ?? 0);
+      }
+    },
+    stop(at, sec = 0.3) {
+      if (handle.stopped) return;
+      handle.stopped = true;
+      const s = Math.max(at, ctx.currentTime);
+      for (const b of beds) b.stop(s, sec);
+      rep.gain.setValueAtTime(1, s);
+      rep.gain.linearRampToValueAtTime(0, s + Math.max(sec, 0.005));
+      if (!('startRendering' in ctx)) {
+        setTimeout(() => { g.disconnect(); if (send) send.disconnect(); }, (s - ctx.currentTime + sec + 3) * 1000);
+      }
+    },
+  };
+  return handle;
+}
+
 // ---- Live state ----
 
 let ctx = null;
@@ -114,6 +166,7 @@ let cue = null; // { track, resume, ducked (the track it interrupted), ended }
 let pendingMusic = null;
 let wrongness = 0;
 const activeSfx = []; // { id, voice }
+const loops = new Map(); // id -> handle from startLoopOn
 const settings = loadSettings();
 
 function loadSettings() {
@@ -146,6 +199,7 @@ function tick() {
     if (ctx.currentTime > t.stopAt + 0.5) { t.dispose(); fading.delete(t); } else t.schedule(until);
   }
   if (cue && ctx.currentTime > cue.track.endTime + 0.05 && !cue.ended) endCue();
+  for (const h of loops.values()) h.schedule(until);
 }
 
 /**
@@ -251,7 +305,7 @@ function endCue() {
  * Effects marked `mono` cut off their own previous instance (text blips, footsteps).
  */
 export function sfx(id, opts = {}) {
-  if (!SFX[id]) throw new Error(`unknown sfx "${id}"`);
+  if (!SFX[id] || SFX[id].loop) throw new Error(`unknown sfx "${id}"`);
   if (!ctx || ctx.state !== 'running') return;
   const now = ctx.currentTime;
   for (let i = activeSfx.length - 1; i >= 0; i--) {
@@ -265,6 +319,43 @@ export function sfx(id, opts = {}) {
   while (activeSfx.length >= MAX_SFX) activeSfx.shift().voice.choke(now);
   const voice = startSfx(ctx, graph, id, now + 0.005, opts);
   activeSfx.push({ id, voice });
+}
+
+/**
+ * Start a looping effect ('crowd', 'wind', 'water_pour', 'timer_tick', ...), fading in over
+ * `fadeMs`. Starting a loop that is already running does nothing. Before initAudio() it does
+ * nothing.
+ */
+export function startLoop(id, { fadeMs = 300 } = {}) {
+  if (!SFX[id]?.loop) throw new Error(`unknown loop "${id}"`);
+  if (!ctx || loops.has(id)) return;
+  const h = startLoopOn(ctx, graph, id, ctx.currentTime + 0.01, fadeMs / 1000);
+  h.schedule(ctx.currentTime + LOOKAHEAD);
+  loops.set(id, h);
+}
+
+/** Stop a looping effect over `fadeMs` (use 0 for a dead stop, like the crowd at moonrise). */
+export function stopLoop(id, fadeMs = 300) {
+  const h = loops.get(id);
+  if (!h) return;
+  h.stop(ctx.currentTime, fadeMs / 1000);
+  loops.delete(id);
+}
+
+/** Stop every looping effect. */
+export function stopAllLoops(fadeMs = 300) {
+  for (const id of [...loops.keys()]) stopLoop(id, fadeMs);
+}
+
+/**
+ * Let the current music run down like a music box over `ms`: it slows, sags flat, and stops
+ * wherever it has got to, with the last notes left to ring. (The moonrise.)
+ */
+export function windDownMusic(ms = 4000) {
+  if (!ctx || !current) { pendingMusic = null; return; }
+  current.track.windDown(ms / 1000);
+  fading.add(current.track);
+  current = null;
 }
 
 /** Set 'master', 'music', or 'sfx' volume, 0..1. Saved in localStorage. */
@@ -299,4 +390,5 @@ export function setWrongness(amount) {
 }
 
 export const MUSIC_IDS = Object.keys(SONGS);
-export const SFX_IDS = Object.keys(SFX);
+export const SFX_IDS = Object.keys(SFX).filter((id) => !SFX[id].loop);
+export const LOOP_IDS = Object.keys(SFX).filter((id) => SFX[id].loop);

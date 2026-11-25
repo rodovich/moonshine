@@ -9,8 +9,9 @@ import { findPath, nearestReachable } from './pathfind.js';
 import { makeApi } from './script.js';
 import { Control } from './control.js';
 import { writeSave } from './save.js';
-import { colorOf, loadSheet } from './art.js';
+import { colorOf, loadSheet, rgbSetOf } from './art.js';
 import { uiSmall } from '../art/ui.js';
+import { TINTS, EMISSIVE } from '../art/tints.js';
 import { drawText, measure, wrap, LINE_HEIGHT } from './text.js';
 import { STYLES, drawBox } from './ui.js';
 import { playMusic, stopMusic } from './sound.js';
@@ -553,7 +554,12 @@ export class World {
     this.map.draw(ctx, 'detail', cx, cy, WIDTH, HEIGHT, ms);
     this.drawMarker(ctx, cx, cy);
     const lit = this.effects.hasLight();
-    if (lit) this.effects.applyLight(ctx, 1);
+    if (lit) {
+      this.effects.applyLight(ctx, 1);
+      // Emissive pixels (lit windows, lamps) skip the lighting.
+      this.map.drawGlow(ctx, 'ground', cx, cy, WIDTH, HEIGHT, ms, this.emissive());
+      this.map.drawGlow(ctx, 'detail', cx, cy, WIDTH, HEIGHT, ms, this.emissive());
+    }
     const sorted = [...this.entities].sort((a, b) => {
       const la = a.layer === 'ground' ? 0 : 1;
       const lb = b.layer === 'ground' ? 0 : 1;
@@ -565,9 +571,18 @@ export class World {
     if (lit) this.compositeLit(ctx, sprites, this.content.spriteLight ?? SPRITE_LIGHT);
     const over = lit ? this.layer('overhead') : ctx;
     this.map.draw(over, 'overhead', cx, cy, WIDTH, HEIGHT, ms);
-    if (lit) this.compositeLit(ctx, over, 1);
+    if (lit) {
+      this.compositeLit(ctx, over, 1);
+      this.map.drawGlow(ctx, 'overhead', cx, cy, WIDTH, HEIGHT, ms, this.emissive());
+    }
     if (this.game.debug.debug) this.drawDebug(ctx, cx, cy);
     this.effects.applyWorld(ctx);
+  }
+
+  // Colors that skip lighting: src/art/tints.js EMISSIVE, or content.emissive.
+  emissive() {
+    if (!this.emissiveSet) this.emissiveSet = rgbSetOf(this.content.emissive || EMISSIVE);
+    return this.emissiveSet;
   }
 
   // A cleared, transparent offscreen layer the size of the screen.
@@ -692,23 +707,12 @@ function sameSprite(a, b) {
 // content.spriteLight overrides it.
 export const SPRITE_LIGHT = 0.5;
 
-// Built-in lighting presets: lists of passes drawn over the world. Content
-// may override or add presets with `content.lighting`.
-export const LIGHTING = {
-  day: [],
-  // Warm and dimming. A soft multiply keeps lights and darks apart (white
-  // walls stay brighter than paving), and a small violet lift in the shadows.
-  dusk: [
-    { color: '#f8c0a0', mode: 'multiply', amount: 0.8 },
-    { color: '#d898a0', mode: 'multiply', amount: 0.35 },
-    { color: '#382048', mode: 'screen', amount: 0.15 },
-  ],
-  // Moonlit: dark and blue, with lifted blacks so detail survives.
-  night: [
-    { color: '#5060b0', mode: 'multiply', amount: 0.85 },
-    { color: '#182850', mode: 'screen', amount: 0.3 },
-  ],
-};
+// Lighting presets come from the art task's time-of-day tints
+// (src/art/tints.js): each is one { color, amount, mode } pass or a list of
+// them. content.lighting may add or replace presets.
+export const LIGHTING = Object.fromEntries(
+  Object.entries(TINTS).map(([name, t]) => [name, (Array.isArray(t) ? t : [t]).filter((p) => (p.amount ?? 1) > 0)]),
+);
 
 // `looks` is how many times the player looked before this time.
 async function runInteract(g, e, looks) {

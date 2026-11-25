@@ -149,6 +149,40 @@ export function loadSheet(sheet, variant) {
   return art;
 }
 
+// A copy of `img` keeping only pixels whose color is in `rgbSet` (a Set of
+// 0xRRGGBB numbers), or null if there are none. Cached per image and set.
+const glowCache = new WeakMap();
+export function glowMask(img, rgbSet) {
+  let bySet = glowCache.get(img);
+  if (!bySet) {
+    bySet = new Map();
+    glowCache.set(img, bySet);
+  }
+  if (bySet.has(rgbSet)) return bySet.get(rgbSet);
+  const ctx = img.getContext('2d');
+  const data = ctx.getImageData(0, 0, img.width, img.height);
+  const d = data.data;
+  let any = false;
+  for (let i = 0; i < d.length; i += 4) {
+    if (d[i + 3] && rgbSet.has((d[i] << 16) | (d[i + 1] << 8) | d[i + 2])) any = true;
+    else d[i + 3] = 0;
+  }
+  let mask = null;
+  if (any) {
+    mask = document.createElement('canvas');
+    mask.width = img.width;
+    mask.height = img.height;
+    mask.getContext('2d').putImageData(data, 0, 0);
+  }
+  bySet.set(rgbSet, mask);
+  return mask;
+}
+
+// Palette color names -> a Set of 0xRRGGBB numbers, for glowMask.
+export function rgbSetOf(names) {
+  return new Set(names.map((n) => parseInt(resolveColor(n).slice(1), 16)));
+}
+
 // Index into a looping list of frame durations at time `ms`.
 export function frameIndexAt(durs, ms) {
   let total = 0;

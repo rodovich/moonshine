@@ -7,7 +7,7 @@
 
 import { DIR_VEC, dirBetween } from './entity.js';
 import { pathToDirs } from './world.js';
-import { playMusic, stopMusic, sfx, playCue, setWrongness } from './sound.js';
+import { playMusic, stopMusic, sfx, playCue, windDownMusic, startLoop, stopLoop, setWrongness } from './sound.js';
 import { loadSheet } from './art.js';
 import { TILE } from './tilemap.js';
 
@@ -327,17 +327,25 @@ export function makeApi(world) {
     stopMusic(fadeMs) {
       stopMusic(fadeMs);
     },
+    sfx(id) {
+      sfx(id);
+    },
     // A one-shot music cue over the current track (which dips and returns,
     // unless { resume: false }).
     playCue(id, opts) {
       playCue(id, opts);
     },
-    // How far the Wrongness has crept into the music, 0..1.
+    windDownMusic(ms) {
+      windDownMusic(ms);
+    },
+    startLoop(id, opts) {
+      startLoop(id, opts);
+    },
+    stopLoop(id, fadeMs) {
+      stopLoop(id, fadeMs);
+    },
     setWrongness(amount) {
       setWrongness(amount);
-    },
-    sfx(id) {
-      sfx(id);
     },
 
     // ---- Misc ----
