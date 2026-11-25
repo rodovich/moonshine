@@ -84,7 +84,6 @@ function compose(g) {
   // The south wall and the arch to Fountain Square.
   for (let x = 0; x < W; x++) L.set('ground', x, 41, 'street:retain_top', true);
   L.set('ground', 6, 41, pave(6, 41, true), false); L.set('ground', 7, 41, pave(7, 41, true), false);
-  L.set('ground', 5, 41, 'buildings:arch_jamb_l', true); L.set('ground', 8, 41, 'buildings:arch_jamb_r', true);
   L.set('overhead', 6, 41, 'buildings:over_arch_l'); L.set('overhead', 7, 41, 'buildings:over_arch_r');
 
   // Props.

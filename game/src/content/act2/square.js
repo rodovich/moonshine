@@ -134,7 +134,9 @@ const pianoArch = {
   use: { '*': cherylDeclines },
 };
 const pianoFountain = {
-  id: 'piano', x: 11, y: 5, w: 2, h: 2, kind: 'object',
+  // Against the Fountain's east rim (the design has the north rim, but there
+  // the bronze fish, drawn tall, stands right across its keys).
+  id: 'piano', x: 14, y: 8, w: 2, h: 2, kind: 'object',
   sprite: { sheet: pianoSheet, frame: 'piano' },
   when: slid,
   look: "Half a ton of piano, resting against the Fountain with its lid open, as if it's thinking of a tune.",
@@ -158,8 +160,8 @@ async function moversTalk(g) {
 }
 
 const movers = [
-  { id: 'big_mover', name: 'Big Mover', x: 10, y: 5, facing: 'right', sprite: LOOKS.big_mover },
-  { id: 'other_mover', name: 'Other Mover', x: 13, y: 5, facing: 'left', sprite: LOOKS.other_mover },
+  { id: 'big_mover', name: 'Big Mover', x: 16, y: 8, facing: 'left', sprite: LOOKS.big_mover },
+  { id: 'other_mover', name: 'Other Mover', x: 15, y: 10, facing: 'up', sprite: LOOKS.other_mover },
 ].map((m) => ({
   ...m, when: slid, interact: moversTalk,
   use: { '*': (g) => g.say('Big Mover', 'Very nice, Miss. Not grease, though.') },

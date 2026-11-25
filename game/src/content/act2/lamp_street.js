@@ -147,7 +147,11 @@ const girls = [[10, 'girl_1', 'girl1', 'right'], [12, 'girl_2', 'girl2', 'down']
   id, name: GIRL_LINES[id][0], x, y: 6, facing,
   sprite: LOOKS[look],
   behavior: 'idle',
-  ...(id === 'girl_2' && { bark: { lines: [CHANT], range: 3, once: true, speaker: 'Skipping Girls' }, emote: { frame: 'note', every: [3, 6] } }),
+  // The chant, in two halves so each fits the bark line at the top of the screen.
+  ...(id === 'girl_2' && {
+    bark: { lines: ['♪ Moonshine, moonshine, catch it in a cup, ♪', '♪ ring the bell when the tide turns up! ♪'], range: 3, every: [3, 3], once: true, speaker: 'Skipping Girls' },
+    emote: { frame: 'note', every: [3, 6] },
+  }),
   interact: (g, self) => girlsTalk(g, self, GIRL_LINES[id][1]),
   use: { '*': (g) => g.say('First Girl', "We're BUSY, Miss.") },
 }));
@@ -202,7 +206,9 @@ export const lampStreetMap = composedMap(compose, {
   step: 'step_stone',
   spawn: [3, 6],
   exits: [
-    { x: 3, y: 0, w: 2, to: 'cistern_court', at: [15, 23], facing: 'up' },
+    // Arrives one row in from the Squeeze top (the design's (15–16, 23) is the
+    // piano's tile at dusk, so the content check can't see it's walkable).
+    { x: 3, y: 0, w: 2, to: 'cistern_court', at: [15, 22], facing: 'up' },
     { x: 22, y: 0, w: 2, to: 'crown', at: [11, 13], facing: 'up' },
     { x: 27, y: 15, w: 2, to: 'hundred_steps', at: [6, 1], facing: 'down' },
   ],
