@@ -86,7 +86,7 @@ async function firstLook(g) {
   await sweepTo(g, 11, 4.6, 4.5);
   await g.wait(0.4);
   await g.describe("The Crown. The Steps. That's us.");
-  await sweepTo(g, 4.6, 9, 2.2);
+  await sweepTo(g, 4.6, 7.5, 1.8);
   await g.wait(0.5);
   await g.describe('And the sea comes up to... there. Halfway up the hill.');
   await g.wait(0.6);
@@ -112,8 +112,9 @@ const HOTSPOTS = [
   ['teapot', (x, y) => (x === 7 || x === 8) && (y === 7 || y === 8)],
   ['shaft', (x) => x === 5],
   ['mast', (x, y) => x === 7 && (y === 5 || y === 6)],
-  ['chain', (x, y) => (x === 11 || x === 12) && y >= 7],
-  ['waterline', (x, y) => y === 9],
+  ['chain', (x, y) => (x === 11 && y === 7) || (x === 12 && y >= 8)],
+  // The sea comes up to the row 7/8 boundary: the waves at the hull's ends, and the sea below.
+  ['waterline', (x, y) => (y >= 7 && (x === 3 || x === 12)) || y >= 9],
   ['hull', (x, y) => y >= 7],
   ['town', () => true],
 ];

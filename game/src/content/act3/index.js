@@ -6,7 +6,7 @@ import { galleryMap, cradleMap, galleryScripts } from './gallery.js';
 import { hallsMap, bunkMap, hallsScripts } from './halls.js';
 import { chartMap, chartScripts } from './chart.js';
 import { act3Items } from './common.js';
-import { withAct3, crownEnding, surfaceScripts } from './surface.js';
+import { withAct3, crownEnding, surfaceScripts, act3 } from './surface.js';
 
 export const act3Maps = {
   step_gallery: galleryMap,
@@ -16,7 +16,7 @@ export const act3Maps = {
   chart_room: chartMap,
 };
 
-export { act3Items, withAct3 };
+export { act3Items, withAct3, act3 };
 
 export const act3Scripts = {
   ...galleryScripts,

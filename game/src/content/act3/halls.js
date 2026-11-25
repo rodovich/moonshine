@@ -22,7 +22,7 @@
 
 import { composedMap } from '../opening/grid.js';
 import { act3Tiles } from './tiles.js';
-import { ds_rod, ds } from '../../art/downstairs.js';
+import { ds_rod, ds_rod_short, ds } from '../../art/downstairs.js';
 import {
   UNDER, WRONGNESS, deck, wall, floor, ribs, hasDisc, valveTurned, wallHotspots, lampEntity, nicheTile,
   founderUse, getItem, cherylDeclines, ladderDeclines, discLight, keepLoops, bump, relight,
@@ -243,7 +243,8 @@ const hallObjects = [
 
 const pipes = PIPES.map((x) => ({
   id: `light_pipe_${x}`, x, y: 8, kind: 'object', lookKey: 'light_pipes',
-  sprite: { sheet: ds_rod, frame: 'rod' }, shadow: false,
+  // The rod under the valve's standing spot is the short one, so it stays in its tile.
+  sprite: x === 22 ? { sheet: ds_rod_short, frame: 'rod_short' } : { sheet: ds_rod, frame: 'rod' }, shadow: false,
   looks: PIPE_LOOKS,
   use: { ...founderUse, paper_charcoal: (g) => g.describe('A rubbing of daylight. No.') },
 }));

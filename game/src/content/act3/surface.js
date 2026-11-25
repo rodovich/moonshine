@@ -18,6 +18,10 @@ import { LOOKS, talking } from '../act2/common.js';
 import { WRONGNESS, unbolted } from './common.js';
 
 const surfaced = (g) => !!g.flag('act3.surfaced');
+
+// Set by src/content/index.js: the script that starts Act 4 (it takes over
+// after the dusk vista, from black), or null for Act 3's end card.
+export const act3 = { next: null };
 const done = (g) => !!g.flag('act3.done');
 
 // ---------------------------------------------------------------------------
@@ -175,7 +179,8 @@ function studPatches(g) {
   ];
 }
 
-const dusk = (g) => surfaced(g);
+// The Crown at dusk lasts from surfacing until Act 4's morning (or Act 6's epilogue).
+const dusk = (g) => surfaced(g) && !g.flag('act4.started') && !g.flag('epilogue');
 
 const duskPeople = [
   {
@@ -269,6 +274,16 @@ export async function crownEnding(g) {
   await g.think('The Fountain was me, and the lights were me.');
   await g.think("I've been down there one afternoon.");
   await g.wait(1);
+  // Act 4 takes over from here once it registers (see act3.next); until then, the end card.
+  if (act3.next) {
+    g.stopMusic(1500);
+    g.stopLoop('glow_shimmer', 1500);
+    await g.fade('out', 1.2);
+    await g.hidePicture({ fade: 0 });
+    g.place('player', 11, 12, 'down');
+    g.setFlag('act3.done');
+    return act3.next(g);
+  }
   await g.hidePicture({ fade: 0 });
   await showEndCard(g);
 }
