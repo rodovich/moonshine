@@ -2,6 +2,39 @@
 
 Where to find the art for the "Art needed" list in [design/05-high-and-dry.md](design/05-high-and-dry.md). References are `sheet:frame`.
 
+## Surface
+
+Module `game/src/art/act5_surface.js`. Dev page: `/dev/art.html?only=scene:act5_surface&state=harbor` (also `harbor_teeth2`, `harbor_teeth3`, `clockshop`, `bilge`, `bilge_disc`, `shop`, `shop_guide`, `square`, `lamproom`).
+
+| Design | Frame(s) | Layer, placement |
+| --- | --- | --- |
+| Risen Harbor: the old quay edge (row 9) | `reveal:qwall_<a-h>` (the Bilge's own quay wall; place by x % 8) | ground |
+| Risen Harbor: exposed hull with barnacles and a tide line (row 10) | `harbor_hull:hull_<a-h>` (the top of `reveal:hull_n` over the foot of `reveal:hull_s`; place by x % 8) | ground |
+| The sea against the hull (row 11) | `sea:wash_a` (even x) / `wash_b` (odd x), 4 frames: a wet black band at the hull's foot, foam lapping | ground |
+| The sea, lower (row 12) | `sea:sea_nw` (even x) / `sea_ne` (odd x), 4 frames: dark, slow swells (the 2×2 block `sea_<nw,ne,sw,se>` also tiles larger seas) | ground |
+| The far sea and haze (rows 13–14), where the Teeth sit | `sea:far_a/b` on row 13, `sea:haze_a/b` on row 14 (a/b by even/odd x), 4 frames: paler, calmer water fading into a pale sea haze at the bottom edge, so the band reads as far away | ground |
+| **The Teeth**, three stages | `teeth:stage1`, `stage2`, `stage3` (4 frames each; stage 3 at uneven timing). A 176×32 sprite drawn top-left at (8·16, 13·16), on the far-sea band and clear of the ferry. They're blue-grey and hazed over, low contrast against the sea, with only the surf bright, so they read as far off. Stage 1: barely there, a faint line of dots and surf. Stage 2: a little larger and darker. Stage 3: clearly bigger and darker, with surf breaking, but still hazy and still on the far band | overhead sprite |
+| The ferry *Persistence*, hanging low and tilted on taut ropes | `ferry:persistence`, a 176×80 sprite drawn top-left at (8·16, 8·16): the ropes run from the bollards at (8, 8) and (18, 8) down to her cleats; she lies over (10–15, 11–12), down by the stern | sprite |
+| Bollards (with the ferry's rope), nets | `harbor_props:bollard_rope` at (8, 8) and (18, 8) (`bollard` without the rope); `harbor_props:nets` at (20, 4); crates are `props:crate` | objects |
+| The Keyhole, with the anchor chain running out (30–31, 9–10) | `keyhole:keyhole_x<0-1>y<0-1>` | ground |
+| The lighthouse's foot (26–29, 0–3), door at (27–28, 3) | `lighthouse:lighthouse_x<0-3>y<0-3>` (transparent at the sides: put it on the objects layer over rock) | objects |
+| Dry Bilge: the stair ring (25, 7) | `stair_rope:ring`; tied, `stair_rope:ring_tied` | objects, over `reveal:wstairs_r` |
+| The rope hanging down the hull to the mud | `stair_rope:rope_edge` (25, 8), `rope_hull` (25, 9), `rope_foot` (25, 10, a coil on the mud) | objects |
+| The bronze door opening; open with cyan light; light on the mud | grinding open: `bilge_door5:door_opening_x<0-1>y<0-1>_<0-2>` (play 0, 1, 2); open: `door_open_x<0-1>y<0-1>` (2 frames, the light flickering); the spill on the mud at (26–27, 10): `bilge_door5:spill_l`, `spill_r` (2 frames) | ground (the door at 26–27, 8–9); objects (the spill) |
+| The dim disc sitting in the door's eye | `bilge_door5:door_disc_x<0-1>y<0-1>` | ground |
+| Clockmaker's Shop: wall clocks, each a different time (1–2, 4–5, 7–8 on row 1) | `clockshop:clocks_a`, `clocks_b`, `clocks_c` (a pendulum, 4 frames), `clocks_d`, `clocks_e` (a cuckoo clock with swinging weights, 4 frames), `clocks_f` | objects, over `interior:wall_lower` |
+| The workbench with the drive in little dishes (1–3, 3) | `clockshop:bench_l`, `bench_m`, `bench_r` | objects |
+| The doorstop: the bell's clapper (7, 5) | `clockshop:clapper` | objects |
+| The door (4–5, 7): propped open / swung shut | `clockshop:door_open_l/r` / `door_shut_l/r` | ground, in the south wall |
+| Walls and floor | `interior:wall_*`, `shop:floor` | ground |
+| Shop: the window display fallen over, the hat on the floor (7–8, 5) | `shop5:display_fallen_l/r` | objects |
+| Shop: the guidebook in pride of place (7–8, 5) | `shop5:display_guide_l/r` | objects |
+| Fountain Square: DRY CANAL DAY — TONIGHT — MOONRISE on two poles over the café (17–22, 11) | `banner:over_banner_<a-f>` (2 frames, a ripple), overhead in a row; the poles' feet `banner:pole_foot_l` / `pole_foot_r` on the objects layer in the row below, under the first and last banner tiles | overhead; objects |
+| Lamp room: the window ring (row 1), walls, floor | `lamproom:window`, `wall`, `floor` | ground |
+| The lamp, lit and turning (3–4, 2–3) | `lamproom:lamp_x<0-1>y<0-1>` (4 frames, the bright face of the lens moving round) | objects |
+| The empty polish tin (2, 5) | `lamproom:polish_tin` | objects |
+| Laundry streaming | `cloth:over_wind_<a-f>` (from Act 4), overhead in a row | overhead |
+
 ## Underground
 
 The Windlass Room and the Bow Passage (module `game/src/art/act5_under.js`). Walls, floors, ribs and light pools use the existing `hull:` tiles; the speaking tube is the existing `ds:horn`. On the dev page: `?only=scene:act5_under&state=windlass|windlass_clapper|passage|passage_lit`.
