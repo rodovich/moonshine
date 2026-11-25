@@ -512,6 +512,8 @@ test('keyboard: the epilogue, the Stair Race and the Shopkeeper\'s plug', async 
   expect(joined(await read())).toContain("It's lucky.");
   await kbInteract(page, 'epi_counting_woman');
   expect(joined(await read())).toContain('A hundred. Every time.');
+  await kbInteract(page, 'epi_runner_0');
+  expect(joined(await read())).toContain('How do you beat an egg?');
 
   // Down to Fountain Square; the Shop: a new plug.
   await kbExit(page, 6, 40, 'down', 'fountain_square');

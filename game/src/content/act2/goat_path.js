@@ -15,7 +15,7 @@ const W = 16, H = 42;
 
 // The path, as rectangles [x0, y0, x1, y1] (inclusive), top to bottom.
 const PATH = [
-  [11, 1, 15, 3],  // the top landing, in from Lamp Street's west gate (x15)
+  [11, 1, 14, 1], [11, 2, 15, 3],  // the top landing, in from Lamp Street's west gate (x15, rows 2-3; (15, 1) is under the bag button)
   [2, 2, 15, 3],   // the first leg, west, two wide
   [2, 4, 3, 7],    // rough steps down
   [2, 8, 13, 8],   // east, along a ledge
@@ -135,7 +135,7 @@ export const goatPathMap = composedMap(compose, {
   spawn: [14, 2],
   exits: [
     // Top right: back up to Lamp Street's west gate (0, 9–11).
-    { x: 15, y: 1, h: 3, to: 'lamp_street', at: [1, 9], facing: 'right', sfx: 'step_stone' },
+    { x: 15, y: 2, h: 2, to: 'lamp_street', at: [1, 9], facing: 'right', sfx: 'step_stone' },
     // Bottom right: onto the west end of the Bilge's south quay (0, 11–13).
     { x: 15, y: 39, h: 3, to: 'bilge', at: [1, 11], facing: 'right', sfx: 'step_stone' },
   ],

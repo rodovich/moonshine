@@ -52,12 +52,9 @@ export function withAct4Part2(maps) {
           for (let y = 4; y <= 6; y++) for (let x = 0; x <= 1; x++) flood(T, x, y, 1);
           for (const y of [4, 6]) T.set('detail', 2, y, 'bilge_flood:flood1_lap_w');
         } else {
-          for (let y = 11; y <= 13; y++) for (let x = 1; x < 32; x++) flood(T, x, y, 2);
-          // The west steps up to the Goat Path, water higher up them.
-          ['n', 'm', 's'].forEach((k, i) => T.set('ground', 0, 11 + i, `bilge_west:steps_${k}_f2`, false));
+          for (let y = 11; y <= 13; y++) for (let x = 0; x < 32; x++) flood(T, x, y, 2);
           for (let y = 4; y <= 6; y++) for (let x = 0; x <= 9; x++) flood(T, x, y, 2);
           for (const y of [4, 6]) T.set('detail', 10, y, 'bilge_flood:flood2_lap_w');
-          ['l', 'm', 'm', 'r'].forEach((k, i) => T.set('ground', 22 + i, 7, `bilge_deep:wstairs_deep_${k}`));
           T.set('detail', 6, 11, null); T.set('detail', 6, 12, null);
           // The Fishmonger's crate.
           T.set('detail', 4, 4, 'props:crate', true);
@@ -131,7 +128,6 @@ export function withAct4Part2(maps) {
       // Into the shack for the coil, and back.
       g.setSprite(self, { sheet: mottArt });
       self.offset = [0, 0];
-      if (g.player.x === 3 && g.player.y === 16) { await g.movePlayer([3, 17]); g.facePlayer('up'); }
       await g.moveNpc(self, 'r', { ghost: true, speed: 18 }); // off his crates, to the door
       g.faceNpc(self, 'up');
       g.sfx('door_open');
@@ -160,7 +156,7 @@ export function withAct4Part2(maps) {
       hide: ['sea_cave'],
       tiles: (g, T) => {
         T.set('detail', 2, 16, 'props:crate', true); // Mott's crates, in the yard just below and left of his door (3, 15)
-        T.set('ground', 1, 37, 'cave_low:cave_mouth_low', false); // the sea cave's mouth, open at low tide
+        T.block(1, 37, false); // the sea cave's mouth, open at low tide
       },
       exits: [{ x: 1, y: 37, to: 'sea_cave', at: [4, 6], facing: 'up', sfx: 'step_stone', when: act4 }],
       entities: [{
@@ -201,12 +197,11 @@ export function withAct4Part2(maps) {
     out.harbor = overlayMap(harbor, {
       when: act4,
       tileset: act4Tiles,
-      hide: ['mott', 'harbor_office', 'ferry', 'bollard_8', 'bollard_18'],
+      hide: ['mott', 'harbor_office', 'ferry'],
       entities: [
-        ...[8, 18].map((x) => ({ id: `bollard_a4_${x}`, x, y: 8, solid: false, when: act4, lookKey: 'bollards_a4', look: 'A bollard. Nobody sitting on it. Nobody sitting on any of them.' })),
         { id: 'bollard_a4', x: 13, y: 8, solid: false, when: act4, look: "Mott's bollard. No Mott, no jug. He'll be at his shack, up the Goat Path." },
         { id: 'harbor_office_a4', x: 12, y: 2, h: 2, solid: false, when: act4, look: 'A new note: GONE TO LOOK FOR THE LANDING. STILL.' },
-        { id: 'ferry_a4', x: 10, y: 9, w: 6, h: 3, solid: false, when: act4, look: "The Persistence, tied up and going nowhere. She's level. I checked. Nothing else is." },
+        { id: 'ferry_a4', x: 10, y: 9, w: 6, h: 3, solid: false, when: act4, look: "The Persistence is tied up at a tilt. Even the ferry's leaning." },
       ].map((o) => ({ use: { '*': cherylDeclines }, ...o })),
       onEnter: surfaceAudio,
     });

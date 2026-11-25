@@ -2,6 +2,7 @@
 // (docs/design/06-moon-in-the-bowl.md, "The final scene", "Credits").
 
 import { vista_glow, vista_twinkle, VISTA_BASINS } from '../../art/vista.js';
+import { vista_pins } from '../../art/pins.js';
 import { vista_final, final_rim, final_moon, vista_cheryl_bath, vista_title } from '../../art/act6_vistas.js';
 
 // The final vista, per docs/art-act6.md: the glow gathers in the Gate, the moon
@@ -10,7 +11,7 @@ import { vista_final, final_rim, final_moon, vista_cheryl_bath, vista_title } fr
 function finalVista(g) {
   const art = {
     bowl: g.sheet(vista_final), glow: g.sheet(vista_glow), moon: g.sheet(final_moon), rim: g.sheet(final_rim),
-    twinkle: g.sheet(vista_twinkle), cheryl: g.sheet(vista_cheryl_bath), title: g.sheet(vista_title),
+    twinkle: g.sheet(vista_twinkle), pins: g.sheet(vista_pins), cheryl: g.sheet(vista_cheryl_bath), title: g.sheet(vista_title),
   };
   const phases = VISTA_BASINS.map((_, i) => (i * 677) % 1180);
   const v = { t: 0, titleAt: null, titleOff: null, dimAt: null };
@@ -32,6 +33,8 @@ function finalVista(g) {
     }
     ctx.drawImage(art.rim.frame('rim'), 0, 0);
     VISTA_BASINS.forEach(([x, y], i) => ctx.drawImage(art.twinkle.frameAt('twinkle', ms + phases[i]), x - 3, y - 3));
+    // The two sighting pins on the roof, lined up on the Gate (as in Act 1); the moon rises dead between them.
+    ctx.drawImage(art.pins.frame('pins'), 0, 0);
     ctx.drawImage(art.cheryl.frame('cheryl_bath'), 0, 128);
     // The title: a two-step fade in; and out again, the same way, before the credits roll.
     if (v.titleAt != null && ms >= v.titleAt) {

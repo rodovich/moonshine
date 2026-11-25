@@ -13,11 +13,13 @@ import { props } from '../../art/props.js';
 import { LOOKS } from '../act2/common.js';
 import { clockmaker } from '../../art/act4_sprites.js';
 import { crowd_a, crowd_b, keeper } from '../../art/act5_sprites.js';
-import { piano_delivered, luggage, well_lift, bunting, step_barrier } from '../../art/act6_surface.js';
+import { piano_delivered, luggage, well_lift, bunting } from '../../art/act6_surface.js';
+import { steps_lid } from '../../art/hundredth.js';
+import { tower_noclock, tower_open, founders_door_sign, shop_epi } from '../../art/sweep.js';
 import { counting_rosette, runner, kid_finish, tourist_case, pelletier_m, pelletier_f } from '../../art/act6_sprites.js';
 import { finalScene } from './ending.js';
 
-const said = (speaker) => (lines) => async (g, self) => g.say(self, ...[].concat(lines));
+const said = (lines) => async (g, self) => g.say(self, ...[].concat(lines));
 
 // A base entity, copied under a new id for the epilogue, with new lines.
 function recast(map, id, over) {
@@ -106,8 +108,16 @@ export function courtEpilogue(map) {
 
   return {
     sheets: { well_lift },
-    hide: [{ when: epilogue, ids: ['old_man', 'neighbor_morning', 'cat_morning', 'tub', 'well', 'kid_morning'] }],
-    entities: [oldMan, neighborEpi, cat, well, tub, piano, ...movers],
+    hide: [
+      { when: epilogue, ids: ['old_man', 'neighbor_morning', 'cat_morning', 'tub', 'well', 'kid_morning', 'nb_door', 'back_line'] },
+      { when: (g) => epilogue(g) && !!g.flag('epi.leftCourt'), ids: ['window_5'] },
+    ],
+    entities: [
+      oldMan, neighborEpi, cat, well, tub, piano, ...movers,
+      recast(map, 'nb_door', { look: "Her door. She's up on the roof, admiring her sheets." }),
+      recast(map, 'back_line', { look: ['Her sheets. Whitest of her life, she says.', "For once, I'd say she's right."] }),
+      recast(map, 'window_5', { when: (g) => epilogue(g) && !!g.flag('epi.leftCourt'), look: 'My window, with a piano in front of it now. Gerald has a sense of occasion.' }),
+    ].filter(Boolean),
     exits: [
       // The door home: not yet; then (after the piano) the final scene; after the game, as usual.
       {
@@ -132,9 +142,15 @@ export function courtEpilogue(map) {
       },
     ],
     patches: (g) => {
-      const s = g.flag('fx.wellGrate');
-      if (s == null) return [];
       const out = [];
+      // The epilogue's back line: her sheets white again, as on Moonshine Night (not the morning after's grey).
+      if (epilogue(g)) {
+        'abcdefgh'.split('').forEach((c, i) => {
+          out.push(['detail', 11 + i, 1, `laundry:backline_sheets_${c}_n`], ['detail', 11 + i, 2, `laundry:backline_sheets_${c}_s`]);
+        });
+      }
+      const s = g.flag('fx.wellGrate');
+      if (s == null) return out;
       for (let y = 0; y < 2; y++) for (let x = 0; x < 2; x++) out.push(['detail', 9 + x, 16 + y, `well_lift:well_lift_x${x}y${y}_${s}`]);
       return out;
     },
@@ -194,9 +210,10 @@ export function lampStreetEpilogue(map) {
     ...(id === 'girl_2' ? { bark: { lines: [chant], speaker: 'Skipping Girls', range: 4, every: [5, 8] } } : {}),
   }));
   return {
-    hide: [{ when: epilogue, ids: ['girl_1', 'girl_2', 'girl_3', 'bench_man', 'watering_woman'] }],
+    hide: [{ when: epilogue, ids: ['girl_1', 'girl_2', 'girl_3', 'bench_man', 'watering_woman', 'cat'] }],
     entities: [
       ...girls,
+      recast(map, 'cat', { look: 'The cat, in the sun on the wall. Every end of the street is level again, and she knows it.' }),
       recast(map, 'bench_man', {
         interact: lines('benchMan', [], ['Says here it was a "seiche." A wave that goes back and forth in a bay. I said seiche. Didn\'t I say seiche?']),
         use: npcDecline("I've got my paper, thank you."),
@@ -214,8 +231,22 @@ export function lampStreetEpilogue(map) {
 
 export function crownEpilogue(map) {
   return {
-    hide: [{ when: epilogue, ids: ['ambrose'] }],
+    sheets: { tower_noclock, tower_open },
+    hide: [{ when: epilogue, ids: ['ambrose', 'tower_door', 'clock_2', 'clock_6', 'sundial'] }],
+    // A paler square of stone where the Mayor's clock hung, and the tower door open.
+    patches: (g) => {
+      if (!epilogue(g)) return [];
+      const out = [];
+      for (let y = 0; y < 3; y++) for (let x = 0; x < 2; x++) out.push(['ground', 4 + x, 2 + y, { tile: `tower_noclock:noclock_x${x}y${y}`, solid: true }]);
+      for (let y = 0; y < 2; y++) for (let x = 0; x < 2; x++) out.push(['ground', 4 + x, 5 + y, { tile: `tower_open:tower_open_x${x}y${y}`, solid: true }]);
+      return out;
+    },
     entities: [
+      recast(map, 'tower_door', {
+        looks: [["A paler square of stone where the Mayor's clock hung. Four bolt holes.", "Ambrose says it's under his bed."], 'The tower door, wide open. The bell rings tides again, and nobody is calibrating anything.'],
+      }),
+      ...['clock_2', 'clock_6'].map((id) => recast(map, id, { lookKey: 'epi_tower', look: "The Bell Tower, with a paler square where the clock was. It looks younger without it." })),
+      recast(map, 'sundial', { look: 'The sundial and the sun agree. They always did.' }),
       recast(map, 'ambrose', {
         interact: lines('ambrose', ['RANG AT THE TURN. ALL WELL.'], ["THE CLOCK'S GONE. THE MAYOR SAYS IT'S \"UNDER REVIEW.\" I SAY IT'S UNDER MY BED.", 'RANG AT THE TURN. ALL WELL.']),
         use: npcDecline("I DON'T WANT THAT. I'VE GOT MY BELL."),
@@ -261,8 +292,18 @@ export function archiveEpilogue(map) {
 
 export function cryptEpilogue(map) {
   return {
-    hide: [{ when: epilogue, ids: ['founders_door'] }],
-    entities: [recast(map, 'founders_door', { look: "Open. Ottilie's put a little sign on it: DOOR (OPEN). FURTHER STUDY NEEDED." })].filter(Boolean),
+    sheets: { founders_door_sign },
+    hide: [{ when: epilogue, ids: ['founders_door', 'lectern'] }],
+    patches: (g) => {
+      if (!epilogue(g)) return [];
+      const out = [];
+      for (let y = 0; y < 2; y++) for (let x = 0; x < 2; x++) out.push(['ground', 5 + x, 1 + y, `founders_door_sign:founders_door_sign_x${x}y${y}`]);
+      return out;
+    },
+    entities: [
+      recast(map, 'founders_door', { look: "Open. Ottilie's put a little sign on it: DOOR (OPEN). FURTHER STUDY NEEDED." }),
+      recast(map, 'lectern', { look: "Ottilie's notes, three deep. The top one says BOOTLEGGERS, underlined twice." }),
+    ].filter(Boolean),
   };
 }
 
@@ -293,6 +334,8 @@ export function squareEpilogue(map) {
 
 export function shopEpilogue(map) {
   return {
+    sheets: { shop_epi },
+    patches: (g) => (epilogue(g) ? [['detail', 7, 5, { tile: 'shop_epi:display_book_l', solid: true }], ['detail', 8, 5, { tile: 'shop_epi:display_book_r', solid: true }]] : []),
     hide: [{ when: epilogue, ids: ['shopkeeper', 'hat_display'] }],
     entities: [
       recast(map, 'shopkeeper', {
@@ -372,30 +415,25 @@ export function stepsEpilogue(map) {
     use: npcDecline("I've got my basin, love."),
   });
   return {
-    sheets: { bunting, step_barrier },
-    hide: [{ when: epilogue, ids: ['counting_woman', 'basin_woman', 'kid', 'kid_after'] }],
-    entities: [counter, ...kid, ...runners, ...crowd, basin].filter(Boolean),
-    // Bunting over landing 2; the finish tape across flight 3; the rope barrier round the open step.
+    sheets: { bunting, steps_lid },
+    hide: [{ when: epilogue, ids: ['counting_woman', 'basin_woman', 'kid', 'kid_after', 'hundredth_step', 'open_step_a4'] }],
+    entities: [
+      counter, ...kid, ...runners, ...crowd, basin,
+    ].filter(Boolean),
+    // The board is a floor: Act 2's "Go down?" exit under it doesn't fire. (Act 2's steps.js draws the
+    // chalked board itself from content/act2-structure on, with its first-walk line; these match it.)
+    hideExits: [{ when: epilogue, x: 10, y: 19 }],
+    // Bunting over landing 2; the finish tape across flight 3; the chalked board over the hundredth step.
     patches: (g) => {
       if (!epilogue(g)) return [];
       const out = [];
       'abcd'.split('').forEach((s, i) => out.push(['overhead', 4 + i, 16, `bunting:over_bunting_${s}`]));
       const broken = g.flag('epi.race') || g.flag('fx.tape') ? 'finish_broken' : 'finish_tape';
       out.push(['detail', STEPS.tape[0], STEPS.tape[1], `bunting:${broken}_l`], ['detail', STEPS.tape[0] + 1, STEPS.tape[1], `bunting:${broken}_r`]);
-      for (let y = 0; y < 3; y++) for (let x = 0; x < 4; x++) {
-        if ((x === 1 || x === 2) && y === 1) continue; // the hole itself
-        out.push(['detail', 8 + x, 18 + y, `step_barrier:step_barrier_x${x}y${y}`]);
-      }
+      out.push(['ground', 9, 19, { tile: 'steps_lid:chalked_l', step: 'step_bonk' }], ['ground', 10, 19, { tile: 'steps_lid:chalked_r', step: 'step_bonk' }]);
+      out.push(['detail', 9, 19, null], ['detail', 10, 19, null]);
       return out;
     },
-    // The open hundredth step (Act 2's exit at (10, 19)): not today.
-    exits: [{
-      x: 10, y: 19, when: epilogue,
-      run: async (g) => {
-        await g.describe("Not today. I've been down enough for one week.");
-        return g.movePlayer([10, 18]);
-      },
-    }],
     onEnter: async (g, base) => {
       if (!epilogue(g)) return base(g);
       await base(g);
@@ -468,8 +506,9 @@ export function harborEpilogue(map) {
   const pelletiers = lines('pelletiers', ["We've been on the mainland all week! The ferry couldn't FIND the island! Can you imagine!"],
     ['Did anything happen while we were away? No? It never does.']);
   return {
-    hide: [{ when: epilogue, ids: ['mott'] }],
+    hide: [{ when: epilogue, ids: ['mott', 'ferry'] }],
     entities: [
+      recast(map, 'ferry', { look: ['The Persistence, tied up level at her landing, the way she should be.', 'Landed first go, Mott says. He says it twice.'] }),
       { id: 'epi_pelletier_m', name: 'The Pelletiers', x: 15, y: 6, facing: 'down', when: epilogue, sprite: { sheet: pelletier_m }, behavior: { type: 'face', range: 3 }, interact: pelletiers, use: npcDecline("We've got enough luggage, thank you.") },
       { id: 'epi_pelletier_f', name: 'The Pelletiers', x: 16, y: 6, facing: 'down', when: epilogue, sprite: { sheet: pelletier_f }, behavior: { type: 'face', range: 3 }, interact: pelletiers, use: npcDecline("We've got enough luggage, thank you.") },
       { id: 'epi_pelletier_bags', x: 17, y: 6, when: epilogue, sprite: { sheet: luggage, frame: 'luggage' }, look: 'The Pelletiers\' luggage. A week on the mainland, and they bought a hatbox.' },
@@ -488,10 +527,24 @@ export function harborEpilogue(map) {
       }),
       {
         id: 'epi_keeper', name: 'Lighthouse Keeper', x: 21, y: 7, facing: 'down', when: epilogue,
-        sprite: { sheet: keeper }, behavior: { type: 'face', range: 3 },
+        // With her telescope on the quay, looking out to sea; she holds it across her body to talk.
+        sprite: { sheet: keeper, frame: 'scope_down' }, turnToTalk: false, talkPose: 'hold_down_0',
         interact: lines('keeper', ["It's lovely, isn't it. The sea. Twenty-two years. Who knew."], ['I look at the sea now. Twice a day. Then I polish the telescope.']),
         use: npcDecline("I've no use for that down here. I'm just looking."),
       },
+    ].filter(Boolean),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// The lamp room: the Keeper is out on the quay with her telescope.
+
+export function lampRoomEpilogue(map) {
+  return {
+    hide: [{ when: epilogue, ids: ['keeper', 'lamp', 'windows'] }],
+    entities: [
+      recast(map, 'lamp', { look: "The lamp, polished to within an inch of its life. The Keeper's out on the quay, looking at the sea instead." }),
+      recast(map, 'windows', { look: 'The sea, the Rim, the Gate. No Teeth. Just sea, the way it was.' }),
     ].filter(Boolean),
   };
 }
