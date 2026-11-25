@@ -297,7 +297,7 @@ export const galleryMap = composedMap(composeGallery, {
     await g.panCamera(15, 5, 0.7);
     await g.wait(1.2);
     await g.followPlayer(1.4);
-    await g.think('All this, under the Steps. All this time.');
+    await g.think('Thirty-one years I\'ve gone up and down those Steps. Every day, most days twice.', 'And all this was underneath. All this time.');
   },
   entities: [...galleryObjects, mirror],
 });
