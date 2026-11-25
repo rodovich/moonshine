@@ -77,7 +77,7 @@ function compose(g) {
     // The hole is the step's east half; its west half is just the top of flight 3,
     // so people can still go up and down the Steps past it.
     L.set('ground', 9, 19, 'steps:steps_l', false);
-    L.set('ground', 10, 19, 'steps:hollow_open_r', true);
+    L.set('ground', 10, 19, 'steps:hollow_open_r', false);
   } else {
     L.set('ground', 9, 19, 'steps:hollow_wet_l', false);
     L.set('ground', 10, 19, 'steps:hollow_wet_r', false);
@@ -132,7 +132,7 @@ const MOON_EYE = [
 const PRY_STEPS = "These steps are older than the Mayor's great-grandmother. I'm not prying them up at random.";
 
 async function hollowLook(g) {
-  if (!counted(g)) return g.describe('The edge of the landing, where she\'s sitting. Water has pooled along it, just there, by her feet.');
+  if (!counted(g)) return g.describe('The edge of the landing, where she\'s sitting. Water has pooled along it, just there, by her feet.', "There's just room to get past her, if I mind her feet.");
   if (!g.flag('step.found')) {
     g.setFlag('step.found');
     return g.describe(
@@ -174,12 +174,10 @@ const objects = [
   { id: 'hollow_step', x: 10, y: 19, when: (g) => !counted(g), interact: hollowLook, use: hollowUse },
   { id: 'hollow_step_free', x: 9, y: 19, w: 2, when: (g) => counted(g) && !open(g), interact: hollowLook, use: hollowUse },
   {
-    // The open step: a solid hole at (10, 19). Looking at it (or clicking it) asks.
+    // The open step (10, 19): walking onto it asks (it's an exit with a confirm);
+    // so does looking at it, from beside it, or clicking it.
     id: 'hundredth_step', x: 10, y: 19, when: open,
-    interact: async (g) => {
-      const i = await g.choose('Go down?', ['Yes', 'Not yet']);
-      if (i === 0) return goDown(g);
-    },
+    interact: (g) => askDown(g),
     use: { '*': (g) => g.describe("I'm not dropping anything down there. I'd only want it back.") },
   },
   { id: 'view', x: 15, y: 26, h: 3, look: 'Halfway down Tessel. Halfway up, if you\'re the Kid.' },
@@ -293,11 +291,12 @@ async function slidePiano(g) {
 async function countingTalk(g, self) {
   if (firstMeet(g, 'counting_woman')) {
     await g.describe("The Keeper of the Count. It's a real title. There's a sash. She's wearing the sash.");
-    return g.say(self,
+    await g.say(self,
       'Ninety-seven. Ninety-eight. Ninety-nine. ...Ninety-nine. Every day. Every DAY.',
       "It's the Hundred Steps, Cheryl. A hundred. It's in the name. I am the Keeper of the Count. It's a civic title.",
       'Every morning I count them, and every morning I get it wrong. Ninety-nine. So I sit, and I count again.',
       'And every morning somebody tips their Moonshine water down the Steps, and my feet get wet. Right here.');
+    return g.describe("She's planted on the edge of the landing like a bollard. There's just room to squeeze past her.");
   }
   return g.say(self, cycle(g, 'counter.repeat', [
     "Fourteen. Fifteen. Don't talk to me, I'm counting. ...Fifteen? Sixteen.",
@@ -337,6 +336,7 @@ async function showGuidebook(g, self) {
   }
   g.hide(self);
   g.setFlag('counter.left');
+  kidLap(g);
   if (pianoThere) {
     await g.wait(0.4);
     await g.followPlayer(3);
@@ -382,12 +382,31 @@ const basinWoman = {
 };
 
 // ---------------------------------------------------------------------------
-// The Sweaty Kid: laps from landing 2, past the Counting Woman, down flight 3
-// to landing 3 and back. He never stops on the narrow stretch (x9–10, y18–24),
-// so he can't stand on the hollow step once the Counting Woman has gone.
+// The Sweaty Kid: laps up and down flight 3 and along landing 3. He's solid,
+// so he can always be faced and talked to, and he never has the one way past
+// the Counting Woman to himself: while she sits on (9, 19), the only way
+// through is (10, 19) then (10, 20), so his lap stops at (10, 21), just below
+// her, and Cheryl goes by on the flight's free west column. Once she's gone he
+// runs up to landing 2; he never stops on the stretch x9–10, y18–24 then, so he
+// can't stand on the hollow step.
 
+const LAP_COUNTING = [[10, 21], [10, 27], [13, 27], [10, 27]];
 const LAP = [[10, 18], [10, 27], [13, 27], [10, 27]];
-const LAP_OPEN = [[9, 18], [9, 27], [13, 27], [9, 27]]; // once the step is open, past the hole on its west half
+// Once the step is open, (9, 19) is the only way past it, so his lap keeps below:
+// up flight 3 to (10, 20) and back, never on (9, 18-19).
+const LAP_OPEN = [[10, 20], [10, 27], [13, 27], [10, 27]];
+
+// The Kid's lap for the story state (his patrol reads its route every step).
+function kidLap(g) {
+  let k = null;
+  try { k = g.npc('kid'); } catch { return; } // not on the map once the step is open
+  if (!k || !k.def.behavior) return;
+  const route = counted(g) ? LAP : LAP_COUNTING;
+  if (k.def.behavior.route !== route) {
+    k.def.behavior.route = route;
+    k.patrolIdx = 0;
+  }
+}
 
 function onKidWaypoint(g, self) {
   if (Math.random() < 0.5) {
@@ -410,10 +429,11 @@ async function kidTalk(g, self) {
   return g.say(self, cycle(g, 'kid.steps', lines));
 }
 
-// He doesn't block Cheryl: in the one-tile gap beside the Counting Woman she
-// squeezes past him rather than the two of them waiting on each other.
+// He's solid, like everyone else: with Cheryl and him unable to share a tile,
+// he can always be faced and talked to. In the one-tile gap he waits for her
+// (the engine never walks an NPC through Cheryl), so she's never shut out.
 const kidBase = {
-  name: 'Sweaty Kid', facing: 'down', solid: false,
+  name: 'Sweaty Kid', facing: 'down',
   sprite: { sheet: sweaty_kid, walk: [1, 2, 3, 4] },
   stepTicks: 13,
   talkPose: 'jog',
@@ -427,12 +447,12 @@ const kidBase = {
 
 const kids = [
   {
-    ...kidBase, id: 'kid', x: 10, y: 18, when: (g) => !open(g),
-    behavior: { type: 'patrol', route: LAP, stopNear: 2, nearPose: 'jog', noStop: [[9, 18, 2, 7]], onWaypoint: onKidWaypoint },
+    ...kidBase, id: 'kid', x: 10, y: 21, when: (g) => !open(g),
+    behavior: { type: 'patrol', route: LAP_COUNTING, stopNear: 2, nearPose: 'jog', noStop: [[9, 18, 2, 7]], onWaypoint: onKidWaypoint },
   },
   {
-    ...kidBase, id: 'kid_after', x: 9, y: 27, when: open,
-    behavior: { type: 'patrol', route: LAP_OPEN, stopNear: 2, nearPose: 'jog', noStop: [[9, 18, 1, 7]], onWaypoint: onKidWaypoint },
+    ...kidBase, id: 'kid_after', x: 10, y: 27, when: open,
+    behavior: { type: 'patrol', route: LAP_OPEN, stopNear: 2, nearPose: 'jog', onWaypoint: onKidWaypoint },
   },
 ];
 
@@ -479,6 +499,11 @@ async function openStep(g) {
   }
 }
 
+async function askDown(g) {
+  const i = await g.choose('Go down?', ['Yes', 'Not yet']);
+  if (i === 0) return goDown(g);
+}
+
 async function goDown(g) {
   g.place('player', 10, 19, 'up');
   g.facePlayer('up');
@@ -513,6 +538,7 @@ export const stepsMap = composedMap(compose, {
   exits: [
     { x: 6, y: 0, w: 2, to: 'lamp_street', at: [27, 12], facing: 'up' },
     { x: 6, y: 41, w: 2, to: 'fountain_square', at: [11, 4], facing: 'down', when: slid, sfx: 'step_stone' },
+    { x: 10, y: 19, when: open, confirm: 'Go down?', choices: ['Yes', 'Not yet'], run: (g) => goDown(g) },
   ],
   triggers: [
     {
@@ -528,6 +554,7 @@ export const stepsMap = composedMap(compose, {
   onEnter: async (g) => {
     pianoLineShown = false;
     actWrongness(g);
+    kidLap(g);
     if (g.flag('n.stepsArrived')) return;
     g.setFlag('n.stepsArrived', 1);
     await g.describe(
@@ -539,7 +566,8 @@ export const stepsMap = composedMap(compose, {
     // The Woman with Basin tips her basin every twenty seconds or so.
     { every: [18, 24], when: (g) => !g.flag('basin.inside'), run: trickle },
   ],
-  entities: [...objects, piano, crowbar, cat, ...movers, countingWoman, basinWoman, ...kids],
+  // People first: on a shared tile (the Kid crossing the hollow step) the first entity answers.
+  entities: [...kids, countingWoman, basinWoman, ...movers, cat, piano, crowbar, ...objects],
 });
 
 // For tests and the map viewer.
