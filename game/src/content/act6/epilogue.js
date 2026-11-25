@@ -282,7 +282,7 @@ export function squareEpilogue(map) {
         id: 'epi_tourist', name: 'Stranded Tourist', x: 18, y: 14, facing: 'down', when: epilogue,
         sprite: { sheet: tourist_case }, behavior: { type: 'face', range: 3 },
         interact: lines('tourist', ["The ferry's in! It found us! I'm going home. I'm never coming back."],
-          ["...I'll come back next year. For Moonshine Night. Keep the guidebook. I'm keeping your hat."]),
+          ["...I'll come back next year. For Moonshine Night.", "Keep the guidebook. I'm keeping this hat."]),
         use: npcDecline("I'm all packed, thank you."),
       },
       { id: 'epi_luggage', x: 19, y: 15, sprite: { sheet: luggage, frame: 'luggage' }, when: epilogue, look: 'Her luggage. More of it than she came with. Tessel does that.' },
@@ -489,7 +489,7 @@ export function harborEpilogue(map) {
       {
         id: 'epi_keeper', name: 'Lighthouse Keeper', x: 21, y: 7, facing: 'down', when: epilogue,
         sprite: { sheet: keeper }, behavior: { type: 'face', range: 3 },
-        interact: lines('keeper', [], ["It's lovely, isn't it. The sea. Twenty-two years. Who knew."]),
+        interact: lines('keeper', ["It's lovely, isn't it. The sea. Twenty-two years. Who knew."], ['I look at the sea now. Twice a day. Then I polish the telescope.']),
         use: npcDecline("I've no use for that down here. I'm just looking."),
       },
     ].filter(Boolean),

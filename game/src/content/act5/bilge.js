@@ -361,7 +361,9 @@ const objects = [
     look: 'The last of the canal, a finger deep, running out to the Bowl.',
     use: { bucket: (g) => g.describe("I'd be here till Tuesday."), '*': cherylDeclines },
   },
-  ...[[0, 11], [15, 7], [30, 2]].map(([x, w]) => ({
+  // The quay wall between the boats, the piano, and the Movers (whose own
+  // hotspots reach up to this row), so Z by keyboard reaches each of them.
+  ...[[0, 3], [5, 2], [18, 1], [21, 1], [30, 2]].map(([x, w]) => ({
     id: `canal_${x}`, x, y: 7, w, solid: true, lookKey: 'canal5',
     looks: [
       ['Six feet down, to mud. The canal walls aren\'t stone, under the old waterline. They\'re slate, fitted, like Downstairs.', 'Barnacles, all the way up to a line. The line where the sea used to be. On us.'],
@@ -399,6 +401,8 @@ const boatman = {
   // answers for the edge too: its first look, the Kid's throw, and every item.
   interact: edgeLook,
   use: edgeUse,
+  // At night (Act 6) Z from the stairs reaches the broken edge instead, which answers exactly as he does.
+  unreachable: (g) => (g.flag('act6.started') && !g.flag('epilogue') ? 'the broken edge answers for him, with the same lines' : null),
 };
 
 const boatBlock = { id: 'boat5_boatman', x: 22, y: 10, w: 2, solid: true, shadow: false };

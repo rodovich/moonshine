@@ -24,7 +24,7 @@ import { composedMap } from '../opening/grid.js';
 import { act3Tiles } from './tiles.js';
 import { ds_rod, ds_rod_short, ds } from '../../art/downstairs.js';
 import {
-  UNDER, WRONGNESS, deck, wall, floor, hasDisc, valveTurned, wallHotspots, lampEntity, nicheTile,
+  UNDER, WRONGNESS, deck, wall, floor, hasDisc, RUB_WALLS, valveTurned, wallHotspots, lampEntity, nicheTile,
   founderUse, getItem, cherylDeclines, ladderDeclines, discLight, keepLoops, bump, relight,
 } from './common.js';
 
@@ -321,7 +321,7 @@ const bunkObjects = [
   {
     id: 'roster', x: 4, y: 1, w: 2,
     looks: [['A bell, then a wave. A bell, then a wave. All along the wall.', 'A timetable. For ringing a bell when the tide turns.'], 'Ambrose would like this wall.'],
-    use: { paper_charcoal: (g) => g.describe("Bell, wave, bell, wave. I don't need a rubbing to remember that."), ...founderUse },
+    use: { paper_charcoal: (g) => g.describe(RUB_WALLS, "Bell, wave, bell, wave. I don't need a rubbing to remember that."), ...founderUse },
   },
   {
     id: 'tool_rack', x: 7, y: 1, w: 2,

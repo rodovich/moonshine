@@ -150,6 +150,58 @@ export const CITY_SFX = {
       return out;
     },
   },
+  // The hollow hundredth step underfoot (once the Counting Woman has left it): a deep, hollow,
+  // wooden-sounding knock with a little ring, as if there's a room under it. Clearly not a
+  // footstep, and not comic: the Kid's "BONK" made real.
+  step_bonk: {
+    mono: true, jitter: 30, gain: 0.6, echo: 0.3,
+    layers: [
+      { type: 'tone', wave: 'sine', freq: [150, 105], sweep: 0.12, dur: 0.4, gain: 0.55, env: { a: 0.002, d: 0.38, s: 0, r: 0.06 } },
+      { type: 'tone', wave: 'triangle', freq: [340, 300], dur: 0.06, gain: 0.16 },
+      { type: 'noise', dur: 0.5, gain: 0.12, filter: { type: 'bandpass', freq: 240, q: 9 }, env: { a: 0.003, d: 0.45, s: 0, r: 0.08 } },
+      { type: 'noise', dur: 0.025, gain: 0.14, filter: { type: 'bandpass', freq: 1200, q: 1.2 } },
+      { type: 'tone', wave: 'sine', freq: 523, dur: 0.6, gain: 0.04, env: { a: 0.002, d: 0.55, s: 0, r: 0.08 } },
+    ],
+  },
+  // The Goat Path (loop): wind on the cliff, surf far below, a goat bell now and then, and gulls
+  // wheeling below the listener (softer and more distant than the harbor's). Plays under `harbor`.
+  goatpath: {
+    gain: 0.9, echo: 0.35,
+    loop: {
+      beds: [
+        { type: 'noise', gain: 0.14, filter: { type: 'lowpass', freq: 450, q: 0.6 }, lfo: { target: 'gain', rate: 0.12, depth: 0.55 } },
+        { type: 'noise', gain: 0.02, filter: { type: 'bandpass', freq: 1300, q: 5 }, lfo: { target: 'filter', rate: 0.08, depth: 400 } },
+        { type: 'noise', gain: 0.045, filter: { type: 'bandpass', freq: 500, q: 0.7 }, lfo: { target: 'gain', rate: 0.09, depth: 0.6 } },
+      ],
+      offset: 1.5, period: 2.5, jitter: 4,
+      layers: () => {
+        if (Math.random() < 0.55) {
+          // A goat bell: two or three dull tonks as the goat moves.
+          const f = rand(800, 1000);
+          return Array.from({ length: 2 + Math.floor(Math.random() * 2) }, (_, i) => [
+            { type: 'tone', wave: 'sine', at: i * rand(0.25, 0.4), freq: f, dur: 0.35, gain: 0.03, env: { a: 0.002, d: 0.3, s: 0, r: 0.05 } },
+            { type: 'tone', wave: 'sine', at: i * rand(0.25, 0.4), freq: f * 2.4, dur: 0.12, gain: 0.012 },
+          ]).flat();
+        }
+        // Gulls below: far, thin, softened.
+        return Array.from({ length: 1 + Math.floor(Math.random() * 2) }, (_, i) => ({
+          ...gullCry(i * rand(0.5, 0.7), rand(0.25, 0.35), rand(0.012, 0.02)),
+          filter: { type: 'bandpass', freq: 1400, q: 2 },
+        }));
+      },
+    },
+  },
+  // The telescope: brass tubes sliding home, and a click as it seats (set in the Shop window,
+  // or handed over).
+  telescope: {
+    gain: 1.4, echo: 0.2,
+    layers: [
+      { type: 'noise', dur: 0.35, gain: 0.08, filter: { type: 'bandpass', freq: [1800, 3800], q: 3, time: 0.33 }, env: { a: 0.03, d: 0.3, s: 0.6, r: 0.04 } },
+      { type: 'tone', wave: 'sine', freq: 1200, path: [[0.33, 1700]], dur: 0.33, gain: 0.015 },
+      { type: 'tone', wave: 'triangle', at: 0.36, freq: 2400, dur: 0.02, gain: 0.15 },
+      { type: 'tone', wave: 'sine', at: 0.36, freq: 1568, dur: 0.3, gain: 0.05, env: { a: 0.001, d: 0.28, s: 0, r: 0.05 } },
+    ],
+  },
   // A footstep on the flooded street in the Bilge.
   step_splash: {
     mono: true, jitter: 200, gain: 0.8,

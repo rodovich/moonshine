@@ -68,6 +68,9 @@ export const act3Items = {
       await g.showPicture({ sheet: ship_plan, frame: 'plan' }, { fade: 0.3 });
       await g.waitForInput();
       await g.hidePicture({ fade: 0.3 });
+      if (g.flag('n.plan.first')) return;
+      g.setFlag('n.plan.first', 1);
+      await g.describe("It's a map. Of us, I think.", "Ottilie will want to read the writing. She'll be wrong about it, but she can read it.");
     },
   },
 };
@@ -116,6 +119,8 @@ export const WALL_LOOKS = [
   'Straight lines, all the way along.',
 ];
 export const RIB_LOOK = 'Ribs across the ceiling, every few paces. Like being inside something.';
+// Ottilie said to rub floors, where the light falls (structure pass, section 4).
+export const RUB_WALLS = 'Walls. Ottilie said floors, where the light falls.';
 export const NO_SEAM = "No seam. Whoever made this didn't make things for crowbars.";
 
 // Crowbar on Founder stone; everything else falls through to the disc's or
@@ -143,7 +148,7 @@ export function wallHotspots(prefix, y, x0, x1, taken, ribCols = []) {
     else run = { x, w: 1 };
   }
   flush();
-  return out.map((o) => ({ solid: false, use: founderUse, ...o }));
+  return out.map((o) => ({ solid: false, use: { paper_charcoal: (g) => g.describe(RUB_WALLS), ...founderUse }, ...o }));
 }
 
 // A moonglass lamp in a niche: dead until the disc wakes it (flag lamp.<id>).

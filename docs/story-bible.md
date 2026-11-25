@@ -453,6 +453,8 @@ NPCs:
 - One "line" in a script equals one text box, and must fit in three wrapped lines (see Brevity).
 - Check unusual characters against the font (`game/src/art/font.js`) before using them in game text. As of this writing it lacks "×", "–" (en dash), and "→"; it has "·", "…", "—", and "♪".
 - American English spelling.
+- **Describe what's drawn.** A look line must agree with the art: avoid counts and colors unless the art shows them plainly ("thirty clocks" over ten drawn, or a "green" bell drawn brown, reads as a bug). (From the QA description sweep, A6UaxuFHMT.)
+- **A line that names a state goes stale.** Any line that mentions the tide, the light, the time, or someone's presence or absence ("Mott's sitting on the good one") has to be checked, and changed if needed, in every later act and the epilogue, where the world it describes may have moved on.
 
 ## Decisions log
 

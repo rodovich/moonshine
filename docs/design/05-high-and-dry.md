@@ -156,8 +156,8 @@ The machine that holds Tessel to its anchor. A bronze drum the size of a chapel 
 | `bucket.full` | Bucket used on the Fountain | The bucket item becomes "bucket of water" |
 | `boatman.afloat` | Full bucket lowered to the Boatman | He's AFLOAT; Cheryl has the rope |
 | `rope.tied` | Rope used on the stair ring | The rope climb at (25, 8) |
-| `keeper.asked` | First talk with the Keeper | The Shopkeeper will now swap the telescope |
-| `got.telescope` | Guidebook given to the Shopkeeper | Guidebook gone; the telescope in the bag |
+| `keeper.asked` | First talk with the Keeper | The Shopkeeper's repeat line changes (he swaps the telescope for the guidebook either way) |
+| `telescope.back` | Guidebook given to the Shopkeeper | Guidebook gone; the telescope in the bag; `window.telescope` cleared. (`got.telescope` is Act 2's flag, already set when this act begins.) |
 | `keeper.telescope` | Telescope given to the Keeper | The lamp is usable |
 | `disc.charged` | The disc held in the lamp, after `keeper.telescope` | Starts the relay scene |
 | `door.open` | The relay scene ends | The bronze door open; Bow Passage lamps lit; the disc back, dim |
@@ -189,7 +189,7 @@ The machine that holds Tessel to its anchor. A bronze drum the size of a chapel 
 
 - **All three threads are independent.** The Kid jumps down to the mud for the relay, so the door can open before the rope is down; Cheryl needs both the open door and the rope to get through it herself.
 - **Reaching the Windlass Room without the clapper is fine.** The stump and socket point at it (see the descriptions), and the rope is a two-way climb.
-- **No item is consumed early.** The Shopkeeper accepts the guidebook only in Act 5, once the Keeper has asked for her telescope; in Acts 2 and 4 he declines it ("My window is complete."), because the Clockmaker needs it in Act 4. The jug is only useful to the Clockmaker.
+- **No item is consumed early.** The Shopkeeper accepts the guidebook only in Act 5; in Acts 2 and 4 he declines it ("My window is complete."), because the Clockmaker needs it in Act 4. The jug is only useful to the Clockmaker.
 
 ### Hints in the world
 
@@ -318,9 +318,9 @@ Staring at the fallen display.
 - SHOPKEEPER: The telescope's lying in it like a fallen soldier. Best thing I've ever displayed.
 - After the Keeper has asked for it: SHOPKEEPER: Give it BACK? Then there's a GAP, Miss. I need something local. Something that says Tessel.
 
-**Repeat:** SHOPKEEPER: A gap. People will talk. They'll say, "Did you see his window?"
+**Repeat:** before the Keeper has asked: SHOPKEEPER: If it goes, there's a GAP, Miss. I'd need something local. Something that says Tessel. After: SHOPKEEPER: A gap. People will talk. They'll say, "Did you see his window?"
 
-**Give guidebook** (only once the Keeper has asked; before that, "My window is complete.") → guidebook gone; *Got Telescope.*
+**Give guidebook** (any time in Act 5; the builder removed the wait for the Keeper, which only sent a player who reached the Shop first to the lighthouse and back) → guidebook gone; *Got Telescope.*
 - SHOPKEEPER: A guidebook! "Tessel: A Pocket Companion." Genuinely local. Confidently wrong. PERFECT.
 - SHOPKEEPER: In it goes. Out comes the telescope. Display for display. Twice in one week. I'm practically a merchant.
 
@@ -403,7 +403,8 @@ At his bench, repairing the clock drive she unclamped. Calm now, in a brittle wa
 ### Cistern Court
 
 - OLD MAN: The whole house lifted in the night. Gerald says we've risen in the world. Gerald thinks he's funny.
-- NEIGHBOR: The wind! My sheets are out on the line flat as flags. Whiter than ever. I don't trust it.
+- NEIGHBOR: My whites have never been whiter. Not since the house lifted in the night. I don't trust it.
+- The back line (Acts 5 and 6's night; builder's line after the QA sweep, edited): "Still grey to me. She says whiter than ever. I'm not arguing with her about her sheets. Nobody wins that." Her door: "Shut. She'll be up on her roof, guarding her sheets."
 
 ## Objects and descriptions
 
@@ -427,7 +428,7 @@ At his bench, repairing the clock drive she unclamped. Calm now, in a brittle wa
 
 ### Lamp room
 
-- **The lamp** (before the telescope): "The lamp, lit in the middle of the afternoon. Brightest light in Tessel." / "She's standing between me and it."
+- **The lamp** (before the telescope): "The lamp, lit in the middle of the afternoon. Brightest light in Tessel." / "And she won't let me near it." (As built, after the QA description sweep: she stands at the window, not between Cheryl and the lamp.) The tower door in Act 5: "The tower door, unbolted at last. Ambrose is up there, waiting for moonrise." The Clockmaker's wall: "A wall of clocks, every one at a different time."
 - **The window** (by stage): as the Teeth, but from up here: Stage 1: "From up here, the Teeth are a white line across the mouth of the Bowl. And we're pointing at them." Stage 2: "Closer. The whole town's leaning toward them like a dog on a lead." Stage 3: "Close enough to count. I don't."
 - **The dust sheet**: "The dust sheet the telescope lived under. She's kicked it into a corner."
 
@@ -601,7 +602,7 @@ The Act 5 builder (b_30JU3Nrc) built this act on `content/act5`; its full list i
 - **The Teeth on screen:** the first time Cheryl is on the Harbor at each stage (arriving, or back at the lighthouse door after the relay), the camera pans to the reef, holds two seconds while the surf swells, shows her stage line in a box at the top of the screen, and returns to her.
 - **The relay's length:** the `relay` cue was cut to 15.8 seconds to fit the run, so the Kid's time is "Fifteen seconds."
 - **The Kid's route:** west along the Harbor quay (MOTT: Mind the edge, boy!), into the Bilge on the south quay, over the bridge, east along the north quay, off the quay onto the mud by the Movers (OTHER MOVER: Hnn!), hurdling a beached boat and the Boatman's (BOATMAN: Go on, lad!).
-- **Placements:** the Clockmaker at (2, 4), back to us at his bench; the Counting Woman at (12, 17); the banner over x16–21. The open hundredth step is a hole Cheryl walks round ("The hundredth step, open, and the ladder down. Not today. My business is at the bottom of the canal.").
+- **Placements:** the Clockmaker at (2, 4), back to us at his bench; the Counting Woman at (12, 17); the banner over x16–21. ~~The open hundredth step is a hole Cheryl walks round ("…Not today…").~~ **Changed after client feedback:** from Act 4 on the step is boarded over, walkable, with no refusal (see 04's structure-pass note).
 - **The act opens** with the card "That afternoon." and: "The wind's getting up. Every line of washing on the quay is pointing out to sea." / "A door at the bottom of the canal, and stairs that don't reach it. Well. One thing at a time."
 - **Lines the builder added, adopted as written:** after the relay ("He did it. I heard him from here. Half of Tessel heard him from here."); the Clockmaker as the door swings shut ("Ah! …It's fine! The jug's fine! It's the DOOR that moved!"); the Square's crowd; Mott's declines ("Keep it. I'm off it. I'm off all of it till she's tied up again." / "Grandad had a bit of glass like that. Said it came off a door. I thought he meant a pub door."); the Shop's display; the lamp after the relay; the passage and Windlass lamps; and the socket with the clapper in the bag ("I know exactly what goes in there. It's in my bag.").
 
