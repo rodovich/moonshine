@@ -176,7 +176,7 @@ export function withAct4(maps) {
       // The sundial points at the guidebook's page on Tessel time (the key to the Clockmaker).
       id: 'sundial_a4', x: 11, y: 9, w: 2, h: 2, solid: false, when: act4,
       looks: [
-        ['The sundial and the clock disagree by eleven minutes.', "That guidebook of mine has a page about Tessel keeping its own time. He'd have opinions about that page."],
+        ['The sundial and the clock disagree by eleven minutes.', "The guidebook has a page on Tessel's time. It's wrong too, naturally."],
         "The sundial has been here five hundred years. The clock arrived last month. I know which one I'd ask for directions.",
       ],
     }, towerDoor, clockmakerDoor, clockmakerSundial, mayorCrown, ambrose4],
