@@ -156,7 +156,7 @@ The machine that holds Tessel to its anchor. A bronze drum the size of a chapel 
 | `bucket.full` | Bucket used on the Fountain | The bucket item becomes "bucket of water" |
 | `boatman.afloat` | Full bucket lowered to the Boatman | He's AFLOAT; Cheryl has the rope |
 | `rope.tied` | Rope used on the stair ring | The rope climb at (25, 8) |
-| `keeper.asked` | First talk with the Keeper | The Shopkeeper will now swap the telescope |
+| `keeper.asked` | First talk with the Keeper | The Shopkeeper's repeat line changes (he swaps the telescope for the guidebook either way) |
 | `telescope.back` | Guidebook given to the Shopkeeper | Guidebook gone; the telescope in the bag; `window.telescope` cleared. (`got.telescope` is Act 2's flag, already set when this act begins.) |
 | `keeper.telescope` | Telescope given to the Keeper | The lamp is usable |
 | `disc.charged` | The disc held in the lamp, after `keeper.telescope` | Starts the relay scene |
@@ -189,7 +189,7 @@ The machine that holds Tessel to its anchor. A bronze drum the size of a chapel 
 
 - **All three threads are independent.** The Kid jumps down to the mud for the relay, so the door can open before the rope is down; Cheryl needs both the open door and the rope to get through it herself.
 - **Reaching the Windlass Room without the clapper is fine.** The stump and socket point at it (see the descriptions), and the rope is a two-way climb.
-- **No item is consumed early.** The Shopkeeper accepts the guidebook only in Act 5, once the Keeper has asked for her telescope; in Acts 2 and 4 he declines it ("My window is complete."), because the Clockmaker needs it in Act 4. The jug is only useful to the Clockmaker.
+- **No item is consumed early.** The Shopkeeper accepts the guidebook only in Act 5; in Acts 2 and 4 he declines it ("My window is complete."), because the Clockmaker needs it in Act 4. The jug is only useful to the Clockmaker.
 
 ### Hints in the world
 
@@ -318,9 +318,9 @@ Staring at the fallen display.
 - SHOPKEEPER: The telescope's lying in it like a fallen soldier. Best thing I've ever displayed.
 - After the Keeper has asked for it: SHOPKEEPER: Give it BACK? Then there's a GAP, Miss. I need something local. Something that says Tessel.
 
-**Repeat:** SHOPKEEPER: A gap. People will talk. They'll say, "Did you see his window?"
+**Repeat:** before the Keeper has asked: SHOPKEEPER: If it goes, there's a GAP, Miss. I'd need something local. Something that says Tessel. After: SHOPKEEPER: A gap. People will talk. They'll say, "Did you see his window?"
 
-**Give guidebook** (only once the Keeper has asked; before that, "My window is complete.") → guidebook gone; *Got Telescope.*
+**Give guidebook** (any time in Act 5; the builder removed the wait for the Keeper, which only sent a player who reached the Shop first to the lighthouse and back) → guidebook gone; *Got Telescope.*
 - SHOPKEEPER: A guidebook! "Tessel: A Pocket Companion." Genuinely local. Confidently wrong. PERFECT.
 - SHOPKEEPER: In it goes. Out comes the telescope. Display for display. Twice in one week. I'm practically a merchant.
 
