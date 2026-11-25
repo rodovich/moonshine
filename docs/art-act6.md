@@ -86,3 +86,24 @@ New sheets are in `game/src/art/act6_under.js`. On the dev page: `/dev/art.html?
 | Windlass Room at night: the chain coming in through the moonlit hawse (21, 3–4) | `windlass_night:hawse_in_top/bot_0..3` (220 ms, one link-length per loop) | ground |
 | The drum turning; the brake thrown | the existing `windlass_drum:drum_x<c>y<r>_0..3` and `brake:brake_thrown` | objects; sprite |
 | The Long Keel hatch's emblem lighting (7–8, 1–2), then open | `keel_lit:keel_lit_<q>_0/1` (500 ms), then the existing `keel_hatch:keel_open_<q>` | ground |
+
+## Surface
+
+Module `game/src/art/act6_surface.js`. Composed on the dev page: `/dev/art.html?only=scene:act6_surface&state=bilge_night|refill1|refill2|refill3|harbor_dawn|court_piano|steps_race`. The night states are shown under the night tint; the engine keeps lamp colors bright under it (`EMISSIVE` in `tints.js`), the dev page does not, so the lanterns look dimmer there than in play.
+
+| Design item | Frames | Layer, placement |
+| --- | --- | --- |
+| Lantern poles along the dry Bilge quays (Dry Canal Day, night) | `lantern:lantern_a`, `lantern_b` (16×32, 2-frame flicker; `b` has bunting tied to the pole). The lantern hangs east of the pole | sprite, on the quays (the scene puts them at x 2, 7, 18, 24, 29 on row 6 and x 4, 10, 16, 22, 27 on row 12) |
+| The pool of lamplight under each lantern | `lantern_pool:pool`, `pool_wide` (a dithered warm ring in emissive colors) | objects, the tile east of the pole |
+| The crowd, the Mayor on the bridge | existing bodies: `crowd_a`, `crowd_b`, `counting_woman`, `basin_woman`, `watering_woman`, `kid`, `mayor:gesture_down` | sprites |
+| The Teeth sliding away | `teeth_recede:recede_0..5` (176×32, 500/400/450/400/600/800 ms: stage 3, 2, 1, then gone) and `teeth_recede:gone` to hold | overhead sprite, where the Act 5 stages are: top-left (8·16, 13·16) |
+| The canals refilling | `refill:rush_top` (the highest flooded row: water rushing west with a foaming lip), `refill:rush` (the rows under it), `refill:rush_deep` (the bottom row at stage 3); 4 frames each, 120/120/160 ms | ground, replacing the trench rows: stage 1 row 10; stage 2 rows 9 and 10; stage 3 rows 8 to 10 (the bridge deck at 12 and 13 stays). Then cut to the wet Bilge |
+| The Boatman's boat lifting with the piano in it | `boatman_piano:piano_rock` (act6_sprites.js) | sprite at x = 23·16, its feet on the row below the water's surface: 11·16, 10·16, 9·16 for stages 1 to 3 |
+| The piano delivered by Cheryl's door, upright and shining | `piano_delivered:piano_delivered` (32×32, ribbon, bow and a No. 9 tag; a glint every 1.6 s) | sprite, bottom-centred at (2·16+8, 13·16), just west of the door |
+| The well's grate lifting (dawn) | `well_lift:well_lift_x<0-1>y<0-1>_<n>`, n = 0 closed, 1 half up, 2 up and leaning back | objects, replacing `court_well:well_*` at (9 to 10, 16 to 17) |
+| Stair Race bunting over landing 2 | `bunting:over_bunting_a..d` (4 tiles, 2-frame flutter, 500 ms): pennants in cobalt, white, coral, mustard and sage on a sagging line | overhead, across the flight above the landing |
+| The finish tape | `bunting:finish_tape_l/r`, broken `finish_broken_l/r` | objects, across the 2-wide flight |
+| A little rope barrier round the open hundredth step | `step_barrier:step_barrier_x<0-3>y<0-2>` (4×3: four posts and a sagging rope round a 2-wide hole in the middle row, with a hand-lettered card on the front rope) | objects, with the hole (`steps:hollow_open_l/r`) at columns 1 and 2 of its middle row |
+| The ferry level at her landing | `ferry_level:persistence_level` (176×80: no list, riding at her proper height, slack ropes, flag out) | sprite, same footprint as `ferry:persistence` (top-left (8·16, 8·16)) |
+| The water back at the Harbor quay (morning) | existing `sea:wash_*` and `sea:sea_*` over the Act 5 hull row | ground: row 10 `sea:wash_a`, row 11 near sea |
+| Luggage at the café (the Pelletiers, the Tourist) | `luggage:luggage` (a stack: hatbox, case, trunk), `luggage:suitcase` | objects |
