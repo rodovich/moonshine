@@ -135,7 +135,10 @@ export function overlayMap(base, o) {
     lighting: o.lighting !== undefined ? pick('lighting') : base.lighting,
     entities: [...baseEntities, ...(o.entities || [])],
     exits: [...(o.exits || []), ...(base.exits || [])],
-    triggers: [...(o.triggers || []), ...(base.triggers || [])],
+    // `baseTriggers: false` switches the base map's triggers off while the overlay applies.
+    triggers: [...(o.triggers || []), ...(base.triggers || []).map((t) => (o.baseTriggers === false
+      ? { ...t, when: (g) => !on(g) && (!t.when || t.when(g)) }
+      : t))],
     ambient: [...(base.ambient || []), ...(o.ambient || [])],
     onEnter: async (g) => {
       if (on(g) && o.onEnter) return o.onEnter(g);

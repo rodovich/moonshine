@@ -43,6 +43,20 @@ export async function readThrough(page, advance, { stop = null, timeout = 90000,
     if (s.text) {
       if (s.text !== last) log.push(s.speaker ? `${s.speaker}: ${s.text}` : s.text);
       last = s.text;
+      // Passing a prompt on the way somewhere ("Go down?" over the open hundredth step): decline it.
+      if (s.choice && s.choice.includes('Not yet')) {
+        if (advance.pointer) {
+          // Tap the option itself.
+          const p = await page.evaluate(() => {
+            const c = window.moonshine.world.textbox.active.choice;
+            const r = c.rects[c.options.indexOf('Not yet')];
+            return r && window.moonshine.display.toClient(r.x + r.w / 2, r.y + r.h / 2);
+          });
+          if (p) { await page.mouse.click(p.x, p.y); await page.waitForTimeout(90); continue; }
+        } else {
+          await page.keyboard.press('ArrowDown');
+        }
+      }
       await advance();
     }
     await page.waitForTimeout(90);
@@ -141,10 +155,10 @@ export async function clickTileAt(page, tx, ty) {
   await page.mouse.click(p.x, p.y);
 }
 
-export const ptrAdvance = (page) => async () => {
+export const ptrAdvance = (page) => Object.assign(async () => {
   const p = await page.evaluate(() => window.moonshine.display.toClient(128, 112));
   await page.mouse.click(p.x, p.y);
-};
+}, { pointer: true });
 
 export const onScreen = (page, tx, ty) => page.evaluate(([x, y]) => {
   const w = window.moonshine.world;

@@ -371,8 +371,21 @@ export function withAct4(maps) {
 
   const steps4 = overlayMap(steps, {
     when: act4,
+    // The open hundredth step: in Act 4 it's a hole in the east half of the flight,
+    // with room to pass on the west, so the Steps lead down to the Square again.
+    baseTriggers: false,
+    tiles: (g, T) => { if (g.flag('step.open')) T.block(10, 19, true); },
+    triggers: [{
+      x: 9, y: 19, stop: false,
+      when: (g) => act4(g) && !!g.flag('step.open') && !g.flag('stepped.hundredth'),
+      run: async (g) => { g.setFlag('stepped.hundredth'); await g.describe('I step over the open step, the way you step over a sleeping dog.'); },
+    }],
     hide: ['kid', 'kid_after', 'counting_woman', 'basin_woman'],
     entities: [
+      {
+        id: 'open_step_a4', x: 10, y: 19, solid: false, when: (g) => act4(g) && !!g.flag('step.open'),
+        look: "The hundredth step, open. Downstairs is down there, waiting. I've got the Fountain to see to first.",
+      },
       {
         ...kidBase, id: 'kid_a4', when: act4,
         interact: (g, self) => (bump(g, 'kid.a4') === 0
