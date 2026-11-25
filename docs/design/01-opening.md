@@ -212,11 +212,11 @@ Lines are Cheryl's descriptions unless labeled otherwise. Each line is one text 
 
 **Tap** (2, 4)
 - Tub not plugged: "The roof tap. I'm not filling the tub just to watch it leave."
-- Plugged and empty: → squeak, pour, the tub fills over about two seconds; `tub.full`. Then: "Cold as the sea. That's how it's done. Hot baths are for Tuesdays." Then, if the sheets are already moved: "Now I sit on the edge of the tub and wait for the moon." If not: "Now the view."
+- Plugged and empty: → squeak, pour, the tub fills over about two seconds; `tub.full`. Then: "Cold as the sea. That's how it's done. Hot baths are for Tuesdays." Then, if the sheets are already moved: "Now I sit on the edge of the tub, and wait for the moon." If not: "Now the view."
 - Full: "Full. Any more and I'll be bailing."
 - Morning: "I'm not filling it again until I know where the last lot went."
 
-**Chairs** (2–3, 7): "Two chairs. I only sit in the one." (The same every time, except once the tub is full and the sheets are moved: "Not tonight. Tonight I sit on the edge of the tub.")
+**Chairs** (2–3, 7): "Two chairs. I only sit in the one." (The same every time, except once the tub is full and the sheets are moved: "Not tonight. Tonight it's the tub.")
 
 **Herb pots** (1–2, 2): "Basil, rosemary, and something that blew in and refused to leave. I've grown fond of it."
 
@@ -247,7 +247,7 @@ Lines are Cheryl's descriptions unless labeled otherwise. Each line is one text 
 
 **Neighbor's door** (14, 11): Dusk: "Her door. She's up on the roof with her sheets, where she always is on Moonshine Night." Morning: "Shut. She's upstairs being disappointed at her sheets."
 
-**Windows**: Cheryl's (blue shutters): "Blue shutters. Everyone in Tessel has blue shutters, except Her Next Door, who has green ones and opinions." Her Next Door's (green shutters): "Green shutters. Hers. She painted them herself, and she'll tell you so."
+**Windows**: Cheryl's (blue shutters): "Blue shutters. Everyone in Tessel has blue shutters, except Her Next Door, who has green ones and opinions." Her Next Door's (green shutters, x11, 13, 16, 18 on row 10): "Her green shutters. She repaints them every spring, in case anyone's forgotten they're green."
 
 ### Court
 
@@ -289,9 +289,9 @@ Lines are Cheryl's descriptions unless labeled otherwise. Each line is one text 
 - Use **soap** on it: "Not now. It isn't going anywhere."
 - Walking or clicking into the blocked Squeeze: "I'm not climbing over a piano at my age. Besides, I'm not going anywhere tonight."
 
-**The Squeeze** (morning): First: "The Squeeze is clear. There's a long scrape down every step, and at the bottom, a lot of surprised geraniums." Walking into the exit leaves the slice, after one last line before the fade: "Right. The plug, the moon, the piano. In that order, mostly."
+**The Squeeze** (morning): First: "The Squeeze is clear. There's a long scrape down every step, and at the bottom, a lot of surprised geraniums." Walking into the exit leaves the slice, after one last thought before the fade: *Down, then.* (It echoes Act 4's *Up, then.*)
 
-**The drain grate** (6, 20): Dusk: "A drain in the cobbles. Every so often it gurgles, like something a long way down is clearing its throat." Morning: "The drain's quiet this morning. Too quiet, for a drain."
+**The drain grate** (6, 20): Dusk: "The court drain. Tomorrow every basin in Tessel gets tipped out, and it all goes downhill. Somewhere." Morning: "The drain's making a noise like somebody breathing through a straw. It never used to make any noise at all."
 
 ### Cheryl's flat
 
@@ -332,7 +332,7 @@ Lines are Cheryl's descriptions unless labeled otherwise. Each line is one text 
 - After: "A jug, a basin, and a mirror I avoid before ten."
 
 **Plug hook** (6, 8)
-- Before the plug comes back: "The plug hook. Empty. Oh — I lent the plug to him downstairs. A 'chess emergency.'" (If Cheryl has already looked at the tub or talked to the Old Man: "The plug hook. Empty. He's still got it downstairs.")
+- Before the plug comes back: "The plug hook. Empty. Oh — I lent the plug to him downstairs. A 'chess emergency.'" (Once the tub has explained the plug: "The plug hook. Empty. The plug's downstairs, being a king.")
 - While Cheryl has the plug or it's in the tub: "The plug hook. Empty, but only because the plug is busy."
 - Morning: "The plug hook. Empty. I'm going to find out why."
 
@@ -406,7 +406,7 @@ Stands at (17,5) among her sheets. Idle animation: smoothing a sheet, then stepp
 - Egg timer: NEIGHBOR: I don't need timing. The moon does the timing.
 - Soap: NEIGHBOR: Lovely. Are you saying something? You're saying something.
 - Bath plug: NEIGHBOR: That's yours. Keep it away from my laundry.
-- Anything else: NEIGHBOR: I've no use for that. I'm bleaching.
+- Anything else: first time, NEIGHBOR: I've no use for that. After that: NEIGHBOR: I've no use for that, and I've told you so.
 
 **Morning** (at 14,3, facing the grey sheets)
 - First: NEIGHBOR: Grey. GREY. Thirty years of Moonshine Nights and they've come out grey.
@@ -611,6 +611,8 @@ The opening content task (WCVWR8hxu8) built this slice on `content/opening`; its
 - The sheet move is staged: she unpegs the x15 sheets from (16, 4) and the x12 sheets from (13, 4), props the back line from (14, 3), the sheets go up in three beats, and she returns to (16, 3).
 - The blocked-Squeeze line fires when Cheryl steps down onto (15–16, 22). In the morning, the Squeeze's line plays on her first step onto the stair top (15–16, 24), and the exit is row 25.
 - The end card reads **Moonshine** in the title style, over "End of the opening." and "Tessel continues soon."
+- Moonrise staging: Cheryl sits on the middle of the tub's rim; the moon clears the ridge before *No.*, and the Gate goes dark; after the crack, the camera pans down to the empty Squeeze, then back for the drain.
+- After the playtest (xwPAb3NfPz), the lines for the tap, the chairs, the green shutters, the plug hook, the Neighbor's decline, the court drain, and the final *Down, then.* are the builder's wording, adopted above.
 
 ## Decisions
 
