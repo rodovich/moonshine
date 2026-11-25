@@ -181,6 +181,21 @@ export const COLORS = {
   mist_light: '#e8f0f0',
   mist: '#b8d0d8',
 
+  // Skies (art): looking east at dusk, opposite the setting sun. From the horizon up: the Earth's
+  // shadow (blue-grey), the Belt of Venus (pink), then blue deepening to indigo. What faces the
+  // viewer catches the last sun (alpenglow); the rising moon brightens the sky with cool silver.
+  sky_east_blue: '#405888',
+  venus_pink: '#c890a8',
+  venus_mauve: '#a08098',
+  earth_shadow_light: '#687898',
+  earth_shadow: '#506080',
+  earth_shadow_deep: '#405070',
+  alpen_rose_light: '#e0a8a8',
+  alpen_rose: '#b07888',
+  alpen_shadow: '#584868',
+  moonrise_glow: '#d8e0f0',
+  moonrise_glow_dim: '#98a8c8',
+
   // Interior and items (art)
   // Clay: unglazed terracotta floor tiles, more muted than terra_*.
   clay_light: '#e0a078',
@@ -215,6 +230,11 @@ export const COLORS = {
   mud_light: '#988870',
   mud: '#685848',
   mud_deep: '#403028',
+
+  // Cheryl (art): silver-streaked hair, an ash-grey base under silver streaks, so she reads
+  // as a vigorous late-50s woman rather than a white-haired grandmother (client feedback).
+  cheryl_hair: '#807880',
+  cheryl_hair_shade: '#585060',
 
   // UI (engine)
   ui_ink: '#201828',

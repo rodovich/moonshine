@@ -40,6 +40,8 @@ Tessel lives on fish, tourists (a trickle, by ferry), terrace gardens, and gossi
 
 On the night of the late-summer full moon, every household sets a basin, bowl, or bucket of water on its roof or windowsill to *catch the moon*: to see the rising moon reflected in it the moment it clears the Gate. Then you make a wish, or drink a toast, or tip the water down the Hundred Steps in the morning for luck, depending on your family. Most people do it with a teacup. Cheryl does it with a bathtub, and gets in.
 
+On Moonshine Night all of Tessel is up on its roofs, and there's an old, unspoken rule: **nobody looks at anybody else's roof.** Everyone faces the Gate. Cheryl's tub sits in plain view of Her Next Door, and both of them pretend otherwise, as they have for thirty-one years. Cheryl also bathes in a navy-and-cream striped bathing costume older than the Mayor, so the rule has never been tested. The lack of privacy is deliberate: it's a small comedy of good manners, and it says something about Cheryl, who has never once cared who saw her do something she loves. (Client feedback after playing the opening: the rooftop tub looked strangely public. This makes the publicness intentional and visible in play.)
+
 The word *moonshine* runs through the game:
 
 1. **Moonshine Night**, the festival.
@@ -47,6 +49,17 @@ The word *moonshine* runs through the game:
 3. **Moonshine**, the clear and lethal spirit Captain Mott distills in his shack.
 4. *Moonshine* meaning nonsense, as in "That's moonshine, Mott," which is what everyone says when he insists the island moves.
 5. The Founders' word carved over the Sighting Basin, which Ottilie translates, correctly for once, as "where the moon shines in," and then misreads as proof that the Founders were bootleggers.
+
+### The sky over Tessel
+
+Everything about the sky must be physically right; the only thing wrong in it is where Tessel is. (Client feedback after playing the opening: the first moonrise showed a sunset glow on the moon's side of the sky.) The facts every scene follows:
+
+- **The Gate is on the eastern Rim.** A full moon rises opposite the sun, so on Moonshine Night the sun sets behind the *western* Rim, at Cheryl's back, while the moon rises in the east, in the Gate.
+- **The eastern sky at that moment holds no sunset glow.** Above the Rim it's deepening blue; just above the horizon is a soft band of rose-pink (the sunset's light reflected high in the eastern sky), and along the Rim itself a blue-grey band, the Earth's shadow rising. Before the moon clears the Rim, a small silvery brightening shows where it will come up. The moon comes up large and pale, brightening the sky around it to silver. All the warmth in an eastward dusk view comes from the rose-lit cliffs and the lit town, never from the sky. The low sun behind Cheryl lights everything that faces her: the Rim's cliffs glow rose (alpenglow), and the town's roofs and walls catch the last warm light, with the lamps coming on. The Bowl reflects the cool eastern sky.
+- **Each night after full,** the moon rises later (about half an hour to an hour later in late summer) and at a different point on the horizon. Two nights past full, it rises after dark, about an hour after sunset, and is a waning gibbous: a hair flattened on one edge. That's why "Past full: allow two fingers."
+- **The Gate is wide.** Over the years the late-summer full moon's rising point wanders a little within the notch (the moon's eighteen-and-a-half-year swing), so "in the Gate" is a band, not a point. Cheryl's thirty-one ticks all sit inside it until the last few creep right, past its edge.
+- **Tides:** two high waters and two low waters a day, the tide turning about every six and a quarter hours, about fifty minutes later each day. The biggest tides, spring tides, come a day or two after full and new moon. So Moonshine Night's evening tide was a big one, and the climax two nights later is bigger still ("THE SEA'S BEEN SAVING IT UP").
+- **Dusk views face the light correctly:** looking east at dusk, no orange; looking west, the afterglow behind the western Rim.
 
 ### Landmarks
 
@@ -118,7 +131,7 @@ The habits wore down over time. The bell was the last one still doing its real j
 
 **Tessel has slipped its mooring.** Underneath that are three specific failures:
 
-1. **The Tooth broke.** When the Mayor's clock took over the bell, the bell stopped ringing at the turn of the tide, and the windlass stopped being wound. For five weeks the chain crept out a link at a time, and the strain built on the windlass's pawl, a bronze tooth the size of a person. On Moonshine Night the Tooth sheared (the crack and groan Cheryl hears) and the chain ran out a long way. The city swung and lurched. It happened on Moonshine Night *because* of the moon: the full moon brings the month's biggest tide, a spring tide, and that last heave was more than the Tooth could take. (This is also why the Founders calibrated on the full moon: it's the moment of greatest strain.) As the hull dropped and swung, it pulled a gust of air down the Sighting Shaft, which sucked Cheryl's plug down her drain. The same air breathes back out of the court well the next morning. Ever since, Tessel has been drifting slowly across the Bowl toward the Teeth.
+1. **The Tooth broke.** When the Mayor's clock took over the bell, the bell stopped ringing at the turn of the tide, and the windlass stopped being wound. For five weeks the chain crept out a link at a time, and the strain built on the windlass's pawl, a bronze tooth the size of a person. On Moonshine Night the Tooth sheared (the crack and groan Cheryl hears) and the chain ran out a long way. The city swung and lurched. It happened on Moonshine Night *because* of the moon: the full moon brings the spring tides, the month's biggest, and the evening high water at moonrise was one heave more than the Tooth could take. (This is also why the Founders calibrated on the full moon: it's the moment of greatest strain.) As the hull dropped and swung, it pulled a gust of air down the Sighting Shaft, which sucked Cheryl's plug down her drain. The same air breathes back out of the court well the next morning. Ever since, Tessel has been drifting slowly across the Bowl toward the Teeth.
 2. **The ballast is failing.** The Three Sisters have not pumped in decades. The Middle Sister's copper throat was swept away long ago. (It ended up in a sea cave, where Mott's grandfather found it and built a still around it.) The ballast cells have been slowly filling unevenly, and the lurch cracked one of them. Tessel is starting to list toward the Bilge side.
 3. **No one sights the moon anymore.** The Sighting Basin is dry and its stopper is lost, so nothing confirms where the city is. The city has crept out of true for years; Cheryl's moon chart shows it.
 
@@ -163,7 +176,7 @@ The Wrongness isn't a creature; it's the city being *out of true*. The [art](art
 
 ### Who she is
 
-Cheryl is fifty-eight. She came to Tessel on the ferry thirty-one years ago with one suitcase and someone else's, and stayed. She taught at the Little School on Lamp Street for twenty-nine years, so she taught half the town to read, including the Mayor, the Clockmaker, the Fishmonger, the Lighthouse Keeper, and both Piano Movers. She retired two years ago ("my knees retired; I went with them"). She lives alone at No. 9 Cistern Court, a tall narrow house at the top of town. She bought it for the roof.
+Cheryl is fifty-eight. She came to Tessel on the ferry thirty-one years ago with one suitcase and someone else's, and stayed. She taught at the Little School on Lamp Street for twenty-nine years, so she taught half the town to read, including the Mayor, the Clockmaker, the Fishmonger, the Lighthouse Keeper, and both Piano Movers. She retired two years ago, early and by choice ("Twenty-nine years. I wanted to see what the town does in the afternoons."). She lives alone at No. 9 Cistern Court, a tall narrow house at the top of town. She bought it for the roof.
 
 On her roof sits a cast-iron clawfoot bathtub. It took four men and a song to get it up there. Every Moonshine Night she fills it with cold water, gets in, and watches the moon rise in the Gate. She has not missed one in thirty-one years. She keeps a **moon chart** of every one.
 
@@ -186,6 +199,7 @@ The game shows these and never explains them. Writers must not resolve them, hin
 - **Quietly kind.** She fixes things without telling anyone. This is exactly the person who can save a city and never mention it.
 - **Nosy, professionally.** She was a teacher. Curiosity isn't a vice in her; it's a habit she hasn't broken.
 - **Brave in a practical way, not a dramatic one.** "I'm brave, not stupid."
+- **Vigorous.** She's a fit, capable woman in her late fifties who has climbed Tessel's stairs every day for thirty-one years. She climbs ladders and ropes, hauls on levers, and walks the whole island without remark. Her age shows in her wit and her memory, never in her body: no aches, no frailty, no "at my age." When she declines something, the reason is judgment, manners, or comedy, not weakness. (Client feedback after playing the opening: Cheryl read older than 58. This rule fixes that.)
 - **Blind spot:** she believes she's an outsider who watches Tessel. By the end, she is the person holding it together.
 
 ### What she wants
@@ -217,7 +231,8 @@ Cheryl never speaks in dialog. NPCs talk *at* her, and her silence is often the 
 
 Rules for her voice:
 - Never explains her own past (see the gaps above).
-- Never says "I can't do that." Give each refusal a reason in character: "I'm not climbing over a piano at my age." "I'm brave, not stupid."
+- Never says "I can't do that." Give each refusal a reason in character: "I'm not climbing over a piano I didn't order." "I'm brave, not stupid."
+- Never makes her sound old or frail (see "Vigorous" above).
 - When something is genuinely awe-inspiring, she's brief and plain. Downstairs she gets quieter.
 - She calls people by her own nicknames in descriptions ("Her Next Door," "the Mayor, who was Duncan when he was seven"). Their in-game labels stay descriptive.
 
@@ -342,7 +357,7 @@ Riding high, Tessel catches the wind and drifts faster. From the lighthouse gall
 
 Two threads:
 
-- **The Water Stairs door.** Get the Boatman out of the way (a bucket from the Fishmonger, filled at the refilled Fountain: "AFLOAT!") and take his rope for the broken last flight. The barnacled moon-lock needs a full charge of light. Polish from the Shop (swapped for the guidebook) lets the Lighthouse Keeper agree to let Cheryl hold the moonglass disc in the great lamp. But the charge fades in less than a minute, and Cheryl is fifty-eight. She hands the disc to the Sweaty Kid, who still has her egg timer from Moonshine Night and winds it himself. *Run.* He beats the egg. (A scripted scene; it can't fail.)
+- **The Water Stairs door.** Get the Boatman out of the way (a bucket from the Fishmonger, filled at the refilled Fountain: "AFLOAT!") and take his rope for the broken last flight. The barnacled moon-lock needs a full charge of light. Polish from the Shop (swapped for the guidebook) lets the Lighthouse Keeper agree to let Cheryl hold the moonglass disc in the great lamp. But the charge fades in less than a minute, and the door is the length of the town away: nobody could walk it in time. Someone would have to run flat out and jump off the quay. She hands the disc to the Sweaty Kid, the fastest thing in Tessel, who still has her egg timer from Moonshine Night and winds it himself. *Run.* He beats the egg. (A scripted scene; it can't fail.)
 - **The Tooth.** The Clockmaker's doorstop, the bell's old clapper, is the spare Tooth. He trades it for Mott's square jug: "Square. Heavy. Doesn't roll. Smells of… is that turpentine?"
 
 The rope and the door are separate threads (the Kid jumps down for the relay; Cheryl needs the rope for herself), so Act 5 has three threads in all. Full design: [design/05-high-and-dry.md](design/05-high-and-dry.md).
@@ -440,6 +455,11 @@ NPCs:
 ## Decisions log
 
 Creative decisions made in this document, with their reasons. The client's brief requirements are marked **(brief)**.
+
+**Client feedback after playing the opening** (relayed by the orchestrator):
+- **Cheryl must read as a vigorous late-50s woman,** dry and capable, never frail or elderly. Every line that leaned on her age ("at my age," aching knees and arms, "not at fifty-eight") is rewritten across all acts; see "Vigorous" under Cheryl.
+- **The sky must be physically right** apart from where Tessel is. The full moon rises in the east as the sun sets in the west; the vistas and tide times follow "The sky over Tessel."
+- **The audio is "pretty good":** keep the [audio direction](audio-direction.md) as it is.
 
 - **The city is Tessel, on an island in a sheltered bay; it is secretly a moored floating ship built by the residents' own ancestors.** This gives one coherent mystery that explains every symptom, the tunnels' different style **(brief)**, the forgetting, and a surface change that's physically spectacular (the canals drain). The "residents are descendants" twist keeps the history human rather than alien.
 - **The Wrongness is a slipped mooring: a broken pawl, failing ballast, and no sighting.** It's concrete enough to puzzle around (parts, valves, timing) and escalates naturally (drift, then list, then rise, then the reef).
