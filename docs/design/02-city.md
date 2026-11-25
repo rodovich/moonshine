@@ -1103,6 +1103,7 @@ The same builder built the Goat Path, Harbor, lamp room, and Bilge on `content/a
 - **The piano blocks the direct route,** so the first thing the wider city teaches is that there's a long way round, and that way passes half the cast.
 - **The Counting Woman climbs over the piano when she storms off,** which Cheryl refuses to do. The thread can't softlock, and it's funny.
 - **The Shop's hat is display stock,** so the Tourist's need points at the Shopkeeper's foible, and the answer is Cheryl's own hat at home.
+- **The open hundredth step is a one-tile hole at (10, 19), and it never blocks the Steps.** It looks like a hole (dark, with the ladder's top showing), (9, 19) beside it is plain stairs, and this holds in every act from the moment it's pried open: Act 2, the Act 3 surfacing, Acts 4–6, and the epilogue (whose rope rings only the hole). Client feedback: in an earlier build the opened step blocked the flight without looking blocked, then let Cheryl past later. No constraint here serves the design, so there isn't one.
 - **Former pupils call Cheryl "Miss."** It's a warm, cheap way to show her history with the town.
 - **The Clockmaker is only heard in Act 2.** He appears in Act 4, when his thread starts, which saves a sprite for this slice.
 - **The Founders' Door is seen (bolted) in Act 2** and opened from the other side in Act 3. It's the player's first look at Founder architecture.
