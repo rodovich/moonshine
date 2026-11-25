@@ -92,6 +92,8 @@ Short cutaways, 2–3 seconds each, cut in without fades. Each is an existing ma
 - **Belfry, night:** Ambrose at the rope, moonlight through the openings.
 - **The wet Bilge, night** (for the refill montage): the canals filling, the Boatman's boat rising with the piano in it.
 
+**Engine calls for the montages** (engine/core, 3fd9f41): chain `await g.changeMap(map, x, y, facing, { cutscene: true, fade: false })` visits for hard cuts, `g.wait(2)` on each (pans work there too), then `await g.restorePlayer({ fade: false })` to cut back to Cheryl where she was.
+
 ### Morning states (the epilogue)
 
 Every surface map in its plain daytime state from Act 2, with these differences: Wrongness 0; no laundry streaming; the canals full (the wet Bilge, the Harbor at its normal height); the Fountain flowing; the hundredth step open (with a little rope barrier around it that someone has put up); no hull creak. Placements and lines are in "The epilogue."

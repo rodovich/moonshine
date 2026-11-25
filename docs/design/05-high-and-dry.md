@@ -490,6 +490,8 @@ At his bench, repairing the clock drive she unclamped. Calm now, in a brittle wa
 
 The run is fully scripted and always succeeds.
 
+**Engine calls** (engine/core, 3fd9f41): `g.cameraFollow('kid')` on the Harbor while Cheryl stands at the lighthouse door; `await g.changeMap('bilge_dry', x, y, facing, { cutscene: true })` to follow him without her (her map, spot, and facing are kept; nothing is saved); `await g.restorePlayer()` to come back to her at the lighthouse door.
+
 **The Kid afterward** (on the mud by the door, then back at the Harbor):
 - SWEATY KID: Fifty-two seconds, Miss! And I jumped! Off the QUAY! Don't tell Mum.
 - Repeat: SWEATY KID: The Stair Race is going to be EASY after that.
