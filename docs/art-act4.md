@@ -37,7 +37,7 @@ Module `game/src/art/act4_surface.js`. Composed on the dev page: `/dev/art.html?
 
 | Piece | Frames | Layer, placement |
 | --- | --- | --- |
-| Flooded paving, stage 1 (ankle-deep: the stone shows, water in the joints) | `bilge_flood:flood1_<q>` (4 frames, 280 ms), `<q>` = the paving quadrant (`nw` on even x and y, `ne` odd x, `sw` odd y, `se` both odd) | ground |
+| Flooded paving, stage 1 (ankle-deep: the slabs show grey-green through a film of water (`flood_stone`), cyan-lit edges, teal joints, foam glints; dry stone with cyan joints read as a debug grid) | `bilge_flood:flood1_<q>` (4 frames, 280 ms), `<q>` = the paving quadrant (`nw` on even x and y, `ne` odd x, `sw` odd y, `se` both odd) | ground |
 | Flooded paving, stage 2 (deeper) | `bilge_flood:flood2_<q>` (4 frames) | ground |
 | Water lapping onto the dry paving next to a flood | `bilge_flood:flood<1-2>_lap_w` (flood to the west), `_lap_n`, `_lap_s` (4 frames) on the dry tile | objects |
 | The Water Stairs' top steps (22–25, 6) | `reveal:wstairs_top_l`, `wstairs_top_m` (×2), `wstairs_top_r` | ground |
