@@ -101,11 +101,11 @@ const objects = [
     id: `door_${x}`, x, y, lookKey: `house_door_${x}`,
     look: [
       'Not my door.',
-      "The Venns'. They'll be asleep. They're always asleep. It's a gift.",
-      "The Pellows'. Their knocker is a brass fish. Nobody remembers why, least of all the Pellows.",
+      "They'll be asleep in there. They're always asleep. It's a gift.",
+      'A brass fish for a knocker. Nobody remembers why, least of all the people inside.',
       'Not my door either. Somebody has left a boot on the step, with a note tucked in it for the boot.',
       'Three locks and the window wide open. That\'s Tessel.',
-      "Old Mrs. Abery's. She scrubs the doorstep on Tuesdays, whatever day it is.",
+      'Somebody scrubs this doorstep on Tuesdays, whatever day it is.',
     ][i],
   })),
   {
