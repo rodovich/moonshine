@@ -370,7 +370,8 @@ const objects = [
     use: { bucket: (g) => g.describe('Mud. Not even wet mud.'), '*': cherylDeclines },
   })),
   {
-    id: 'fish_cellar_door', x: 4, y: 3, solid: true,
+    // A tile wider to the west, since the Fishmonger stands in front of the door.
+    id: 'fish_cellar_door', x: 3, y: 3, w: 2, solid: true,
     look: "The Fishmonger's door, down to her cellar. Ice. Fish. A hatch I'm not opening.",
     use: { bucket: (g) => g.describe("Ice. I'd be here till Tuesday waiting for it to melt."), '*': cherylDeclines },
   },
@@ -379,7 +380,8 @@ const objects = [
 ].map((o) => ({ use: { '*': cherylDeclines }, ...o }));
 
 const fishmongerNpc = {
-  id: 'fishmonger5', name: 'Fishmonger', x: 5, y: 4, facing: 'down',
+  // At (4, 4), clear of the blue awning over her stall, as on the wet Bilge.
+  id: 'fishmonger5', name: 'Fishmonger', x: 4, y: 4, facing: 'down',
   sprite: { sheet: fishmonger },
   behavior: { type: 'face', range: 3 },
   interact: fishmongerTalk,
