@@ -12,6 +12,7 @@ import { relayScripts } from './relay.js';
 import { withSquare5, withShop5, withCrown5, withBelfry5, withArchive5, withSteps5, withLampStreet5, withCourt5, crownLinks, townScripts } from './town.js';
 import { bilgeDryStandIn, lampRoomStandIn } from './standins.js';
 import { startAct5 } from './start.js';
+import { ladderScripts } from './ladder.js';
 import { act5Items, standInItems, started, both, untilAct5 } from './common.js';
 
 const RISEN = { harbor: 'harbor_risen', bilge: 'bilge_dry' };
@@ -24,6 +25,28 @@ export const act5Maps = {
 };
 
 export { act5Items, standInItems, act5, startAct5 };
+
+// The Ship Plan's Act 5 look (after the picture folds away): the tooth drawn
+// at the bow, the same shape as the Clockmaker's doorstop. Wraps the item as
+// earlier acts leave it (Act 4 adds its own looks first).
+export function shipPlanAct5(item) {
+  if (!item) return item;
+  const base = item.examine;
+  return {
+    ...item,
+    act5Before: base,
+    examine: async (g, looks) => {
+      if (base) await base(g, looks);
+      else await g.describe(item.description);
+      if (!g.flag('act5.started') || g.flag('epilogue') || g.flag('tooth.set')) return;
+      if (!g.flag('n.plan.a5')) {
+        g.setFlag('n.plan.a5', 1);
+        return g.describe('The chain runs from the bow to the anchor. Beside it, at the bow, a little drawing of a tooth.', 'Rounded at one end, notched at the other.');
+      }
+      return g.describe('Rounded at one end, notched at the other.');
+    },
+  };
+}
 
 const LAYERS = {
   bilge_dry: withBilge5,
@@ -89,7 +112,7 @@ function act5Flags(g) {
     'door.open': g.flag('door.open'), 'kid.gaveDisc': g.flag('kid.gaveDisc'), 'got.clapper': g.flag('got.clapper'),
     'clockmaker.jug': g.flag('clockmaker.jug'), 'shop.guide': g.flag('shop.guide'),
     'passage.lit': g.flag('passage.lit'), 'windlass.seen': g.flag('windlass.seen'),
-    'tooth.out': g.flag('tooth.out'), 'tooth.set': g.flag('tooth.set'),
+    'keepers.ladder': g.flag('keepers.ladder'), 'tooth.out': g.flag('tooth.out'), 'tooth.set': g.flag('tooth.set'),
     'windlass.sat': g.flag('windlass.sat'), 'windlass.late': g.flag('windlass.late'), 'act5.done': g.flag('act5.done'),
   };
   console.log('[act5]', flags);
@@ -101,6 +124,7 @@ export const act5Scripts = {
   // ?map=harbor_risen&flags=act4.risen&run=act5_start
   act5_start: startAct5,
   ...windlassScripts,
+  ...ladderScripts,
   ...harborScripts,
   ...clockshopScripts,
   ...bilgeScripts,

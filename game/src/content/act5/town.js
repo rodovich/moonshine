@@ -14,6 +14,7 @@ import {
   morePatches, untilAct5, openTiles, valueOf,
 } from './common.js';
 import { act5Loops } from './loops.js';
+import { belfryHatch, belfryHatchPatch } from './ladder.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -341,10 +342,16 @@ export function withCrown5(def) {
 
 // The belfry (Act 4's map), if it's registered: Ambrose there instead.
 export function withBelfry5(def) {
-  // Ambrose stands under the bell (4, 3), inside its hotspot; listed first, he's the one who answers.
+  // Ambrose stands at the foot of the rope; listed first, he's the one who answers there.
   const entities = act5Talk(def.entities, 'ambrose_belfry', ambroseTalk, ambroseUse5);
   const first = entities.filter((e) => e.id === 'ambrose_belfry');
-  return { ...def, entities: [...first, ...entities.filter((e) => e.id !== 'ambrose_belfry')] };
+  const base = withSheets(def);
+  return {
+    ...base,
+    // The Keepers' ladder comes up through a floor hatch beside him (ladder.js).
+    patches: morePatches(base.patches, (g) => (started(g) ? belfryHatchPatch(g) : [])),
+    entities: [...first, ...entities.filter((e) => e.id !== 'ambrose_belfry'), { ...belfryHatch, when: started }],
+  };
 }
 
 // ---------------------------------------------------------------------------

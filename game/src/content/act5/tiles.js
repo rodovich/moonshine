@@ -6,13 +6,13 @@ import { act2Tiles } from '../act2/tiles.js';
 import { act3Tiles } from '../act3/tiles.js';
 import { canal } from '../../art/canal.js';
 import { harbor_quay, headland, fish_stall } from '../../art/act2b_harbor.js';
-import { reveal, reveal_mouth, reveal_door, bilge_flood } from '../../art/act4_surface.js';
+import { reveal, reveal_mouth, reveal_door, bilge_flood, ice_cellar } from '../../art/act4_surface.js';
 import { harbor_hull, sea, harbor_props, keyhole, lighthouse, bilge_door5, stair_rope, clockshop, shop5, banner, lamproom } from '../../art/act5_surface.js';
 import { windlass_drum, windlass, hawse, keel_hatch, bowdoor } from '../../art/act5_under.js';
 
 export const act5Sheets = {
   canal, harbor_quay, headland, fish_stall,
-  reveal, reveal_mouth, reveal_door, bilge_flood,
+  reveal, reveal_mouth, reveal_door, bilge_flood, ice_cellar,
   harbor_hull, sea, harbor_props, keyhole, lighthouse, bilge_door5, stair_rope, clockshop, shop5, banner, lamproom,
   windlass_drum, windlass, hawse, keel_hatch, bowdoor,
 };
