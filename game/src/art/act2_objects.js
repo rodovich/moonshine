@@ -4,7 +4,7 @@
 //   clock_sign (over a wall tile), goat_gate.
 // piano (32x32 entity): piano_front (wedged), piano_level, piano_slide_0/1, piano_back (from behind, above).
 // act2_water: trickle_h (chains along a row), trickle_end (into the hollow step's joint); 4 frames.
-// act2_marks: over_scrape_a/b (objects-layer overlays on paving; a and b join along a row).
+// act2_marks: scrape_a/b (objects-layer overlays on paving; a and b join along a row).
 // school (buildings letters and swaps): school_sign_a..d (LITTLE SCHOOL), school_bellcote,
 //   school_door_tl/tr/bl/br, clockshop_fascia_l/r, clockshop_window_l/r.
 // schoolyard: yard, yard_b, yard_c, yard_hopscotch_n/s (ground); yardwall, _end_l/_r, _v, _corner_w/_e,
@@ -595,7 +595,7 @@ export const act2_marks = {
   },
   size: [16, 16],
   frames: {
-    over_scrape_a: [
+    scrape_a: [
       '................',
       '................',
       '................',
@@ -613,7 +613,7 @@ export const act2_marks = {
       '................',
       '................',
     ],
-    over_scrape_b: [
+    scrape_b: [
       '................',
       '................',
       '................',
