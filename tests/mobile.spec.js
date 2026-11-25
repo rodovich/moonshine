@@ -8,13 +8,13 @@ async function tapGame(page, gx, gy) {
 }
 
 test('phone portrait: tap to walk, tap NPC, tap through text, inventory button', async ({ page }) => {
-  const errors = await boot(page, '?map=test_yard&seed=1&flags=yard_intro');
+  const errors = await boot(page, '?map=test_street&seed=1&flags=street_intro');
   await waitIdle(page);
   await shot(page, 'm1-portrait');
-  await tapTile(page, 9, 10);
+  await tapTile(page, 12, 8);
   await waitIdle(page);
-  expect([(await snap(page)).x, (await snap(page)).y]).toEqual([9, 10]);
-  await tapTile(page, 8, 7); // Old Man
+  expect([(await snap(page)).x, (await snap(page)).y]).toEqual([12, 8]);
+  await tapTile(page, 9, 7); // Old Man
   await waitText(page);
   await page.waitForTimeout(900);
   await shot(page, 'm2-portrait-talk');
@@ -42,7 +42,7 @@ test('phone portrait: tap to walk, tap NPC, tap through text, inventory button',
 
 test('phone landscape fits and plays', async ({ page }) => {
   await page.setViewportSize({ width: 915, height: 412 });
-  const errors = await boot(page, '?map=test_yard&seed=1&flags=yard_intro');
+  const errors = await boot(page, '?map=test_street&seed=1&flags=street_intro');
   await waitIdle(page);
   await tapTile(page, 12, 9);
   await waitIdle(page);

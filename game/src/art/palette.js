@@ -9,7 +9,7 @@
 // highlights toward yellow, so the surface reads as warm, sunlit stone.
 
 // The engine task added the `ui_*` colors (text boxes, font, menus) and the
-// `ph_*` colors (placeholder art for the engine test map). Keep those names
+// `ph_*` colors (placeholder interior tiles for the engine's test shop). Keep those names
 // working or update src/art/ui.js, src/art/font.js, and src/content/test/art.js.
 
 export const COLORS = {
@@ -191,13 +191,13 @@ export const COLORS = {
   lilac: '#a888c8',
 
   // UI (engine)
-  ui_ink: '#080810',
+  ui_ink: '#201828',
   ui_box: '#182048',
   ui_box_deep: '#101830',
   ui_frame: '#c8c0a8',
   ui_frame_shade: '#686078',
   ui_text: '#f8f0e0',
-  ui_text_shadow: '#081018',
+  ui_text_shadow: '#101020',
   ui_cheryl_box: '#302018',
   ui_cheryl_deep: '#201810',
   ui_cheryl_frame: '#d8a868',
@@ -205,7 +205,7 @@ export const COLORS = {
   ui_label: '#f8c860',
   ui_dim: '#8888a0',
   ui_select: '#f8d870',
-  ui_marker: '#f8f8f8',
+  ui_marker: '#f0e8d8',
   ui_marker_shade: '#88a0c0',
   ui_bag: '#a86838',
   ui_bag_light: '#d89858',
@@ -213,44 +213,16 @@ export const COLORS = {
   ui_clasp: '#f0c848',
 
   // Placeholder art for the engine test map (engine)
-  ph_grass: '#58a040',
-  ph_grass_dark: '#407830',
-  ph_grass_light: '#80c058',
-  ph_path: '#d8c098',
-  ph_path_dark: '#b09870',
-  ph_stone: '#a8a0a0',
   ph_stone_dark: '#706870',
-  ph_stone_light: '#d0c8c0',
   ph_plaster: '#f0e8d8',
   ph_plaster_shade: '#c8b8a8',
-  ph_roof: '#3868b0',
-  ph_roof_dark: '#284880',
-  ph_roof_light: '#6090d0',
   ph_wood: '#906038',
   ph_wood_dark: '#604020',
   ph_wood_light: '#c08850',
-  ph_water: '#3878c8',
-  ph_water_dark: '#285898',
-  ph_water_light: '#90c0f0',
-  ph_leaf: '#307830',
-  ph_leaf_dark: '#205020',
-  ph_leaf_light: '#58a048',
   ph_floor: '#b08858',
   ph_floor_dark: '#886840',
   ph_red: '#c83838',
   ph_red_dark: '#882028',
   ph_gold: '#f0c040',
-  ph_gold_dark: '#b08020',
-  ph_skin: '#f0b888',
-  ph_skin_shade: '#c08060',
-  ph_hair_grey: '#c0c0c8',
-  ph_hair_dark: '#583828',
-  ph_purple: '#7850a0',
-  ph_purple_dark: '#503070',
-  ph_teal: '#40a098',
-  ph_teal_dark: '#287068',
   ph_black: '#181018',
-  ph_white: '#f8f8f0',
-  ph_flower: '#f070a0',
-  ph_flower_2: '#f8e060',
 };

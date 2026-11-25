@@ -49,6 +49,42 @@ export class Effects {
     this.flickerRate = 4;
     this.tweens = new Map();
     this.tick = 0;
+    // Lighting: crossfade from `lightFrom` to `lightTo` passes as lightMix goes 0 -> 1.
+    this.lightFrom = [];
+    this.lightTo = [];
+    this.lightMix = 1;
+  }
+
+  // Change the scene lighting (a list of { color, mode, amount } passes) over
+  // `seconds`; 0 is a hard cut.
+  setLight(passes, seconds = 0) {
+    // Mid-crossfade, start from whichever look currently dominates.
+    this.lightFrom = this.lightMix >= 0.5 ? this.lightTo : this.lightFrom;
+    this.lightTo = passes;
+    this.lightMix = 0;
+    return this.tween('lightMix', 1, seconds);
+  }
+
+  hasLight() {
+    return (this.lightTo.length && this.lightMix > 0) || (this.lightFrom.length && this.lightMix < 1);
+  }
+
+  // Draw the lighting passes over everything on `ctx`, at `strength` (0..1).
+  applyLight(ctx, strength = 1) {
+    const draw = (passes, k) => {
+      for (const p of passes) {
+        const a = (p.amount ?? 1) * k * strength;
+        if (a <= 0.001) continue;
+        ctx.save();
+        ctx.globalCompositeOperation = p.mode || 'source-over';
+        ctx.globalAlpha = Math.min(1, a);
+        ctx.fillStyle = colorOf(p.color);
+        ctx.fillRect(0, 0, WIDTH, HEIGHT);
+        ctx.restore();
+      }
+    };
+    draw(this.lightFrom, 1 - this.lightMix);
+    draw(this.lightTo, this.lightMix);
   }
 
   // Animate numeric property `key` to `to` over `seconds`. Resolves at the end.
@@ -73,9 +109,18 @@ export class Effects {
     return this.tween('fadeAlpha', alpha, seconds);
   }
 
+  // A new shake replaces one in progress; the earlier promise resolves then.
   shake(amount = 3, seconds = 0.4) {
+    this.shakeDone?.();
+    this.shakeDone = null;
+    const ticks = secs(seconds);
+    if (ticks <= 0) {
+      this.shakeAmp = 0;
+      this.shakeTicks = 0;
+      return Promise.resolve();
+    }
     this.shakeAmp = amount;
-    this.shakeTicks = secs(seconds);
+    this.shakeTicks = ticks;
     return new Promise((resolve) => { this.shakeDone = resolve; });
   }
 
@@ -100,7 +145,10 @@ export class Effects {
   flicker(seconds = 0.5, { color, rate } = {}) {
     if (color) this.flickerColor = colorOf(color);
     if (rate) this.flickerRate = rate;
+    this.flickerDone?.();
+    this.flickerDone = null;
     this.flickerTicks = secs(seconds);
+    if (this.flickerTicks <= 0) return Promise.resolve();
     return new Promise((resolve) => { this.flickerDone = resolve; });
   }
 
@@ -125,8 +173,12 @@ export class Effects {
     if (this.shakeTicks > 0 && --this.shakeTicks === 0) {
       this.shakeAmp = 0;
       this.shakeDone?.();
+      this.shakeDone = null;
     }
-    if (this.flickerTicks > 0 && --this.flickerTicks === 0) this.flickerDone?.();
+    if (this.flickerTicks > 0 && --this.flickerTicks === 0) {
+      this.flickerDone?.();
+      this.flickerDone = null;
+    }
     this.wavePhase += this.waveSpeed;
   }
 
