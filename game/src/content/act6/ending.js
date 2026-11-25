@@ -22,7 +22,13 @@ function finalVista(g) {
     if (glow >= 0) ctx.drawImage(art.glow.frame(`glow_${glow}`), 128 - 60, 112 - 48);
     if (ms > 2000) {
       const cy = Math.max(92, Math.round(126 - (6 * (ms - 2000)) / 1000));
+      // Below the Rim's lower edge (y 118) is the sea: the rising moon never shows there.
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(0, 0, 256, 118);
+      ctx.clip();
       ctx.drawImage(art.moon.frameAt('moon', ms), 128 - 16, cy - 16);
+      ctx.restore();
     }
     ctx.drawImage(art.rim.frame('rim'), 0, 0);
     VISTA_BASINS.forEach(([x, y], i) => ctx.drawImage(art.twinkle.frameAt('twinkle', ms + phases[i]), x - 3, y - 3));

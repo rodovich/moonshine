@@ -131,8 +131,8 @@ export function lampRoomNight() {
 export function belfryNight() {
   return {
     hide: [{ when: inCut, ids: ['ambrose_belfry'] }],
-    entities: [{ id: 'act6_ambrose', x: 4, y: 4, facing: 'up', solid: false, when: inCut, sprite: { sheet: ambrose, frame: 'ring_up' } }],
-    lights: (g) => (inCut(g) ? [{ x: 4, y: 2, radius: 3, color: 'moon_light' }] : []),
+    entities: [{ id: 'act6_ambrose', x: 4, y: 6, facing: 'up', solid: false, when: inCut, sprite: { sheet: ambrose, frame: 'ring_up' } }],
+    lights: (g) => (inCut(g) ? [{ x: 4, y: 4, radius: 3, color: 'moon_light' }] : []),
   };
 }
 
