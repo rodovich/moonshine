@@ -128,7 +128,9 @@ export const COLORS = {
   coral_shade: '#983848',
   navy: '#485888',
   navy_shade: '#303860',
+  mustard_light: '#f8d868',
   mustard: '#e0b040',
+  mustard_mid: '#c89030',
   mustard_shade: '#a87828',
   moss: '#788848',
   moss_shade: '#505830',
@@ -154,6 +156,39 @@ export const COLORS = {
   wrong_deep: '#581878',
   wrong_void: '#100010',
   wrong_bile: '#c8f040',
+
+  // Vista and effects (art): the dusk sky over the Bowl, the Rim, the moon.
+  dusk_indigo_deep: '#181838',
+  dusk_indigo: '#283060',
+  dusk_violet: '#484878',
+  dusk_mauve: '#806088',
+  dusk_rose: '#c07880',
+  dusk_apricot: '#f0a070',
+  dusk_apricot_light: '#f8d098',
+  rim_deep: '#201830',
+  rim: '#302840',
+  rim_lit: '#584060',
+  bowl_deep: '#101830',
+  bowl: '#202848',
+  roof_dusk_shadow: '#403050',
+  roof_dusk: '#685070',
+  roof_dusk_lit: '#c08878',
+  moon_light: '#f8f8e0',
+  moon: '#f0e0b0',
+  moon_shade: '#d0b890',
+  moon_mare: '#c0a888',
+  mist_light: '#e8f0f0',
+  mist: '#b8d0d8',
+
+  // Interior and items (art)
+  // Clay: unglazed terracotta floor tiles, more muted than terra_*.
+  clay_light: '#e0a078',
+  clay: '#c07850',
+  clay_shade: '#985840',
+  clay_deep: '#683830',
+  // Lilac: Cheryl's lavender soap.
+  lilac_light: '#d8b8e8',
+  lilac: '#a888c8',
 
   // UI (engine)
   ui_ink: '#201828',

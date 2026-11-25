@@ -1,0 +1,39 @@
+// The moonrise vista (docs/design/01-opening.md, sequence steps 5–7), looped:
+// the glow brightens to the right of the Gate, then the moon rises there instead of in it.
+// ?still shows the moment the moon is half up.
+import { VISTA_BASINS } from '../src/art/vista.js';
+
+const still = new URLSearchParams(location.search).has('still');
+const MOON_X = 176;          // the moon rises here; the Gate is centred on x=128
+const MOON_START = 104;      // moon centre y when hidden behind the Rim
+const MOON_END = 56;         // moon centre y when well clear
+const LOOP = 22000;
+const RISE = 3;              // px per second: half the moon is up about six seconds in
+
+export const SCENE = {
+  title: 'Moonrise vista',
+  width: 256,
+  height: 224,
+  scale: 3,
+  draw(ctx, now, { SHEETS, frameCanvas, animFrame }) {
+    const t = still ? 10000 : now % LOOP;
+    const img = (sheet, frame) => frameCanvas(sheet, SHEETS[sheet], frame);
+    if (!SHEETS.vista) return;
+    ctx.drawImage(img('vista', 'bowl_dusk'), 0, 0);
+    // 0–4 s: the glow gathers behind the Rim, right of the Gate.
+    const glowStep = t < 1000 ? -1 : t < 2200 ? 0 : t < 3400 ? 1 : 2;
+    if (glowStep >= 0) ctx.drawImage(img('vista_glow', `glow_${glowStep}`), MOON_X - 60, 90 - 48);
+    // From 4 s: the moon rises slowly (about six seconds until half of it is up).
+    if (t > 4000) {
+      const cy = Math.max(MOON_END, Math.round(MOON_START - RISE * (t - 4000) / 1000));
+      ctx.drawImage(img('vista_moon', animFrame(SHEETS.vista_moon, 'moon', now)), MOON_X - 16, cy - 16);
+    }
+    ctx.drawImage(img('vista_rim', 'rim'), 0, 0);
+    // Basins twinkle, each on its own phase.
+    VISTA_BASINS.forEach(([x, y], i) => {
+      const f = animFrame(SHEETS.vista_twinkle, 'twinkle', now + i * 437);
+      ctx.drawImage(img('vista_twinkle', f), x - 3, y - 3);
+    });
+    ctx.drawImage(img('vista_cheryl', 'cheryl_tub'), 0, 128);
+  },
+};

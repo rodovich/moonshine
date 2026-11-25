@@ -60,7 +60,7 @@ Each landmark has an ordinary job above ground and a forgotten one below. This i
 | **The Fountain of the Fish** (Fountain Square) | A bronze fish spouting into a round basin. It has flowed for five hundred years with fresh water from nowhere. It runs a little low lately. | The fish is a stylized Founder hull (its "fins" are oars). The Fountain is the trim gauge for the city's ballast: its level shows how the hull is riding. A hatch in its basin floor leads down to the **Pump Hall**. |
 | **The Prow Light** (the lighthouse) | Built on the headland; kept by a Keeper who polishes the lamp and never looks out. A sea arch beneath it is called the Keyhole. | The headland is the bow. The **Windlass and Chain Locker** lie beneath the lighthouse, and the Keyhole is the hawse through which the anchor chain runs. The climax happens here. |
 | **The Water Stairs** (the Bilge) | Broad stairs that walk down into the canal and vanish. "The stairs to nowhere." Tourists photograph them. | They go to a barnacled bronze door, normally ten feet underwater, into the bow decks. It's exposed only when the city rises. |
-| **The well in Cistern Court** (minor, Cheryl's own) | A dry well. Drop a pebble and you never hear it land. | The top of the **Sighting Shaft**. A bronze mirror in its throat throws the rising moon straight down to the **Sighting Basin** at the bottom of the hull. Cheryl's house is narrow because it was built around the shaft, which is why her roof has the best view of the Gate in Tessel. |
+| **No. 9 and the well in Cistern Court** (minor, Cheryl's own) | Cheryl's tall, narrow house, with the tub on the roof; and the dry well in the court below. Drop a pebble down the well and you never hear it land. | The **Sighting Shaft** rises *inside* No. 9, which is narrow because it was built around the shaft. The Founders' sighting post is exactly where Cheryl's tub stands, which is why her roof has the best view of the Gate in Tessel. A bronze mirror under the roof throws the rising moon straight down to the **Sighting Basin** at the bottom of the hull, and the tub's drain drops straight into the shaft. The court well is a side branch: the Keepers' lift shaft and an air vent for the Sighting Room. That's why it "breathes," and why Cheryl comes up through it at the end. |
 
 ## The Founders
 
@@ -68,7 +68,7 @@ Each landmark has an ordinary job above ground and a forgotten one below. This i
 
 Five hundred and some years ago, a people lived in a flat, wet country of marshes and canals called **the Lowland**. The sea was taking it a field at a time. Their engineers were tide-workers who had spent generations building sluices, mills, and pumps that ran on the pull of the moon, and they made a decision: if the land would not stay above the sea, they would build land that floated.
 
-Over forty years they raised a hill of hollow stone in a dry dock on the marsh: thousands of sealed cells of a light, glassy, pumice-filled concrete they called hullstone, ribbed and vaulted like the inside of a shell. They put houses on its back, a mast on its crown, and machinery in its belly. When the sea came in for good, the hill lifted, and they sailed away on it.
+Over forty years they raised a hill of hollow stone in a dry dock on the marsh: thousands of sealed cells of a light, glassy, pumice-filled concrete they called hullstone, fitted and ribbed like the inside of a hull. They put houses on its back, a mast on its crown, and machinery in its belly. When the sea came in for good, the hill lifted, and they sailed away on it.
 
 They drifted and sailed for a generation, looking for calm water. They found the Bowl, a flooded crater with a single narrow mouth, as still as a millpond. They dropped an anchor the size of a chapel in the middle of it, and they set the mooring by the moon: the chain's length and bearing were fixed so that, from the Sighting Basin at the bottom of the hull, the late-summer full moon would rise dead center in the Gate. Every year they checked it. If the moon sat true in the Basin, the city was where it should be.
 
@@ -78,13 +78,13 @@ Cheryl is not a descendant. She came from the mainland thirty-one years ago. The
 
 ### Architecture and technology
 
-Above ground, Tessel is square-ish, whitewashed, warm, and improvised. Below ground, the Founders' work is the opposite:
+Above ground, Tessel is rounded, whitewashed, warm, and improvised. Below ground, the Founders' work is the opposite. (The visual rules are in [art direction](art-direction.md#the-underground-direction-for-future-sheets); this is the story behind them.)
 
-- **Curved, never square.** Ribbed vaults like the inside of a hull or a seashell. Round doors with bronze rims, like portholes. Spiral stairs. Floors that dish gently toward drains.
-- **Hullstone**: dark sea-green, faintly glassy, smooth as a pebble, with a fine honeycomb texture where it's broken.
-- **Bronze** everywhere, gone verdigris-green: valves, wheels, gear trains, speaking tubes, the windlass drum, the chain.
-- **Mosaics** of tiny tiles in deep blue, silver, and sea-green: tides, moon phases, fish, the three pumps drawn as three women, the city drawn as a boat. The recurring emblem is a crescent moon over a wave, joined by a chain link.
-- **Moonglass**: a pale, milky glass that drinks light and gives it back as a cool blue glow for days. It lights the Founders' lamps, which sit in scallop-shell niches, and the light-pipes, which carry daylight down from the moon-eyes on the streets. Their locks also use it: a *moon-lock* opens when bright light falls on its glass eye. The underground is lit in cool blue; the surface is lit in warm gold.
+- **Straight, precise, and dark.** Long corridors of fitted slate-dark *hullstone* blocks with no visible mortar, chamfered 45° corners instead of arches, and floors of large square plates. It's built like the inside of a ship: corridors are decks, and at regular intervals heavy chamfered *ribs* cross the ceiling like a hull's frames. Steep ladder-stairs, not spirals. Hatches, not doors.
+- **Hullstone**: a dark, dense-looking stone that is secretly light: where a block is broken, its inside is a fine honeycomb of sealed air cells. That's why the hill floats.
+- **Bronze** fittings gone to verdigris: valves, wheels, gear trains, speaking tubes, the windlass drum, the chain.
+- **Geometric inlays** repeated along the walls, in a strict pattern language: tides as stepped lines, moon phases as squares filling up, the three pumps as three upright bars of different widths. Only the Chart Room's great floor inlay is pictorial: the city drawn as a ship. The recurring emblem is a crescent over a stepped wave, joined by a chain link.
+- **Moonglass**: a pale glass that drinks light and gives it back as a cool cyan glow for days (`relic_cyan` in the palette). It lights the Founders' lamps and the light-pipes, which carry daylight down from the moon-eyes on the streets. Their locks also use it: a *moon-lock* opens when bright light falls on its glass eye. The machinery's own warning lights and the Tide Wheel's housings glow amber (`relic_amber`). The underground is lit locally by these glows; the surface by the sun.
 - **Tide power.** Tidal flow through gill-like channels in the hull turns the **Tide Wheel**, which drives the **Three Sisters** (the ballast pumps: Thin, Stout, and Middle) and the **Windlass**. The Founders called the whole system, in effect, "the moon's work."
 - **Sighting.** The shaft, the mirror, and the Basin form a periscope aimed at the Gate.
 - **Signals.** The bell and its rope, speaking tubes, and rods connect the deck above to the machinery below.
@@ -118,7 +118,7 @@ The habits wore down over time. The bell was the last one still doing its real j
 
 **Tessel has slipped its mooring.** Underneath that are three specific failures:
 
-1. **The Tooth broke.** When the Mayor's clock took over the bell, the bell stopped ringing at the turn of the tide, and the windlass stopped being wound. For five weeks the chain crept out a link at a time, and the strain built on the windlass's pawl, a bronze tooth the size of a person. On Moonshine Night the Tooth sheared (the crack and groan Cheryl hears) and the chain ran out a long way. The city swung and lurched. Ever since, Tessel has been drifting slowly across the Bowl toward the Teeth.
+1. **The Tooth broke.** When the Mayor's clock took over the bell, the bell stopped ringing at the turn of the tide, and the windlass stopped being wound. For five weeks the chain crept out a link at a time, and the strain built on the windlass's pawl, a bronze tooth the size of a person. On Moonshine Night the Tooth sheared (the crack and groan Cheryl hears) and the chain ran out a long way. The city swung and lurched. It happened on Moonshine Night *because* of the moon: the full moon brings the month's biggest tide, a spring tide, and that last heave was more than the Tooth could take. (This is also why the Founders calibrated on the full moon: it's the moment of greatest strain.) As the hull dropped and swung, it pulled a gust of air down the Sighting Shaft, which sucked Cheryl's plug down her drain. The same air breathes back out of the court well the next morning. Ever since, Tessel has been drifting slowly across the Bowl toward the Teeth.
 2. **The ballast is failing.** The Three Sisters have not pumped in decades. The Middle Sister's copper throat was swept away long ago. (It ended up in a sea cave, where Mott's grandfather found it and built a still around it.) The ballast cells have been slowly filling unevenly, and the lurch cracked one of them. Tessel is starting to list toward the Bilge side.
 3. **No one sights the moon anymore.** The Sighting Basin is dry and its stopper is lost, so nothing confirms where the city is. The city has crept out of true for years; Cheryl's moon chart shows it.
 
@@ -148,12 +148,16 @@ The city's real danger grows steadily. What the city *sees* grows in jumps, and 
 | When | What happens | Whose fault it looks like |
 | --- | --- | --- |
 | Act 1 | The moon rises off the Gate; the city lurches; the piano escapes; Cheryl's plug is sucked down the drain. | Nobody's. It's the first glimpse. |
-| Act 3 | Cheryl opens the Step Gallery's light shafts. That night, every moon-eye on every doorstep in Tessel glows blue. | Hers. The city is delighted and spooked. "Haunted," "a miracle," "a prank by the Pelletier boys." |
-| Act 3 | Cheryl turns a valve Downstairs and the Fountain of the Fish stops for the first time in five hundred years. | Hers. Residents believe the list started because of it. It didn't, but the timing is awful. |
+| Act 3 | Cheryl opens the Step Gallery's light shafts. That night, every moon-eye on every doorstep in Tessel glows blue. | Hers. The city is delighted and spooked. "Haunted," "a miracle," "the Pelletier boys. Who are on the mainland. Which is exactly what they'd want you to think." |
+| Act 3 | To drain the flooded passage to the Chart Room, Cheryl turns a valve Downstairs. It diverts the Fountain's feed, and the Fountain of the Fish stops for the first time in five hundred years. The valve jams; it can't be turned back. | Hers, unavoidably. Residents believe the list started because of it. It didn't, but the timing is awful. |
 | Act 4 | The Bilge floods ankle-deep; houses lean; the bell rings at "twenty past" because Cheryl has put Ambrose back on the rope. | Partly hers, in the city's eyes. |
-| Act 4→5 | Cheryl wakes the Three Sisters to fix the list. Mott's still-coil throat won't let the Middle Sister stop. **The city rises six feet out of the water. Every canal in the Bilge drains dry.** The city now rides high, catches the wind, and drifts faster. | Very much hers. This is the changed-surface reveal (see Act 4). |
+| Act 4→5 | Cheryl wakes the Three Sisters to fix the list. Mott's still-coil throat won't let the Middle Sister stop. **The city rises six feet out of the water. Every canal in the Bilge drains dry.** The city now rides high, catches the wind, and drifts faster. Meanwhile, the flooded Pump Hall backs up through the Fountain's feed, so the Fountain refills (and its hatch, P2, is under water for good). | Very much hers. This is the changed-surface reveal (see Act 4). |
 | Act 5 | From the lighthouse, the Teeth are visible and closer each time Cheryl looks. | Hers, she suspects. |
 | Act 6 | Cheryl releases the windlass brake. The whole city lurches; everyone falls over; the piano makes its last journey. Then everything settles, the canals refill, and the moon sits in the Gate. | Nobody's, as far as the city knows. |
+
+### How the Wrongness looks and sounds
+
+The Wrongness isn't a creature; it's the city being *out of true*. The [art](art-direction.md#the-wrongness) and [audio](audio-direction.md#the-three-worlds) directions already express that: misregistered pixels, colors that slip, notes that sag flat. Use those treatments only where the player is *feeling* the city come loose: the moonrise, the groan and the crack, the lurches, the Bilge flooding, the reveal. Never use them for a monster, a villain, or a glowing evil thing. There isn't one. Scale the audio's global Wrongness amount with the escalation table above: about 0.1 after Act 1, 0.2 in Act 3, 0.35 in Act 4, 0.5 in Act 5 while the reef approaches, and 0 the moment the moon centers in the Basin.
 
 ## Cheryl
 
@@ -217,9 +221,9 @@ Rules for her voice:
 - When something is genuinely awe-inspiring, she's brief and plain. Downstairs she gets quieter.
 - She calls people by her own nicknames in descriptions ("Her Next Door," "the Mayor, who was Duncan when he was seven"). Their in-game labels stay descriptive.
 
-### Look (for the art task)
+### Look
 
-Silver-streaked hair in a loose bun with a pencil through it. Reading glasses on a beaded chain. A mustard cardigan over a teal skirt, sensible shoes, a canvas tote bag (where the inventory lives). She walks briskly and stops to look at things.
+[Art direction](art-direction.md#cheryl) owns her design: silver hair in a bun with a coral tie, a coral cardigan over a cream blouse, a navy skirt, sensible brown shoes, and a leather satchel across her body, where the inventory lives. She walks briskly and stops to look at things. Text should agree with the sprite (her "bag" is the satchel).
 
 ## Cast
 
@@ -237,7 +241,7 @@ Most people are known by description. Three people besides Cheryl have names, be
 
 | Character | Where | Comic engine | Job in the game |
 | --- | --- | --- | --- |
-| **Old Man** | Cistern Court | Has played chess against himself, as "Gerald," for eleven years. Refuses to let himself win: "I'd never hear the end of it." | Act 1: has borrowed Cheryl's bath plug as his black king. Ending: he ordered the piano for No. 9, but claims Gerald did. |
+| **Old Man** | Cistern Court | Has played chess against himself, as "Gerald," for seventeen years. Refuses to let himself win: "I'd never hear the end of it." | Act 1: has borrowed Cheryl's bath plug as his black king. Ending: he ordered the piano for No. 9, but claims Gerald did. |
 | **Neighbor** ("Her Next Door") | Cistern Court roof | Moon-bleaches her sheets every Moonshine Night: "whiter than a gull's conscience." Certain she's never wrong. | Act 1: her sheets block Cheryl's view of the Gate. Later: grey sheets, a theory about the glowing doorsteps, and in the ending the whitest sheets in Tessel. |
 | **Sweaty Kid** | Cistern Court, then everywhere | Training for the Stair Race, nine days away. Always running, always damp, always certain he's getting faster. | Act 1: has the clothes prop and wants a timer (Cheryl's egg timer). Act 2: tripped on a step that "went bonk." Act 5: races a fast-fading moonglass charge from the lighthouse to the Water Stairs before the egg timer dings. Ending: wins the Stair Race. |
 | **Piano Movers** (two: the Big One talks, the Other One grunts) | Cistern Court, then wherever the piano goes | Professionally committed to a piano that keeps escaping. Their notes say BACK AFTER MOON. | Act 2: leave their crowbar behind when Cheryl's soap sends the piano sliding. Running gag through the game. Ending: deliver the piano to No. 9. |
@@ -271,7 +275,7 @@ The Founders taught their children this rhyme so that someone would always remem
 What each line means:
 - Lines 1–2: the sighting; ring at the turn of the tide to engage the Tide Wheel.
 - Lines 3–4: wake the pumps in order: Thin, then Stout, then Middle.
-- Lines 5–6: the Middle Sister must be stopped once the list is corrected, or the city rises. *(Cheryl can't stop her, because Mott's still coil sticks open. This foreshadows the reveal.)*
+- Lines 5–6: the Middle Sister must be stopped once the list is corrected, or the city rises. *(In the Pump Hall Cheryl can't stop her, because Mott's still coil sticks open. This foreshadows the reveal. She finally puts her to bed in Act 6, with the Keepers' master stop in the Sighting Room.)*
 - Lines 7–8: replace the broken Tooth; release the windlass brake on the bell; let the tide wind the chain home.
 - Lines 9–10: plug the Basin, sight the moon, trim the mooring true.
 
@@ -282,15 +286,15 @@ The Skipping Girls' versions (each wrong in one place that matters):
 
 ## The plot
 
-The game runs from Moonshine Night through the next few days. Time of day changes only at scripted moments (dusk, day, dusk again, night); there is no clock and no deadline. The player is never on a timer except during the Kid's relay run in Act 5, and that one can be retried.
+The game runs from Moonshine Night through the next few days. Time of day changes only at scripted moments (dusk, day, dusk again, night); there is no clock and no deadline. The player is never on a timer. (The Kid's relay run in Act 5 looks like a race against time, but it's a scripted scene.)
 
 ### Act 1 — Moonshine Night (Cistern Court)
 
-*Confined. Teaches the controls and the puzzle style. About 15–20 minutes.*
+*Confined. Teaches the controls and the puzzle style. About 8–12 minutes.*
 
 At sunset, Cheryl is on her roof beside an empty tub. Three things stand between her and her bath: the Old Man borrowed her plug as a chess king; Her Next Door's sheets hang right across the view of the Gate; and the only way out of the court, the narrow stair called the Squeeze, is blocked by a piano someone has tried to deliver to No. 9 (she didn't order a piano). She can't leave, but she doesn't want to. She swaps her pepper mill for the plug, trades her egg timer to the Sweaty Kid for the clothes prop so Her Next Door can move the sheets, and fills the tub.
 
-Just as she settles in to watch, the moon rises to the right of the Gate. The crowd noise from the city stops. Something groans far below, like an enormous rope taking strain, and then cracks. The roof tilts; the sheets swing sideways; somewhere a piano goes down the Squeeze with a long falling chord. Her plug is yanked down the drain, chain and all, and the echo falls away much farther than the drain should go.
+Just as she settles in to watch, the moon rises to the right of the Gate. The crowd noise from the city stops. Something groans far below, like an enormous rope taking strain, and then cracks. The roof tilts; the sheets swing sideways; somewhere a piano goes down the Squeeze with a long falling chord. Her plug is yanked down the drain, chain and all, and the echo falls away much farther than the drain should go. (Her drain empties into the Sighting Shaft, and the lurch pulled a gust of air down it; see "What it is" above.)
 
 The next morning, the Squeeze is clear (the piano took the geraniums with it), the well breathes cold sea air, and Tessel is open. Full design: [design/01-opening.md](design/01-opening.md).
 
@@ -308,7 +312,7 @@ Two threads lead to the first way Downstairs: get the Movers' crowbar by soaping
 
 *The underground and the big middle reveal. About 25–35 minutes.*
 
-Under the hundredth step is the **Step Gallery**, a curving hullstone vault of sea-green stone, bronze, and dark moonglass. *(Internal monologue, the first time Cheryl stands in it.)* She pries open a jammed light-shaft lid and swings a bronze mirror until daylight falls on a moon-lock. A round door opens, and she gains a **moonglass disc** that glows and lights her way. A hidden chute drops her, one-way, into the **Lamp Halls**. She finds a ladder she can kick down to make the Step Gallery a two-way shortcut, a valve wheel that (she discovers later) stops the Fountain, and a black flooded corridor heading downhill that she wisely refuses to swim.
+Under the hundredth step is the **Step Gallery**, a long, straight, low deck of dark fitted hullstone, ribbed like the inside of a hull, with verdigris bronze and dead moonglass lamps. *(Internal monologue, the first time Cheryl stands in it.)* She pries open a jammed light-shaft lid and swings a bronze mirror until daylight falls on a moon-lock. A sealed hatch opens, and she gains a **moonglass disc** that glows and lights her way. A hidden chute drops her, one-way, into the **Lamp Halls**. She finds a ladder she can kick down to make the Step Gallery a two-way shortcut, and a black flooded corridor heading downhill that she wisely refuses to swim. The passage north toward the Chart Room is flooded too, by a pipe gushing fresh water. A big valve wheel beside it diverts the flow. When she turns it, the passage drains, the wheel jams for good, and from a speaking tube far above comes a tiny, outraged voice: "The FOUNTAIN!"
 
 At the north end is the **Chart Room** under the Blue Dome: the last Keeper's chair, cup, and ledger (*Rang at the turn. All well.*), and a floor mosaic, lit from above through the Dome's glass eye, showing **Tessel as a ship**: the hull, the mast where the Bell Tower stands, the chain from the Prow to an anchor, the Three Sisters, the Basin under Cistern Court. *(Internal monologue: "Oh." … "Oh, we're a boat.")* She takes a rubbing, the **Ship Plan**, which becomes the player's underground map. Then she unbolts the Founders' Door and walks out into the Archive crypt, to Ottilie's indignation.
 
@@ -338,7 +342,7 @@ Riding high, Tessel catches the wind and drifts faster. From the lighthouse gall
 
 Two threads:
 
-- **The Water Stairs door.** Get the Boatman out of the way (a bucket from the Fishmonger, filled at the refilled Fountain: "AFLOAT!") and take his rope for the broken last flight. The barnacled moon-lock needs a full charge of light. Polish from the Shop (swapped for the guidebook) lets the Lighthouse Keeper agree to let Cheryl hold the moonglass disc in the great lamp. But the charge fades in less than a minute, and Cheryl is fifty-eight. She hands the disc and the egg timer to the Sweaty Kid. *Run.* He beats the egg.
+- **The Water Stairs door.** Get the Boatman out of the way (a bucket from the Fishmonger, filled at the refilled Fountain: "AFLOAT!") and take his rope for the broken last flight. The barnacled moon-lock needs a full charge of light. Polish from the Shop (swapped for the guidebook) lets the Lighthouse Keeper agree to let Cheryl hold the moonglass disc in the great lamp. But the charge fades in less than a minute, and Cheryl is fifty-eight. She hands the disc to the Sweaty Kid, who still has her egg timer from Moonshine Night and winds it himself. *Run.* He beats the egg. (A scripted scene; it can't fail.)
 - **The Tooth.** The Clockmaker's doorstop, the bell's old clapper, is the spare Tooth. He trades it for Mott's square jug: "Square. Heavy. Doesn't roll. Smells of… is that turpentine?"
 
 The bow decks, the Chain Locker, the Windlass: links taller than Cheryl, a bronze drum like a chapel on its side, the sheared Tooth. Ambrose's ledger says the next turn of the tide is at moonrise tonight.
@@ -349,11 +353,11 @@ The bow decks, the Chain Locker, the Windlass: links taller than Cheryl, a bronz
 
 Night. Cheryl levers out the broken Tooth with the crowbar, sets the clapper in its place, and waits by the speaking tube. Far above, the bell rings at the turn. *Pull the old tooth when the bell says when.* She throws the brake. The Tide Wheel bites, the drum turns, and the chain comes home link by link, each one a thunderclap. Cut to the surface: the whole city lurches; everyone falls over; Her Next Door's sheets stand straight out; the piano makes its final journey; through the lighthouse window the Teeth slide away into the dark.
 
-Cheryl walks the **Long Keel**, a straight corridor down the center of the hull, to the **Sighting Room**: a round chamber under the shaft, with a stone basin big enough to sit in, dry, and in the bottom of it, her bath plug. *("My plug.")* She plugs the Basin. Water rises from the shaft's seep. The moon's reflection slides into it, off-center. She turns the trim wheel a quarter turn, then another, until the moon sits dead center in the Gate in the water. The Basin's moonglass rim lights; every lamp Downstairs blazes blue; the Middle Sister finally goes to sleep; the city settles to its proper waterline. Far above, the canals refill. ("I'M AFLOAT!")
+Cheryl walks the **Long Keel**, a straight corridor down the center of the hull, to the **Sighting Room**: an eight-sided chamber under the shaft, with a stone basin big enough to sit in, dry, and in the bottom of it, her bath plug. *("My plug.")* She plugs the Basin. Water rises from the shaft's seep. The moon's reflection slides into it, off-center. It's a few nights past full now, so the moon rises later and farther along the horizon; the Keeper's ledger has a line for exactly that ("Past full: allow two fingers"), and Cheryl, who has watched thirty-one moonrises, knows what two fingers looks like. She turns the trim wheel a quarter turn, then another, until the moon sits where it should. The Basin's moonglass rim lights and every lamp Downstairs blazes. Only now does the Keepers' master stop beside the Basin come free: a bronze rod marked with the Middle Sister's emblem. Cheryl pulls it. *Middle sister's greedy, put her back to bed.* Far off, the Middle Sister coughs and goes quiet, and the city settles to its proper waterline. Far above, the canals refill. ("I'M AFLOAT!")
 
 Cheryl takes off her shoes and gets into the Basin. *(Internal monologue, the last: a few short lines. She doesn't explain anything. See sample lines.)*
 
-At dawn she rides the Keepers' counterweighted lift up the shaft and steps out of the well in Cistern Court. The Old Man looks up from his chess: "Morning."
+At dawn she rides the Keepers' counterweighted lift up its side shaft and steps out of the well in Cistern Court. The Old Man looks up from his chess: "Morning."
 
 **Epilogue.** Tessel explains the night to itself, wrongly. The Mayor credits his clock, which has been removed. The Clockmaker is delighted that the sun has "come round." Ambrose is back on the rope. Ottilie announces the bootleggers. The Counting Woman counts one hundred. The Kid wins the Stair Race. Her Next Door's sheets are the whitest in history. Mott's ferry lands on the first try; he looks at the Gate and keeps his mouth shut. The Pelletiers come home. The Piano Movers finally deliver the piano to No. 9, and the Old Man says it's from Gerald: "Gerald heard you play once. Through the wall. Years ago." *(Description: "Gerald has very good manners for a man who doesn't exist.")*
 
@@ -371,7 +375,7 @@ No one ever knows.
 - **Wrong explanations are the main running joke.** Residents always have a confident wrong theory for each symptom. The player knows more than everyone, and that's the pleasure.
 - **Downstairs is quiet.** Humor drops to almost nothing underground. Descriptions get shorter and more plain. Awe needs room. The first time Cheryl comes back up, let the noise of the city hit hard.
 - **Mystery is played straight.** No character ever says "the city is a ship" until the player has seen the mosaic. Clues are planted early and in plain sight. No exposition dumps; the Keeper's ledger and the mosaic do the telling.
-- **Brevity.** One text box holds about 3 lines of 30 characters (about 90 characters). Most lines should fit in one box. No NPC says more than four boxes at a time without the player pressing on.
+- **Brevity.** One script line must fit in one text box: three wrapped lines of the real font, 224 px wide (roughly 110–120 characters, fewer in capitals). Aim for about 90. Most NPC speeches should be four boxes or fewer.
 - **Repeat talks are short** and change when the world changes. Every NPC has something new to say after each act's big event.
 - **Age is not a joke** except when Cheryl makes it about herself.
 
@@ -425,7 +429,8 @@ NPCs:
 - Cheryl's descriptions have no label.
 - Internal monologue is in italics or a distinct soft color, with no label (the engine's choice).
 - Ambrose's lines are always written in capitals. Nobody else shouts like that except at peak moments (one word, rarely).
-- One "line" in a script equals one text box. Keep it to about 90 characters.
+- One "line" in a script equals one text box, and must fit in three wrapped lines (see Brevity).
+- Check unusual characters against the font (`game/src/art/font.js`) before using them in game text. As of this writing it lacks "×", "–" (en dash), and "→"; it has "·", "…", "—", and "♪".
 - American English spelling.
 
 ## Decisions log
@@ -439,7 +444,11 @@ Creative decisions made in this document, with their reasons. The client's brief
 - **"Two jobs" is a design rule:** every Founder object has a forgotten second job, which is the source of puzzle solutions.
 - **Rituals are degraded instructions:** the bell, the festival, the rhyme, the Count, and the Stair Race. This is how the residents unknowingly help save the city they don't know is in danger **(brief: residents never know)**.
 - **Cheryl is a retired primary teacher who came from the mainland.** She knows everyone since they were seven, which drives her voice, and she's an outsider who notices.
-- **Cheryl's past has deliberate gaps** (the second hand on the chart, the second chair, the face-down photo, the song, the piano). These must never be resolved **(brief: let players fill in gaps)**.
+- **Cheryl's past has deliberate gaps** (the second hand on the chart, the second chair, the face-down photo, the song, the piano). These must never be resolved **(brief: let players fill in gaps)**. Keep the numbers apart too: the Old Man's game with Gerald is seventeen years old, so it can't be read as starting when the second handwriting stopped (twelve years ago).
+- **The Sighting Shaft rises inside No. 9; the court well is the Keepers' lift shaft and vent.** That way the plug's fall, the roof's view, the breathing well, and the final exit all fit the opening map. (From review by xaKh8TS_PJ.)
+- **The full moon's spring tide breaks the Tooth,** so the disaster falls on Moonshine Night because of the moon, not by coincidence. (From review.)
+- **The fountain valve is a required step, and it jams,** so Cheryl's complicity in the Fountain stopping is unavoidable. **The Fountain refills at the reveal** because the flooded Pump Hall backs up through its feed. (From review.)
+- **Cheryl stops the Middle Sister herself** in Act 6 with the Keepers' master stop, so the rhyme's "put her back to bed" is a player action. (From review.)
 - **Three named NPCs (Ambrose, Ottilie, Mott)**; everyone else is descriptive **(brief)**.
 - **No deadlines, no death, no fail states.** Time of day changes only at scripted moments. The one timed moment (the Kid's relay) is the Kid's run, not Cheryl's, and can be retried.
 - **Period:** vaguely a century ago, with no electricity. This keeps the SNES-era storybook feel and makes a clock a plausible "modernization."

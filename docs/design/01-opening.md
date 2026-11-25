@@ -6,12 +6,12 @@ This is the build-ready design for the first playable slice. It covers Act 1 of 
 
 At sunset on Moonshine Night, Cheryl is on her roof beside an empty bathtub. She wants her yearly cold bath while the full moon rises in the Gate. Two things stop her:
 
-- **No plug.** The Old Man downstairs borrowed it as the black king in his eleven-year chess game against himself. He'll trade it for another king: black, tall, dignified. Her pepper mill qualifies.
+- **No plug.** The Old Man downstairs borrowed it as the black king in his seventeen-year chess game against himself. He'll trade it for another king: black, tall, dignified. Her pepper mill qualifies.
 - **No view.** Her Next Door's moon-bleaching sheets hang across the view of the Gate. She'd move them to the back line, but it sags without the clothes prop, and the Sweaty Kid has the prop as a hurdle. He'll trade it for something that ticks. Her egg timer qualifies.
 
 With the tub plugged and filled and the sheets moved, Cheryl sits on the edge of the tub, and the moon rises *in the wrong place*. A groan and a crack come from far below the city; the roof lurches; the piano blocking the only exit goes crashing down the Squeeze; her plug is sucked down the drain, and its echo goes much too deep. The next morning, the way out is clear.
 
-**Playtime:** 15–20 minutes. **Maps:** 2 (Cistern Court, 20×26 tiles; Cheryl's flat, 12×9). **NPCs:** 3. **Items:** 5 at dusk, plus 2 more in the morning.
+**Playtime:** 8–12 minutes (about eight required interactions; longer for players who look at everything). **Maps:** 2 (Cistern Court, 20×26 tiles; Cheryl's flat, 12×9). **NPCs:** 3. **Items:** 5 at dusk, plus 2 more in the morning.
 
 ### What the slice teaches
 
@@ -53,7 +53,7 @@ One scrolling map with two levels: the roof terraces at the top and the courtyar
    14  #,lLl,,,,,K,,,,,,,,#   L lemon trunk; K Kid starts his laps here
    15  #,lll,,,,,,,,,,,,,,#
    16  #,Ocg,,,,WW,,,,,,,,#   O Old Man, c chess table, g Gerald's chair; W well (2×2)
-   17  #,,,,,,,,WW,,o-o,,,#   o flowerpots, - the prop laid across them as a hurdle
+   17  #,,,,,,,,WW,o-o,,,,#   o flowerpots (12, 14), - the prop laid across them as a hurdle (13)
    18  #,,,,,,,,,,,,,,,,,,#
    19  G,,,,,,,,,,,,,,,,,,#   G the Pelletiers' gate (locked)
    20  #,,,,,,,,,,,,,,,,,,#
@@ -97,7 +97,8 @@ One scrolling map with two levels: the roof terraces at the top and the courtyar
 - **The east parapet** (x19, y3–7): the view of the Gate.
 - **The stair** (x7, y8–11): down through the gap between the houses.
 - **The court** (y12–23): the lemon tree and chess table to the west, the well in the middle, the Kid's lap track around the well, the bench under the Neighbor's window.
-- **The Kid's lap**: a rectangle from (7,14) to (13,14) to (13,19) to (7,19) and back. He hops the hurdle at (13,17). If Cheryl stands in his path, he jogs in place until she moves.
+- **The Kid's lap**: a rectangle from (7,14) to (13,14) to (13,19) to (7,19) and back. He hops the hurdle at (13,17). **He stops and jogs in place, facing Cheryl, whenever she is within two tiles of him, or as soon as the player clicks or taps him**, so he's easy to talk to and to give things to with either control scheme. He resumes his lap when she moves away.
+- **The cat**: the Pelletiers' cat, a sitting cat (the art kit's ginger cat) at (17,19) at dusk. In the morning she sits at (12,12) against the north wall, facing the well.
 
 **Exits**
 
@@ -127,6 +128,8 @@ A single room, smaller than a screen; the engine centers it. The top two rows ar
     8  #####DH#####   D door → court (3,12), H plug hook
 ```
 
+**Collision:** `#` walls, wall objects (`m`, `c`, `W`, `b`, `H`), and all furniture (`1`, `2`, `S`, `B`, `f`, `X`, `k`, `A`, `w`) are solid. Floor (`.`) and rug (`r`) are walkable. The counter row is solid; the player stands on row 3 to reach the counter and shelf.
+
 Wall objects (`m`, `c`, `W`, `b`, `H`) are interacted with from the floor tile next to them. The pepper mill (1,2) and egg timer (2,2) sit on the counter; taking them swaps the tile to a bare counter.
 
 ## State
@@ -148,7 +151,7 @@ Every examinable object also keeps a look counter, so that its first look, secon
 ### Morning state (`act1.moonrise`)
 
 - Day tint everywhere.
-- The piano is gone; the Squeeze is open, with scrape marks on every step.
+- The piano is gone; the Squeeze is open, with scrape marks on every step. The tiles where the piano stood become court paving at (15–16, 23) and Squeeze stair at (15–16, 24).
 - The tub is empty, with no plug.
 - Sheets on the back line, palette-swapped to grey.
 - The chessboard's pieces have slid to the lemon-tree end.
@@ -162,8 +165,9 @@ Every examinable object also keeps a look counter, so that its first look, secon
 2. Internal monologue (input advances):
    - *Moonshine Night.*
    - *A tub on the roof and the moon on its way. Thirty-one years, and I haven't missed one.*
-   - *Everything's nearly ready. Nearly.*
-3. Control is given. A one-time control hint fades in at the bottom for about six seconds: "Arrows: walk · Z: look / talk · X: bag" (on touch devices: "Tap to walk · Tap things to look").
+   - *Everything's ready. Nearly. On Moonshine Night there's always a nearly.*
+3. Control is given. A one-time control hint fades in at the bottom for about six seconds: "Arrows: walk   Z: look/talk   X: bag" (on touch devices: "Tap to walk. Tap things to look."). (Engine calls: `g.hint(...)` for both hints, with `{ untilBag: true }` for the second; `g.card('Morning.', 2)` for the card; `g.say(speaker, text, { auto: 1.2 })` for auto-advancing boxes; a patrol with `stopNear: 2` for the Kid.)
+4. **Item hint.** The first time anything goes into the satchel, a second one-time hint appears and stays until the player opens the bag: "X: bag. Pick something, then use it on someone or something." (Touch: "Tap the bag, pick something, then tap where it goes.").
 
 The first thing most players touch is the tub, and its first description names the problem and who has the plug.
 
@@ -204,11 +208,11 @@ Lines are Cheryl's descriptions unless labeled otherwise. Each line is one text 
 - Plugged, empty: "Plugged. Now the water."
 - Full, sheets still up: First: "A full tub, cold water, and a fine view of Her Next Door's bedding." Then: "I am not watching the moon come up through somebody's sheets."
 - Full, sheets moved: → **Moonrise sequence**.
-- Morning: First: "Empty. No plug. It went down the drain last night, chain and all. Plugs don't do that." Then: "I put my ear to the drain. Water, very far down. And a creak, like a rope taking strain."
+- Morning: First: "Empty. No plug. It went down the drain last night, chain and all. Plugs don't do that." Then: "I put my ear to the drain. Water, very far down, and a cold draft coming up. Drains don't draft."
 
 **Tap** (2, 4)
 - Tub not plugged: "The roof tap. I'm not filling the tub just to watch it leave."
-- Plugged and empty: → squeak, pour, the tub fills over about two seconds; `tub.full`. Then: "Cold as the sea. That's how it's done. Hot baths are for Tuesdays."
+- Plugged and empty: → squeak, pour, the tub fills over about two seconds; `tub.full`. Then: "Cold as the sea. That's how it's done. Hot baths are for Tuesdays." Then, if the sheets are already moved: "Now I sit, and wait for the moon." If not: "Now the view."
 - Full: "Full. Any more and I'll be bailing."
 - Morning: "I'm not filling it again until I know where the last lot went."
 
@@ -216,7 +220,7 @@ Lines are Cheryl's descriptions unless labeled otherwise. Each line is one text 
 
 **Herb pots** (1–2, 2): "Basil, rosemary, and something that blew in and refused to leave. I've grown fond of it."
 
-**Chimney** (7–8, 2): "My chimney pots. Mine are the ones with the little hats."
+**Chimney** (7–8, 2): "My chimney pots, in their little tin hats. Hers next door go bareheaded. Make of that what you will."
 
 **South roof edge** (any `=` on y9): Dusk: "Tessel, all the way down to the water. Every roof has a basin on it tonight, waiting for the moon." Morning: "Basins on every roof, still full. Nobody wants to be the first to tip theirs out."
 
@@ -242,7 +246,7 @@ Lines are Cheryl's descriptions unless labeled otherwise. Each line is one text 
 
 **Neighbor's door** (14, 11): Dusk: "Her door. She's up on the roof with her sheets, where she always is on Moonshine Night." Morning: "Shut. She's upstairs being disappointed at her sheets."
 
-**Windows** (any `w` in the facade): "Blue shutters. Everyone in Tessel has blue shutters. Nobody remembers deciding."
+**Windows** (any `w` in the facade): "Blue shutters. Everyone in Tessel has blue shutters, except Her Next Door, who has green ones and opinions."
 
 ### Court
 
@@ -253,7 +257,7 @@ Lines are Cheryl's descriptions unless labeled otherwise. Each line is one text 
 - After the trade: "A thimble queen, a cork bishop, and my pepper mill. Gerald's in trouble."
 - Morning: "Every piece has slid to the lemon-tree end of the board. The pepper king is holding firm."
 
-**Gerald's chair** (4, 16): "Gerald's chair. Nobody's sat in it for eleven years. Including Gerald."
+**Gerald's chair** (4, 16): "Gerald's chair. Nobody's sat in it for seventeen years. Including Gerald."
 
 **Well** (9–10, 16–17)
 - Dusk: First: "The old well, with an iron grate over it. Dry for as long as anyone remembers." / "Drop a pebble and you never hear it land. Children love it. Parents don't." Then: the second line only.
@@ -266,6 +270,10 @@ Lines are Cheryl's descriptions unless labeled otherwise. Each line is one text 
 
 **Bench** (16–17, 12): "The bench. It soaks up sun all day and holds on to it all evening, like a cat."
 
+**The Pelletiers' cat** (17, 19 at dusk; 12, 12 in the morning)
+- Dusk: "The Pelletiers' cat. Minding the house while they're away. Badly."
+- Morning: First: "She's moved to the uphill side of the court, staring at the well." / "I didn't know the court had an uphill side." Then: "Still staring at the well. So am I, now."
+
 **Geraniums** (any `p`): "Geraniums. Everyone in Tessel has geraniums. Nobody remembers planting them."
 
 **Pelletiers' gate** (0, 19)
@@ -276,7 +284,7 @@ Lines are Cheryl's descriptions unless labeled otherwise. Each line is one text 
 - First: "Someone has tried to bring a piano up the Squeeze. The Squeeze has won."
 - Second: "There's a label. 'No. 9, Cistern Court.' That's me. I didn't order a piano."
 - Third: "A note on the lid: BACK AFTER MOON. DO NOT TOUCH PIANO."
-- Then: → plays one key (a slightly flat note). "Middle C. A bit flat. Aren't we all."
+- Then: → plays one key (a slightly flat note). "Middle C. A little flat. I'd know."
 - Use **soap** on it: "Not now. It isn't going anywhere."
 - Walking or clicking into the blocked Squeeze: "I'm not climbing over a piano at my age. Besides, I'm not going anywhere tonight."
 
@@ -290,6 +298,8 @@ Lines are Cheryl's descriptions unless labeled otherwise. Each line is one text 
 
 **Egg timer** (counter, 2,2): "My egg timer. It ticks like it's furious about something. Then it dings, and it's over it." → take.
 
+**Kitchen shelf** (1–2, 1): "Tins, a jar of capers I've been meaning to open since spring, and a teapot that drips."
+
 **Stove** (3, 2): "The stove. No kettle tonight. Cold baths only on Moonshine Night. That's the rule."
 
 **Clock** (4, 1): Dusk: "Nearly moonrise. Roughly. That clock has never once been right, but it's always been confident." Morning: "Half past something."
@@ -298,7 +308,7 @@ Lines are Cheryl's descriptions unless labeled otherwise. Each line is one text 
 
 **Bookshelf** (9–10, 1): "Twenty-nine years of lesson plans. In case anyone ever needs the water cycle explained in a hurry."
 
-**Bed** (9–10, 2–3): Dusk: "My bed. Later. Moon first." Morning: "I didn't sleep. I lay there listening to the house creak like a boat."
+**Bed** (9–10, 2–3): Dusk: "My bed. Later. Moon first." Morning: "I didn't sleep. The house creaked all night. Houses settle. This one felt like it was unsettling."
 
 **Photo frame** (8, 3): "I know what it is." (Always. Never changes, never explained.)
 
@@ -329,12 +339,13 @@ Sits at (2,16) on his stool, facing Gerald's empty chair. Idle animation: chin o
 
 **First talk** → `oldMan.wantsKing`
 - OLD MAN: Shh. Gerald's thinking.
-- OLD MAN: He's been thinking since Tuesday. Eleven years, this game, and I'm one move from beating him.
+- OLD MAN: He's been thinking since Tuesday. Seventeen years, this game, and I'm one move from beating him.
 - OLD MAN: …You're looking at the king. Yes, it's your plug. A very good king. Heavy. Doesn't blow over.
 - OLD MAN: Bring me another king and you can have it back. Black. Tall. Dignified. Gerald's particular.
 
 **Repeat** (alternate)
 - OLD MAN: Black. Tall. Dignified. Gerald won't play against a teaspoon. I've tried.
+- OLD MAN: I could win in one move. I won't. I'd never hear the end of it.
 - OLD MAN: Shh.
 
 **Give pepper mill** (works whether or not they've talked) → remove pepper mill; give **bath plug**; `oldMan.hasPepperKing`
@@ -354,6 +365,7 @@ Sits at (2,16) on his stool, facing Gerald's empty chair. Idle animation: chin o
 - Soap: OLD MAN: I washed on Sunday.
 - Clothes prop: OLD MAN: That's hers. I'm not getting involved. Gerald got involved once. Never again.
 - Bath plug: OLD MAN: No, no. It's retired. It was a good king. Let it rest.
+- Anything else: OLD MAN: Not now. Gerald's thinking.
 
 **Morning**
 - First: OLD MAN: Piano went down the Squeeze in the night. Took the Pelletiers' geraniums with it.
@@ -373,7 +385,7 @@ Stands at (17,5) among her sheets. Idle animation: smoothing a sheet, then stepp
 
 **Repeat** (alternate)
 - NEIGHBOR: Bring me my prop and I'll move them. I'm not unreasonable. I'm just right.
-- NEIGHBOR: Don't look at me like that. I can hear you looking.
+- NEIGHBOR: I can hear you thinking. You think very loudly for a quiet woman.
 
 **Give clothes prop** (works without talking first) → remove prop; `neighbor.sheetsMoved`
 - NEIGHBOR: My prop! Is it damp? It's damp. Never mind.
@@ -389,23 +401,25 @@ Stands at (17,5) among her sheets. Idle animation: smoothing a sheet, then stepp
 - Egg timer: NEIGHBOR: I don't need timing. The moon does the timing.
 - Soap: NEIGHBOR: Lovely. Are you saying something? You're saying something.
 - Bath plug: NEIGHBOR: That's yours. Keep it away from my laundry.
+- Anything else: NEIGHBOR: I've no use for that, and I've told you so.
 
 **Morning** (at 14,3, facing the grey sheets)
 - First: NEIGHBOR: Grey. GREY. Thirty years of Moonshine Nights and they've come out grey.
 - NEIGHBOR: The moon wasn't straight on. I don't know where it was, but it wasn't straight on.
-- NEIGHBOR: And did you feel the house lean? I said to myself, that's the bleach. I've overdone the bleach.
+- NEIGHBOR: And the house LEANED. I've changed bleach. Mother's recipe. There's vinegar in it, and something she wouldn't tell me.
 - Repeat: NEIGHBOR: Mother would be mortified. Mother would blame the moon. Mother was usually right.
 - Moon chart: NEIGHBOR: See? Outside the Gate! I knew it wasn't straight on. Not that anyone asked me.
 
 ### Sweaty Kid
 
-About ten. Runs laps of the well (see the map notes) at a steady jog, hopping the hurdle each time round. Sweat drops fly off him at the corners. When Cheryl interacts with him, he stops where he is and jogs in place, facing her, until the conversation ends.
+About ten. Runs laps of the well (see the map notes) at a steady jog, hopping the hurdle each time round. Sweat drops fly off him at the corners. Whenever Cheryl is within two tiles of him, or the player clicks or taps him, he stops where he is and jogs in place, facing her, so talking to him and giving him things work like any standing NPC.
 
 **First talk** → `kid.wantsTimer`
 - SWEATY KID: Can't stop! Stair Race in nine days. I'm gonna win it by SO much.
 - SWEATY KID: I'm doing laps. Forty laps. Or thirty. I keep losing count, because the well's round.
 - SWEATY KID: If I had a timer I'd know if I was getting faster. Mum says I'm only getting sweatier.
-- SWEATY KID: The prop? It's my hurdle. Hurdles are for the legs. Watch! → he hops the hurdle once and comes back.
+- SWEATY KID: The prop? It's my hurdle. Watch! → he hops the hurdle once and comes back.
+- SWEATY KID: Did you see? I was in the AIR.
 
 **Repeat** (alternate)
 - SWEATY KID: Need a timer! Something that ticks!
@@ -425,6 +439,9 @@ About ten. Runs laps of the well (see the map notes) at a steady jog, hopping th
 - Soap: SWEATY KID: I had a bath last WEEK.
 - Bath plug: SWEATY KID: That's a plug. …Why are you showing me a plug?
 - Clothes prop (after the trade): SWEATY KID: Keep it! Hurdles are for babies.
+- Moon chart (morning): SWEATY KID: Is that a race map? …It's just ticks. Boring ticks.
+- Hat (morning): SWEATY KID: No hats! Hats are drag!
+- Anything else: SWEATY KID: Can't carry it! Aerodynamics!
 
 **Morning** (jogging in place at 15,22 by the Squeeze)
 - First: SWEATY KID: Did you see the well? It BREATHED. I put my face over it and it breathed on me.
@@ -453,7 +470,7 @@ Specific lines (Cheryl):
 - Soap on the piano: "Not now. It isn't going anywhere."
 - Clothes prop on the sheets: "It's her prop and her sheets. She can do the honors."
 
-Generic fallback (cycle in order):
+Each NPC has its own "Anything else" decline (listed with their dialog), so giving an NPC the wrong thing always gets an answer in that NPC's voice. Cheryl's generic fallback is only for objects (cycle in order):
 - "No."
 - "That's not where that goes."
 - "I don't think so, somehow."
@@ -467,7 +484,7 @@ Generic fallback (cycle in order):
 2. Cheryl walks to (3,5), just south of the tub, turns east, and sits on the tub's edge (sit pose).
 3. **Cistern Court** fades out over two seconds. Ambient sound rises: the festival murmur from the city below. Far off, the Mayor's new clock on the Crown strikes the hour (three strokes, fading).
 4. Crossfade (one second) to the **vista**.
-5. **Vista.** The Bowl at dusk from Cheryl's roof, looking east. Foreground: Cheryl's silhouette from behind, lower left (the bun and pencil), and the rim of the tub. Below her, roofs stepping down to the water, each with a tiny basin that twinkles. Middle: the dark Bowl with a long gleam. Background: the Rim's cliffs, deep violet against a sky shading from apricot to indigo, with the Gate notch at screen center (x ≈ 128). Music: **Moonrise**, a music box playing the rhyme melody slowly.
+5. **Vista.** The Bowl at dusk from Cheryl's roof, looking east. Foreground: Cheryl's silhouette from behind, lower left (the bun and its coral tie), and the rim of the tub. Below her, roofs stepping down to the water, each with a tiny basin that twinkles. Middle: the dark Bowl with a long gleam. Background: the Rim's cliffs, deep violet against a sky shading from apricot to indigo, with the Gate notch at screen center (x ≈ 128). Music: **Moonrise**, a music box playing the rhyme melody slowly.
 6. A glow brightens behind the Rim, *to the right of the Gate* (x ≈ 176). Hold two seconds. The music box keeps playing; the murmur continues.
 7. The moon's rim appears over the cliff at x ≈ 176 and rises slowly (about six seconds until half of it is up). As it appears, the festival murmur stops dead. A single dog barks, far off. The music box slows, drifts flat, and stops mid-phrase.
 8. Internal monologue over the vista: *No.* / *It comes up in the Gate.* / *It has come up in the Gate every year of my life.*
@@ -480,7 +497,7 @@ Generic fallback (cycle in order):
 15. Cheryl stands. Internal monologue: *That drain goes to the gutter. The gutter goes to the lane.* / *That sound went somewhere else entirely.*
 16. NEIGHBOR: Did you FEEL that? The whole house went sideways! / NEIGHBOR: It's the bleach. I've overdone the bleach.
 17. Internal monologue: *Something's wrong.* / *Not wrong like a dropped stitch. Wrong like a step that isn't there.*
-18. Fade to black over two seconds. Text card, centered: **Cheryl did not sleep well.** (2.5 seconds.)
+18. Fade to black over two seconds. Text card, centered: **Morning.** (2 seconds.)
 19. Set `act1.moonrise` and the morning state. Fade in on the flat under the **day** tint, with Cheryl standing at (8,4) by the bed. Music: **Morning After**.
 20. Internal monologue: *My plug is gone. The moon came up in the wrong place. There's a piano loose in the city.* / *I'd like to know why.* / *I'd also like my plug back.*
 21. Control returns.
@@ -555,7 +572,7 @@ The tints (dusk, night, day) are global color treatments by the engine, not sepa
 
 **Music**
 - **Cistern Court**: a warm dusk theme, unhurried, in a gentle triple meter. Plucked strings and a reedy, accordion-like lead. Loops in 60–90 seconds. It becomes Cheryl's home theme for the whole game.
-- **Moonrise**: a music box playing the skipping-rhyme melody. The rhyme's tune is the game's central motif; later it returns underground and at the ending. It needs a "detune and stop mid-phrase" ending for this scene.
+- **Moonrise**: a music box playing the skipping-rhyme melody. The rhyme's tune is the game's central motif; later it returns underground and at the ending. Following the [audio direction](../audio-direction.md#leitmotifs), build it from the home motif's intervals rearranged, with a turn to the flat sixth, so that Tessel's home tune turns out to be a fragment of the Founders' rhyme. It needs a "detune and stop mid-phrase" ending for this scene.
 - **Morning After**: a thinner, slightly uneasy variation of Cistern Court, short and looping.
 
 **Sound effects**
@@ -576,10 +593,13 @@ The tints (dusk, night, day) are global color treatments by the engine, not sepa
 - [ ] Each text box fits (about 90 characters).
 - [ ] The moonrise sequence lands: the off-center moon is clear even to someone not looking for it, the silence after the murmur stops is felt, and the cut back to the roof is sharp.
 - [ ] Morning state: piano gone, Squeeze open, sheets grey, chessboard slid, well breathing, every NPC has new lines.
-- [ ] First-time players finish in 15–20 minutes.
+- [ ] First-time players finish in 8–12 minutes (up to about 20 if they look at everything).
+- [ ] The item hint appears on the first pickup and stays until the bag is opened.
+- [ ] The Kid stops for Cheryl when she's within two tiles, and when he's clicked.
 
 ## Decisions
 
+- **Revised after review (xaKh8TS_PJ):** the hurdle's position fixed on the map; an item-use hint; the Kid stops within two tiles or when clicked; per-NPC declines for wrong items; flat collision and a shelf line; the tap points to the next step; fewer ship clues in the morning (the bed and drain lines no longer say "boat" or "rope"); Gerald's game is seventeen years, so it can't be read as a clue to Cheryl's past; the Pelletiers' cat added (an existing art-kit sprite).
 - **The slice is two maps: Cistern Court (roof and court in one scrolling map) and the flat.** That's big enough for two parallel threads and small enough to polish soon.
 - **The roof and court share one map, joined by an outside stair.** Players see the vertical, stair-stacked feel of Tessel from the first minute.
 - **The flat supplies the tradeable items.** It's natural that Cheryl's own home is where her things are, and it teaches taking items before giving them.
