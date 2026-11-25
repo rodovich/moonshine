@@ -22,7 +22,7 @@ export const act4Items = {
   square_jug: {
     name: 'Square Jug',
     icon: { sheet: items_act4, frame: 'square_jug' },
-    description: "Mott's square jug. Empty. Doesn't roll. Smells like a mistake.",
+    description: "Mott's square jug. Empty. Doesn't roll. Put it down and it stays put. Smells like a mistake.",
     useOn: { object: "A square jug. It doesn't roll. That's its whole personality.", npc: "A square jug. It doesn't roll. That's its whole personality." },
   },
 };
