@@ -272,6 +272,25 @@ const ambrose5 = {
   use: ambroseUse5,
 };
 
+// The Clockmaker's door in Act 5: propped open with the bell's old clapper
+// (then shut, with the jug inside). Down over the doorway (12, 6), so it can be
+// clicked from the plaza; looking at it goes in.
+const clockshopDoor5 = {
+  id: 'clockshop_door5', x: 12, y: 5, h: 2, solid: false,
+  when: started,
+  interact: async (g) => {
+    if (!g.flag('n.clockshopDoor5')) {
+      g.setFlag('n.clockshopDoor5', 1);
+      await g.describe(g.flag('got.clapper')
+        ? "The Clockmaker's door, shut. Something square is holding it from the inside."
+        : "The Clockmaker's door, propped open with something heavy. Clocks ticking inside, all at once.");
+    }
+    g.sfx('door');
+    await g.changeMap('clockmaker_shop', 4, 6, 'up');
+  },
+  use: { '*': cherylDeclines },
+};
+
 // The tower door in Act 5: open, with Ambrose up in the belfry. (Act 2's
 // bolted door, with the Clockmaker calibrating behind it, steps aside.)
 // Looking at it, or clicking it, goes up, as Act 4's open door does.
@@ -282,7 +301,7 @@ const towerDoor5 = {
   interact: async (g) => {
     if (!g.flag('n.towerDoor5')) {
       g.setFlag('n.towerDoor5', 1);
-      await g.describe('The tower door, wide open. Ambrose is up there, waiting for moonrise.');
+      await g.describe('The tower door, unbolted at last. Ambrose is up there, waiting for moonrise.');
     }
     g.sfx('step_stairs');
     await g.changeMap('belfry', 1, 7, 'up');
@@ -325,7 +344,7 @@ export function withCrown5(def) {
       },
     ],
     triggers: (base.triggers || []).map(untilAct5),
-    entities: [...entities, ambrose5, ...(crownLinks.belfry ? [towerDoor5] : []), { id: 'clockshop_door_shut', x: 12, y: 6, solid: true, shadow: false, when: (g) => !started(g) }],
+    entities: [...entities, ambrose5, clockshopDoor5, ...(crownLinks.belfry ? [towerDoor5] : []), { id: 'clockshop_door_shut', x: 12, y: 6, solid: true, shadow: false, when: (g) => !started(g) }],
     onEnter: async (g) => {
       if (!started(g)) {
         if (after5(g)) act5Loops(g, []);

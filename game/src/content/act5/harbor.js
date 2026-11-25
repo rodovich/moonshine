@@ -117,9 +117,14 @@ const objects = [
   {
     id: 'harbor_office', x: 12, y: 3, look: 'A new note: GONE TO LOOK FOR THE LANDING. STILL.',
   },
-  ...[[5, 1], [7, 5], [13, 5], [19, 4]].map(([x, w]) => ({
+  // The house fronts: above the washing line (10-15), the washing; elsewhere, the houses.
+  ...[[10, 2], [13, 3]].map(([x, w]) => ({
     id: `fronts_${x}`, x, y: 2, w, h: 2, lookKey: 'harbor_laundry',
     look: 'Every line of washing in Tessel is pointing the same way. Out to sea.',
+  })),
+  ...[[5, 1], [7, 3], [16, 2], [19, 4]].map(([x, w]) => ({
+    id: `fronts_${x}`, x, y: 2, w, h: 2, lookKey: 'harbor_fronts5',
+    look: 'The harbor front, shutters fastened against the wind. Nobody on the quay is looking at the houses.',
   })),
   // Either side of the door, reaching down to row 3, so they can be reached from the quay.
   ...[26, 29].map((x) => ({ id: `lighthouse5_${x}`, x, y: 0, h: 4, lookKey: 'lighthouse5', look: 'The lighthouse, lit in broad daylight. Somebody up there has seen what I\'ve seen.' })),
@@ -127,7 +132,7 @@ const objects = [
   ...[7, 8].map((x) => ({ id: `crate5_${x}`, x, y: 4, lookKey: 'crates5', look: 'Crates. Stencilled MAINLAND, and waiting for a ferry that\'s six feet below them.' })),
   ...[8, 18].map((x) => ({ id: `bollard5_${x}`, x, y: 8, lookKey: 'bollards5', look: "A bollard, with the ferry's rope round it, pulled as tight as a fiddle string." })),
   { id: 'bollard5_13', x: 13, y: 8, look: "Mott's bollard. He's not sitting on it today. He's standing, and watching." },
-  ...[6, 18].map((x) => ({ id: `door5_${x}`, x, y: 2, h: 2, lookKey: 'harbor_doors5', look: 'Not my door. Fishing nets drying on the handle, flapping out to sea.' })),
+  ...[6, 18].map((x) => ({ id: `door5_${x}`, x, y: 2, h: 2, lookKey: 'harbor_doors5', look: 'Not my door. Shut against the wind, like every door on the harbor front.' })),
 ].map((o) => ({ solid: false, use: { '*': cherylDeclines }, ...o }));
 
 const teethSprite = {
@@ -236,7 +241,7 @@ const WINDOW_LOOKS = {
 async function lampLook(g) {
   if (doorOpen(g)) return g.describe("The lamp, turning. She's had her eye to the telescope the whole time.");
   if (hasTelescope(g)) return g.describe("The lamp. Brightest light in Tessel. She's let me near it.");
-  return g.describe('The lamp, lit in the middle of the afternoon. Brightest light in Tessel.', "She's standing between me and it.");
+  return g.describe('The lamp, lit in the middle of the afternoon. Brightest light in Tessel.', "And she won't let me near it.");
 }
 
 const lampObjects = [

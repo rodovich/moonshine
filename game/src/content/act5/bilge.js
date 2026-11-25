@@ -306,7 +306,8 @@ async function kidThrowsDisc(g) {
 
 const objects = [
   {
-    id: 'bucket5', x: 6, y: 4, kind: 'object',
+    // On the open quay between the stalls' awnings, where it can be seen.
+    id: 'bucket5', x: 7, y: 4, kind: 'object', solid: false, // the quay's only way west at this row
     sprite: { sheet: items_act5, frame: 'bucket_empty' },
     when: (g) => !g.flag('got.bucket'),
     look: "A bucket, upside down by her stall. It's hers. I'd have to ask.",
@@ -437,7 +438,8 @@ const movers = [
 
 const piano = {
   // Up to the quay wall, so it can be looked at from the quay; drawn on the mud.
-  id: 'piano5', x: 15, y: 7, w: 2, h: 4, solid: false, kind: 'object',
+  // One tile wide (15), drawn back over both, so it doesn't overlap the Other Mover's hotspot at 16.
+  id: 'piano5', x: 15, y: 7, w: 1, h: 4, solid: false, kind: 'object', offset: [8, 0],
   sprite: { sheet: bilge_piano, frame: 'piano_mud' },
   look: 'The piano, upright on the mud, lid open. It got further down Tessel than any of us.',
 };
