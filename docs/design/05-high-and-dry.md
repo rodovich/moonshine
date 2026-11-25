@@ -474,6 +474,7 @@ At his bench, repairing the clock drive she unclamped. Calm now, in a brittle wa
 - Polish on anything: "It's for a lighthouse. It says so on the tin."
 - Clapper on anything but the socket: "It's heavy, and it wants to be somewhere particular."
 - Disc on the lamp before the polish: the Keeper's decline.
+- **The Ship Plan in Act 5** (inventory look, first time): "The chain runs from the bow to the anchor. Beside it, at the bow, a little drawing of a tooth." / "Rounded at one end, notched at the other." Later looks: the second line only. This lets a player recognize the doorstop before going down the rope, so the clapper can be fetched on the way and not after a trip to the Windlass Room.
 
 ## The disc and the Kid
 
@@ -591,6 +592,7 @@ The Act 5 builder (b_30JU3Nrc) built this act on `content/act5`; its full list i
 
 - **Act 5 is one afternoon, ending at dusk in the Windlass Room** with the Tooth replaced, so Act 6 can begin with the bell.
 - **Seating the clapper moves from Act 6 to the end of Act 5.** It's the act's payoff; Act 6 then starts with the wait and the bell. (The story bible is updated to match.)
+- **No shortcut between the Crown and the Bilge in Act 5.** A blind playtester crossed town about five times and suggested one (the speaking tube, the hundredth step, or the Fountain hatch). None fits: the tube carries sound, the hundredth step leads to Act 3's maps, which don't reach the bow, and the Fountain is flowing over its hatch. The climb up and down the Steps is the town's shape. Instead, the Ship Plan's Act 5 look draws the tooth, so players can fetch the clapper before they go down the rope, which saves the longest trip.
 - **The Kid jumps down for the relay, so the rope and the door are independent.** Cheryl needs both to get through the door herself.
 - **The disc comes back, dimmed,** so Cheryl still carries a light for Act 6.
 - **The Teeth are a visible, growing sprite on the Harbor horizon** and a changing look from the lighthouse, never a fail state.
