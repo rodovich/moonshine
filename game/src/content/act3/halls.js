@@ -224,6 +224,10 @@ const PIPE_LOOKS = [
   "Somebody's doorstep. I wonder whose.",
 ];
 
+// Things on the west end (x1-11) are out of reach once it floods (for
+// npm run check:keyboard; nothing there matters after the valve).
+const underFlood = (o) => (o.x <= FLOOD_X ? { ...o, unreachable: (g) => (flooded(g) ? 'under the passage water, after the valve' : null) } : o);
+
 // The flooded west end: the passage's water, over the ladder's foot.
 async function westFloodLook(g) {
   if (!g.flag('n.westFlood')) {
@@ -335,7 +339,7 @@ export const hallsMap = composedMap(composeHalls, {
     g.setWrongness(WRONGNESS);
     keepLoops(g, valveTurned(g) ? [] : ['water_gush']);
   },
-  entities: [...hallObjects, ...pipes, westFlood],
+  entities: [...hallObjects, ...pipes].map(underFlood).concat(westFlood),
 });
 
 // ---------------------------------------------------------------------------
