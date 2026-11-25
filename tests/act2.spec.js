@@ -1,11 +1,12 @@
-// Plays Act 2 part 1 (docs/design/02-city.md) start to finish: once by
-// keyboard alone, once by pointer alone, plus a check that the Sweaty Kid
-// never blocks the gap beside the Counting Woman. Screenshots of key moments
-// go to tests/screenshots/act2-*.
+// Plays Act 2 (docs/design/02-city.md) start to finish: by keyboard with the
+// piano thread first, by pointer with the piano first, and by keyboard the
+// long way round (Goat Path, Harbor, Bilge) with the Count thread first, so the
+// Counting Woman climbs over the piano. Plus a check that the Sweaty Kid never
+// blocks the gap beside the Counting Woman, and a pointer tour of part 2's
+// people. Screenshots of key moments go to tests/screenshots/act2-*.
 //
-// Both runs start on Lamp Street the morning after, carrying what a player
-// usually has from the opening (soap, hat, moon chart). In part 1 the only
-// way to Fountain Square is through the arch, so the piano always goes first.
+// The runs start on Lamp Street the morning after, carrying what a player
+// usually has from the opening (soap, hat, moon chart).
 import { test, expect } from '@playwright/test';
 import { snap, waitFor, shot } from './helpers.js';
 
@@ -198,7 +199,19 @@ async function kbStepDownAndUse(page, x, item = null) {
 
 // ---- pointer --------------------------------------------------------------
 
+// The camera glides after a map change or a long walk; a tile's screen
+// position is only good once it has stopped.
+async function cameraStill(page) {
+  for (let i = 0; i < 30; i++) {
+    const a = await page.evaluate(() => ({ ...window.moonshine.world.cam }));
+    await page.waitForTimeout(60);
+    const b = await page.evaluate(() => ({ ...window.moonshine.world.cam }));
+    if (a.x === b.x && a.y === b.y) return;
+  }
+}
+
 async function clickTileAt(page, tx, ty) {
+  await cameraStill(page);
   const p = await page.evaluate(([x, y]) => window.moonshine.tileToClient(x, y), [tx, ty]);
   await page.mouse.click(p.x, p.y);
 }
@@ -265,9 +278,13 @@ async function ptrInteract(page, id) {
     // Click the footprint's bottom-left tile (the part nearest the floor).
     const tx = e.x, ty = e.y + e.h - 1;
     if (await onScreen(page, tx, ty)) {
+      // If the walk over is interrupted, click again, as a player would.
+      const holding = (await snap(page)).holding;
       await clickTileAt(page, tx, ty);
-      await waitFor(page, () => window.moonshine.snapshot().busy || !!window.moonshine.snapshot().text, null, 12000);
-      return;
+      const ok = await waitFor(page, () => window.moonshine.snapshot().busy || !!window.moonshine.snapshot().text, null, 8000).then(() => true, () => false);
+      if (ok) return;
+      if (holding && !(await snap(page)).holding) throw new Error(`lost hold of ${holding} on the way to ${id}`);
+      continue;
     }
     const s = await snap(page);
     const near = await page.evaluate((id) => {
@@ -300,14 +317,31 @@ async function ptrOpenBag(page, item) {
 }
 
 // Tap an item to select it, and tap it again to use it.
+// Each click is checked before the next, so a slow frame under load can't
+// merge or drop one.
 async function ptrUse(page, item, id) {
   const slot = await ptrOpenBag(page, item);
-  const sel = await page.evaluate(() => { const s = window.moonshine.world.inventory.openState; return s.owned[s.index]; });
-  if (sel !== item) {
+  for (let tries = 0; tries < 6; tries++) {
+    const st = await page.evaluate(() => {
+      const w = window.moonshine.world;
+      const s = w.inventory.openState;
+      return { holding: w.control.holding, open: !!s, sel: s ? s.owned[s.index] : null };
+    });
+    if (st.holding === item) break;
+    if (!st.open) {
+      await clickGame(page, 241, 14);
+      await waitFor(page, () => window.moonshine.snapshot().inventoryOpen);
+      continue;
+    }
     await page.mouse.click(slot.x, slot.y);
-    await page.waitForTimeout(100);
+    // Wait for the click to register: the selection moves, or the bag closes with the item held.
+    await waitFor(page, ([item, was]) => {
+      const w = window.moonshine.world;
+      const s = w.inventory.openState;
+      return w.control.holding === item || (s && s.owned[s.index] === item && was !== item);
+    }, [item, st.sel], 2000).catch(() => {});
+    await page.waitForTimeout(150);
   }
-  await page.mouse.click(slot.x, slot.y);
   await waitFor(page, (item) => window.moonshine.snapshot().holding === item, item);
   await waitFor(page, () => !window.moonshine.snapshot().busy);
   await ptrInteract(page, id);
@@ -361,11 +395,6 @@ test('keyboard: Act 2 part 1', async ({ page }) => {
   await kbInteract(page, 'girl_2');
   log = await read();
   expect(joined(log)).toContain('Stout is a beer.');
-
-  // The shut Goat Path gate.
-  await kbInteract(page, 'goat_gate');
-  log = await read();
-  expect(joined(log)).toContain('GOATS ON THE PATH TODAY');
 
   // Up to the Crown: Ambrose, the Clockmaker, the parapet.
   await kbExit(page, 22, 1, 'up', 'crown');
@@ -478,12 +507,6 @@ test('keyboard: Act 2 part 1', async ({ page }) => {
   await page.keyboard.press('x');
   await waitFor(page, () => window.moonshine.snapshot().idle);
 
-  // The rope down to the Bilge (part 2).
-  await kbWalk(page, 11, 14);
-  await kbWalk(page, 11, 15);
-  log = await read();
-  expect(joined(log)).toContain('CANAL CLEANING');
-
   // Back up the Steps; the guidebook moves the Counting Woman.
   await kbExit(page, 11, 1, 'up', 'hundred_steps');
   await kbInteract(page, 'counting_woman', 'guidebook');
@@ -581,7 +604,8 @@ test('pointer: Act 2 part 1', async ({ page }) => {
   let s = await snap(page);
   expect(s.flags['counter.left']).toBeTruthy();
 
-  // Fountain Square: she's with the Mayor now.
+  // Her step: wait for the Kid to run past it (a click on him would use the crowbar on him).
+  await waitFor(page, () => !window.moonshine.world.entities.some((e) => e.id === 'kid' && e.x <= 9 && e.y >= 18 && e.y <= 21), null, 20000);
   await ptrUse(page, 'crowbar', 'hollow_step_free');
   log = await read();
   expect(joined(log)).toContain('the hundredth step goes down');
@@ -621,5 +645,171 @@ test('the Kid never blocks the gap beside the Counting Woman', async ({ page }) 
     return k.patrolHeld && k.x === 10 && k.y >= 18 && k.y <= 24;
   });
   expect(held).toBeFalsy();
+  expect(errors).toEqual([]);
+});
+
+// Every character and object on every Act 2 map has a tile beside it that
+// Cheryl can walk to from the map's spawn (so it can be looked at, talked to,
+// or used, by keyboard and by pointer). Characters that wander or run laps are
+// checked where they start.
+for (const [map, flags] of [
+  ['lamp_street', 'act2.started'], ['crown', 'act2.started'], ['archive', 'act2.started'], ['crypt', 'act2.started'],
+  ['hundred_steps', 'act2.started,n.stepsArrived'], ['hundred_steps', 'act2.started,n.stepsArrived,piano.slid,counter.left'],
+  ['fountain_square', 'act2.started'], ['fountain_square', 'act2.started,piano.slid,counter.left'], ['shop', 'act2.started'],
+  ['goat_path', 'act2.started'], ['harbor', 'act2.started'], ['lamp_room', 'act2.started'], ['bilge', 'act2.started'],
+]) {
+  test(`every object can be reached: ${map} (${flags})`, async ({ page }) => {
+    const errors = await start(page, `?map=${map}&flags=${flags}&seed=1`);
+    await readThrough(page, kbAdvance(page));
+    const unreachable = await page.evaluate(() => {
+      const w = window.moonshine.world;
+      const out = [];
+      for (const e of w.entities) {
+        if (e.isPlayer || !e.visible) continue;
+        const d = e.def;
+        if (!(d.interact || d.use || d.look || d.looks || d.talk || d.talks)) continue;
+        const spots = w.interactSpots(e).filter((s) => !w.isExit(s.x, s.y));
+        if (!spots.length || !w.pathFor(w.player, spots.map((s) => [s.x, s.y]))) {
+          if (!spots.some((s) => s.x === w.player.x && s.y === w.player.y)) out.push(e.id);
+        }
+      }
+      return out;
+    });
+    expect(unreachable).toEqual([]);
+    expect(errors).toEqual([]);
+  });
+}
+
+test('keyboard: the long way round, the Count thread first', async ({ page }) => {
+  test.setTimeout(480000);
+  const errors = await start(page);
+  const adv = kbAdvance(page);
+  const read = (opts) => readThrough(page, adv, opts);
+  await waitFor(page, () => !!window.moonshine.snapshot().text);
+  await read();
+
+  // The Goat Path, from Lamp Street's west edge.
+  await kbWalk(page, 1, 10);
+  await page.keyboard.press('ArrowLeft');
+  let log = await read();
+  expect(joined(log)).toContain('The Goat Path. Down the back of the island');
+  await waitFor(page, () => window.moonshine.snapshot().map === 'goat_path', null, 6000);
+  await waitFor(page, () => window.moonshine.snapshot().idle, null, 6000);
+  await shot(page, 'act2-20-goat-path');
+  await kbInteract(page, 'shack_window');
+  log = await read();
+  expect(joined(log)).toContain('a still');
+  await kbInteract(page, 'goat_2');
+  log = await read();
+  expect(joined(log)).toContain('Meh.');
+
+  // Down to the Harbor: Mott, the moon chart, a swig.
+  await kbExit(page, 1, 22, 'down', 'harbor');
+  await kbInteract(page, 'mott');
+  await readUntil(page, adv, "only because I'm right");
+  await shot(page, 'act2-21-mott');
+  await read();
+  await kbInteract(page, 'mott', 'moon_chart');
+  log = await read();
+  expect(joined(log)).toContain("Today I'm drinking.");
+  await kbInteract(page, 'sea_view');
+  log = await read();
+  expect(joined(log)).toContain('the Teeth');
+
+  // The lamp room.
+  await kbExit(page, 27, 4, 'up', 'lamp_room');
+  await kbInteract(page, 'keeper');
+  await readUntil(page, adv, 'You look at the lamp.');
+  await shot(page, 'act2-22-lamp-room');
+  await read();
+  await kbExit(page, 3, 6, 'down', 'harbor');
+
+  // The Bilge: the Fishmonger, the Boatman, wet feet.
+  await kbExit(page, 1, 7, 'left', 'bilge');
+  await kbInteract(page, 'fishmonger');
+  await readUntil(page, adv, 'LOOK at it!');
+  await shot(page, 'act2-23-bilge');
+  await read();
+  await kbInteract(page, 'boatman');
+  log = await read();
+  expect(joined(log)).toContain('A boatman stays in his boat.');
+  await kbInteract(page, 'water_stairs');
+  log = await read();
+  expect(joined(log)).toContain('keep going');
+  await kbWalk(page, 7, 12);
+  await kbWalk(page, 4, 12);
+  log = await read();
+  expect(joined(log)).toContain('under an inch of water');
+
+  // Up to Fountain Square, the back way: the Tourist's hat.
+  await kbExit(page, 11, 1, 'up', 'fountain_square');
+  await kbInteract(page, 'tourist');
+  await read();
+  await kbInteract(page, 'piano_arch');
+  log = await read();
+  expect(joined(log)).toContain('back end of a piano');
+  await kbInteract(page, 'tourist', 'hat');
+  await read();
+  expect((await snap(page)).items).toContain('guidebook');
+
+  // All the way back round to the top of the Steps.
+  await kbExit(page, 11, 16, 'down', 'bilge');
+  await kbExit(page, 30, 12, 'right', 'harbor');
+  await kbExit(page, 2, 1, 'up', 'goat_path');
+  await kbExit(page, 13, 1, 'up', 'lamp_street');
+  await kbExit(page, 27, 14, 'down', 'hundred_steps');
+  await read();
+
+  // The guidebook: she storms off and climbs straight over the piano.
+  await kbInteract(page, 'counting_woman', 'guidebook');
+  await readUntil(page, adv, "That's a PIANO!");
+  await shot(page, 'act2-24-over-the-piano');
+  log = await read();
+  expect(joined(log)).toContain('And these are MY STEPS.');
+  expect((await snap(page)).flags['counter.left']).toBeTruthy();
+
+  // Then the piano, the crowbar, and the hundredth step.
+  await kbInteract(page, 'piano', 'soap');
+  await read();
+  expect((await snap(page)).flags['piano.slid']).toBeTruthy();
+  await kbInteract(page, 'crowbar');
+  await read();
+  await kbStepDownAndUse(page, 9, 'crowbar');
+  log = await read();
+  expect(joined(log)).toContain('And the hundredth step goes down.');
+  await page.keyboard.press('ArrowDown');
+  await waitFor(page, () => !!window.moonshine.snapshot().choice, null, 4000);
+  await settle(page);
+  await page.keyboard.press('z');
+  await waitFor(page, () => window.moonshine.snapshot().map === 'step_gallery', null, 20000);
+  expect(errors).toEqual([]);
+});
+
+test("pointer: the long way round, part 2's people", async ({ page }) => {
+  test.setTimeout(240000);
+  const errors = await start(page, '?map=bilge&x=11&y=5&facing=down&flags=act2.started&items=moon_chart');
+  const adv = ptrAdvance(page);
+  const read = (opts) => readThrough(page, adv, opts);
+  await ptrInteract(page, 'boatman');
+  let log = await read();
+  expect(joined(log)).toContain('A boatman stays in his boat.');
+  await ptrInteract(page, 'fishmonger');
+  await read();
+  await ptrWalk(page, 30, 12);
+  await clickTileAt(page, 31, 12);
+  await waitFor(page, () => window.moonshine.snapshot().map === 'harbor', null, 8000);
+  await waitFor(page, () => window.moonshine.snapshot().idle, null, 6000);
+  await ptrUse(page, 'moon_chart', 'mott');
+  log = await read();
+  expect(joined(log)).toContain("Today I'm drinking.");
+  await ptrInteract(page, 'ferry');
+  log = await read();
+  expect(joined(log)).toContain('Persistence');
+  await ptrExit(page, 27, 3, [27, 4], 'lamp_room');
+  await ptrInteract(page, 'keeper');
+  await read();
+  await ptrInteract(page, 'windows');
+  log = await read();
+  expect(joined(log)).toContain('She has her back to all of it.');
   expect(errors).toEqual([]);
 });

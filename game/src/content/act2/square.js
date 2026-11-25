@@ -1,7 +1,7 @@
 // Fountain Square (24 × 18), the middle of town, and the Shop (10 × 8) on it.
-// From docs/design/02-city.md. In part 1 the way down to the Bilge is roped
-// off; the only way in is through the arch from the Hundred Steps, once the
-// piano has gone through it first.
+// From docs/design/02-city.md. Two ways in: the arch from the Hundred Steps
+// (once the piano has gone through it first), and the stair up from the Bilge,
+// the long way round.
 //
 //      x 0         1         2
 //        012345678901234567890123
@@ -10,11 +10,11 @@
 //     3  ####D######::######D####   Shop door (4, 3); Mayor's door (19, 3), locked
 //     7  ..........FFFF..........   the Fountain (10-13, 7-10)
 //    12  .ss.ss.........cc.....cc   ss market stalls; café tables and chairs
-//    16  rrrrrrrrrrr==rrrrrrrrrrr   the stair down to the Bilge, roped off (11-12)
+//    16  rrrrrrrrrrr==rrrrrrrrrrr   the stair down to the Bilge (11-12)
 
 import { composedMap, blankGrid } from '../opening/grid.js';
 import { act2Tiles } from './tiles.js';
-import { layout, house, pave, lowRoof, LOOKS, pianoSprite, bump, cycle, firstMeet, getItem, cherylDeclines } from './common.js';
+import { layout, house, pave, lowRoof, LOOKS, pianoSprite, bump, cycle, firstMeet, getItem, cherylDeclines, actWrongness } from './common.js';
 import { fish } from '../../art/landmarks.js';
 
 const W = 24, H = 18;
@@ -57,14 +57,14 @@ function compose(g) {
   // ---- Lamps ----
   L.lamp(3, 5); L.lamp(20, 5);
 
-  // ---- South: roofs below, and the stair down to the Bilge, roped off ----
+  // ---- South: roofs below, and the stair down to the Bilge ----
   for (let y = 16; y < H; y++) for (let x = 0; x < W; x++) L.set('ground', x, y, lowRoof(x, y), true);
   for (let x = 0; x < W; x++) L.set('ground', x, 16, 'street:retain_top', true);
   for (const y of [16, 17]) {
-    L.set('ground', 11, y, 'steps:steps_l', true);
-    L.set('ground', 12, y, 'steps:steps_r', true);
+    L.set('ground', 11, y, 'steps:steps_l', false);
+    L.set('ground', 12, y, 'steps:steps_r', false);
+    L.step[y][11] = L.step[y][12] = 'step_stairs';
   }
-  L.set('detail', 10, 16, 'act2_props:rope_l'); L.set('detail', 11, 16, 'act2_props:rope_m'); L.set('detail', 12, 16, 'act2_props:rope_r');
   return L.done();
 }
 
@@ -76,9 +76,12 @@ const FOUNTAIN = [
   "It's lower than it should be. A finger's width. You'd only notice if you'd stared at it for thirty years.",
 ];
 
+const FISH = "A bronze fish, spouting. Its fins look like oars, if you squint. I've never squinted at it before.";
+
 const fountainLook = async (g) => {
   if (slid(g) && bump(g, 'fountain.piano') === 0) return g.describe('The piano has come to rest against the Fountain. The fish looks offended.');
   const n = bump(g, 'fountain');
+  if (n === 1) return g.describe(FISH);
   return g.describe(...[].concat(FOUNTAIN[Math.min(n, 1)]));
 };
 
@@ -100,13 +103,6 @@ const objects = [
     id: 'shop_window', x: 6, y: 2, w: 2, h: 2,
     interact: (g) => hatWindow(g),
   },
-  {
-    id: 'rope', x: 10, y: 16, w: 3,
-    looks: [
-      ['A rope across the stair down to the Bilge, and a sign: CANAL CLEANING. KEEP OUT. -- by order of the Mayor.', "The Bilge will keep. It's kept for five hundred years."],
-      'CANAL CLEANING. KEEP OUT. I taught him to spell "canal." He still puts two Ns in it in his head.',
-    ],
-  },
   ...[[0, 11], [13, 11]].map(([x, w]) => ({ id: `south_${x}`, x, y: 16, w, lookKey: 'south_view', look: 'The lower town, roofs and laundry all the way down to the canals.' })),
 ].map((o) => ({ solid: false, use: { '*': cherylDeclines }, ...o }));
 
@@ -123,7 +119,6 @@ const fishStatue = {
   id: 'fish', x: 11, y: 8, w: 2, solid: false, kind: 'object',
   sprite: { sheet: fish, frame: 'fish' },
   offset: [0, 3],
-  look: "A bronze fish, spouting. Its fins look like oars, if you squint. I've never squinted at it before.",
 };
 
 // The piano: its back end in the arch, then against the Fountain once it slides.
@@ -271,19 +266,9 @@ export const squareMap = composedMap(compose, {
   exits: [
     { x: 11, y: 0, w: 2, to: 'hundred_steps', at: [6, 39], facing: 'up', when: slid, sfx: 'step_stone' },
     { x: 4, y: 3, to: 'shop', at: [4, 6], facing: 'up' },
+    { x: 11, y: 17, w: 2, to: 'bilge', at: [11, 4], facing: 'down', sfx: 'step_stairs' },
   ],
-  triggers: [
-    {
-      // The first time Cheryl walks up to the rope.
-      x: 11, y: 15, w: 2,
-      when: (g) => !g.flag('n.ropeSeen'),
-      run: async (g) => {
-        g.setFlag('n.ropeSeen', 1);
-        g.facePlayer('down');
-        await g.describe('A rope across the stair down to the Bilge, and a sign: CANAL CLEANING. KEEP OUT. -- by order of the Mayor.', "The Bilge will keep. It's kept for five hundred years.");
-      },
-    },
-  ],
+  onEnter: async (g) => { actWrongness(g); },
   entities: [...objects, fishStatue, pianoArch, pianoFountain, ...movers, mayor, countingWoman, tourist],
 });
 
@@ -334,7 +319,7 @@ const shopObjects = [
   },
   { id: 'shelves', x: 1, y: 1, w: 4, lookKey: 'shop_shelves', look: 'Brass polish, lamp oil, string, lanterns. Everything a lighthouse could want. All display.' },
   { id: 'shelves_e', x: 8, y: 1, lookKey: 'shop_shelves', look: 'Brass polish, lamp oil, string, lanterns. Everything a lighthouse could want. All display.' },
-  { id: 'barometer', x: 7, y: 0, look: "The barometer says FAIR. It's said FAIR for nine years. He won't tap it in case it changes its mind." },
+  { id: 'barometer', x: 7, y: 0, h: 2, look: "The barometer says FAIR. It's said FAIR for nine years. He won't tap it in case it changes its mind." },
   ...[2, 6].map((x) => ({ id: `counter_${x}`, x, y: 3, lookKey: 'counter', look: 'A counter, polished by a lifetime of not selling things.' })),
 ].map((o) => ({ solid: false, use: { '*': cherylDeclines }, ...o }));
 
@@ -373,6 +358,6 @@ export const shopMap = composedMap(composeShop, {
   step: 'step_wood',
   spawn: [4, 6],
   exits: [{ x: 4, y: SH - 1, w: 2, to: 'fountain_square', at: [4, 4], facing: 'down' }],
-  onEnter: async (g) => { g.sfx('shop_bell'); },
+  onEnter: async (g) => { actWrongness(g); g.sfx('shop_bell'); },
   entities: [...shopObjects, shopkeeper],
 });

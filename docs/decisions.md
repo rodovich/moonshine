@@ -38,7 +38,7 @@ This file records the project's technical and process decisions. Creative decisi
 - **Content is data plus small scripts.** Maps, characters, items, and text live under `game/src/content/`. Interactions and cutscenes are async functions that call a small engine API (say a line, give an item, set a flag, move a character, change map, play music). Game state is a set of flags plus the inventory, saved to `localStorage`.
 - **Debug hooks for testing.** URL parameters let a tester start at a given map and position with given flags and items (documented in the engine README), so reviewers and Playwright tests can reach any scene quickly.
 - **New Game starts the opening** (Cheryl's roof in Cistern Court). The engine test maps stay in the game but are reachable only through debug parameters (`?map=test_street`). The opening's content and its build decisions are in `game/src/content/opening/README.md`. (Added by the opening content task.)
-- **Each act's content lives in its own folder under `game/src/content/`** with a README of its build decisions and stand-ins: `opening/`, then `act2/` (Act 2 part 1; its README is `game/src/content/act2/README.md`). Act folders reuse the opening's `grid.js` (maps from a `compose(g)` function) and dialog helpers rather than copying them. (Added by the Act 2 content task.)
+- **Each act's content lives in its own folder under `game/src/content/`** with a README of its build decisions and stand-ins: `opening/`, then `act2/` (both parts of Act 2; its README is `game/src/content/act2/README.md`). Act folders reuse the opening's `grid.js` (maps from a `compose(g)` function) and dialog helpers rather than copying them. (Added by the Act 2 content task.)
 
 ## Engine
 
