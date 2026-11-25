@@ -55,6 +55,7 @@ Module `game/src/art/act4_surface.js`. Composed on the dev page: `/dev/art.html?
 | **Dry:** wet quay paving and stranded fish | `bilge_flood:wet_<q>`; `fish_stranded_a`, `fish_stranded_b` (the flopping fish is a sprite in "Sprites and icons") | ground; objects |
 | **Dry:** boats on their sides in the mud, keels toward the camera, oars spilled, at (3–4, 10), (8–9, 10), (19–20, 10); the Boatman's boat upright at (22–23, 10) | `bilge_boats:boat_side_a` (blue), `boat_side_b` (coral, mirrored), `boat_side_c` (white); `boat_upright` (32×16, anchored bottom-centre on the boat's two tiles) | sprite |
 | **Dry:** the piano on the mud, upright, lid open (15–16, 10) | `bilge_piano:piano_mud` | sprite |
+| **Every state:** the west end, where the Goat Path comes down onto the south quay (structure pass) | Stage 1 (0, 11–13): `bilge_west:steps_n_f1`, `steps_m_f1`, `steps_s`. Stage 2: `steps_n_f2`, `steps_m_f2`, `steps_s_f2`. Dry (0, 12–14): `steps_n_dry`, `steps_m_dry`, `steps_s_dry`. The cliff in place of the south roofs at x0: `bilge_west:cliff_a`, `cliff_b`. The 'HARBOR →' sign `signpost:harbor_0..2` stands on the south quay at the east end. See [art-act2b.md](art-act2b.md) | ground; objects |
 
 ### Ice Cellar (10 × 8)
 
