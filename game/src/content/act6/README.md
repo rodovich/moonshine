@@ -83,7 +83,7 @@ Where the design left something open, or didn't work in play, this is what the b
 - **The door home is a scripted exit** in the epilogue: "Not yet" until the piano has come, then the final scene; after the credits it's an ordinary door again.
 - **The piano stands at (4-5, 12)**, east of Cheryl's door (the design's position; the art index's suggested spot west of it would cover the door). The Movers wait at (6, 12) and (7, 13) and leave down the Squeeze.
 - **The Stair Race** comes up flight 4 and flight 3; the finish tape is across flight 3 at row 21, just below the open hundredth step, where the Counting Woman (7, 18) counts. The Kid starts at the top of landing 3 and stops on the line; the two runners stop on landing 3. Two crowds stand on landing 2 and two on landing 3; the bunting is over landing 2.
-- **The rope barrier round the open hundredth step can be walked through.** The open step spans the whole of flight 3, so a solid barrier would cut the Steps in two. It sits on the ground layer, and the open step no longer asks "Go down?" in the epilogue.
+- **The rope barrier round the open hundredth step can be walked through.** The open step spans the whole of flight 3, so a solid barrier would cut the Steps in two. It sits on the ground layer. In the epilogue, walking onto the open step (Act 2's exit at (10, 19)) gets "Not today. I've been down enough for one week." and a step back, instead of "Go down?".
 - **The Woman with Basin tips her basin when talked to**, on her doorstep (7, 16).
 - **The Tourist stands at (18, 14) with her luggage at (19, 15)**, by the café.
 - **The Crown's clock tick stops** in the epilogue (the clock is gone).
