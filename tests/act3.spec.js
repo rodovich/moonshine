@@ -366,6 +366,14 @@ test('keyboard: Act 3', async ({ page }) => {
   expect(joined(log)).toContain("I've opened more than one lid.");
   expect((await snap(page)).flags['gallery.lever']).toBeTruthy();
 
+  // Ottilie said floors, where the light falls: a wall is wrong, the lit floor a near miss.
+  await kbInteract(page, 'gallery_wall_8', 'paper_charcoal');
+  log = await read();
+  expect(joined(log)).toContain('Ottilie said floors, where the light falls.');
+  await kbInteract(page, 'mirror', 'paper_charcoal');
+  log = await read();
+  expect(joined(log)).toContain('nothing written on it. Not this one.');
+
   // The mirror: up-left to the Sisters, straight up to the moons, up-right to the hatch.
   await kbInteract(page, 'mirror');
   log = await readUntil(page, adv, 'Three bars');
@@ -490,6 +498,8 @@ test('keyboard: Act 3', async ({ page }) => {
   await shot(page, 'act3-12-ship-plan');
   await page.keyboard.press('z');
   await waitFor(page, () => !window.moonshine.snapshot().picture, null, 5000);
+  log = await read();
+  expect(joined(log)).toContain("It's a map. Of us, I think.");
   await page.waitForTimeout(400);
   if ((await snap(page)).inventoryOpen) { await page.keyboard.press('x'); await page.waitForTimeout(200); }
 
@@ -655,6 +665,8 @@ test('pointer: Act 3', async ({ page }) => {
   await page.waitForTimeout(400);
   await clickGame(page, 128, 112);
   await waitFor(page, () => !window.moonshine.snapshot().picture, null, 5000);
+  log = await read();
+  expect(joined(log)).toContain('She\'ll be wrong about it');
   await page.waitForTimeout(400);
   if ((await snap(page)).inventoryOpen) { await clickGame(page, 241, 14); await page.waitForTimeout(300); }
   if ((await snap(page)).inventoryOpen) { await page.keyboard.press('Escape'); await page.waitForTimeout(300); }
