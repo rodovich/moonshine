@@ -84,10 +84,10 @@ A narrow workshop full of clocks, every one showing a slightly different time. T
     4  #........#
     5  #......d.#   d the doorstop: the bell's old clapper (7, 5), holding the door
     6  #........#
-    7  ####DD####   door (4-5, 7) → the Crown (11, 7)
+    7  ####DD####   door (4-5, 7) → the Crown (12, 7)
 ```
 
-The Crown's shop door (11, 6) → Clockmaker's Shop (4–5, 6), facing up. Once the clapper is taken, the door swings shut behind Cheryl when she leaves (a bang, and the Clockmaker's yelp).
+The Crown's shop door (12, 6; as built in Act 2) → Clockmaker's Shop (4–5, 6), facing up. Once the clapper is taken, the door swings shut behind Cheryl when she leaves (a bang, and the Clockmaker's yelp).
 
 ### Fountain Square (Act 5 state)
 
