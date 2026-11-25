@@ -15,6 +15,7 @@ Waking the Sisters, and the sea going out. The design is [docs/design/04-the-lis
 | `climb.js` | The Emergency Shaft (6 × 30) and the Ice Cellar (10 × 8). |
 | `bilge_dry.js` | The dry Bilge (32 × 17): the reveal, free roam, and the end of the act. |
 | `seacave.js` | The Sea Cave (10 × 8), off the Goat Path. |
+| `part2.js` | Act 4's states of Act 2 part 2's maps (called from `withAct4`). |
 
 ## Layering onto other acts' maps
 
@@ -37,7 +38,7 @@ Every Act 4 state yields once `act5.started` or `epilogue` is set (`act4(g)` in 
 
 - **In:** Act 3's ending calls `act3.next(g)`, which `src/content/index.js` sets to `startAct4`. `startAct4` shows the Morning card, sets `act4.started` and Wrongness 0.35, and wakes Cheryl in her flat.
 - **Out:** looking at the bronze door ends the act. `endOfAct4` says the door lines, sets `act4.done`, then calls `act4End.next(g)` if Act 5 has set it; otherwise the end card and the title screen.
-- **Act 2 part 2** (the wet Bilge, Goat Path, Harbor, lamp room) is still being built; Act 4's states of those maps (the flood stages, Mott at his shack, the sea-cave mouth) will be added as overlays when it lands. Until then the playthrough tests start with the copper throat in the bag.
+- **Act 2 part 2:** `part2.js` lays Act 4 over the Bilge (flood stages 1 and 2 by `listStage`, the piano in the canal, the Movers fishing, the Fishmonger on her crate), the Goat Path (Mott on his crates at (3, 13) and the copper-throat scene; the sea-cave mouth (0, 21) as an exit), the Harbor (Mott's empty bollard, the ferry, the office note), and the lamp room (the Keeper).
 
 ## Build decisions
 
