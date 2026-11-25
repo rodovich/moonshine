@@ -6,9 +6,11 @@ import { testMaps, testItemDefs, testScripts, testCharacters } from './test/inde
 import { openingMaps, openingItems, openingScripts, openingIntro, opening } from './opening/index.js';
 import { cherylDeclines } from './opening/common.js';
 import { act2Maps, act2Items, act2Scripts } from './act2/index.js';
+import { act3Maps, act3Items, act3Scripts, withAct3 } from './act3/index.js';
 import { cheryl } from '../art/cheryl.js';
 
-const maps = { ...openingMaps, ...act2Maps, ...testMaps };
+// Act 3 layers its states onto Act 2's maps (the way down, the crypt, the Crown at dusk).
+const maps = withAct3({ ...openingMaps, ...act2Maps, ...act3Maps, ...testMaps });
 // The Squeeze leads on to Lamp Street once Act 2 registers it; until then it ends the slice.
 opening.squeezeTo = maps.lamp_street ? 'lamp_street' : null;
 
@@ -24,10 +26,10 @@ export default {
   maps,
   // People defined once and placed by story state (see the engine README).
   characters: { ...testCharacters },
-  items: { ...openingItems, ...act2Items, ...testItemDefs },
+  items: { ...openingItems, ...act2Items, ...act3Items, ...testItemDefs },
 
   // Named scripts, runnable with ?run=<name> for testing.
-  scripts: { ...openingScripts, ...act2Scripts, ...testScripts },
+  scripts: { ...openingScripts, ...act2Scripts, ...act3Scripts, ...testScripts },
 
   // Runs once when a new game starts.
   onNewGame: openingIntro,

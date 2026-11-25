@@ -523,10 +523,8 @@ test('keyboard: Act 2 part 1', async ({ page }) => {
   await waitFor(page, () => !!window.moonshine.snapshot().choice, null, 4000);
   await settle(page);
   await page.keyboard.press('z');
-  await waitFor(page, () => window.moonshine.snapshot().picture, null, 10000);
-  await page.waitForTimeout(1500);
-  await shot(page, 'act2-18-end-card');
-  await waitFor(page, () => window.moonshine.snapshot().scene === 'title', null, 15000);
+  // Act 3 goes on from here: down the ladder into the Step Gallery.
+  await waitFor(page, () => window.moonshine.snapshot().map === 'step_gallery', null, 15000);
   expect(errors).toEqual([]);
 });
 
@@ -599,7 +597,8 @@ test('pointer: Act 2 part 1', async ({ page }) => {
   });
   if (!yes) throw new Error('no choice rects to click');
   await clickGame(page, yes.x + 4, yes.y + 4);
-  await waitFor(page, () => window.moonshine.snapshot().scene === 'title', null, 20000);
+  // Act 3 goes on from here: down the ladder into the Step Gallery.
+  await waitFor(page, () => window.moonshine.snapshot().map === 'step_gallery', null, 20000);
   expect(errors).toEqual([]);
 });
 
