@@ -2,7 +2,7 @@
 // A*, walking up to things to interact, using held items, the inventory
 // button, and exits/triggers when the player arrives on a tile.
 
-import { WIDTH } from './display.js';
+import { WIDTH, HEIGHT } from './display.js';
 import { TILE } from './tilemap.js';
 import { DIR_VEC, dirBetween } from './entity.js';
 import { loadSheet } from './art.js';
@@ -13,6 +13,8 @@ import { inArea, isInteractable, safeCall } from './world.js';
 import { sfx, step } from './sound.js';
 
 const BAG_BTN = { x: WIDTH - 26, y: 3, w: 22, h: 22 };
+// A little more forgiving than the drawn button, for fingers.
+const BAG_HIT = { x: BAG_BTN.x - 4, y: 0, w: BAG_BTN.w + 8, h: BAG_BTN.h + 8 };
 const HOLD_BANNER = { x: 4, y: 3, w: 0, h: 22 }; // width set when drawn
 const DIRS = ['up', 'down', 'left', 'right'];
 
@@ -218,7 +220,14 @@ export class Control {
   }
 
   tap(t) {
-    if (inRect(t, BAG_BTN)) {
+    // Taps in the letterbox, outside the 256×224 frame, aren't world taps
+    // (the phone touch bar below the frame is handled first).
+    if (this.world.game.display.touchBarHit && this.world.game.display.touchBarHit(t)) {
+      this.openInventory();
+      return;
+    }
+    if (t.x < 0 || t.y < 0 || t.x >= WIDTH || t.y >= HEIGHT) return;
+    if (inRect(t, BAG_HIT)) {
       this.openInventory();
       return;
     }
