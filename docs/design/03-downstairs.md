@@ -311,7 +311,7 @@ On first arriving in the Step Gallery (from the ladder), after a two-second paus
   - **Position 3, up-right: the hatch** (15, 2): see "The hatch opens."
   - The mirror starts at position 0, throwing the beam flat along the floor to the east, where it pools on nothing. The first turn always produces something.
 - **Inlays**, looked at directly (lit or not): the lines above, without the beam.
-- **The hatch** (15, 2): Before: "A square hatch, sealed flush. No handle. A round glass eye in the middle." / "It looks like it's waiting for something." Crowbar: "No seam. Whoever made this didn't make doors for crowbars." (The same as the Founders' Door, deliberately.)
+- **The hatch** (15, 2): Before: "A square hatch, sealed flush. No handle. A round glass eye in the middle, looking down at the mirror." / "It looks like it's waiting for something." Crowbar: "No seam. Whoever made this didn't make doors for crowbars." (The same as the Founders' Door, deliberately.)
 - **The hatch opens** (beam at position 3, the first time) → `gallery.hatch`: the eye fills with light and glows cyan; a chime; the hatch grinds open. "The glass drinks the light, and the hatch opens." / "Not a lock that wants a key. A lock that wants the sun."
 - **Floor grate** (6, 8): Before the drop-ladder: "A grate in the floor. Underneath, a darker kind of dark." After: "The top of the ladder I dropped. My way back, if I want one."
 
@@ -537,7 +537,9 @@ The Act 3 builder (zEKLwXahJL) built this act on `content/act3`; its full list o
 
 - **Chart Room reveal:** the room is exactly one screen, so the camera can't pan. Instead the room dims and a band of daylight sweeps up the floor from the hull to the Crown, then back down to the waterline on "the sea comes up to… there," and fades back under the reveal cue. Same lines, same order.
 - **Chart Room hotspots** follow the art's drawing: town rows 5–6; hull rows 7–8 and 10; waterline row 9; mast (7, 5–6); shaft and bowl (5, 5–10); chain (11–12, 7–10); Sisters (8–9, 8); teapot (7–8, 7–8). Priority as designed. The ledger is at (4, 4) beside the table, the cup on the table at (3, 4).
-- **Step Gallery ribs** at x5, x17, x21 only (x9 and x13 lie on the diagonal beams).
+- **Step Gallery ribs** are wall pillars, not overhead beams (overhead beams hid Cheryl), at x5, x17, x21 only (x9 and x13 lie on the diagonal beams).
+- **Arriving:** after "Under the Steps.", the screen fades up as her eyes adjust and the camera pans across the gallery; the other two lines follow the pan.
+- **The hatch's eye looks at the mirror,** so turning the mirror to it is a choice the player can reason out, not only something they find by cycling. The mirror stays a toy; the inlays it lights are plants for Act 4 (the Sisters) and the Chart Room.
 - **Doorway and passage lines play on arrival**, not as hotspots: entering the Bunk Room plays "Pitch dark in here. Darker than the hall. My disc barely gets past the door."; first stepping onto the drained passage plays "Drained. Wet, but walkable. North."
 - **Ladders, grates, and the drop-ladder:** walking into them climbs; looking at them gives the look line, then a "Climb up?" / "Climb down?" choice ("Pull the chain?" for the hooked ladder), so pointer players can climb.
 - **The mirror:** each inlay's lines play the first time the beam lights it; later turns are silent.
