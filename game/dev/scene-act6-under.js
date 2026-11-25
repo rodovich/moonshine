@@ -59,7 +59,11 @@ function sighting(state) {
   // the sighting log on its stand (14, 4); Cheryl's shoes by the Basin once she's in it
   L.set('objects', 14, 4, props('log_stand'));
   if (lit) L.set('objects', 6, 7, props('shoes'));
+  // the Keepers' sconces in the north wall (5, 1) and (10, 1), lit once the moon is true
+  for (const x of [5, 10]) L.set('ground', x, 1, `sight_lamp:${lit ? 'lamp_lit' : 'lamp_dead'}`);
   const sprites = [{ sheet: 'master_stop', frame: lit ? 'stop_risen' : 'stop_locked', x: 9 * 16 + 8, y: 7 * 16 }];
+  // the plug's glint over the dry Basin: the star's centre (8, 8) on world (126, 93)
+  if (b === 'dry_plug') sprites.push({ sheet: 'plug_glint', frame: 'glint', x: 126, y: 101 });
   const titles = { sighting: 'dry, the plug glinting', sighting_fill: 'filling', sighting_full: 'full and still', sighting_lit: 'the rim lit', sighting_plug: 'the plug under the water', sighting_dry: 'dry and empty' };
   return { title: `Sighting Room (${titles[state] || titles.sighting})`, ...L, sprites,
     hero: lit ? null : [7 * 16 + 8, 11 * 16, 'up'], scale: 3 };

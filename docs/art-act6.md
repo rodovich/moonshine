@@ -58,7 +58,7 @@ The Act 1 composition made right. Draw in this order:
 3. `final_moon:moon` (32×32, 2-frame shimmer, 500 ms; pale peach-gold, as in Act 1; `moon_mid` and `moon_high` are its whiter stages if it ever climbs higher) centred on x = 128, rising from y = 126 (hidden behind the cliffs) at about 6 px/s, from 2 s, and stopping at y = 92: dead in the Gate, framed by its walls. (A new moon sprite: the Act 1 moon's markings read as a face once the whole disc is visible.)
 4. `vista_rim:rim` at (0, 0), over the moon.
 5. `vista_twinkle:twinkle` on the `VISTA_BASINS` points (as in Act 1), if wanted.
-6. `vista_cheryl_bath:cheryl_bath` at (0, 128): a year later, Cheryl sits in her tub, seen from behind with only her head, in the bathing cap, and her shoulders, with the costume's two navy straps and a stripe of its back, above the water, the moon's glint on the water beside her. (The Act 1 vista keeps `vista_cheryl:cheryl_tub`, perched on the edge in the same costume and cap.)
+6. `vista_cheryl_bath:cheryl_bath` at (0, 128): a year later, Cheryl sits in her tub, seen from behind and slightly above. The tub is an oval of white enamel with dark water inside, the moon's light lying on the water ahead and to her right. Above the water: a small head in the bathing cap (cream band, the bun a bump on top), bare shoulders nearly three times its width with the costume's two navy straps and its striped back, and her arms out along the tub's sides. (At play size, a big head over narrow shoulders read as an egg on a plinth; keep the head small and the tub's rim curved.) (The Act 1 vista keeps `vista_cheryl:cheryl_tub`, perched on the edge in the same costume and cap.)
 7. The title, once the moon has settled and the music has landed: `vista_title:title_0` (a half-dissolved first step) and then `title_1` (full), at (0, 0). MOONSHINE in cream with a dark outline and a soft violet glow, with a thin rule and a small moon-in-a-notch ornament beneath. The dev scene shows it at 10.5 s and 11.3 s. The credits roll over this picture.
 
 ## Underground
@@ -68,6 +68,7 @@ New sheets are in `game/src/art/act6_under.js`. On the dev page: `/dev/art.html?
 | Design (position) | Frames | Layer |
 | --- | --- | --- |
 | The Basin (7–8, 5–6): dry with the plug glinting at the bottom | `basin:basin_dry_plug_<q>` | objects |
+| …the plug's glint | `plug_glint:glint` (16×16, 4 frames, 900/90/150/90 ms: a point, then a brass-and-silver star). Put the frame's centre pixel (8, 8) on world (126, 93), the plug's bright edge: top-left (118, 85), or bottom-centre (126, 101). Draw it above the moonbeam | above overhead |
 | …dry and empty | `basin:basin_dry_<q>` | objects |
 | …filling | `basin:basin_fill_<q>_0..3` (350 ms; hold the last frame, then switch to full) | objects |
 | …full and still | `basin:basin_full_<q>_0/1` (900 ms, the moon's reflection shivers a pixel) | objects |
@@ -77,6 +78,7 @@ New sheets are in `game/src/art/act6_under.js`. On the dev page: `/dev/art.html?
 | The trim wheel (3–4, 1–2) | `sight_wall:trim_still_<q>`; turning `trim_<q>_0..3` (200 ms) | ground |
 | The lift cage (6–7, 1–2), with its counterweight chain | `sight_wall:lift_closed_<q>`, `lift_open_<q>` | ground |
 | The master stop (9, 6), the three-bars emblem with the Middle picked out | `master_stop:stop_locked`, `stop_risen` (the collar glowing), `stop_pulled` (16×32) | sprite |
+| The Sighting Room's wall lamps (5, 1) and (10, 1), upper wall row: Keepers' sconces, a bronze bowl holding a moonglass moon (their emblem) | `sight_lamp:lamp_dead`; waking `lamp_wake_0..4` (300/120/120/220/600 ms, hold the last frame); lit `lamp_lit_0/1` (700 ms pulse) | ground |
 | The sighting log on its stone stand (14, 4) | `sight_props:log_stand` | objects |
 | Cheryl's shoes, side by side (beside the Basin, e.g. 6, 7) | `sight_props:shoes` | objects |
 | Long Keel floor: the middle row's two worn grooves (y4) and the rows beside them (y3, y5) | `keel:keel_groove`, `keel_groove_b` (vary every few tiles); `keel_n` (y3), `keel_s` (y5) | ground |
@@ -86,6 +88,12 @@ New sheets are in `game/src/art/act6_under.js`. On the dev page: `/dev/art.html?
 | Windlass Room at night: the chain coming in through the moonlit hawse (21, 3–4) | `windlass_night:hawse_in_top/bot_0..3` (220 ms, one link-length per loop; the same big opening and links as Act 5's hawse, the links travelling in toward the drum) | ground |
 | The drum turning; the brake thrown | the existing `windlass_drum:drum_x<c>y<r>_0..3` and `brake:brake_thrown` | objects; sprite |
 | The Long Keel hatch's emblem lighting (7–8, 1–2), then open | `keel_lit:keel_lit_<q>_0/1` (500 ms), then the existing `keel_hatch:keel_open_<q>` | ground |
+
+## Items
+
+| Design | Frame |
+| --- | --- |
+| The Shopkeeper's new plug ("same icon, shinier") | `items2:bath_plug_new`: the Act 1 `bath_plug` with brighter brass, a white highlight and two sparkles |
 
 ## Surface
 
