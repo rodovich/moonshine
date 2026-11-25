@@ -102,10 +102,18 @@ export class Title {
     ctx.fillStyle = '#101020';
     const roofs = [[0, 170, 40], [36, 160, 30], [62, 176, 44], [102, 150, 22], [120, 166, 50], [166, 156, 34], [196, 172, 30], [222, 162, 34]];
     for (const [x, y, w] of roofs) ctx.fillRect(x, y, w, HEIGHT - y);
+    // A dome and a few chimneys, so the skyline reads as Tessel.
+    for (let dy = 0; dy <= 11; dy++) {
+      const half = Math.round(Math.sqrt(121 - dy * dy));
+      ctx.fillRect(113 - half, 150 - dy, half * 2, 1);
+    }
+    ctx.fillRect(112, 135, 2, 4);
+    for (const [x, y] of [[44, 152], [70, 168], [176, 148], [230, 154]]) ctx.fillRect(x, y, 4, 8);
     ctx.fillStyle = '#f8d870';
     for (const [x, y] of [[48, 172], [80, 186], [130, 176], [176, 168], [232, 178], [108, 160]]) ctx.fillRect(x, y, 2, 3);
 
-    drawLarge(ctx, this.game.content.title || 'Moonshine', WIDTH / 2, 64, 2);
+    if (!this.titleImg) this.titleImg = renderLarge(this.game.content.title || 'Moonshine');
+    ctx.drawImage(this.titleImg, Math.round(WIDTH / 2 - this.titleImg.width), 64, this.titleImg.width * 2, this.titleImg.height * 2);
     const opts = this.currentOptions();
     if (this.confirming) drawTextCentered(ctx, 'Your saved game will be replaced.', WIDTH / 2, 112, { color: 'ui_cheryl_text' });
     this.rects = [];
@@ -122,14 +130,11 @@ export class Title {
   }
 }
 
-// Text drawn at an integer multiple, for the title.
-function drawLarge(ctx, text, cx, y, scale) {
+// The title text at 1×, drawn once; the screen scales it up 2×.
+function renderLarge(text) {
   const tmp = document.createElement('canvas');
-  const w = measure(text) + 2;
-  tmp.width = w;
+  tmp.width = measure(text) + 2;
   tmp.height = 11;
-  const t = tmp.getContext('2d');
-  drawText(t, text, 0, 0, { color: 'ui_select', shadow: 'ui_cheryl_box' });
-  ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(tmp, Math.round(cx - (w * scale) / 2), y, w * scale, 11 * scale);
+  drawText(tmp.getContext('2d'), text, 0, 0, { color: 'ui_select', shadow: 'ui_cheryl_box' });
+  return tmp;
 }

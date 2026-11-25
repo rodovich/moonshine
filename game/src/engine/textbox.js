@@ -15,6 +15,7 @@ const PAD_Y = 7;
 const LINES = 3;
 const BOX_H = PAD_Y * 2 + LINES * LINE_HEIGHT - 3;
 const CHARS_PER_TICK = 0.7; // ~42 characters per second
+const OPEN_TICKS = 4; // the box unfolds over this many frames
 const PAUSES = { '.': 8, '!': 8, '?': 8, '…': 10, ',': 4, ';': 5, ':': 5, '—': 5 };
 
 export class TextBox {
@@ -29,15 +30,17 @@ export class TextBox {
     return !!this.active;
   }
 
-  // Show text; resolves when the player dismisses the last page.
-  show({ text, speaker = null, style = 'npc', position = 'bottom' }) {
+  // Show text; resolves when the player dismisses the last page. With
+  // `auto` (seconds), each page closes on its own that long after it's fully
+  // shown, and input neither skips nor advances it.
+  show({ text, speaker = null, style = 'npc', position = 'bottom', auto = null }) {
     return new Promise((resolve) => {
       const s = STYLES[style] || STYLES.npc;
       const lines = wrap(text, BOX_W - PAD_X * 2);
       const pages = [];
       for (let i = 0; i < lines.length; i += LINES) pages.push(lines.slice(i, i + LINES));
       this.position = position;
-      this.active = { pages, page: 0, shown: 0, pause: 0, style: s, styleName: style, speaker, resolve, choice: null };
+      this.active = { pages, page: 0, shown: 0, pause: 0, style: s, styleName: style, speaker, resolve, choice: null, auto, autoT: 0, openT: this.openStart() };
     });
   }
 
@@ -46,14 +49,25 @@ export class TextBox {
   choose({ options, prompt = null, speaker = null, style = 'npc', position = 'bottom', cancelIndex = null }) {
     return new Promise((resolve) => {
       const s = STYLES[style] || STYLES.npc;
-      const lines = prompt ? wrap(prompt, BOX_W - PAD_X * 2).slice(-LINES) : [];
+      // A long prompt pages like normal text; the options appear on its last page.
+      const lines = prompt ? wrap(prompt, BOX_W - PAD_X * 2) : [];
+      const pages = [];
+      for (let i = 0; i < lines.length; i += LINES) pages.push(lines.slice(i, i + LINES));
+      if (!pages.length) pages.push([]);
       this.position = position;
       this.active = {
-        pages: [lines], page: 0, shown: 0, pause: 0, style: s, styleName: style, speaker, resolve,
+        pages, page: 0, shown: 0, pause: 0, style: s, styleName: style, speaker, resolve,
         choice: { options, index: 0, cancelIndex, rects: [] },
+        openT: this.openStart(),
       };
       if (!prompt) this.active.shown = Infinity;
     });
+  }
+
+  // A box unfolds when it opens, but not when it directly follows another
+  // (a conversation shouldn't flap open and shut between lines).
+  openStart() {
+    return performance.now() - (this.closedAt || 0) < 150 ? OPEN_TICKS : 0;
   }
 
   pageText() {
@@ -72,6 +86,13 @@ export class TextBox {
     this.tick++;
     const a = this.active;
     if (!a) return;
+    if (a.openT < OPEN_TICKS) {
+      a.openT++;
+      // A press while the box unfolds isn't lost: it reveals the text once open.
+      if (input.taps().length || input.pressed('confirm') || input.pressed('cancel')) a.revealOnOpen = true;
+      if (a.openT === OPEN_TICKS && a.revealOnOpen && a.auto == null) a.shown = Infinity;
+      return;
+    }
     // Typewriter
     if (!this.revealed()) {
       if (a.pause > 0) {
@@ -90,7 +111,21 @@ export class TextBox {
     }
 
     const taps = input.taps();
-    if (a.choice && this.revealed()) {
+    if (a.auto != null) {
+      input.flush();
+      if (!this.revealed()) return;
+      if (++a.autoT < a.auto * 60) return;
+      a.autoT = 0;
+      if (a.page < a.pages.length - 1) {
+        a.page++;
+        a.shown = 0;
+      } else {
+        this.finish();
+      }
+      return;
+    }
+    const lastPage = a.page === a.pages.length - 1;
+    if (a.choice && this.revealed() && lastPage) {
       const c = a.choice;
       const d = input.menuDir();
       if (d === 'up' || d === 'left') { c.index = (c.index + c.options.length - 1) % c.options.length; sfx('cursor'); }
@@ -117,8 +152,6 @@ export class TextBox {
     if (!this.revealed()) {
       a.shown = Infinity;
       a.pause = 0;
-    } else if (a.choice) {
-      // handled above
     } else if (a.page < a.pages.length - 1) {
       a.page++;
       a.shown = 0;
@@ -130,6 +163,7 @@ export class TextBox {
   finish(value) {
     const a = this.active;
     this.active = null;
+    this.closedAt = performance.now();
     if (a.choice) sfx('select');
     a.resolve(value);
   }
@@ -142,6 +176,12 @@ export class TextBox {
     if (pos === 'auto') pos = playerScreenY > HEIGHT * 0.62 ? 'top' : 'bottom';
     const y = pos === 'top' ? 8 : HEIGHT - BOX_H - 8;
     const hasText = a.pages[a.page].length > 0;
+    if (a.openT < OPEN_TICKS) {
+      // Unfolding from the middle, like an SNES window opening.
+      const h = Math.max(6, Math.round((BOX_H * (a.openT + 1)) / (OPEN_TICKS + 1)));
+      drawBox(ctx, BOX_X, y + Math.round((BOX_H - h) / 2), BOX_W, h, a.style);
+      return;
+    }
     if (hasText || !a.choice) {
       drawBox(ctx, BOX_X, y, BOX_W, BOX_H, a.style);
       if (a.speaker) this.drawLabel(ctx, a.speaker, y, pos);
@@ -154,21 +194,21 @@ export class TextBox {
         });
         remaining -= n;
       });
-      if (this.revealed() && !a.choice) {
+      if (this.revealed() && a.auto == null && (!a.choice || a.page < a.pages.length - 1)) {
         const frame = this.small.frame(Math.floor(this.tick / 16) % 2 ? 'arrow_1' : 'arrow_0');
         ctx.drawImage(frame, BOX_X + BOX_W - 14, y + BOX_H - 11);
       }
     }
-    if (a.choice && this.revealed()) this.drawChoices(ctx, y, pos, hasText);
+    if (a.choice && this.revealed() && a.page === a.pages.length - 1) this.drawChoices(ctx, y, pos, hasText);
   }
 
   drawLabel(ctx, speaker, boxY, pos) {
     const w = measure(speaker) + 12;
-    const h = 15;
+    const h = 17;
     const lx = BOX_X + 6;
-    const ly = pos === 'top' ? boxY + BOX_H - 2 : boxY - h + 2;
+    const ly = pos === 'top' ? boxY + BOX_H - 3 : boxY - h + 3;
     drawBox(ctx, lx, ly, w, h, this.active.style);
-    drawText(ctx, speaker, lx + 6, ly + 3, { color: 'ui_label' });
+    drawText(ctx, speaker, lx + 6, ly + 4, { color: 'ui_label' });
   }
 
   drawChoices(ctx, boxY, pos, hasText) {

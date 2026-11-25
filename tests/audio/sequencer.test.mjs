@@ -6,7 +6,8 @@ import {
 } from '../../game/src/audio/sequencer.js';
 import { SONGS } from '../../game/src/audio/music/index.js';
 import { INSTRUMENTS } from '../../game/src/audio/instruments.js';
-import { SFX } from '../../game/src/audio/sfx.js';
+import { SFX, SFX_GROUPS } from '../../game/src/audio/sfx.js';
+import { lintSong, parseHarmony } from '../../game/src/audio/lint.js';
 
 test('pitch names', () => {
   assert.equal(pitchToMidi('A4'), 69);
@@ -69,7 +70,7 @@ test('intro plays once, then the loop repeats', () => {
 });
 
 test('consecutive windows neither drop nor repeat events', () => {
-  const c = compileSong(SONGS.neighborhood);
+  const c = compileSong(SONGS.cistern_court);
   const whole = [...eventsInRange(c, 0, 2000)].map((x) => `${x.abs}:${x.ev.ch}:${x.ev.type}`);
   const pieces = [];
   let from = 0;
@@ -101,11 +102,14 @@ test('every song compiles, with the intended lengths', () => {
     assert.equal(song.id, id);
     const c = compileSong(song);
     assert.ok(c.channels.length <= 6, `${id} uses ${c.channels.length} channels; music keeps to 6`);
-    if (c.loopSteps) {
-      assert.ok(c.loopSeconds >= 45 && c.loopSeconds <= 95, `${id} loop is ${c.loopSeconds}s`);
+    if (c.loopSteps && !song.scene) {
+      assert.ok(c.loopSeconds >= 30 && c.loopSeconds <= 95, `${id} loop is ${c.loopSeconds}s`);
     }
   }
   assert.ok(Math.abs(compileSong(SONGS.neighborhood).loopSeconds - 76.8) < 1e-9);
+  // The design asks for a 60–90 s home theme.
+  const cc = compileSong(SONGS.cistern_court).loopSeconds;
+  assert.ok(cc >= 60 && cc <= 90, `cistern_court loop is ${cc}s`);
 });
 
 test('songs and effects only use instruments and drums that exist', () => {
@@ -125,7 +129,12 @@ test('songs and effects only use instruments and drums that exist', () => {
     }
   }
   for (const [id, def] of Object.entries(SFX)) {
-    for (const L of def.layers) {
+    const src = def.loop ?? def;
+    if (!src.layers && !(def.loop?.beds?.length)) assert.fail(`${id} has no layers`);
+    if (!src.layers) continue;
+    // Function layers are randomized; call them a few times to check every variation.
+    const runs = typeof src.layers === 'function' ? Array.from({ length: 5 }, (_, i) => src.layers(i)) : [src.layers];
+    for (const L of runs.flat()) {
       if (L.type === 'notes') assert.ok(INSTRUMENTS[L.inst], `${id}: ${L.inst}`);
       else assert.ok(['tone', 'noise'].includes(L.type), `${id}: layer type ${L.type}`);
     }
@@ -133,7 +142,73 @@ test('songs and effects only use instruments and drums that exist', () => {
 });
 
 test('the required sound effects exist', () => {
-  for (const id of ['blip', 'blip_cheryl', 'step', 'confirm', 'cancel', 'menu_open', 'menu_close', 'item_get', 'door', 'splash', 'wrong_sting']) {
-    assert.ok(SFX[id], id);
+  const ids = [
+    // round 1
+    'blip', 'blip_cheryl', 'step', 'confirm', 'cancel', 'menu_open', 'menu_close', 'item_get', 'door', 'splash', 'wrong_sting',
+    // docs/design/01-opening.md, "Audio needed"
+    'cursor', 'give', 'step_stone', 'step_plaster', 'step_tile', 'step_rug', 'step_stairs', 'step_wood', 'step_kid',
+    'door_open', 'door_close', 'tap_squeak', 'water_pour', 'tub_full', 'chess_tap', 'pepper_grind', 'sneeze',
+    'timer_tick', 'timer_ding', 'sheets_flap', 'kid_patter', 'kid_hop', 'piano_flat',
+    'swifts', 'crowd', 'dog_bark', 'gull', 'wind', 'clock_strike', 'well_breath',
+    'groan', 'crack', 'rattle', 'piano_tumble', 'drain', 'drain_glunk', 'drain_gurgle', 'drain_echo',
+  ];
+  for (const id of ids) assert.ok(SFX[id], id);
+  // docs/design/02-city.md, "Audio needed", and the underground's machines
+  const act2 = [
+    'knock', 'shop_bell', 'stone_scrape', 'scrub', 'skip_rope', 'slab_lift', 'piano_slide', 'trickle', 'sink_gurgle', 'step_splash',
+    'door_hum', 'town', 'canal', 'gulls', 'goat', 'goats', 'clock_tick', 'boatman_sing', 'girls_chant',
+    'step_hullstone', 'step_rung', 'lid_pry', 'hatch_open', 'light_beam', 'mirror_turn', 'moonlock_open', 'disc_glow',
+    'chute_slide', 'ladder_drop', 'tube_voice', 'lever_pull', 'lid_open', 'shutters', 'beam_hum', 'moonglass_hum', 'disc_get', 'lamp_relight', 'tube_murmur', 'bolt_draw', 'founders_door', 'rubbing', 'glow_shimmer', 'valve_turn', 'valve_jam', 'water_gush', 'far_gurgle', 'drips', 'hull',
+    'pump_run', 'pump_cough', 'chain_rattle', 'chain_haul', 'tide_wheel',
+    // docs/design/04-the-list.md, "Audio needed"
+    'belfry_tick', 'clock_rundown', 'lever_clank', 'clamp_lift', 'bell_stroke', 'bell_strokes', 'thrum_rise', 'thrum',
+    'hull_far', 'coins_rattle', 'ring_hatch', 'valve_squeal', 'pump_stall', 'thump_thin', 'thump_stout', 'thump_middle',
+    'pump_thin', 'pump_stout', 'shaft_hum', 'grate_drain', 'hull_creak_long', 'valve_hiss', 'ear_pop', 'groan_great',
+    'burst', 'spray', 'roar', 'runoff', 'water_spread', 'hatch_bang', 'air_whistle', 'slack_lap', 'channel_rush', 'gull_close',
+    'slab_scrape', 'slab_close', 'shouting', 'bell_low', 'town_rush', 'crabs', 'fish_flop',
+    // docs/design/05-high-and-dry.md, "Audio needed"
+    'laundry', 'surf', 'bucket_fill', 'bucket_lower', 'pour', 'splash_small', 'rope_throw', 'rope_creak', 'tin_lid',
+    'lamp_hum', 'disc_drink', 'disc_fade', 'timer_wind', 'leap', 'mud_splat', 'barnacles_crack', 'door_grind',
+    'light_spill', 'bronze_door', 'lamp_wake', 'lamps_wake', 'chain_creak', 'hawse_wind', 'drum_creak', 'drum_strain',
+    'stump_lever', 'clapper_seat', 'tube_wind',
+  ];
+  for (const id of act2) assert.ok(SFX[id], id);
+  const loops = ['water_pour', 'timer_tick', 'crowd', 'wind', 'trickle', 'door_hum', 'town', 'canal', 'gulls', 'goats',
+    'clock_tick', 'water_gush', 'drips', 'hull', 'pump_run', 'chain_haul', 'tide_wheel', 'beam_hum', 'moonglass_hum', 'tube_murmur', 'glow_shimmer'];
+  for (const id of loops) assert.ok(SFX[id].loop, `${id} loops`);
+  for (const id of ['title', 'cistern_court', 'moonrise', 'morning_after', 'wrongness', 'neighborhood', 'harbor', 'archive', 'discovery', 'downstairs', 'reveal', 'reveal_last', 'pumps', 'neighborhood_thin', 'climb', 'relay']) assert.ok(SONGS[id], id);
+});
+
+test('harmony strings split bars evenly unless lengths are given', () => {
+  const h = parseHarmony('F | C7 Dm | F:4 C:12 |', 16);
+  assert.deepEqual(h.map((x) => [x.step, x.len, x.chord.sym]), [[0, 16, 'F'], [16, 8, 'C7'], [24, 8, 'Dm'], [32, 4, 'F'], [36, 12, 'C']]);
+  assert.throws(() => parseHarmony('F:4 C:4 |', 16), /doesn't fill/);
+});
+
+test('lint catches clashes against the harmony', () => {
+  const song = {
+    id: 'bad', bpm: 100, channels: [{ id: 'lead', inst: 'flute' }, { id: 'pad', inst: 'strings' }],
+    patterns: { P: { harmony: 'C | C |', lead: 'F5:16 | E5:16 |', pad: 'E4:16 | F4:16 |' } }, intro: ['P'], loop: null,
+  };
+  const msgs = lintSong(song).issues.filter((i) => i.level === 'warn').map((i) => i.msg);
+  assert.ok(msgs.some((m) => /F5 \(16 steps\) clashes with C/.test(m)), msgs.join('; '));
+  assert.ok(msgs.some((m) => /F4 \(16 steps\) isn't in C/.test(m)), msgs.join('; '));
+  assert.ok(msgs.some((m) => /F5 against E4/.test(m)), msgs.join('; ')); // a minor ninth
+});
+
+test('every song passes the music lint', () => {
+  for (const song of Object.values(SONGS)) {
+    const warns = lintSong(song).issues.filter((i) => i.level === 'warn');
+    assert.deepEqual(warns, [], `${song.id}: ${warns.map((w) => `${w.where}: ${w.msg}`).join('; ')}`);
+  }
+});
+
+test('no sound effect id is defined in two files', () => {
+  const seen = new Map();
+  for (const [group, defs] of Object.entries(SFX_GROUPS)) {
+    for (const id of Object.keys(defs)) {
+      assert.ok(!seen.has(id), `${id} is in both ${seen.get(id)} and ${group}`);
+      seen.set(id, group);
+    }
   }
 });

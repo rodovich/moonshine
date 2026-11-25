@@ -37,6 +37,8 @@ This file records the project's technical and process decisions. Creative decisi
 - **Controls.** Keyboard: arrow keys (WASD also works) to move, Z / Space / Enter to interact and advance text, X / Escape to open the inventory and cancel. Pointer: click or tap a spot to walk there by A* pathfinding; click or tap a character or object to walk next to it and interact; tap to advance text; an on-screen button opens the inventory. Every action must be possible with either scheme alone.
 - **Content is data plus small scripts.** Maps, characters, items, and text live under `game/src/content/`. Interactions and cutscenes are async functions that call a small engine API (say a line, give an item, set a flag, move a character, change map, play music). Game state is a set of flags plus the inventory, saved to `localStorage`.
 - **Debug hooks for testing.** URL parameters let a tester start at a given map and position with given flags and items (documented in the engine README), so reviewers and Playwright tests can reach any scene quickly.
+- **New Game starts the opening** (Cheryl's roof in Cistern Court). The engine test maps stay in the game but are reachable only through debug parameters (`?map=test_street`). The opening's content and its build decisions are in `game/src/content/opening/README.md`. (Added by the opening content task.)
+- **Each act's content lives in its own folder under `game/src/content/`** with a README of its build decisions and stand-ins: `opening/`, then `act2/` (Act 2 part 1; its README is `game/src/content/act2/README.md`). Act folders reuse the opening's `grid.js` (maps from a `compose(g)` function) and dialog helpers rather than copying them. (Added by the Act 2 content task.)
 
 ## Engine
 
@@ -45,7 +47,11 @@ The engine's own decisions (grid-stepped movement, display scaling, text style, 
 - **Movement is grid-stepped**: characters occupy whole 16×16 tiles and glide smoothly between them, in four directions. Puzzle layouts can rely on "who stands on which tile".
 - **The overhead layer is for things always above characters** (eaves, arch tops, canopies). Anything a character can stand both in front of and behind is a sprite entity, which sorts by its feet.
 - **Text style**: NPC dialog in a navy box with a speaker tab; Cheryl's descriptions in a warm brown box with no label; her thoughts in the warm box, italic, with a dashed frame. The bitmap font is in `game/src/art/font.js`.
-- **The audio boundary** is four functions in `game/src/audio/index.js` (`unlockAudio`, `playMusic`, `stopMusic`, `sfx`); the file's header lists the effect ids the engine uses.
+- **The audio boundary** is `game/src/engine/sound.js`, a bridge to the audio module that maps engine sound ids to audio ids and ignores unknown ids. Scripts reach it through `g.playMusic`, `g.stopMusic`, `g.playCue`, `g.sfx`, and `g.setWrongness`.
+- **Walk animation follows distance walked** (one frame per 8 px), not the sheet's `walk_*` durations, so feet stay planted; the `walk_*` durations are ignored. Cheryl walks a tile per 12 frames (80 px/s, about 100 ms per walk frame), NPCs a tile per 16. Idles and other animations use `durations`. Scene lighting tints characters at half strength.
+- **Authoring aids:** `npm run check` validates all content (maps, exits, art references, ids used by scripts); `/dev/map.html` renders any map in any story state with collision, exits, triggers, and entities overlaid. Run the check before pushing content.
+- **People who move between maps are defined once** in `content.characters` with an `at(g)` placement, rather than duplicated per map.
+- **Lighting (dusk, night, day) is an engine layer**, declared per map and changeable mid-scene, separate from the Wrongness's screen effects.
 - **UI colors** are the `ui_*` entries in `game/src/art/palette.js`. The `ph_*` entries are placeholder art for the engine test maps and go away with them.
 
 ## Repository layout

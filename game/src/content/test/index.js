@@ -1,123 +1,167 @@
-// Engine test content: two small maps with placeholder art that exercise
-// every engine feature (NPC dialog and choices, item pickup, use-item, a door
-// to a second map, overhead layer, counter talk, wandering NPC, animated
-// water, triggers, and a scripted sequence with screen effects).
+// Engine test content: three small maps built from the real city art (the
+// shop interior uses placeholder tiles until interiors are drawn). Together
+// they exercise every engine feature: NPC dialog and choices, a look counter,
+// item pickup, using an item on a door, a door and an edge exit, detail and
+// overhead layers, a patrolling NPC, lighting that changes with the story,
+// and two scripted sequences (the shopkeeper's Wrongness and a moonrise-style
+// vista with auto-advancing shouts and a text card).
 //
-// Reach it with ?map=test_yard (or test_house). Content authors: this is a
-// working example of everything in src/engine/README.md.
+// Reach it with ?map=test_street (or test_shop, test_lane). Content authors:
+// this is a working example of everything in src/engine/README.md.
 
-import { outdoorTiles as O, buildingTiles as B, indoorTiles as I, testProps, testItems, testPerson } from './art.js';
+import { street } from '../../art/street.js';
+import { buildings } from '../../art/buildings.js';
+import { rooftiles } from '../../art/rooftiles.js';
+import { props } from '../../art/props.js';
+import { cloth } from '../../art/cloth.js';
+import { canal } from '../../art/canal.js';
+import { items } from '../../art/items.js';
+import { old_man, kid, shopkeeper } from '../../art/npcs.js';
+import { vista, vista_glow, vista_moon, vista_rim, vista_twinkle, vista_cheryl, VISTA_BASINS } from '../../art/vista.js';
+import { indoorTiles as I } from './art.js';
 
+// Tiles can be named here or referenced directly from a legend as
+// 'sheet:frame' or 'sheet:frame@palette' (sheets listed under `sheets`).
 export const testTileset = {
+  sheets: { street, buildings, rooftiles, props, cloth, canal },
   tiles: {
-    grass: { sheet: O },
-    grass_tuft: { sheet: O },
-    flowers: { sheet: O },
-    path: { sheet: O },
-    water: { sheet: O, solid: true, fps: 3 },
-    trunk: { sheet: O, solid: true },
-    canopy_tl: { sheet: O }, canopy_t: { sheet: O }, canopy_tr: { sheet: O },
-    canopy_bl: { sheet: O }, canopy_b: { sheet: O }, canopy_br: { sheet: O },
-    wall: { sheet: B, solid: true },
-    window: { sheet: B, solid: true },
-    door: { sheet: B },
-    roof: { sheet: B, solid: true },
-    roof_edge: { sheet: B, solid: true },
-    stone: { sheet: B, solid: true },
-    pillar: { sheet: B, solid: true },
-    arch_l: { sheet: B }, arch_m: { sheet: B }, arch_r: { sheet: B },
+    // Paving is a 2×2 macro-tile: the frame is picked by position.
+    pave: { sheet: street, pattern: [['pave_nw', 'pave_ne'], ['pave_sw', 'pave_se']] },
     floor: { sheet: I },
     inwall: { sheet: I, solid: true },
     inwall_top: { sheet: I, solid: true },
+    void: { sheet: I, solid: true },
     rug: { sheet: I },
     counter: { sheet: I, solid: true, counter: true },
     doormat: { sheet: I },
-    void: { sheet: I, solid: true },
   },
 };
 
-const person = (palette) => ({ sheet: testPerson, palette });
+const solid = (tile) => ({ tile, solid: true });
 
 export const testItemDefs = {
   brass_key: {
     name: 'Brass Key',
-    icon: { sheet: testItems, frame: 'brass_key' },
+    icon: { sheet: items, frame: 'key' },
     description: "Warm from the sun. Somebody lost it, and somebody's going to want it back.",
+    // Used on any character with no handler of their own for it.
+    useOn: { npc: "I'm not handing my keys to strangers. Even someone else's keys." },
   },
   letter: {
     name: 'Sealed Letter',
-    icon: { sheet: testItems, frame: 'letter' },
-    description: "Addressed to \"The Shop.\" The wax seal has a little crescent moon pressed into it. I'm not going to open it. Probably.",
+    icon: { sheet: items, frame: 'letter' },
+    description: 'Addressed to "The Shop." The wax seal has a little crescent moon pressed into it. I\'m not going to open it. Probably.',
+    // Look (in the bag): a different line each time, then cycling after the first.
+    looks: [
+      'I hold it up to the light. Nothing. Good paper.',
+      'It smells faintly of cedar.',
+      'The moon on the seal has a crack in it. Probably the wax.',
+    ],
+    looksRepeat: 'cycle',
   },
 };
 
-const yard = {
-  id: 'test_yard',
-  name: 'Test Yard',
+// Dusk until the letter is delivered; night after.
+const storyLight = (g) => (g.flag('letter_delivered') ? 'night' : 'dusk');
+
+const streetMap = {
+  id: 'test_street',
+  name: 'Test Street',
   tileset: testTileset,
-  music: 'test_yard',
-  background: 'ph_grass_dark',
-  spawn: [5, 6],
+  music: 'cistern_court',
+  lighting: storyLight,
+  spawn: [5, 7],
   legend: {
-    '.': 'grass', ',': 'grass_tuft', '*': 'flowers', '=': 'path', '~': 'water',
-    '#': 'stone', R: 'roof', E: 'roof_edge', W: 'wall', N: 'window', D: 'door', T: 'trunk', P: 'pillar',
-    '(': 'canopy_tl', '^': 'canopy_t', ')': 'canopy_tr', '[': 'canopy_bl', '_': 'canopy_b', ']': 'canopy_br',
-    '<': 'arch_l', '-': 'arch_m', '>': 'arch_r',
+    // House A (whitewash and cobalt, the base palette)
+    a: solid('buildings:roof_l'), b: solid('buildings:roof'), c: solid('buildings:roof_r'), C: solid('buildings:roof_chimney'),
+    d: solid('buildings:roof_front_l'), e: solid('buildings:roof_front'), f: solid('buildings:roof_front_r'),
+    g: solid('buildings:wall_l'), h: solid('buildings:window_box'), i: solid('buildings:wall'), j: solid('buildings:door_top'),
+    k: solid('buildings:window'), l: solid('buildings:wall_r'),
+    m: solid('buildings:wall_base_l'), n: solid('buildings:wall_base'), o: solid('buildings:door_bot'),
+    p: solid('buildings:window_base'), q: solid('buildings:wall_base_r'),
+    // Shop B (ochre, tiled roof with overhead eaves)
+    1: solid('rooftiles:ridge_l'), 2: solid('rooftiles:ridge'), 3: solid('rooftiles:ridge_r'),
+    4: solid('rooftiles:tiles_l'), 5: solid('rooftiles:tiles'), 6: solid('rooftiles:tiles_moss'), 7: solid('rooftiles:tiles_r'),
+    A: solid('buildings:wall_l@ochre'), B: solid('buildings:wall@ochre'), D: solid('buildings:wall_r@ochre'),
+    E: solid('buildings:window_box@ochre'), F: solid('buildings:window_closed@ochre'), G: solid('buildings:door_top@ochre'),
+    H: solid('buildings:window@ochre'),
+    I: solid('buildings:wall_base_l@ochre'), J: solid('buildings:wall_base@ochre'), K: solid('buildings:window_closed_base@ochre'),
+    L: 'buildings:door_bot@ochre', M: solid('buildings:window_base@ochre'), N: solid('buildings:wall_base_r@ochre'),
+    // House C (sky blue)
+    r: solid('buildings:roof_l@sky'), s: solid('buildings:roof@sky'), t: solid('buildings:roof_r@sky'), u: solid('buildings:roof_hatch@sky'),
+    v: solid('buildings:roof_front_l@sky'), w: solid('buildings:roof_front@sky'), x: solid('buildings:roof_front_r@sky'),
+    y: solid('buildings:wall_l@sky'), z: solid('buildings:window@sky'), O: solid('buildings:balcony@sky'), P: solid('buildings:wall@sky'),
+    Q: solid('buildings:window_closed@sky'), S: solid('buildings:window_box@sky'), T: solid('buildings:wall_r@sky'),
+    U: solid('buildings:wall_base_l@sky'), V: solid('buildings:window_base@sky'), W: solid('buildings:wall_base@sky'),
+    X: solid('buildings:window_closed_base@sky'), Y: solid('buildings:wall_base_r@sky'),
+    // Street, terrace, canal
+    '.': 'pave', '%': 'street:pave_se_crack',
+    '=': solid('street:retain_top'), _: solid('street:retain_base'), '<': 'street:stairs_l', '>': 'street:stairs_r',
+    '-': solid('canal:bank_n'), '~': solid('canal:water'), '^': solid('canal:bank_s'), Z: solid('canal:water_shadow'),
+    '[': 'canal:bridge_n_l', ']': 'canal:bridge_n_r', '{': 'canal:bridge_down_l', '}': 'canal:bridge_down_r',
+    '(': 'canal:bridge_up_l', ')': 'canal:bridge_up_r', '/': 'canal:bridge_s_l', '\\': 'canal:bridge_s_r',
+    // Detail layer (on the ground, under characters)
+    '*': solid('props:pot_geranium'), '&': solid('props:pot_bay'), '#': solid('props:crate'), '|': solid('props:lamp_post'),
+    '+': solid('canal:mooring_post'), 9: solid('props:bench_l'), 0: solid('props:bench_r'),
+    // Overhead layer
+    8: 'props:over_lamp_top', ';': 'rooftiles:over_eave_l', ':': 'rooftiles:over_eave', '?': 'rooftiles:over_eave_r',
+    '@': 'cloth:over_awning_l', $: 'cloth:over_awning_m', '`': 'cloth:over_awning_r',
+    "'": 'cloth:over_vine_l', '"': 'cloth:over_vine_r',
   },
   ground: [
+    'abbbbbbc12222223rsssssst',
+    'abbCbbbc45565557rsssusst',
+    'deeeeeefABBBBBBDvwwwwwwx',
+    'ghijikilAEFBGBHDyzOPQSzT',
+    'mnnonpnqIJKJLJMNUVWWXWVY',
     '........................',
     '........................',
-    '................=.......',
-    '........,.......=.......',
-    '................=...*...',
-    '.....=..........=.......',
-    '.....=...*......=.......',
-    '.....=..........=.......',
-    '.....=....,.....=...,...',
-    '.....=..........=.......',
-    '.....============.......',
-    '................=..*....',
-    '..~~~~..........=.......',
-    '..~~~~~.....*...=.......',
-    '..~~~~~.........=.......',
-    '...~~~..........=.....,.',
-    '...............===......',
-    '...............===......',
+    '...........%............',
+    '........................',
+    '........................',
+    '====<>==================',
+    '____<>__________________',
+    '........................',
+    '----------------[]------',
+    '~~~~~~~~~~~~~~~~{}Z~~~~~',
+    '~~~~~~~~~~~~~~~~()Z~~~~~',
+    '^^^^^^^^^^^^^^^^/\\^^^^^^',
+    '........................',
   ],
-  objects: [
-    '########################',
-    '# RRRRRRR              #',
-    '# RRRRRRR              #',
-    '# EEEEEEE              #',
-    '# WNWDWNW  T           #',
-    '#                      #',
-    '#                      #',
-    '#              P P     #',
-    '#              P P     #',
-    '#                      #',
-    '#                      #',
-    '#                      #',
-    '#                      #',
-    '#                   T  #',
-    '#                      #',
-    '#                      #',
-    '#                      #',
-    '###############   ######',
+  detail: [
+    '                        ',
+    '                        ',
+    '                        ',
+    '                        ',
+    '                        ',
+    ' *             *      & ',
+    '                        ',
+    '       |                ',
+    '                    #   ',
+    ' 90                     ',
+    '                        ',
+    '                        ',
+    '+                      +',
+    '                        ',
+    '                        ',
+    '                        ',
+    '                        ',
+    '                        ',
   ],
   overhead: [
     '                        ',
     '                        ',
-    '          (^)           ',
-    '          [_]           ',
+    '        ;::::::?        ',
+    '                        ',
+    '             @$`        ',
+    '                        ',
+    '       8                ',
     '                        ',
     '                        ',
-    '               <->      ',
+    '                        ',
+    "            '\"          ",
     '                        ',
     '                        ',
-    '                        ',
-    '                        ',
-    '                   (^)  ',
-    '                   [_]  ',
     '                        ',
     '                        ',
     '                        ',
@@ -125,110 +169,134 @@ const yard = {
     '                        ',
   ],
   exits: [
-    { x: 5, y: 4, to: 'test_house', at: [4, 8], facing: 'up' },
-    // A three-tile edge exit: the player keeps their offset across it.
-    { x: 15, y: 17, w: 3, to: 'test_lane', at: [8, 1], facing: 'down' },
+    { x: 12, y: 4, to: 'test_shop', at: [4, 8], facing: 'up' },
+    // A two-tile edge exit: the player keeps their offset across it.
+    { x: 16, y: 17, w: 2, to: 'test_lane', at: [8, 1], facing: 'down' },
+    // A closed exit that explains itself, then steps Cheryl back.
+    { x: 0, y: 5, h: 5, to: 'test_lane', at: [2, 2], when: () => false, blocked: "The west end's closed off for repairs. It has been since spring." },
   ],
+  // Every few seconds the cat wonders about something (non-blocking).
+  ambient: [{ every: [6, 10], run: (g) => g.emote('cat', 'question') }],
   triggers: [
     {
-      x: 7, y: 12, h: 4,
-      when: (g) => !g.flag('saw_pond'),
+      x: 0, y: 12, w: 24,
+      when: (g) => !g.flag('saw_canal'),
       run: async (g) => {
-        g.setFlag('saw_pond');
-        await g.think('A pond. When did they put in a pond?');
+        g.setFlag('saw_canal');
+        await g.think('The canal. It smells of salt and somebody\'s supper.');
       },
     },
   ],
   onEnter: async (g) => {
-    if (g.flag('yard_intro')) return;
-    g.setFlag('yard_intro');
+    if (g.flag('street_intro')) return;
+    g.setFlag('street_intro');
     await g.wait(0.3);
-    await g.think('Right. The engine test yard. Everything here is pretend, including me.');
+    await g.think('Right. The engine test street. Everything here is pretend, including me.');
+    g.hint(g.usingTouch ? 'Tap to walk   Tap things to look' : 'Arrows: walk   Z: look/talk   X: bag');
   },
   entities: [
     {
       id: 'old_man',
       name: 'Old Man',
-      x: 8, y: 7, facing: 'down',
-      sprite: person('old_man'),
+      x: 9, y: 7, facing: 'down',
+      sprite: { sheet: old_man },
       behavior: 'face',
-      interact: async (g, self) => {
-        if (g.flag('chest_open')) {
-          await g.say(self, 'You opened my chest! I never could find that key.', 'Go on, take the letter to the shop. It was always meant to go there.');
+      emote: { frame: 'note', every: [5, 9] }, // hums now and then
+      decline: "No, no. I've got everything I need. Except my key.",
+      interact: async (g, self, looks) => {
+        if (g.flag('letter_delivered')) {
+          await g.say(self, 'Getting dark early tonight. Darker than it ought to.');
           return;
         }
-        await g.say(self, "Afternoon. Don't mind me, I'm watching the grass.");
-        const i = await g.choose('Is it doing anything?', ['Growing', 'Not really'], { speaker: self });
-        if (i === 0) await g.say(self, 'Slowly! That\'s the trick of it. You have to be slower than the grass.');
+        if (looks > 0) {
+          await g.say(self, g.hasItem('letter') ? 'The shop. With the awning. Go on.' : 'Did you lose my letter? No? Good.');
+          return;
+        }
+        await g.say(self, "Evening. Don't mind me, I'm watching the canal.");
+        const i = await g.choose('Is it doing anything?', ['Flowing', 'Not really'], { speaker: self });
+        if (i === 0) await g.say(self, 'Slowly! That\'s the trick of it. You have to be slower than the water.');
         else await g.say(self, 'That\'s what it wants you to think.');
-        if (!g.hasItem('brass_key')) await g.say(self, 'If you see a little brass key, it\'s mine. I dropped it near the pond.');
+        await g.say(self, 'Would you take this to the shop for me? The door sticks. I dropped my key down by the water.');
+        await g.giveItem('letter');
       },
       use: {
         brass_key: async (g, self) => {
-          await g.say(self, 'My key! Keep it, keep it. Open my chest over by the tree for me, would you? My knees.');
+          await g.say(self, 'My key! Keep it, keep it. The shop door, with the awning. My knees won\'t do it.');
         },
       },
     },
     {
-      id: 'kid',
-      name: 'Sweaty Kid',
-      x: 19, y: 4,
-      sprite: person('kid'),
-      behavior: { type: 'wander', area: [18, 2, 5, 6], pause: [1, 2.5] },
-      talk: ["I'm not running. I'm walking really fast in a circle.", "Don't tell my mom."],
+      id: 'cat',
+      x: 10, y: 9,
+      sprite: { sheet: props, frame: 'cat' },
+      // Look counter: a different line each time, then the last one repeats.
+      looks: [
+        'A ginger cat. It is pretending I don\'t exist.',
+        'Still pretending. It\'s very good at it.',
+        ['We\'ve reached an understanding.', 'The understanding is that I\'m furniture.'],
+      ],
     },
     {
       id: 'sign',
-      x: 6, y: 6,
-      sprite: { sheet: testProps, frame: 'sign' },
-      look: ['"ENGINE TEST YARD. Please do not feed the placeholders."', 'Somebody has drawn a little moon in the corner.'],
+      x: 10, y: 5,
+      sprite: { sheet: props, frame: 'sign_board' },
+      look: ['"ENGINE TEST STREET. Please do not feed the placeholders."', 'Somebody has drawn a little moon in the corner.'],
     },
     {
       id: 'key',
-      x: 13, y: 14,
+      x: 3, y: 12,
       solid: false,
       layer: 'ground',
-      sprite: { sheet: testItems, frame: 'key_glint', fps: 1.5 },
+      sprite: { sheet: items, frame: 'key' },
       when: (g) => !g.flag('got_key'),
       interact: async (g) => {
         g.setFlag('got_key');
-        g.remove('key');
         await g.giveItem('brass_key');
         await g.describe('A little brass key, warm from the sun.');
+        // A one-time hint that stays until the bag is opened.
+        if (!g.flag('bag_hint')) {
+          g.setFlag('bag_hint');
+          g.hint(g.usingTouch ? 'Tap the bag, pick something, then tap where it goes.' : 'X: bag. Pick something, then use it on someone or something.', Infinity, { untilBag: true });
+        }
       },
     },
     {
-      id: 'chest',
-      x: 21, y: 15,
-      sprite: { sheet: testProps, frame: 'chest_closed' },
-      when: (g) => !g.flag('chest_open'),
-      look: "A sturdy little chest. Locked. Of course it's locked.",
+      // A hotspot with no sprite: the locked shop door. Solid until unlocked.
+      id: 'shop_door',
+      x: 12, y: 4,
+      when: (g) => !g.flag('door_unlocked'),
+      looks: [
+        ['The shop door. Locked, with a card in the window: BACK SOON.'],
+        "Still locked. 'Soon' is doing a lot of work on that card.",
+      ],
       use: {
         brass_key: async (g) => {
           g.takeItem('brass_key');
-          g.setFlag('chest_open');
-          g.sfx('select');
+          g.setFlag('door_unlocked');
+          g.sfx('door');
           await g.describe('The key turns with a satisfying clunk.');
-          await g.giveItem('letter');
         },
       },
     },
     {
-      id: 'chest_open',
-      x: 21, y: 15,
-      sprite: { sheet: testProps, frame: 'chest_open' },
-      when: (g) => !!g.flag('chest_open'),
-      look: 'Empty now, apart from a smell of cedar and old paper.',
+      id: 'blue_door',
+      x: 3, y: 4,
+      lookKey: 'doors', // shares a look counter with any other 'doors'
+      looks: ['A blue door. Everyone in Tessel has a blue door.', 'Nobody remembers deciding.'],
     },
   ],
 };
 
-const house = {
-  id: 'test_house',
+const shopMap = {
+  id: 'test_shop',
   name: 'Test Shop',
   tileset: testTileset,
-  music: 'test_shop',
   spawn: [4, 8],
+  // After the letter, the shop goes dark except around Cheryl.
+  darkness: (g) => (g.flag('letter_delivered') ? 0.85 : 0),
+  playerLight: 3,
+  // A lamp on the counter, lit by a flag (colored lights tint their pool).
+  lights: [{ x: 1, y: 3, radius: 2, color: 'lamp_warm', when: (g) => g.flag('counter_lamp') }],
   legend: { x: 'inwall_top', v: 'void', w: 'inwall', '.': 'floor', r: 'rug', c: 'counter', m: 'doormat' },
   ground: [
     'xxxxxxxxxx',
@@ -243,14 +311,14 @@ const house = {
     'vvvvmvvvvv',
   ],
   exits: [
-    { x: 4, y: 9, to: 'test_yard', at: [5, 5], facing: 'down' },
+    { x: 4, y: 9, to: 'test_street', at: [12, 5], facing: 'down' },
   ],
   entities: [
     {
       id: 'shopkeeper',
       name: 'Shopkeeper',
       x: 2, y: 3, facing: 'down',
-      sprite: person('shopkeeper'),
+      sprite: { sheet: shopkeeper },
       interact: async (g, self) => {
         if (g.flag('letter_delivered')) {
           await g.say(self, "We're closed. We've always been closed. Please come again.");
@@ -258,36 +326,61 @@ const house = {
         }
         await g.say(self, 'Welcome! Everything in the shop is free today, on account of there being nothing in the shop.');
       },
-      use: {
-        letter: deliverLetter,
-      },
+      use: { letter: deliverLetter },
     },
   ],
 };
 
-const lane = {
+const laneMap = {
   id: 'test_lane',
   name: 'Test Lane',
   tileset: testTileset,
-  music: 'test_yard',
-  spawn: [9, 1],
-  legend: { '.': 'grass', ',': 'grass_tuft', '*': 'flowers', '=': 'path', '#': 'stone' },
+  music: 'cistern_court',
+  lighting: storyLight,
+  spawn: [8, 2],
+  legend: {
+    '.': 'pave', '!': 'street:pave_wrong',
+    '=': solid('street:retain_top'), _: solid('street:retain_base'), '<': 'street:stairs_l', '>': 'street:stairs_r',
+    '-': solid('canal:bank_n'), '~': solid('canal:water'),
+  },
   ground: [
-    '........===.........',
-    '........===.........',
-    '........===....*....',
-    '........===.........',
-    '........==========..',
-    '.................=..',
-    '..*..............=..',
-    '.................=..',
-    '.......,.........=..',
-    '.................=..',
+    '========<>==========',
+    '________<>__________',
     '....................',
     '....................',
+    '....................',
+    '....................',
+    '..............!.....',
+    '....................',
+    '....................',
+    '....................',
+    '--------------------',
+    '~~~~~~~~~~~~~~~~~~~~',
   ],
-  objects: [
-    '########   #########',
+  // After the letter, the canal has drained: a whole-map variant replaces the
+  // ground layer (placeholder: shaded paving for the canal bed).
+  variants: [
+    {
+      when: (g) => g.flag('letter_delivered'),
+      legend: { ',': 'street:pave_se_shade' },
+      ground: [
+        '========<>==========',
+        '________<>__________',
+        '....................',
+        '....................',
+        '....................',
+        '....................',
+        '..............!.....',
+        '....................',
+        '....................',
+        '....................',
+        '--------------------',
+        ',,,,,,,,,,,,,,,,,,,,',
+      ],
+    },
+  ],
+  // The lane's sides are walls the art doesn't show yet.
+  collision: [
     '#                  #',
     '#                  #',
     '#                  #',
@@ -298,32 +391,39 @@ const lane = {
     '#                  #',
     '#                  #',
     '#                  #',
-    '####################',
+    '#                  #',
+    '#                  #',
   ],
   exits: [
-    { x: 8, y: 0, w: 3, to: 'test_yard', at: [15, 16], facing: 'up' },
+    { x: 8, y: 0, w: 2, to: 'test_street', at: [16, 16], facing: 'up' },
   ],
   // First visit: pan the camera to the sign and back.
   onEnter: async (g) => {
     if (g.flag('lane_intro')) return;
     g.setFlag('lane_intro');
-    await g.panCamera(17, 8);
+    await g.panCamera(16, 7);
     await g.wait(0.4);
-    await g.think('A dead end with a sign. Signs at dead ends are never good news.');
+    await g.think('A dead end with a sign. And something wrong with the paving.');
     await g.followPlayer();
   },
   entities: [
     {
       id: 'lane_sign',
-      x: 18, y: 9,
-      sprite: { sheet: testProps, frame: 'sign' },
+      x: 17, y: 7,
+      sprite: { sheet: props, frame: 'sign_board' },
       look: '"DEAD END. For now."',
+    },
+    {
+      id: 'crack',
+      x: 14, y: 6,
+      solid: false,
+      looks: ['The paving has a crack in it that moves when I\'m not looking straight at it.', 'I am not going to step on that.'],
     },
   ],
 };
 
-// The scripted sequence: walking, camera, and the screen effects the
-// Wrongness can use.
+// The shopkeeper's scene: scripted walking and the screen effects the
+// Wrongness can use. Afterwards the street is lit for night.
 async function deliverLetter(g, self) {
   g.takeItem('letter');
   await g.say(self, 'A letter? For the shop? Nobody writes to the shop.');
@@ -331,24 +431,153 @@ async function deliverLetter(g, self) {
   await g.moveNpc(self, ['down', 'down']);
   g.faceNpc(self, 'player');
   await g.say(self, 'Let me just...');
-  g.playMusic('wrongness');
-  await Promise.all([g.tint('ph_purple_dark', 0.45, 1.2, 'multiply'), g.distort(2, 1.2)]);
+  g.playCue('wrongness');
+  g.setWrongness(0.6);
+  g.sfx('wrong_sting');
+  await Promise.all([g.tint('wrong_deep', 0.45, 1.2, 'multiply'), g.distort(2, 1.2)]);
   await g.shake(3, 0.6);
   await g.flicker(0.5);
   await g.hueShift(140, 0.6);
   await g.say(self, 'The letter is blank. It was always blank. Why did I think it would say something?');
   await g.think("Did the floor just... breathe? No. Floors don't do that.");
   await g.clearEffects(0.8);
-  g.playMusic('test_shop');
+  g.setWrongness(0);
   await g.moveNpc(self, [2, 3]);
   g.faceNpc(self, 'down');
   g.setFlag('letter_delivered');
   await g.say(self, "Sorry. Where was I? Welcome! We're closed.");
 }
 
-export const testMaps = { test_yard: yard, test_house: house, test_lane: lane };
+// A vista in the manner of the opening's moonrise, composed from the art
+// task's layers (src/art/vista.js): background, glow, moon, rim over the
+// moon, basin twinkles, and Cheryl in the foreground. Then auto-advancing
+// shouts, a hard cut back to the map under night lighting, and a card.
+function makeVista(g) {
+  const bg = g.sheet(vista);
+  const glow = g.sheet(vista_glow);
+  const moon = g.sheet(vista_moon);
+  const rim = g.sheet(vista_rim);
+  const twinkle = g.sheet(vista_twinkle);
+  const cheryl = g.sheet(vista_cheryl);
+  return (ctx, ms) => {
+    const t = ms / 1000;
+    ctx.drawImage(bg.frame('bowl_dusk'), 0, 0);
+    if (t > 0.5) {
+      const img = glow.frameAt('glow', ms);
+      ctx.globalAlpha = Math.min(1, (t - 0.5) / 1.5);
+      ctx.drawImage(img, 176 - img.width / 2, 88 - img.height);
+      ctx.globalAlpha = 1;
+    }
+    // The moon rises from behind the rim, right of the Gate.
+    const moonY = Math.round(104 - Math.max(0, Math.min(1, (t - 2) / 12)) * 48);
+    ctx.drawImage(moon.frameAt('moon', ms), 176 - 16, moonY - 16);
+    ctx.drawImage(rim.frame('rim'), 0, 0);
+    VISTA_BASINS.forEach(([x, y], k) => ctx.drawImage(twinkle.frameAt('twinkle', ms + k * 137), x - 4, y - 4));
+    ctx.drawImage(cheryl.frame('cheryl_tub'), 0, 128);
+  };
+}
+
+async function moonrise(g) {
+  await g.think('Plug in. Water in. Sheets out of the way.', 'Now, the moon.');
+  g.stopMusic(2000);
+  await g.showPicture(makeVista(g), { fade: 1 });
+  await g.wait(7);
+  await g.think('No.', 'It comes up in the Gate.');
+  await g.hidePicture({ fade: 0 }); // hard cut
+  await g.setLighting('night', 0);
+  const groan = g.shake(1, 3);
+  await g.say('Sweaty Kid', 'WHOA!', { auto: 1.2 });
+  await g.say('Neighbor', 'My SHEETS!', { auto: 1.2 });
+  await groan;
+  await g.shake(3, 0.5);
+  await g.wait(1);
+  await g.fade('out', 2);
+  await g.card('Morning.', 2);
+  await g.setLighting('day', 0);
+  await g.fade('in', 1);
+  await g.think('I\'d like to know why.');
+  await g.setLighting(null, 0);
+  g.hint('Lighting returns to the map\'s own on the next map load.', 3);
+}
+
+// A character defined once and placed by story state: the Sweaty Kid laps the
+// street until the letter is delivered, then waits in the lane.
+export const testCharacters = {
+  kid: {
+    name: 'Sweaty Kid',
+    sprite: { sheet: kid },
+    // Stops and faces Cheryl when she's within 2 tiles or walking over to him.
+    behavior: { type: 'patrol', route: [[14, 6], [19, 6], [19, 9], [14, 9]], stopNear: 2 },
+    talks: ["I'm not running. I'm walking really fast in a square.", "Don't tell my mum.", 'Forty laps! Or thirty.'],
+    talksRepeat: 'cycle',
+    decline: "Nah. I need SPEED, not stuff.",
+    bark: { lines: ['Faster! Faster!', 'Lap... a lot!'], range: 4, every: [5, 9] },
+    at: (g) => (g.flag('letter_delivered')
+      ? { map: 'test_lane', x: 12, y: 5, facing: 'down', behavior: 'face' }
+      : { map: 'test_street', x: 14, y: 6 }),
+  },
+};
+
+// A stress map for performance checks (?map=test_big&debug=1 shows frame
+// times): 64×48 tiles of street with building blocks, lamps, and 40
+// wandering people, lit for night.
+function bigMap() {
+  const W = 64;
+  const H = 48;
+  const ground = [];
+  const detail = [];
+  const overhead = [];
+  for (let y = 0; y < H; y++) {
+    let g = '';
+    let d = '';
+    let o = '';
+    for (let x = 0; x < W; x++) {
+      const bx = x % 16;
+      const by = y % 12;
+      const inBlock = bx >= 2 && bx < 10 && by >= 1 && by < 6;
+      if (inBlock) g += by < 3 ? 'r' : by === 3 ? 'f' : by === 4 ? (bx % 3 ? 'w' : 'n') : 'b';
+      else g += '.';
+      d += !inBlock && bx === 12 && by === 8 ? '|' : ' ';
+      o += !inBlock && bx === 12 && by === 7 ? '8' : ' ';
+    }
+    ground.push(g);
+    detail.push(d);
+    overhead.push(o);
+  }
+  const people = [];
+  const sheets = [kid, old_man, shopkeeper];
+  for (let i = 0; i < 40; i++) {
+    const x = 1 + ((i * 7) % 60);
+    const y = 7 + ((i * 5) % 4) + 12 * (i % 4);
+    people.push({
+      id: `walker_${i}`, name: 'Passer-by', x, y,
+      sprite: { sheet: sheets[i % 3] },
+      behavior: { type: 'wander', area: [x - 3, y - 1, 7, 3], pause: [0.5, 2] },
+      talk: 'Lovely evening.',
+      emote: i % 5 === 0 ? { frame: 'note', every: [3, 6] } : undefined,
+    });
+  }
+  return {
+    id: 'test_big',
+    name: 'Test Big',
+    tileset: testTileset,
+    lighting: 'night',
+    spawn: [12, 9],
+    legend: {
+      '.': 'pave', r: solid('buildings:roof@ochre'), f: solid('buildings:roof_front@ochre'),
+      w: solid('buildings:window@ochre'), n: solid('buildings:window_closed@ochre'), b: solid('buildings:wall_base@ochre'),
+      '|': solid('props:lamp_post'), 8: 'props:over_lamp_top',
+    },
+    ground, detail, overhead,
+    entities: people,
+  };
+}
+
+export const testMaps = { test_street: streetMap, test_shop: shopMap, test_lane: laneMap, test_big: bigMap() };
 
 export const testScripts = {
-  // ?map=test_house&x=2&y=5&facing=up&items=letter&run=wrongness
+  // ?map=test_shop&x=2&y=5&facing=up&items=letter&run=wrongness
   wrongness: async (g) => deliverLetter(g, g.npc('shopkeeper')),
+  // ?map=test_street&run=moonrise
+  moonrise,
 };

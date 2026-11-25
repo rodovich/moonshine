@@ -2,18 +2,20 @@
 // A*, walking up to things to interact, using held items, the inventory
 // button, and exits/triggers when the player arrives on a tile.
 
-import { WIDTH } from './display.js';
+import { WIDTH, HEIGHT } from './display.js';
 import { TILE } from './tilemap.js';
 import { DIR_VEC, dirBetween } from './entity.js';
 import { loadSheet } from './art.js';
 import { uiIcons } from '../art/ui.js';
 import { STYLES, drawBox, inRect } from './ui.js';
 import { drawText, measure } from './text.js';
-import { inArea, isInteractable } from './world.js';
-import { sfx } from './sound.js';
+import { inArea, isInteractable, safeCall } from './world.js';
+import { sfx, step } from './sound.js';
 
-const BAG_BTN = { x: WIDTH - 24, y: 4, w: 20, h: 20 };
-const HOLD_BANNER = { x: 4, y: 4, w: 0, h: 20 }; // width set when drawn
+const BAG_BTN = { x: WIDTH - 26, y: 3, w: 22, h: 22 };
+// A little more forgiving than the drawn button, for fingers.
+const BAG_HIT = { x: BAG_BTN.x - 4, y: 0, w: BAG_BTN.w + 8, h: BAG_BTN.h + 8 };
+const HOLD_BANNER = { x: 4, y: 3, w: 0, h: 22 }; // width set when drawn
 const DIRS = ['up', 'down', 'left', 'right'];
 
 export class Control {
@@ -118,6 +120,7 @@ export class Control {
     const [dx, dy] = DIR_VEC[dir];
     if (this.world.canEnter(p, p.x + dx, p.y + dy)) {
       p.startStep(dir);
+      this.footstep();
     } else {
       p.facing = dir;
       if (held && this.bump === 0) {
@@ -139,6 +142,7 @@ export class Control {
       this.path.shift();
       this.waitT = 0;
       p.startStep(dir);
+      this.footstep();
       return;
     }
     // Someone is in the way: wait a moment, then route around them.
@@ -216,7 +220,14 @@ export class Control {
   }
 
   tap(t) {
-    if (inRect(t, BAG_BTN)) {
+    // Taps in the letterbox, outside the 256×224 frame, aren't world taps
+    // (the phone touch bar below the frame is handled first).
+    if (this.world.game.display.touchBarHit && this.world.game.display.touchBarHit(t)) {
+      this.openInventory();
+      return;
+    }
+    if (t.x < 0 || t.y < 0 || t.x >= WIDTH || t.y >= HEIGHT) return;
+    if (inRect(t, BAG_HIT)) {
       this.openInventory();
       return;
     }
@@ -264,13 +275,32 @@ export class Control {
     const w = this.world;
     this.cancelMove();
     this.holding = null;
+    if (w.hintState && w.hintState.untilBag) w.hintState = null;
     w.run(async () => {
-      const r = await w.inventory.show(w.state.inventory, this.lastItem);
-      if (r && r.use) {
-        this.holding = r.use;
-        this.lastItem = r.use;
+      // Looking at an item shows its text, then returns to the bag.
+      for (;;) {
+        const r = await w.inventory.show(w.state.inventory, this.lastItem);
+        if (r && r.look) {
+          this.lastItem = r.look;
+          await w.examineItem(r.look);
+          continue;
+        }
+        if (r && r.use) {
+          this.holding = r.use;
+          this.lastItem = r.use;
+        }
+        return;
       }
     });
+  }
+
+  // A footstep sound for the tile Cheryl steps onto: the tile's `step` id
+  // (e.g. 'step_splash'), else the map's `step`, else 'step'.
+  footstep() {
+    const w = this.world;
+    const p = this.player;
+    const t = w.map.tile('detail', p.x, p.y) || w.map.tile('ground', p.x, p.y);
+    step((t && t.props.step) || w.mapDef.step || 'step');
   }
 
   // The player finished a step onto a new tile.
@@ -279,11 +309,33 @@ export class Control {
     if (w.busy) return;
     const p = this.player;
     const def = w.mapDef;
-    const exit = (def.exits || []).find((ex) => inArea(ex, p.x, p.y) && (!ex.when || ex.when(w.api)));
+    const here = (def.exits || []).filter((ex) => inArea(ex, p.x, p.y));
+    const exit = here.find((ex) => !ex.when || safeCall(ex.when, w.api));
+    const stepBack = async (g) => {
+      if (p.lastFrom) await g.movePlayer([p.lastFrom[0], p.lastFrom[1]]);
+    };
+    // A closed exit that explains itself: say why, then step back off it.
+    const closed = !exit && here.find((ex) => ex.blocked);
+    if (closed) {
+      this.cancelMove();
+      this.bufferedDir = null;
+      w.run(async (g) => {
+        const why = closed.blocked;
+        if (typeof why === 'function') await why(g);
+        else await g.describe(...(Array.isArray(why) ? why : [why]));
+        await stepBack(g);
+      });
+      return;
+    }
     if (exit) {
       this.cancelMove();
       this.bufferedDir = null;
       w.run(async (g) => {
+        // `confirm: 'Go down?'` asks first; "Not yet" steps back.
+        if (exit.confirm) {
+          const i = await g.choose(exit.confirm, exit.choices || ['Yes', 'Not yet']);
+          if (i !== 0) return stepBack(g);
+        }
         if (exit.run) return exit.run(g);
         const multi = (exit.w || 1) > 1 || (exit.h || 1) > 1;
         const x = exit.at[0] + (multi ? p.x - exit.x : 0);
@@ -293,7 +345,7 @@ export class Control {
       });
       return;
     }
-    const trig = (def.triggers || []).find((tr) => inArea(tr, p.x, p.y) && (!tr.when || tr.when(w.api)));
+    const trig = (def.triggers || []).find((tr) => inArea(tr, p.x, p.y) && (!tr.when || safeCall(tr.when, w.api)));
     if (trig) {
       if (trig.stop !== false) this.cancelMove();
       w.run(trig.run);
@@ -305,7 +357,7 @@ export class Control {
     ctx.save();
     ctx.globalAlpha = 0.9;
     drawBox(ctx, BAG_BTN.x, BAG_BTN.y, BAG_BTN.w, BAG_BTN.h, STYLES.npc);
-    ctx.drawImage(this.icons.frame('bag'), BAG_BTN.x + 2, BAG_BTN.y + 2);
+    ctx.drawImage(this.icons.frame('bag'), BAG_BTN.x + 3, BAG_BTN.y + 3);
     ctx.restore();
     // "Using" banner
     if (this.holding) {
@@ -315,8 +367,8 @@ export class Control {
       this.bannerW = wdt;
       drawBox(ctx, HOLD_BANNER.x, HOLD_BANNER.y, wdt, HOLD_BANNER.h, STYLES.cheryl);
       const icon = this.world.inventory.icon(this.holding);
-      if (icon) ctx.drawImage(icon, HOLD_BANNER.x + 3, HOLD_BANNER.y + 2);
-      drawText(ctx, text, HOLD_BANNER.x + 22, HOLD_BANNER.y + 6, { color: STYLES.cheryl.text });
+      if (icon) ctx.drawImage(icon, HOLD_BANNER.x + 3, HOLD_BANNER.y + 3);
+      drawText(ctx, text, HOLD_BANNER.x + 22, HOLD_BANNER.y + 7, { color: STYLES.cheryl.text });
     }
   }
 }

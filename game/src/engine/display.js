@@ -54,7 +54,14 @@ export class Display {
     this.drawW = Math.round(WIDTH * this.scale);
     this.drawH = Math.round(HEIGHT * this.scale);
     this.ox = Math.floor((devW - this.drawW) / 2);
-    this.oy = Math.floor((devH - this.drawH) / 2);
+    // In tall portrait screens, sit near the top and leave the space below
+    // for thumbs; otherwise center.
+    const portrait = devH > devW * 1.3;
+    this.oy = Math.floor(((devH - this.drawH) / 2) * (portrait ? 0.4 : 1));
+    // On tall portrait screens there's room below the frame for a big bag
+    // button (in game pixels, below y = 224, drawn at twice the frame's scale).
+    const below = (devH - this.oy - this.drawH) / this.scale;
+    this.touchBar = portrait && below >= 64 ? { x: WIDTH / 2 - 24, y: HEIGHT + Math.min(24, (below - 48) / 2), w: 48, h: 48 } : null;
     this.dpr = dpr;
     this.ctx.imageSmoothingEnabled = false;
   }
@@ -73,9 +80,15 @@ export class Display {
     return { x: rect.left + (this.ox + x * this.scale) / this.dpr, y: rect.top + (this.oy + y * this.scale) / this.dpr };
   }
 
+  touchBarHit(p) {
+    const r = this.touchBar;
+    return !!r && p.x >= r.x && p.y >= r.y && p.x < r.x + r.w && p.y < r.y + r.h;
+  }
+
   // fx: { wave: {amp, freq, phase} } post-processing handled here; color
   // effects are applied to the buffer by effects.js before present.
-  present(wave) {
+  // `overlay`: a canvas drawn into the touch bar's rect (below the frame).
+  present(wave, overlay = null) {
     const ctx = this.ctx;
     ctx.imageSmoothingEnabled = false;
     ctx.fillStyle = this.letterbox;
@@ -91,6 +104,10 @@ export class Display {
       ctx.drawImage(this.post, 0, 0, WIDTH, HEIGHT, this.ox, this.oy, this.drawW, this.drawH);
     } else {
       ctx.drawImage(this.buffer, 0, 0, WIDTH, HEIGHT, this.ox, this.oy, this.drawW, this.drawH);
+    }
+    if (overlay && this.touchBar) {
+      const r = this.touchBar;
+      this.ctx.drawImage(overlay, this.ox + r.x * this.scale, this.oy + r.y * this.scale, r.w * this.scale, r.h * this.scale);
     }
   }
 }

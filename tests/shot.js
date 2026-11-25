@@ -1,6 +1,6 @@
 // Screenshot the game at a URL query, after optional key presses.
 // Usage: node tests/shot.js "<query>" out.png [waitMs] [keys...]
-//   node tests/shot.js "?map=test_yard&x=10&y=8" yard.png 800 ArrowRight ArrowRight
+//   node tests/shot.js "?map=test_street&x=10&y=8" street.png 800 ArrowRight ArrowRight
 // Starts its own server on port 8124. Prints console errors.
 import { chromium } from '@playwright/test';
 import { spawn } from 'node:child_process';
