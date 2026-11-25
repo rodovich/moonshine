@@ -5,6 +5,9 @@
 
 import { Display, WIDTH, HEIGHT } from './display.js';
 import { wrap, drawTextCentered, LINE_HEIGHT } from './text.js';
+import { drawBox, STYLES } from './ui.js';
+import { loadSheet } from './art.js';
+import { uiIcons } from '../art/ui.js';
 import { Input } from './input.js';
 import { Effects } from './effects.js';
 import { TextBox } from './textbox.js';
@@ -133,6 +136,23 @@ export class Game {
     this.effects.update();
   }
 
+  // The big bag button under the frame on portrait phones (null to hide).
+  touchBarImage() {
+    const w = this.world;
+    if (!this.display.touchBar || !w || this.scene !== w || w.busy || w.textbox.open || w.inventory.open || w.picture) return null;
+    if (!this.barCanvas) {
+      const c = document.createElement('canvas');
+      c.width = 48;
+      c.height = 48;
+      const ctx = c.getContext('2d');
+      ctx.imageSmoothingEnabled = false;
+      drawBox(ctx, 0, 0, 48, 48, STYLES.npc);
+      ctx.drawImage(loadSheet(uiIcons).frame('bag'), 8, 8, 32, 32);
+      this.barCanvas = c;
+    }
+    return this.barCanvas;
+  }
+
   // A snapshot for tests and the console.
   snapshot() {
     const w = this.world;
@@ -174,7 +194,7 @@ export class Game {
     this.scene.draw(ctx);
     this.effects.applyFade(ctx);
     if (this.card) drawCard(ctx, this.card.text);
-    this.display.present(this.effects.waveParams());
+    this.display.present(this.effects.waveParams(), this.touchBarImage());
   }
 }
 

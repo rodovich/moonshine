@@ -242,18 +242,35 @@ export const RISE_SFX = {
       { type: 'noise', dur: 4, gain: 0.12, filter: { type: 'lowpass', freq: 150 }, env: { a: 0.5, d: 1, s: 1, r: 0.6 } },
     ],
   },
-  // The burst: a crack, and a roar of water surging out of the grate (about 3 s). Start the
-  // `roar` loop as it fades.
+  // The burst: the big main pipe splits. A sharp crack, a short shriek of tearing metal, then a
+  // hissing spray and the roar of water (about 3 s). Start the `spray` and `roar` loops as it fades.
   burst: {
     gain: 0.5, echo: 0.35, duck: 0.1, duckFor: 2,
     layers: [
       { type: 'noise', dur: 0.05, gain: 0.7, filter: { type: 'highpass', freq: 600 }, env: { a: 0.001, d: 0.05, s: 0, r: 0.01 } },
       { type: 'tone', wave: 'sine', freq: [80, 30], sweep: 0.8, dur: 1, gain: 0.8, env: { a: 0.002, d: 0.9, s: 0, r: 0.1 } },
-      { type: 'noise', at: 0.05, dur: 3, gain: 0.45, filter: { type: 'bandpass', freq: [2500, 700], q: 0.6, time: 1.5 }, env: { a: 0.05, d: 2.5, s: 0.5, r: 0.4 } },
-      { type: 'noise', at: 0.05, dur: 3, gain: 0.3, filter: { type: 'lowpass', freq: 300 }, env: { a: 0.1, d: 2.5, s: 0.6, r: 0.4 } },
+      // Tearing metal: a bright, ragged shriek sliding up, then the pipe's ring.
+      { type: 'tone', wave: 'sawtooth', at: 0.02, freq: 600, path: [[0.35, 1400]], dur: 0.35, gain: 0.1, vibrato: { rate: 37, depth: 120 }, filter: { type: 'bandpass', freq: 1800, q: 3 }, env: { a: 0.005, d: 0.3, s: 0.6, r: 0.05 } },
+      { type: 'tone', wave: 'sine', at: 0.02, freq: 311, dur: 1.2, gain: 0.12, env: { a: 0.001, d: 1.1, s: 0, r: 0.1 } },
+      { type: 'tone', wave: 'sine', at: 0.02, freq: 311 * 2.32, dur: 0.6, gain: 0.06, env: { a: 0.001, d: 0.5, s: 0, r: 0.1 } },
+      // The spray: high hiss bursting out, settling.
+      { type: 'noise', at: 0.05, dur: 3, gain: 0.35, filter: { type: 'highpass', freq: [6000, 3000], time: 2 }, env: { a: 0.01, d: 2.5, s: 0.5, r: 0.4 } },
+      // The roar of water underneath.
+      { type: 'noise', at: 0.1, dur: 3, gain: 0.35, filter: { type: 'bandpass', freq: [1800, 600], q: 0.6, time: 1.5 }, env: { a: 0.1, d: 2.5, s: 0.5, r: 0.4 } },
+      { type: 'noise', at: 0.1, dur: 3, gain: 0.3, filter: { type: 'lowpass', freq: 300 }, env: { a: 0.15, d: 2.5, s: 0.6, r: 0.4 } },
     ],
   },
-  // Water roaring up through the burst grate and filling the bottom of the shaft (loop). Fade it
+  // The split pipe spraying (loop), with `roar`.
+  spray: {
+    gain: 0.8,
+    loop: {
+      beds: [
+        { type: 'noise', gain: 0.09, filter: { type: 'highpass', freq: 3500 }, lfo: { target: 'gain', rate: 2.6, depth: 0.25 } },
+        { type: 'noise', gain: 0.04, filter: { type: 'bandpass', freq: 2200, q: 2 }, lfo: { target: 'filter', rate: 0.8, depth: 400 } },
+      ],
+    },
+  },
+  // Water roaring out of the split pipe and filling the bottom of the shaft (loop). Fade it
   // with setLoopVolume as Cheryl climbs.
   roar: {
     gain: 0.85,

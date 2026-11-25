@@ -4,7 +4,7 @@ This document sets the game's structure: the areas, how they connect, what is ga
 
 ## Target
 
-- **Length:** 2½–3½ hours for a first-time player (Act 1: 8–12 min, Act 2: 30–40, Act 3: 18–25, Act 4: 35–50, Act 5: 30–45, Act 6: 10–15).
+- **Length:** 2½–3½ hours for a first-time player (Act 1: 8–12 min, Act 2: 30–40, Act 3: 18–25, Act 4: 35–50, Act 5: 30–40, Act 6: 15–25 including the epilogue walk).
 - **Size:** about 35 surface screens and 17 underground screens (one screen is 16×14 tiles), 17 NPCs, about 25 inventory items.
 
 ## Design rules
@@ -184,7 +184,7 @@ flowchart TD
   end
 
   subgraph A6["Act 6 — Moon in the Bowl"]
-    a6tooth[Lever out broken Tooth, set clapper] --> a6brake[Bell rings at the turn → release brake]
+    a6tooth[End of Act 5: lever out broken Tooth, set clapper] --> a6brake[Bell rings at the turn → release brake]
     a6brake --> a6keel[Long Keel → Sighting Room]
     a6keel --> a6plug[Find plug, plug the Basin]
     a6plug --> a6trim[Trim until the moon sits true]
@@ -240,11 +240,12 @@ flowchart TD
 - *Boatman.* Beached at the foot of the Water Stairs, blocking the last broken flight. The Fishmonger lends a **bucket**; the refilled Fountain fills it; he pours it into his boat ("AFLOAT!") and hands over his **rope**, which lets Cheryl down the broken flight.
 - *Charging the disc.* The Water Stairs door's moon-lock needs a full charge, and only the lighthouse lamp is bright enough. The Keeper has polished in a frenzy since she saw the reef and run out of polish; she won't let anyone near the lamp without it. The Shopkeeper, whose window display fell over in the rise ("there's a GAP"), swaps **brass polish** for the guidebook. Charged, the disc fades in under a minute: too fast for Cheryl. She gives it to the Kid, who still has her egg timer from Act 1 and winds it himself. The run is a fully scripted scene that always succeeds.
 - *Clapper.* The Clockmaker's doorstop is the bell's old clapper. He swaps it for Mott's square jug.
-- *Escalation.* Each visit to the lighthouse gallery shows the Teeth larger (three art stages).
+- *Escalation.* The Teeth grow on the risen Harbor's horizon and in the lighthouse window (three art stages).
+- *Windlass.* Through the bronze door and the Bow Passage: lever out the sheared Tooth's stump with the crowbar and seat the **clapper**. Then wait for moonrise. (Build-ready in [05-high-and-dry.md](05-high-and-dry.md).)
 
-**Act 6**
-- *Windlass.* Lever out the sheared Tooth's stub with the crowbar; seat the **clapper**. A speaking tube carries the bell; when it rings at the turn, throw the brake. A cutaway montage shows the surface. The chain comes home.
-- *Sighting Room.* The **plug** lies in the dry Basin. Plug it; it fills; turn the trim wheel until the moon sits true (two or three turns; each turn shows the reflection moving). The Keeper's ledger beside the Basin notes "Past full: allow two fingers," because the climax is a few nights after full moon. Once the moon sits true, the Keepers' master stop (a bronze rod with the Middle Sister's emblem) comes free; pulling it puts her back to bed and the city settles.
+**Act 6** (build-ready in [06-moon-in-the-bowl.md](06-moon-in-the-bowl.md))
+- *Windlass.* A speaking tube carries the bell; when it rings at the turn (it rings on its own if the player waits), throw the brake. A cutaway montage shows the surface lurch. The chain comes home and the Long Keel hatch opens.
+- *Sighting Room.* The **plug** lies in the dry Basin. Plug it; it fills; turn the trim wheel until the moon sits true (three steps; each turn shows the reflection moving). The Keepers' sighting log beside the Basin repeats "Past full: allow two fingers," because the climax is a few nights after full moon. Once the moon sits true, the Keepers' master stop (a bronze rod with the Middle Sister's emblem) comes free; pulling it puts her back to bed and the city settles.
 - *Ending.* Bath, lift, epilogue, final image (story bible, Act 6).
 
 ## Nonlinearity check
@@ -293,8 +294,8 @@ Following the process in [../decisions.md](../decisions.md): build and polish **
 2. Act 2, the surface city (all surface areas in their day state): [02-city.md](02-city.md).
 3. Act 3, Downstairs: Step Gallery, Lamp Halls, Chart Room: [03-downstairs.md](03-downstairs.md).
 4. Act 4, the bell, Mott, the rhyme, the Pump Hall, and the reveal: [04-the-list.md](04-the-list.md).
-5. Act 5, the dry Bilge, the lighthouse, the bow decks.
-6. Act 6, the climax and the ending.
+5. Act 5, the dry Bilge, the lighthouse, the bow decks: [05-high-and-dry.md](05-high-and-dry.md).
+6. Act 6, the climax and the ending: [06-moon-in-the-bowl.md](06-moon-in-the-bowl.md).
 
 ## Decisions log
 

@@ -138,3 +138,29 @@ test('audio unlocks on the first key or tap', async ({ page }) => {
   const ready = await page.evaluate(async () => (await import('/src/audio/index.js')).audioReady());
   expect(ready).toBe(true);
 });
+
+test('closing the bag with a tap never acts in the world; letterbox taps are ignored', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await boot(page, `${STREET}&x=12&y=8&items=letter`);
+  await waitIdle(page);
+  const click = async (gx, gy) => {
+    const p = await page.evaluate(([x, y]) => window.moonshine.display.toClient(x, y), [gx, gy]);
+    await page.mouse.click(p.x, p.y);
+    await page.waitForTimeout(150);
+  };
+  await click(256 - 14, 14); // bag
+  const slot = await page.evaluate(() => window.moonshine.inventory.slotRect(0));
+  await click(slot.x + 10, slot.y + 10); // select (the bag stays open)
+  expect((await snap(page)).inventoryOpen).toBe(true);
+  await click(24 + 208 - 10 - 48 - 4 - 44 + 22, 14 + 96 - 24 + 8); // Use
+  await waitIdle(page);
+  let s = await snap(page);
+  expect(s.holding).toBe('letter');
+  expect([s.x, s.y]).toEqual([12, 8]);
+  // A click in the black margin beside the frame does nothing.
+  await page.mouse.click(1270, 400);
+  await page.waitForTimeout(400);
+  s = await snap(page);
+  expect(s.holding).toBe('letter');
+  expect([s.x, s.y, s.text]).toEqual([12, 8, null]);
+});

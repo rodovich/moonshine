@@ -197,6 +197,37 @@ test('waitForInput resolves on a key', async ({ page }) => {
   expect(await pending).toBe('ok');
 });
 
+test('cutscene visit: camera follows an NPC on another map, then Cheryl comes back', async ({ page }) => {
+  await boot(page, `${STREET}&x=12&y=8`);
+  await waitIdle(page);
+  const r = await runScript(page, `
+    g.setFlag('letter_delivered'); // the Kid is in the lane now
+    g.setFlag('lane_intro');
+    await g.changeMap('test_lane', null, null, null, { cutscene: true, fade: false });
+    const hidden = !g.player.visible;
+    g.cameraFollow('kid');
+    await g.moveNpc('kid', [16, 5]);
+    const cam = window.moonshine.world.cam.x;
+    await g.restorePlayer({ fade: false });
+    return { hidden, cam, map: g.map, x: g.player.x, y: g.player.y, visible: g.player.visible };
+  `, 15000);
+  expect(r.done).toBe(true);
+  expect(r.v).toMatchObject({ hidden: true, map: 'test_street', x: 12, y: 8, visible: true });
+  expect(r.v.cam).toBeGreaterThan(0);
+});
+
+test('a closed conditional exit is ordinary floor for paths', async ({ page }) => {
+  await boot(page, `${STREET}&x=12&y=7`);
+  await waitIdle(page);
+  await page.evaluate(() => window.moonshine.world.mapDef.exits.push({ x: 13, y: 7, to: 'test_shop', at: [4, 8], when: () => false }));
+  const path = await page.evaluate(() => {
+    const w = window.moonshine.world;
+    return w.pathFor(w.player, [[14, 7]]);
+  });
+  expect(path).toEqual([[13, 7], [14, 7]]);
+  await page.evaluate(() => window.moonshine.world.mapDef.exits.pop());
+});
+
 test('Act 4 scene tools: held tilt, white fade, timed tile swaps, chained pans', async ({ page }) => {
   await boot(page, `${STREET}&x=12&y=8`);
   await waitIdle(page);
@@ -213,4 +244,20 @@ test('Act 4 scene tools: held tilt, white fade, timed tile swaps, chained pans',
     return held;
   `, 20000);
   expect(r).toEqual({ done: true, v: 2 });
+});
+
+test('credits roll over a picture, skip after a moment, then back to the title', async ({ page }) => {
+  await boot(page, `${STREET}&x=12&y=8&save=1`);
+  await waitIdle(page);
+  page.evaluate(() => window.moonshine.world.run(async (g) => {
+    g.markComplete();
+    await g.credits([{ text: 'MOONSHINE', heading: true }, '', 'Engine', 'a lander task', '', 'Thank you for playing.'], { skipAfter: 0.5, hold: 0.5, fade: 0.2 });
+    await g.toTitle();
+  })).catch(() => {});
+  await page.waitForTimeout(1500);
+  await page.screenshot({ path: 'tests/screenshots/31-credits.png' });
+  await press(page, 'z'); // skip to the last line
+  await waitFor(page, () => window.moonshine.snapshot().scene === 'title', null, 10000);
+  const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('moonshine.save.v1')));
+  expect(saved.flags['game.complete']).toBe(true);
 });

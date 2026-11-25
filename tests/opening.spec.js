@@ -338,7 +338,8 @@ test('keyboard: the whole opening', async ({ page }) => {
   await kbWalk(page, 15, 24);
   await read();
   await page.keyboard.press('ArrowDown');
-  await waitFor(page, () => window.moonshine.snapshot().flags['act1.done'], null, 8000);
+  await waitFor(page, () => (window.moonshine.snapshot().text || '').includes('Down, then.'), null, 5000);
+  await read({ stop: (s) => s.flags['act1.done'] });
   await page.waitForTimeout(1800);
   await shot(page, 'opening-15-end-card');
   await waitFor(page, () => window.moonshine.snapshot().scene === 'title', null, 15000);

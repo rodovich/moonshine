@@ -148,6 +148,7 @@ const entities = [
     interact: (g) => {
       if (morning(g)) return g.describe("The plug hook. Empty. I'm going to find out why.");
       if (g.hasItem('bath_plug') || g.flag('tub.plugged')) return g.describe('The plug hook. Empty, but only because the plug is busy.');
+      if (g.flag('n.tub.noPlug')) return g.describe("The plug hook. Empty. The plug's downstairs, being a king.");
       return g.describe('The plug hook. Empty. Oh -- I lent the plug to him downstairs. A "chess emergency."');
     },
   },
