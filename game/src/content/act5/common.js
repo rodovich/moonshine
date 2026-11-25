@@ -61,12 +61,6 @@ export const act5Items = {
     description: "The Boatman's mooring rope. Tarry, salty, and longer than I'd like to climb.",
     useOn: { object: "There's nothing here worth tying.", npc: "There's nothing here worth tying." },
   },
-  brass_polish: {
-    name: 'Brass Polish',
-    icon: { sheet: items_act5, frame: 'brass_polish' },
-    description: 'Lighthouse polish. It says so on the tin. The tin is very shiny.',
-    useOn: { object: "It's for a lighthouse. It says so on the tin.", npc: "It's for a lighthouse. It says so on the tin." },
-  },
   clapper: {
     name: 'Clapper',
     icon: { sheet: items_act5, frame: 'clapper' },
@@ -77,6 +71,16 @@ export const act5Items = {
 
 // Act 4's square jug, for playing Act 5 before Act 4's branch is merged.
 // src/content/index.js lists Act 4's own items after these, so theirs wins.
+// The telescope (Act 2's item) gets Act 5's line on anything it isn't for.
+export function telescopeAct5(item) {
+  if (!item) return item;
+  const before = item.useOn || {};
+  const line = (kind) => (g) => (g.flag('act5.started') && !g.flag('epilogue')
+    ? g.describe("It's the Keeper's. She wants it back, and she wants it now.")
+    : before[kind] ? (typeof before[kind] === 'function' ? before[kind](g) : g.describe(...[].concat(before[kind]))) : cherylDeclines(g));
+  return { ...item, useOn: { ...before, object: line('object'), npc: line('npc') } };
+}
+
 export const standInItems = {
   square_jug: {
     name: 'Square Jug',

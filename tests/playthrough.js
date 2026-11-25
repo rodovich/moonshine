@@ -240,7 +240,13 @@ export async function ptrInteract(page, id) {
     if (!near || (near[0] === s.x && near[1] === s.y)) throw new Error(`can't get toward ${id}`);
     await clickTileAt(page, near[0], near[1]);
     await page.waitForTimeout(100);
-    await waitFor(page, () => window.moonshine.snapshot().idle, null, 10000);
+    // A tile on the way may hold a hotspot (the washing over the dry Bilge's quay); read its look and go on.
+    for (let i = 0; i < 20; i++) {
+      await waitFor(page, () => { const p = window.moonshine.snapshot(); return p.idle || !!p.text; }, null, 10000);
+      if (!(await snap(page)).text) break;
+      await ptrAdvance(page)();
+      await page.waitForTimeout(150);
+    }
   }
   throw new Error(`never got to ${id}`);
 }

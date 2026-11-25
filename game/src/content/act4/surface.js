@@ -169,7 +169,10 @@ export function withAct4(maps) {
     when: act4,
     hide: ['ambrose', 'tower_door', 'sundial'],
     tiles: (g, T) => {
-      if (g.flag('clockmaker.out')) { T.block(4, 6, false); T.block(5, 6, false); }
+      if (g.flag('clockmaker.out')) {
+        for (let y = 0; y < 2; y++) for (let x = 0; x < 2; x++) T.set('ground', 4 + x, 5 + y, `tower_open:tower_open_x${x}y${y}`);
+        T.block(4, 6, false); T.block(5, 6, false);
+      }
     },
     exits: [{ x: 4, y: 6, w: 2, to: 'belfry', at: [1, 7], facing: 'up', when: (g) => act4(g) && !!g.flag('clockmaker.out') }],
     entities: [{
@@ -358,7 +361,7 @@ export function withAct4(maps) {
           ? g.say(self, 'Says here the Fountain stopped because of "subterranean adjustments." I said adjustments. I said it yesterday.')
           : g.say(self, cycle(g, 'a4.bench_repeat', [
             "New Tide-Sheet. Glasses on. It says the Bilge is 'a little damp.' I can read every word. I liked it better blurred.",
-            "Low water at twenty to three, it says. Lower than it's ever printed. I said lower. I said it yesterday.",
+            'Low tide "a little lower than usual," it says. Printed. In ink. I can read every word of it.',
           ]))),
       },
       { ...firstTalk(find(lamp, 'watering_woman'), ["My husband says the doorsteps are the clock's fault. I said, everything's the clock's fault with you.", 'He said, exactly.']) },
@@ -418,21 +421,8 @@ export function withAct4(maps) {
 
   const steps4 = overlayMap(steps, {
     when: act4,
-    // The open hundredth step: in Act 4 it's a hole in the east half of the flight,
-    // with room to pass on the west, so the Steps lead down to the Square again.
-    baseTriggers: false,
-    tiles: (g, T) => { if (g.flag('step.open')) T.block(10, 19, true); },
-    triggers: [{
-      x: 9, y: 19, stop: false,
-      when: (g) => act4(g) && !!g.flag('step.open') && !g.flag('stepped.hundredth'),
-      run: async (g) => { g.setFlag('stepped.hundredth'); await g.describe('I go round the open step, the way you go round a sleeping dog.'); },
-    }],
-    hide: ['kid', 'kid_after', 'counting_woman', 'basin_woman', 'hundredth_step'], // Act 4 has its own look at the open step
+    hide: ['kid', 'kid_after', 'counting_woman', 'basin_woman'],
     entities: [
-      {
-        id: 'open_step_a4', x: 10, y: 19, solid: false, when: (g) => act4(g) && !!g.flag('step.open'),
-        look: "The hundredth step, open. Downstairs is down there, waiting. I've got the Fountain to see to first.",
-      },
       {
         ...kidBase, id: 'kid_a4', when: act4,
         interact: (g, self) => (bump(g, 'kid.a4') === 0
@@ -455,6 +445,28 @@ export function withAct4(maps) {
     onEnter: surfaceAudio,
   });
 
+  // From Act 4 on, through Acts 5 and 6, the hundredth step is boarded over
+  // (structure pass, client feedback): a plank lid, walkable, MIND THE STEP;
+  // in the epilogue somebody's chalked 100 on it. No hole, no prompt.
+  const boarded = (g) => !!g.flag('step.open') && (!!g.flag('act4.started') || !!g.flag('epilogue'));
+  const stepsBoarded = overlayMap(steps4, {
+    when: boarded,
+    baseTriggers: false,
+    baseExitsAt: [[9, 19], [10, 19]],
+    hide: ['hundredth_step', 'hollow_step', 'hollow_step_free'],
+    tiles: (g, T) => {
+      const lid = g.flag('epilogue') ? 'chalked' : 'boarded';
+      T.raw('ground', 9, 19, { tile: `steps_lid:${lid}_l`, step: 'step_bonk' });
+      T.raw('ground', 10, 19, { tile: `steps_lid:${lid}_r`, step: 'step_bonk' });
+    },
+    entities: [{
+      id: 'boarded_step', x: 9, y: 19, w: 2, solid: false, when: boarded,
+      interact: (g) => (g.flag('epilogue')
+        ? g.describe('Boarded over, and somebody\'s chalked 100 on it. Twice.')
+        : g.describe('Somebody\'s boarded over the hundredth step. MIND THE STEP. BY ORDER.', 'The Mayor\'s handwriting. He\'s never forgiven a step.')),
+    }],
+  });
+
   // ---------------------------------------------------------------------------
   // Cistern Court and the flat.
 
@@ -468,7 +480,7 @@ export function withAct4(maps) {
       firstTalk(find(court, 'old_man'), ["Gerald's pieces won't stay on the board. Gerald says it's a sign. I said, a sign of what. He said, of pieces."]),
       firstTalk(find(court, 'neighbor_morning'), ['The doorsteps GLOWED. So I put my sheets on the step all night. Nothing. Grey as a Tuesday.']),
       { ...find(court, 'well'), id: 'well_a4', when: act4, interact: (g) => g.describe("The well's breathing harder this morning. In and out, slow, like it's asleep.") },
-      { ...find(court, 'cat_morning'), id: 'cat_a4', when: act4, interact: (g) => g.describe("She's moved her bed against the uphill wall. She's not wrong.") },
+      { ...find(court, 'cat_morning'), id: 'cat_a4', when: act4, interact: (g) => g.describe("She's moved herself up against the uphill wall. She's not wrong.") },
     ],
     onEnter: async (g) => { g.playMusic('morning_after'); await surfaceAudio(g); },
     ambient: [{
@@ -509,7 +521,7 @@ export function withAct4(maps) {
   });
 
 
-  return { ...withAct4Part2(maps), crown: crown4, fountain_square: square4, lamp_street: lamp4, archive: archive4, hundred_steps: steps4, cistern_court: court4, flat: flat4 };
+  return { ...withAct4Part2(maps), crown: crown4, fountain_square: square4, lamp_street: lamp4, archive: archive4, hundred_steps: stepsBoarded, cistern_court: court4, flat: flat4 };
 }
 
 // The act's start: the morning after Act 3, in the flat (design: "What changes when Act 4 begins").
