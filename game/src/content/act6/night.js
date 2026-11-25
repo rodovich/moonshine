@@ -4,8 +4,8 @@
 // untouched in play. Positions follow the art task's composed scenes
 // (game/dev/scene-act6-surface.js) on Act 4's dry Bilge.
 
-import { lantern, lantern_pool, refill } from '../../art/act6_surface.js';
-import { boatman_piano } from '../../art/act6_sprites.js';
+import { lantern, lantern_pool, refill, teeth_recede } from '../../art/act6_surface.js';
+import { boatman_piano, mott_jug } from '../../art/act6_sprites.js';
 import { crowd_a, crowd_b, keeper } from '../../art/act5_sprites.js';
 import { counting_woman, basin_woman, watering_woman, mayor, mover, ambrose } from '../../art/act2_npcs.js';
 import { sweaty_kid } from '../../art/opening_npcs.js';
@@ -50,7 +50,9 @@ export function bilgeDryNight() {
   ];
   return {
     sheets: { lantern_pool, refill },
-    hide: [{ when: inCut, ids: ['fishmonger', 'bridge_man', 'boatman', 'piano', 'big_mover', 'other_mover', 'kid', 'crab_0', 'crab_1', 'crab_2', 'flop'] }],
+    hide: [{ when: inCut, ids: ['fishmonger', 'bridge_man', 'boatman', 'piano', 'big_mover', 'other_mover', 'kid', 'crab_0', 'crab_1', 'crab_2', 'flop',
+      // Act 5's people and things on the mud
+      'fishmonger5', 'kid_mud', 'kid_relay', 'big_mover5', 'other_mover5', 'piano5', 'crab5_0', 'crab5_1', 'crab5_2', 'bucket5'] }],
     entities: [
       ...LANTERNS.map(([x, y], i) => ({ id: `act6_lantern_${i}`, x, y, solid: false, shadow: false, when: inCut, sprite: { sheet: lantern, frame: i % 3 ? 'lantern_a' : 'lantern_b' } })),
       ...crowd,
@@ -117,7 +119,7 @@ export function bilgeNight() {
 
 export function lampRoomNight() {
   return {
-    hide: [{ when: inCut, ids: ['keeper'] }],
+    hide: [{ when: inCut, ids: ['keeper', 'keeper5'] }],
     entities: [{ id: 'act6_keeper', x: 5, y: 2, facing: 'up', solid: false, when: inCut, sprite: { sheet: keeper, frame: 'window_up' } }],
   };
 }
@@ -130,5 +132,26 @@ export function belfryNight() {
     hide: [{ when: inCut, ids: ['ambrose_belfry'] }],
     entities: [{ id: 'act6_ambrose', x: 4, y: 4, facing: 'up', solid: false, when: inCut, sprite: { sheet: ambrose, frame: 'ring_up' } }],
     lights: (g) => (inCut(g) ? [{ x: 4, y: 2, radius: 3, color: 'moon_light' }] : []),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// The risen Harbor (Act 5's): Mott at the quay edge raises a mug of tea to the
+// moon, and the Teeth slide away into the dark.
+
+export function harborRisenNight() {
+  return {
+    hide: [{ when: inCut, ids: ['mott5', 'teeth', 'kid5'] }],
+    entities: [
+      {
+        id: 'act6_mott', x: 13, y: 8, facing: 'down', solid: false, when: inCut,
+        sprite: (g) => ({ sheet: mott_jug, frame: `raise_mug_down_${g.flag('fx.mottToast') || 0}` }),
+      },
+      // Act 5's Teeth sprite sits on the horizon (8-18, 12-14), sorting as if on row 13.
+      {
+        id: 'act6_teeth', x: 8, y: 13, w: 11, kind: 'object', solid: false, shadow: false, offset: [0, 16], when: inCut,
+        sprite: (g) => ({ sheet: teeth_recede, frame: g.flag('fx.teeth') === 'recede' ? 'recede' : 'gone' }),
+      },
+    ],
   };
 }

@@ -538,3 +538,41 @@ test('keyboard: the epilogue on the Bilge and the Harbor', async ({ page }) => {
   await shot(page, 'act6-12-harbor');
   expect(errors).toEqual([]);
 });
+
+test('keyboard: the climax, from the Moonrise card to the Long Keel', async ({ page }) => {
+  test.setTimeout(240000);
+  const ACT5 = 'act1.moonrise,act1.done,n.squeezeSeen=1,act2.started,piano.slid,step.open,act3.started,act4.started,act4.risen,act4.done,act5.started,teeth.stage=3,door.open,got.clapper,tooth.out,tooth.set,act5.done,act6.started';
+  const errors = await start(page, `?map=windlass_room&x=3&y=11&facing=up&flags=${ACT5}&items=moonglass_disc,crowbar,moon_chart&run=act6_start`);
+  const adv = kbAdvance(page);
+  const read = (opts) => readThrough(page, adv, opts);
+  let log;
+
+  // The speaking tube, then wait: the bell comes on its own.
+  await kbInteract(page, 'act6_tube');
+  expect(joined(await read())).toContain('the canals are a FEATURE');
+  await waitFor(page, () => (window.moonshine.snapshot().text || '').includes('THE TURN'), null, 25000);
+  await settle(page);
+  await shot(page, 'act6-00-belfry');
+  await readUntil(page, adv, 'The bell says when.');
+  await read();
+  expect((await snap(page)).flags['bell.final']).toBeTruthy();
+
+  // The brake: the hauling, the montage, the hatch.
+  await kbInteract(page, 'act6_brake');
+  log = await readUntil(page, adv, 'Wind her in slowly.');
+  await shot(page, 'act6-00-hauling');
+  log = log.concat(await readUntil(page, adv, 'tonight Tessel steps'));
+  await shot(page, 'act6-00-dry-canal-day');
+  log = log.concat(await read());
+  expect(joined(log)).toContain('Now the moon in the bowl.');
+  const s = await snap(page);
+  expect(s.map).toBe('windlass_room');
+  expect(s.flags['chain.home']).toBeTruthy();
+  expect(s.flags['hatch.open']).toBeTruthy();
+  await kbInteract(page, 'act6_drum');
+  expect(joined(await read())).toContain("The clapper's doing a job");
+
+  // Through the hatch into the Long Keel.
+  await kbExit(page, 7, 3, 'up', 'long_keel');
+  expect(errors).toEqual([]);
+});

@@ -12,7 +12,7 @@ import { windlassAct6, act6Start, bell, hauling, brakeLever, speakingTube } from
 import { pianoScene, stairRace, courtEpilogue, lampStreetEpilogue, crownEpilogue, archiveEpilogue, cryptEpilogue, squareEpilogue, shopEpilogue, stepsEpilogue, bilgeEpilogue, harborEpilogue } from './epilogue.js';
 import { flatEnding, finalScene, endingVista } from './ending.js';
 import { dawn } from './dawn.js';
-import { bilgeDryNight, bilgeNight, lampRoomNight, belfryNight } from './night.js';
+import { bilgeDryNight, bilgeNight, lampRoomNight, belfryNight, harborRisenNight } from './night.js';
 import { lurchMontage, refillMontage } from './montage.js';
 
 export { act6Items };
@@ -25,6 +25,7 @@ const EXTENSIONS = {
   [act6.ids.bilgeDry]: bilgeDryNight,
   [act6.ids.lampRoom]: lampRoomNight,
   [act6.ids.belfry]: belfryNight,
+  [act6.ids.harborRisen]: harborRisenNight,
   [act6.ids.bilge]: [bilgeNight, bilgeEpilogue],
   [act6.ids.harbor]: harborEpilogue,
   cistern_court: courtEpilogue,

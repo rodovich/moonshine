@@ -74,9 +74,10 @@ export const LURCH_CUTS = [
     await g.say('Lighthouse Keeper', "It's going. It's GOING.", auto(1.4));
   }),
   // 4. The risen Harbor: Mott at the quay edge raises a mug of tea to the moon. No line.
-  async (g) => cut(g, 'lurch', act6.ids.harborRisen, 13, 9, async () => {
+  async (g) => cut(g, 'lurch', act6.ids.harborRisen, 13, 7, async () => {
     g.setFlag('fx.teeth', 'recede');
     g.setFlag('fx.mottToast', 0);
+    g.panCamera(13, 12, 20); // down to the horizon: Mott at the quay edge, the Teeth beyond
     await g.wait(0.9);
     g.setFlag('fx.mottToast', 1);
     await g.wait(1.6);
