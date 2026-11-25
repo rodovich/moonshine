@@ -16,7 +16,7 @@ Module `game/src/art/act4_surface.js`. Composed on the dev page: `/dev/art.html?
 | Plank floor | `belfry:floor_a`, `floor_b`, `floor_c` (pick by a hash) | ground |
 | The rope hole (4, 5) | `belfry:floor_hole` | ground |
 | The stair down (1–2, 8) | `belfry:stair_l`, `stair_r` | ground |
-| The great bell over (3–4, 2–3) | `belfry_bell:over_bell_x<0-1>y<0-1>_<n>`: `_0` still, `_1` swung west, `_2` swung east (play 0, 1, 0, 2 for a stroke) | overhead |
+| The great bell over (3–4, 2–3) | `belfry_bell:over_bell_x<0-1>y<0-1>_<n>`: `_0` still, `_1` swung west, `_2` swung east (play 0, 1, 0, 2 for a stroke). The clapper in its mouth is the new grey steel one, fitted with the clock | overhead |
 | The Clockmaker's drive (6–7, 3–4), ticking / lifted and stopped | `belfry_props:drive_x<0-1>y<0-1>` (3 frames, 330 ms) / `drive_lifted_x<0-1>y<0-1>` | objects |
 | DO NOT TOUCH lever with its card (8, 4) | `belfry_props:lever_up`, `lever_pulled` | objects |
 | The old bell rope (4, 4) down into the hole (4, 5) | `belfry_rope:rope_still`, `rope_swing` (4 frames), `rope_run` (4 frames, running down through the floor for each stroke); 16×32 sprite, anchored bottom-centre on (4, 5) | sprite |
