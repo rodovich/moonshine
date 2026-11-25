@@ -6,10 +6,10 @@
 //  y  0  RRR^^RRRRRRRRRRRRRRRRR^^RRRRRRRR   ^ x3-4 the Squeeze stair; x22-23 the Crown stair
 //     2  ###^^#[ the Little School ]###^^#   houses and the school (x7-18) face the street
 //     4  #D#^^#D#####DD######D#^^#D##D##D
-//     5  #..s...=,,,,,,,,,,=.............   , the school yard; s the scrape, down from the Squeeze
-//     8  #..s...=====,,=====.............
-//     9  G..s............................   G the Goat Path gate (shut in part 1)
-//    12  #..sssssssssssssssssbbsssssss...   the scrape runs along the parapet to the Steps
+//     5  #......=,,,,,,,,,,=.............   , the school yard (girls skipping at x10-12, y6)
+//     8  #......====g=====...............   g the yard gate (open)
+//    10  G..ssssssssssssssssssssssssss...   G the Goat Path gate (shut in part 1); s the scrape
+//    12  #...................bb.......ss.   bb the bench; the scrape turns down to the Steps
 //    13  ===========================^^===   x27-28 down to the Hundred Steps
 //    15  rrrrrrrrrrrrrrrrrrrrrrrrrrr^^rrr
 
@@ -27,13 +27,16 @@ function compose(g) {
   // ---- Houses and the school (rows 0–4) ----
   house(L, 0, 0, { roofRows: 2, mid: '#w#', top: '#D#', base: '#D#', palette: 'sky' });
   house(L, 5, 0, { roofRows: 2, mid: 'w#', top: '#D', base: '#D', palette: 'ochre' });
-  house(L, 7, 0, { roofRows: 2, mid: '#w#w#w#w#w##', top: '#w#w#DD#w#w#', base: '#####DD#####', palette: 'white_sage' });
+  house(L, 7, 0, { roofRows: 2, mid: '#w#w####w#w#', top: '#w#w#DD#w#c#', base: '#w#w#DD#w#w#', palette: 'white_sage' });
   house(L, 19, 0, { roofRows: 2, mid: '#b#', top: '#D#', base: '#D#', palette: 'rose' });
   house(L, 24, 0, { roofRows: 2, mid: '#b#', top: '#D#', base: '#D#' });
   house(L, 27, 0, { roofRows: 2, mid: '#w#', top: '#Dw', base: '#Dw', palette: 'ochre' });
   house(L, 30, 0, { roofRows: 2, mid: 'w#', top: '#D', base: '#D', palette: 'sky' });
-  // The school's sign over its doors.
-  L.set('detail', 12, 2, 'props:sign_board');
+  // The Little School: bell-cote, the painted sign, double doors.
+  L.set('ground', 12, 1, 'school:school_bellcote@white_sage', true);
+  'abcd'.split('').forEach((c, i) => L.set('ground', 11 + i, 2, `school:school_sign_${c}@white_sage`, true));
+  L.set('ground', 12, 3, 'school:school_door_tl@white_sage', true); L.set('ground', 13, 3, 'school:school_door_tr@white_sage', true);
+  L.set('ground', 12, 4, 'school:school_door_bl@white_sage', true); L.set('ground', 13, 4, 'school:school_door_br@white_sage', true);
   // The two stairs up between the houses.
   for (const x0 of [3, 22]) for (let y = 0; y <= 4; y++) {
     L.set('ground', x0, y, 'street:stairs_l', false);
@@ -41,15 +44,21 @@ function compose(g) {
     L.step[y][x0] = L.step[y][x0 + 1] = 'step_stairs';
   }
 
-  // ---- The school yard (x8–17, y5–7), its low wall, and the gate at x12–13 ----
-  const cob = ['a', 'b', 'c', 'd', 'e'];
-  for (let y = 5; y <= 7; y++) for (let x = 8; x <= 17; x++) L.set('ground', x, y, `court:cobble_${cob[(x * 3 + y * 5) % 5]}`);
-  for (let y = 5; y <= 7; y++) { L.set('ground', 7, y, 'roof:lowwall', true); L.set('ground', 18, y, 'roof:lowwall', true); }
-  for (let x = 7; x <= 18; x++) if (x !== 12 && x !== 13) L.set('ground', x, 8, 'street:retain_top', true);
+  // ---- The school yard (x8–17, y5–7), its low wall, and the open gate at x12 ----
+  const yard = ['yard', 'yard_b', 'yard_c'];
+  for (let y = 5; y <= 7; y++) for (let x = 8; x <= 17; x++) L.set('ground', x, y, `schoolyard:${yard[(x * 7 + y * 3) % 3]}`);
+  L.set('ground', 15, 6, 'schoolyard:yard_hopscotch_n'); L.set('ground', 15, 7, 'schoolyard:yard_hopscotch_s');
+  for (let y = 5; y <= 7; y++) { L.set('detail', 7, y, 'schoolyard:yardwall_v', true); L.set('detail', 18, y, 'schoolyard:yardwall_v', true); }
+  for (let x = 8; x <= 17; x++) L.set('detail', x, 8, 'schoolyard:yardwall', true);
+  L.set('detail', 7, 8, 'schoolyard:yardwall_corner_w', true); L.set('detail', 18, 8, 'schoolyard:yardwall_corner_e', true);
+  L.set('detail', 11, 8, 'schoolyard:yardwall_end_r', true); L.set('detail', 14, 8, 'schoolyard:yardwall_end_l', true);
+  L.set('detail', 12, 8, 'schoolyard:yard_gate_open', false); L.set('detail', 13, 8, null, false);
 
   // ---- The west edge: walls, and the Goat Path gate (shut until part 2) ----
   for (let y = 5; y <= 12; y++) L.set('ground', 0, y, 'court:court_wall_w', true);
-  L.set('ground', 0, 10, 'court:gate_w', true);
+  for (let y = 9; y <= 11; y++) L.set('ground', 0, y, pave(0, y), true);
+  L.set('detail', 0, 10, 'act2_props:goat_gate', true);
+  L.set('ground', 0, 9, 'court:court_wall_w', true); L.set('ground', 0, 11, 'court:court_wall_w', true);
 
   // ---- The south edge: the parapet over the lower town, and the Steps ----
   for (let x = 0; x < W; x++) {
@@ -63,15 +72,13 @@ function compose(g) {
     L.step[y][27] = L.step[y][28] = 'step_stairs';
   }
 
-  // ---- The scrape: down from the foot of the Squeeze, then east to the Steps ----
-  for (let y = 5; y <= 11; y++) L.set('detail', 3, y, 'standins:scrape_v');
-  L.set('detail', 3, 12, 'standins:scrape_corner');
-  for (let x = 4; x <= 26; x++) if (x !== 20 && x !== 21) L.set('detail', x, 12, 'standins:scrape');
+  // ---- The scrape: from below the Squeeze along the street to the top of the Steps ----
+  for (let x = 3; x <= 28; x++) L.set('detail', x, 10, `scrape_${x % 2 ? 'a' : 'b'}`);
+  for (const y of [11, 12]) for (const x of [27, 28]) L.set('detail', x, y, `scrape_${x % 2 ? 'a' : 'b'}`);
 
   // ---- Props ----
   L.lamp(5, 9); L.lamp(16, 9); L.lamp(25, 9);
-  L.bench(20, 12);
-  L.block(20, 12, false); // the Man on Bench sits on its left end
+  L.bench(20, 11); // the Man on Bench sits on it from (20, 12)
   L.pot(24, 5); L.pot(26, 5); L.pot(1, 5, 'pot_bay');
   return L.done();
 }
@@ -102,7 +109,8 @@ const objects = [
     ],
   },
   {
-    id: 'scrape', x: 4, y: 12, w: 16, lookKey: 'scrape',
+    // Only near the Squeeze: a look hotspot on a walkable row catches clicks meant for walking.
+    id: 'scrape', x: 3, y: 10, w: 3, lookKey: 'scrape',
     look: 'The piano\'s trail. It knew where it was going, which is more than I do.',
   },
   {
@@ -143,22 +151,29 @@ const GIRL_LINES = {
   girl_3: ['Third Girl', "There's a bit about Tessel bumping her head. It's the BEST bit."],
 };
 
-const girls = [[10, 'girl_1', 'girl1', 'right'], [12, 'girl_2', 'girl2', 'down'], [14, 'girl_3', 'girl3', 'left']].map(([x, id, look, facing]) => ({
-  id, name: GIRL_LINES[id][0], x, y: 6, facing,
+// Two turners face each other two tiles apart, the jumper between them, and the rope over all three.
+const girls = [[10, 'girl_1', 'girl_a'], [11, 'girl_2', 'girl_c'], [12, 'girl_3', 'girl_b']].map(([x, id, look]) => ({
+  id, name: GIRL_LINES[id][0], x, y: 6, facing: 'down',
   sprite: LOOKS[look],
-  behavior: 'idle',
+  turnToTalk: false,
   // The chant, in two halves so each fits the bark line at the top of the screen.
   ...(id === 'girl_2' && {
     bark: { lines: ['♪ Moonshine, moonshine, catch it in a cup, ♪', '♪ ring the bell when the tide turns up! ♪'], range: 3, every: [3, 3], once: true, speaker: 'Skipping Girls' },
-    emote: { frame: 'note', every: [3, 6] },
   }),
   interact: (g, self) => girlsTalk(g, self, GIRL_LINES[id][1]),
   use: { '*': (g) => g.say('First Girl', "We're BUSY, Miss.") },
 }));
 
+const rope = {
+  id: 'rope', x: 10, y: 6, w: 3, solid: false, shadow: false,
+  sprite: LOOKS.rope,
+  offset: [0, 1], // sorts just in front of the girls' feet line
+};
+
 const wateringWoman = {
-  id: 'watering_woman', name: 'Woman with Watering Can', x: 25, y: 5, facing: 'left',
+  id: 'watering_woman', name: 'Woman with Watering Can', x: 25, y: 5, facing: 'down',
   sprite: LOOKS.watering_woman,
+  turnToTalk: false,
   interact: async (g, self) => {
     if (firstMeet(g, 'watering_woman')) {
       await g.describe("She waters the geraniums at nine every morning. The geraniums would set their watches by her, if geraniums had watches.");
@@ -202,7 +217,7 @@ export const lampStreetMap = composedMap(compose, {
   tileset: act2Tiles,
   music: 'neighborhood',
   lighting: 'day',
-  ambience: ['crowd'],
+  ambience: ['town'],
   step: 'step_stone',
   spawn: [3, 6],
   exits: [
@@ -220,5 +235,15 @@ export const lampStreetMap = composedMap(compose, {
       "The piano went this way. I'll follow it. It's the only lead I've got, and it weighs half a ton.",
     );
   },
-  entities: [...objects, ...girls, wateringWoman, benchMan, cat],
+  ambient: [
+    // The rope slaps the yard when Cheryl's near enough to hear it.
+    {
+      every: [1.6, 2.2],
+      run: (g) => {
+        const d = Math.abs(g.player.x - 11) + Math.abs(g.player.y - 6);
+        if (d <= 7) g.sfx('skip_rope', { volume: d <= 3 ? 0.8 : 0.4 });
+      },
+    },
+  ],
+  entities: [...objects, ...girls, rope, wateringWoman, benchMan, cat],
 });

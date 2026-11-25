@@ -12,7 +12,7 @@
 
 import { composedMap, blankGrid } from '../opening/grid.js';
 import { act2Tiles } from './tiles.js';
-import { layout, house, pave, lowRoof, LOOKS, bump, firstMeet, cherylDeclines } from './common.js';
+import { layout, house, pave, LOOKS, bump, firstMeet, cherylDeclines } from './common.js';
 import { props } from '../../art/props.js';
 
 const W = 24, H = 16;
@@ -30,8 +30,12 @@ function compose(g) {
   // A small house on either side of the tower, to close the plaza's north edge.
   house(L, 0, 3, { roofRows: 2, top: '##', base: '#w', palette: 'ochre' });
   house(L, 8, 3, { roofRows: 2, top: '#', base: '#' });
-  // The Clockmaker's shop (x9–13): a narrow front with a door at x11.
-  house(L, 9, 2, { roofRows: 2, mid: '#w#w#', top: '#wDw#', base: '##D##', palette: 'sky' });
+  // The Clockmaker's shop (x9–13): a painted clock over a window full of clocks, the door at x12, the hanging sign.
+  house(L, 9, 2, { roofRows: 2, mid: '#w#w#', top: '###D#', base: '###D#', palette: 'ochre' });
+  L.set('ground', 12, 5, 'buildings:door_top@ochre', true); L.set('ground', 12, 6, 'buildings:door_bot@ochre', true);
+  L.set('ground', 10, 5, 'school:clockshop_fascia_l@ochre', true); L.set('ground', 11, 5, 'school:clockshop_fascia_r@ochre', true);
+  L.set('ground', 10, 6, 'school:clockshop_window_l@ochre', true); L.set('ground', 11, 6, 'school:clockshop_window_r@ochre', true);
+  L.set('detail', 13, 5, 'act2_props:clock_sign');
   house(L, 14, 3, { roofRows: 2, top: '#', base: '#' });
   // The Blue Dome: dome and drum (rows 0–2), a plastered front (rows 3–6), its door at x18–19.
   for (let y = 0; y < 3; y++) for (let x = 0; x < 8; x++) L.set('ground', 15 + x, y, `blue_dome:blue_dome_x${x}y${y}`, true);
@@ -49,12 +53,15 @@ function compose(g) {
   // The sundial.
   for (let y = 0; y < 2; y++) for (let x = 0; x < 2; x++) L.set('detail', 11 + x, 9 + y, `sundial:sundial_x${x}y${y}`, true);
 
-  // The south parapet, with the stair cut through it at x11–12, and the town below.
+  // The south parapet, with the stair cut through it at x11–12, and the terrace face below.
   for (let x = 0; x < W; x++) {
-    L.set('ground', x, 14, 'roof:roof_edge_s', true);
-    L.set('ground', x, 15, lowRoof(x, 15), true);
+    L.set('detail', x, 14, 'crown_parapet:parapet', true);
+    L.set('ground', x, 15, 'street:retain', true);
   }
+  L.set('detail', 10, 14, 'crown_parapet:parapet_end_l', true);
+  L.set('detail', 13, 14, 'crown_parapet:parapet_end_r', true);
   for (const y of [14, 15]) {
+    L.set('detail', 11, y, null); L.set('detail', 12, y, null);
     L.set('ground', 11, y, 'street:stairs_l', false);
     L.set('ground', 12, y, 'street:stairs_r', false);
     L.step[y][11] = L.step[y][12] = 'step_stairs';
@@ -107,7 +114,7 @@ const objects = [
     ],
   },
   {
-    id: 'shop_door', x: 11, y: 5, h: 2,
+    id: 'shop_door', x: 12, y: 5, h: 2,
     looks: [
       "The Clockmaker's shop. A sign: AT THE BELFRY. CLOCK IS PERFECT. DO NOT ASK.",
       "He was the boy who asked 'is it time yet?' every four minutes. Now it's his job.",
@@ -136,7 +143,8 @@ objects[0].use = { crowbar: (g) => g.describe("It's bolted, not stuck. And he's 
 
 const ambrose = {
   id: 'ambrose', name: 'Ambrose', x: 6, y: 7, facing: 'down',
-  sprite: LOOKS.ambrose,
+  sprite: LOOKS.ambrose, // on the tower step with his ledger; looks up at the clock and scowls
+  turnToTalk: false,
   interact: async (g, self) => {
     if (firstMeet(g, 'ambrose')) {
       await g.describe('Ambrose Tull. He rang that bell for fifty-two years. Now he sits under it, like a dog outside a shop.');
@@ -181,18 +189,6 @@ export const crownMap = composedMap(compose, {
   exits: [
     { x: 11, y: 15, w: 2, to: 'lamp_street', at: [22, 5], facing: 'down' },
     { x: 18, y: 6, w: 2, to: 'archive', at: [7, 12], facing: 'up' },
-  ],
-  ambient: [
-    // Ambrose looks up at the clock and scowls.
-    {
-      every: [9, 15],
-      run: (g) => {
-        const a = g.npc('ambrose');
-        if (!a || a.facing !== 'down') return;
-        g.faceNpc(a, 'up');
-        setTimeout(() => { if (a.facing === 'up') a.facing = 'down'; }, 1600);
-      },
-    },
   ],
   entities: [...objects, ambrose, cat],
 });

@@ -9,7 +9,7 @@
 //  y  0  rrrrrr^^rrrrrrrr   top: from Lamp Street (6-7); FLIGHT 1 (x6-7)
 //     7  ................   LANDING 1 (y7-9)
 //    10  ==^^============   FLIGHT 2 (x2-3)
-//    15  r=^^=#w##w#D#w##   D (11, 15): the Woman with Basin's doorstep
+//    15  r=^^=#wD#w##w#w#   D (7, 15): the Woman with Basin's doorstep
 //    16  ................   LANDING 2 (y16-18)
 //    19  =========HH=====   HH THE HOLLOW STEP (9-10, 19)
 //    20  rrrrrrrr=^^=rrrr   FLIGHT 3 (x9-10)
@@ -20,11 +20,11 @@
 
 import { composedMap, blankGrid } from '../opening/grid.js';
 import { act2Tiles } from './tiles.js';
-import { layout, house, pave, lowRoof, LOOKS, pianoSheet, bump, cycle, firstMeet, getItem, cherylDeclines } from './common.js';
+import { layout, house, pave, lowRoof, LOOKS, moverPose, pianoSprite, bump, cycle, firstMeet, getItem, cherylDeclines } from './common.js';
 import { props } from '../../art/props.js';
 import { fx, fx_mist } from '../../art/fx.js';
 import { sweaty_kid } from '../../art/opening_npcs.js';
-import { standins } from './standins.js';
+import { act2_props } from '../../art/act2_objects.js';
 import { endOfAct } from './ending.js';
 
 const W = 16, H = 42;
@@ -64,7 +64,7 @@ function compose(g) {
   // House fronts facing up the Steps at the foot of each block of roofs.
   house(L, 0, 5, { roofRows: 0, top: '#D#w#', base: '#D#w#', palette: 'ochre' });
   house(L, 9, 5, { roofRows: 0, top: '#w##D##', base: '#w##D##', palette: 'sky' });
-  house(L, 5, 12, { roofRows: 2, top: '#w##w#D#w##', base: '#w##w#D#w##' });
+  house(L, 5, 12, { roofRows: 2, top: '#wD#w##w#w#', base: '#wD#w##w#w#' });
   house(L, 0, 22, { roofRows: 2, top: '#w##w#D#', base: '#w##w#D#', palette: 'rose' });
   house(L, 12, 22, { roofRows: 2, top: '#w##', base: '#w##', palette: 'ochre' });
   house(L, 0, 34, { roofRows: 2, top: '##w', base: '##w', palette: 'sky' });
@@ -93,23 +93,26 @@ function compose(g) {
 }
 
 // ---------------------------------------------------------------------------
-// The water trickle: from the Woman with Basin's doorstep, across landing 2,
-// and into the joint of the hollow step, where it vanishes.
+// The water trickle: the Woman with Basin tips her basin on her doorstep and
+// the water runs east along landing 2's lower edge (row 18) and slips into the
+// joint of the hollow step. Overlay tiles, laid one by one, then taken away.
 
-const TRICKLE = [[11, 17], [11, 18], [10, 18], [10, 19]];
+const TRICKLE = [[7, 18], [8, 18], [9, 18]]; // then the end tile at (10, 18)
 
 function trickle(g) {
-  const near = Math.abs(g.player.x - 10) + Math.abs(g.player.y - 18) <= 9;
-  // Round her feet while she's sitting there.
-  const path = counted(g) || open(g) ? TRICKLE : [[11, 17], [11, 18], [10, 18], [10, 19]];
-  for (let i = 0; i < 5; i++) {
-    setTimeout(() => {
-      g.spawnEffect({ sprite: { sheet: standins, frame: 'trickle' }, path, speed: 0.45, offset: [0, -2] });
-    }, i * 260);
+  const here = () => g.map === 'hundred_steps';
+  const basin = g.npc('basin_woman');
+  if (basin) {
+    g.setSprite(basin, LOOKS.basin_tip);
+    setTimeout(() => { if (here() && g.npc('basin_woman')) g.setSprite('basin_woman', LOOKS.basin_woman); }, 1300);
   }
+  const near = Math.abs(g.player.x - 9) + Math.abs(g.player.y - 18) <= 9;
+  const tiles = [...TRICKLE.map(([x, y]) => [x, y, 'act2_water:trickle_h']), [10, 18, 'act2_water:trickle_end']];
+  tiles.forEach(([x, y, ref], i) => setTimeout(() => { if (here()) g.setTile('detail', x, y, ref); }, 500 + i * 220));
+  setTimeout(() => { if (here()) tiles.forEach(([x, y]) => g.setTile('detail', x, y, null)); }, 4200);
   if (near) {
-    g.startLoop('trickle');
-    setTimeout(() => { g.stopLoop('trickle', 400); g.sfx('gurgle'); }, 2600);
+    setTimeout(() => { if (here()) g.startLoop('trickle'); }, 500);
+    setTimeout(() => { g.stopLoop('trickle', 400); if (here()) g.sfx('sink_gurgle'); }, 3600);
   }
 }
 
@@ -167,12 +170,12 @@ const objects = [
   { id: 'view', x: 15, y: 26, h: 3, look: 'Halfway down Tessel. Halfway up, if you\'re the Kid.' },
   { id: 'bench', x: 2, y: 27, w: 2, look: 'A bench for the halfway point. Nobody has ever sat on it going down.' },
   ...[[1, 8], [15, 8], [1, 17], [14, 17]].map(([x, y]) => ({ id: `pot_${x}_${y}`, x, y, lookKey: 'geraniums', look: 'Geraniums.' })),
-  { id: 'basin_door', x: 11, y: 15, look: 'Her doorstep. Wet. It always is, the morning after.' },
+  { id: 'basin_door', x: 7, y: 15, look: 'Her doorstep. Wet. It always is, the morning after.' },
 ].map((o) => ({ solid: false, use: { crowbar: (g) => g.describe(PRY_STEPS), '*': cherylDeclines }, ...o }));
 
 const piano = {
   id: 'piano', x: 6, y: 40, w: 2, h: 2, kind: 'object',
-  sprite: { sheet: pianoSheet, frame: 'piano' },
+  sprite: pianoSprite('piano_front'),
   when: (g) => !slid(g),
   interact: pianoLook,
   use: {
@@ -184,7 +187,7 @@ const piano = {
 
 const crowbar = {
   id: 'crowbar', x: 9, y: 40, kind: 'object',
-  sprite: { sheet: standins, frame: 'crowbar' },
+  sprite: { sheet: act2_props, frame: 'crowbar_ground' },
   when: (g) => slid(g) && !g.flag('got.crowbar'),
   interact: async (g) => {
     await g.describe("Their crowbar. They'll want it back. They'll have to catch a piano first.");
@@ -237,10 +240,10 @@ async function slidePiano(g) {
   await g.say('Big Mover', 'Soap? ...Lavender. Worth a try. Stand back, Miss.');
   await g.movePlayer([11, 38]);
   g.facePlayer('left');
-  // Two beats of scrubbing along the piano's base.
+  // Two beats of scrubbing along the piano's back, crouched on either half.
   const big = g.npc('big_mover'), other = g.npc('other_mover');
-  await Promise.all([g.moveNpc(big, [5, 40]), g.moveNpc(other, [8, 40])]);
-  g.faceNpc(big, 'right'); g.faceNpc(other, 'left');
+  await Promise.all([g.moveNpc(big, [6, 39]), g.moveNpc(other, [7, 39])]);
+  g.setSprite(big, moverPose('big', 'scrub_down')); g.setSprite(other, moverPose('other', 'scrub_down'));
   for (let i = 0; i < 2; i++) {
     g.sfx('scrub');
     await g.tween('piano', { offset: [1, 0], seconds: 0.15 });
@@ -249,18 +252,20 @@ async function slidePiano(g) {
   }
   await g.tween('piano', { offset: [0, 0], seconds: 0.1 });
   // They brace and shove.
-  await Promise.all([g.moveNpc(big, [6, 39]), g.moveNpc(other, [7, 39])]);
+  g.setSprite(big, LOOKS.big_mover); g.setSprite(other, LOOKS.other_mover);
   g.faceNpc(big, 'down'); g.faceNpc(other, 'down');
   await g.wait(0.4);
   g.shake(1, 0.3);
   await g.wait(0.4);
   g.sfx('piano_slide');
+  g.setSprite('piano', pianoSprite('piano_slide'));
   await g.tween('piano', { offset: [0, 40], seconds: 0.45, clipBelow: true });
   g.hide('piano');
   await g.wait(0.3);
   await g.say('Big Mover', 'Not THAT fast!', { auto: 1 });
   await g.say('Other Mover', 'HNN!', { auto: 0.8 });
   // They run through the arch after it.
+  g.setSprite(big, moverPose('big', 'run_down')); g.setSprite(other, moverPose('other', 'run_down'));
   await Promise.all([g.moveNpc(big, 'd d', { ghost: true, speed: 8 }), g.moveNpc(other, 'd d', { ghost: true, speed: 8 })]);
   g.hide(big); g.hide(other);
   g.setFlag('piano.slid');
@@ -294,6 +299,8 @@ async function showGuidebook(g, self) {
   // Clear her path down the flight if Cheryl is standing in it.
   const p = g.player;
   if (p.x === 9 && p.y > 19 && p.y <= 25) { await g.movePlayer([10, p.y]); g.facePlayer('left'); }
+  g.setSprite(self, LOOKS.counting_woman);
+  g.faceNpc(self, 'down');
   g.sfx('step_stairs');
   await g.moveNpc(self, 'd d d d d d d d', { ghost: true, speed: 11 }); // down flight 3 to landing 3
   const pianoThere = !slid(g);
@@ -302,6 +309,7 @@ async function showGuidebook(g, self) {
   if (pianoThere) {
     g.faceNpc('big_mover', 'right'); g.faceNpc('other_mover', 'left');
     // She climbs straight over the piano.
+    g.setSprite(self, { sheet: LOOKS.counting_woman.sheet, frame: 'climb_up' });
     await g.moveNpc(self, 'd', { ghost: true, speed: 14 });
     await g.tween(self, { offset: [0, -10], seconds: 0.25 });
     await g.say('Big Mover', "Madam! That's a PIANO!");
@@ -322,7 +330,8 @@ async function showGuidebook(g, self) {
 
 const countingWoman = {
   id: 'counting_woman', name: 'Counting Woman', x: 9, y: 19, facing: 'down',
-  sprite: LOOKS.counting_woman,
+  sprite: LOOKS.counting_woman_sitting, // sitting on the step, nodding as she counts
+  turnToTalk: false,
   when: (g) => !counted(g),
   interact: countingTalk,
   use: {
@@ -337,8 +346,9 @@ const countingWoman = {
 // The Woman with Basin (landing 2)
 
 const basinWoman = {
-  id: 'basin_woman', name: 'Woman with Basin', x: 11, y: 16, facing: 'down',
+  id: 'basin_woman', name: 'Woman with Basin', x: 7, y: 16, facing: 'down',
   sprite: LOOKS.basin_woman,
+  turnToTalk: false,
   when: (g) => !g.flag('basin.inside'),
   interact: async (g, self) => {
     if (firstMeet(g, 'basin_woman')) {
@@ -440,15 +450,12 @@ async function openStep(g) {
   await g.describe('A ladder. Bronze, gone green, going straight down into the dark. It smells like the well. It smells like the sea.');
   const basin = g.npc('basin_woman');
   if (basin) {
-    g.faceNpc(basin, 'player');
     g.emote(basin, 'exclaim');
     await g.say(basin, 'Cheryl? Did you just -- is that a HOLE in the STEPS?');
     await g.wait(0.5);
     await g.say(basin, "...No. I didn't see anything. I'm tipping my basin.");
-    g.faceNpc(basin, 'down');
     trickle(g);
-    await g.wait(1);
-    g.faceNpc(basin, 'up');
+    await g.wait(1.6);
     await g.moveNpc(basin, 'u', { ghost: true });
     g.sfx('door');
     g.hide(basin);

@@ -13,8 +13,7 @@ The upper town and Fountain Square: the morning after Moonshine Night, from Lamp
 | `steps.js` | The Hundred Steps (16 × 42): the Counting Woman, the Woman with Basin and her trickle, the Sweaty Kid, the Movers and the piano, the crowbar, the hollow step, and the end of the act. |
 | `square.js` | Fountain Square (24 × 18): the Mayor, the Stranded Tourist, the Movers after the slide, the rope to the Bilge; and the Shop (10 × 8). |
 | `ending.js` | The end card, then the title screen. |
-| `common.js` | Act 2's items, tile helpers (paving, roofs, house fronts), stand-in looks for residents without bodies yet, the stitched piano sprite. |
-| `standins.js` | Temporary stand-in art (see below). |
+| `common.js` | Act 2's items, tile helpers (paving, roofs, house fronts), and each resident's look (sheet, pose, palette). |
 | `tiles.js` | The tileset. |
 
 ## Story flags
@@ -46,20 +45,20 @@ Where the design left something open, or didn't work in play, this is what the b
 - **The piano slide:** "Stand back, Miss" moves Cheryl to (11, 38); the Movers scrub either side of the piano (two beats, the piano jiggles), brace above it, and it shoots down through the arch. They run after it; the crowbar is left at (9, 40).
 - **In Fountain Square the piano rests against the Fountain's east rim** at (14–15, 8–9), with the Movers beside it at (16, 8) and (15, 10). On the north rim the bronze fish, drawn two tiles tall, stood right across its keys.
 - **The Tourist sits at (19, 14)**, facing her table at (18–19, 13); the design's (20, 14) faced the gap between the two tables.
-- **The Man on Bench sits on the bench's left end** at (20, 12), rather than standing in front of it.
+- **The bench on Lamp Street is at (20–21, 11)**, and the Man on Bench sits on it from the tile in front, (20, 12), as the art is drawn.
+- **The Skipping Girls stand at (10–12, 6)**, two turners and the jumper between them, with the rope over all three (the design spread them over x10–14).
+- **The Woman with Basin's door is at (7, 15)** and she stands at (7, 16): the trickle art runs west to east along a row, so her water runs along landing 2's lower edge (row 18) from x7 and slips into the joint at (10, 18), above the hollow step.
+- **The Clockmaker's shop door is at x12**; its painted clock and window of clocks take x10–11.
+- **The yard gate is one tile (x12)**, open.
 - **The Counting Woman's march** goes down flight 3, along landing 3, down flight 4, and out through the arch. If the piano were still there she'd climb over it with the Movers' exchange (the camera pans down to watch); in part 1 that can't happen, because the guidebook comes from the Square, which needs the piano gone. Her march stays in for part 2, when the Goat Path makes the other order possible.
 - **The Counting Woman in the Square** has a guidebook line of her own ("I've READ it, thank you...").
 - **The end card** matches the opening's: the title over "End of Act 2. / Downstairs continues soon." Cheryl is saved standing at (10, 18) beside the open step.
 - **Lines added for states the design doesn't cover:** the Goat Path gate's note; the rope's second look; the yard wall, the bay tree, the lamps and the view on Lamp Street; the tower door with the crowbar; the piano and the crowbar, the piano in the Square with soap, the shop hat display with Cheryl's hat; the Woman with Basin's doorstep.
 
-## Stand-ins (until the art lands)
+## Art and audio
 
-Requested from the art task (Kn_OwEk0wq); each is one reference to swap.
+All of this part's art is the art task's (index: [docs/art-act2.md](../../../../docs/art-act2.md); modules `act2_npcs.js`, `act2_objects.js`, `act2_interiors.js`). Residents who sit or hold a pose (the Counting Woman on her step, Ambrose, the Tourist, the Mayor on his crate, the Man on Bench, the Woman with Watering Can, the Skipping Girls, the Woman with Basin) wear an animated pose frame and don't turn to talk; the Counting Woman and the Movers switch to their walking sheets when they leave. The Movers scrub crouched above the piano and run with `run_down`. The piano is `piano_front` wedged, `piano_slide` as it goes, `piano_back` in the Square's arch, and `piano_level` by the Fountain.
 
-- **Residents without bodies** wear palette swaps of existing bodies (`LOOKS` in `common.js`): Ambrose and the Man on Bench (the Old Man), the Counting Woman, Woman with Basin, Woman with Watering Can, and the Tourist (Her Next Door), the Mayor and the Movers (the Shopkeeper), the Skipping Girls (the Kid). None of them sits, tips, waters, gestures, scrubs, or skips yet; the Tourist doesn't visibly wear the hat; there is no skipping rope.
-- **The piano** is the opening's four piano tiles stitched into one 32 × 32 sprite.
-- **`standins.js`:** the scrape marks, the water trickle, the crowbar on the paving, the marble jar, the barometer, the rope barrier, the lectern, and the Eye.
-- **Item icons:** paper and charcoal and the guidebook are the letter icon recolored; the crowbar is the clothes prop recolored.
-- **Other substitutions from the kit:** the school's sign is the generic sign board; the Clockmaker's shop is a plain house front; the Archive's shelves are the flat's bookshelves and Ottilie's desk is the kitchen table; the teapot is the teacup icon; the market stalls are counters under awnings; the stair down to the crypt is a stair tile in the floor.
+The scrape-mark frames are named `over_scrape_*` but belong under characters, so `tiles.js` aliases them as `scrape_a`/`scrape_b` on the detail layer; `npm run check` warns about them until the art task renames the frames.
 
-Audio: `neighborhood`, `archive`, the `discovery` cue, and the sounds `knock`, `shop_bell`, `stone_scrape`, `slab_lift`, `piano_slide`, `scrub`, `gurgle`, and loops `trickle`, `door_hum`, `clock_tick` are requested from the audio task (eoGdH4jg_3) and called by name now; the engine's sound bridge ignores them until they exist.
+Audio is the audio task's, called by id: music `neighborhood` (the Shop muffled) and `archive`; the `discovery` cue; `knock`, `shop_bell`, `stone_scrape`, `slab_lift`, `piano_slide`, `scrub`, `skip_rope`, `sink_gurgle`, `well_breath`; loops `town` (Lamp Street and the Square), `clock_tick` (the Crown), `trickle`, and `door_hum` (beside the Founders' Door).

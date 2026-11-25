@@ -16,26 +16,21 @@ import { composedMap, blankGrid } from '../opening/grid.js';
 import { act2Tiles } from './tiles.js';
 import { layout, bump, firstMeet, getItem, talking, cherylDeclines } from './common.js';
 import { ottilie } from '../../art/named_npcs.js';
-import { items } from '../../art/items.js';
 
-// Walls and floor for a small interior room.
-function room(L, W, H) {
-  for (let y = 2; y < H - 1; y++) for (let x = 1; x < W - 1; x++) {
-    let fr = 'floor';
-    if ((x * 7 + y * 3) % 11 === 0) fr = 'floor_b';
-    if (y === 2) fr = x === 1 ? 'floor_nw' : 'floor_n';
-    else if (x === 1) fr = 'floor_w';
-    L.set('ground', x, y, `interior:${fr}`, false);
+// A room in the Archive's or crypt's own art: row 0 the top of the north wall,
+// then the wall's face rows, side walls, and a south wall.
+function room(L, W, H, sheet, { cap, faces, south, corners }) {
+  for (let x = 0; x < W; x++) {
+    const edge = x === 0 ? '_w' : x === W - 1 ? '_e' : '';
+    L.set('ground', x, 0, `${sheet}:${cap}${corners ? edge : ''}`, true);
+    faces.forEach((f, i) => L.set('ground', x, 1 + i, `${sheet}:${f}${corners ? edge : ''}`, true));
+    L.set('ground', x, H - 1, `${sheet}:${south}${corners ? edge : ''}`, true);
   }
-  for (let x = 1; x < W - 1; x++) {
-    L.set('ground', x, 0, 'interior:wall_upper', true);
-    L.set('ground', x, 1, 'interior:wall_lower', true);
-    L.set('ground', x, H - 1, 'interior:wall_south', true);
+  for (let y = 1 + faces.length; y < H - 1; y++) {
+    L.set('ground', 0, y, `${sheet}:wall_w`, true); L.set('ground', W - 1, y, `${sheet}:wall_e`, true);
+    for (let x = 1; x < W - 1; x++) L.set('ground', x, y, `${sheet}:${(x * 7 + y * 3) % 11 ? 'floor' : 'floor_b'}`, false);
   }
-  L.set('ground', 0, 0, 'interior:wall_upper_w', true); L.set('ground', W - 1, 0, 'interior:wall_upper_e', true);
-  L.set('ground', 0, 1, 'interior:wall_lower_w', true); L.set('ground', W - 1, 1, 'interior:wall_lower_e', true);
-  for (let y = 2; y < H - 1; y++) { L.set('ground', 0, y, 'interior:wall_side_w', true); L.set('ground', W - 1, y, 'interior:wall_side_e', true); }
-  L.set('ground', 0, H - 1, 'interior:wall_south_w', true); L.set('ground', W - 1, H - 1, 'interior:wall_south_e', true);
+  if (!corners) for (let y = 0; y <= faces.length; y++) { L.set('ground', 0, y, `${sheet}:wall_w`, true); L.set('ground', W - 1, y, `${sheet}:wall_e`, true); }
 }
 
 // ---------------------------------------------------------------------------
@@ -45,34 +40,32 @@ const AW = 16, AH = 14;
 
 function composeArchive() {
   const L = layout(AW, AH, blankGrid);
-  // The Archive is a tall room: an extra wall row (row 2) holds the shelves' lower halves.
-  room(L, AW, AH);
-  for (let x = 1; x < AW - 1; x++) { L.set('ground', x, 1, 'interior:wall_upper', true); L.set('ground', x, 2, 'interior:wall_lower', true); }
-  L.set('ground', 0, 2, 'interior:wall_lower_w', true); L.set('ground', AW - 1, 2, 'interior:wall_lower_e', true);
-  L.set('ground', 0, 1, 'interior:wall_upper_w', true); L.set('ground', AW - 1, 1, 'interior:wall_upper_e', true);
-  for (let x = 1; x < AW - 1; x++) L.set('ground', x, 3, x === 1 ? 'interior:floor_nw' : 'interior:floor_n', false);
-  // High windows, and the wall shelves.
-  L.set('ground', 7, 1, 'interior:window_top_l', true); L.set('ground', 8, 1, 'interior:window_top_r', true);
-  L.set('ground', 7, 2, 'interior:window_l', true); L.set('ground', 8, 2, 'interior:window_r', true);
-  for (const x0 of [1, 11]) for (let i = 0; i < 4; i++) {
-    const f = i % 2 ? 'bookshelf_r' : 'bookshelf_l';
-    L.set('detail', x0 + i, 1, `furniture:${f}`);
-    L.set('detail', x0 + i, 2, `furniture:${f}`);
-  }
-  // Freestanding shelves.
+  room(L, AW, AH, 'archive', { cap: 'wall_cap', faces: ['wall_face_upper', 'wall_face_lower'], south: 'wall_s', corners: true });
+  // The curved wall bookcases and the high windows.
+  'abcd'.split('').forEach((c, i) => {
+    for (const x0 of [1, 11]) {
+      L.set('ground', x0 + i, 1, `archive_furniture:wallshelf_top_${c}`, true);
+      L.set('ground', x0 + i, 2, `archive_furniture:wallshelf_bot_${c}`, true);
+    }
+  });
+  L.set('ground', 7, 1, 'archive:window_nw', true); L.set('ground', 8, 1, 'archive:window_ne', true);
+  L.set('ground', 7, 2, 'archive:window_sw', true); L.set('ground', 8, 2, 'archive:window_se', true);
+  // Light from the high windows, pooled on the floor in front of the desk.
+  ['nw', 'n', 'n', 'ne'].forEach((f, i) => L.set('detail', 6 + i, 6, `archive:pool_${f}`));
+  ['sw', 's', 's', 'se'].forEach((f, i) => L.set('detail', 6 + i, 7, `archive:pool_${f}`));
+  // Freestanding shelves, and Ottilie's desk with its seven cold cups.
   for (const [x, y] of [[2, 4], [12, 4], [2, 10], [12, 10]]) {
-    L.set('detail', x, y, 'furniture:bookshelf_l', true); L.set('detail', x + 1, y, 'furniture:bookshelf_r', true);
+    L.set('detail', x, y, 'archive_furniture:shelf_free_l', true); L.set('detail', x + 1, y, 'archive_furniture:shelf_free_r', true);
   }
-  // Ottilie's desk.
-  L.set('detail', 7, 5, 'furniture:table_l', true); L.set('detail', 8, 5, 'furniture:table_r', true);
+  L.set('detail', 7, 5, 'archive_furniture:desk_l', true); L.set('detail', 8, 5, 'archive_furniture:desk_r', true);
   // The Eye: walkable glass, except where the teapot sits.
-  L.set('detail', 7, 8, 'standins:eye_nw'); L.set('detail', 8, 8, 'standins:eye_ne');
-  L.set('detail', 7, 9, 'standins:eye_sw'); L.set('detail', 8, 9, 'standins:eye_se');
-  L.block(7, 8);
+  L.set('ground', 7, 8, 'archive:eye_nw'); L.set('ground', 8, 8, 'archive:eye_ne');
+  L.set('ground', 7, 9, 'archive:eye_sw'); L.set('ground', 8, 9, 'archive:eye_se');
+  L.set('detail', 7, 8, 'archive_furniture:teapot', true);
   // The stair down to the crypt, and the door out.
-  L.set('ground', 13, 11, 'street:stairs', false);
+  L.set('ground', 13, 11, 'archive:stair_down', false);
   L.step[11][13] = 'step_stairs';
-  L.set('ground', 7, AH - 1, 'interior:door', false); L.set('ground', 8, AH - 1, 'interior:door', false);
+  L.set('ground', 7, AH - 1, 'archive:door_l', false); L.set('ground', 8, AH - 1, 'archive:door_r', false);
   return L.done();
 }
 
@@ -105,7 +98,6 @@ const archiveObjects = [
 
 const teapot = {
   id: 'teapot', x: 7, y: 8, solid: false,
-  sprite: { sheet: items, frame: 'teacup' },
   look: 'Her mother\'s teapot. I learned to keep away from it at book club.',
   use: archiveUse,
 };
@@ -173,17 +165,13 @@ const CW = 10, CH = 7;
 
 function composeCrypt() {
   const L = layout(CW, CH, blankGrid);
-  room(L, CW, CH);
-  L.set('ground', 1, 2, 'interior:wall_lower', true); L.set('ground', 2, 2, 'interior:wall_lower', true); L.set('ground', 8, 2, 'interior:wall_lower', true);
-  for (let x = 1; x < CW - 1; x++) L.set('ground', x, 3, x === 1 ? 'interior:floor_nw' : 'interior:floor_n', false);
-  L.set('ground', 0, 2, 'interior:wall_side_w', true); L.set('ground', CW - 1, 2, 'interior:wall_side_e', true);
+  room(L, CW, CH, 'crypt', { cap: 'wall_cap', faces: ['wall_face', 'wall_face_lower'], south: 'wall_s', corners: false });
   // Crates of records stacked against the back wall.
-  for (const [x, y] of [[1, 1], [2, 1], [1, 2], [2, 2], [8, 1], [8, 2]]) L.set('detail', x, y, 'props:crate', true);
+  for (const x of [1, 2, 8]) { L.set('detail', x, 1, 'archive_furniture:crate_stack_top', true); L.set('detail', x, 2, 'archive_furniture:crate_stack_bot', true); }
   // The Founders' Door (5–6, 1–2): dark slate, no mortar, no handle.
   for (let y = 0; y < 2; y++) for (let x = 0; x < 2; x++) L.set('ground', 5 + x, 1 + y, `founders_door:founders_door_x${x}y${y}`, true);
-  for (const x of [3, 4, 7]) L.set('ground', x, 2, 'interior:wall_lower', true);
-  L.set('detail', 3, 3, 'standins:lectern', true);
-  L.set('ground', 1, 5, 'street:stairs', false);
+  L.set('detail', 3, 3, 'archive_furniture:lectern', true);
+  L.set('ground', 1, 5, 'crypt:stair_up', false);
   L.step[5][1] = 'step_stairs';
   return L.done();
 }
