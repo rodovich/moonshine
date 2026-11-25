@@ -425,21 +425,23 @@ test('keyboard: Act 5', async ({ page }) => {
   expect(joined(log)).toContain("I'm carrying it to a boat");
   expect((await snap(page)).items).toContain('bucket_water');
 
-  // The Shop: the telescope lies in the fallen window; with the Keeper asking,
-  // the guidebook swaps for it.
+  // The Shop: the telescope rolled under the counter; the crowbar hooks it out.
   await kbGo(page, 'shop');
   await read();
   await kbInteract(page, 'shopkeeper5');
   log = await read();
-  expect(joined(log)).toContain('like a fallen soldier');
-  expect(joined(log)).toContain('Give it BACK?');
+  expect(joined(log)).toContain('rolled right under the counter');
+  await kbInteract(page, 'counter5', 'crowbar');
+  log = await read();
+  expect(joined(log)).toContain('Out it comes');
+  s = await snap(page);
+  expect(s.items).toContain('telescope');
+  expect(s.flags['window.telescope']).toBeFalsy();
+  // The guidebook, if offered, fills his window.
   await kbInteract(page, 'shopkeeper5', 'guidebook');
   log = await read();
   expect(joined(log)).toContain("I'm practically a merchant");
-  s = await snap(page);
-  expect(s.items).toContain('telescope');
-  expect(s.items).not.toContain('guidebook');
-  expect(s.flags['window.telescope']).toBeFalsy();
+  expect((await snap(page)).items).not.toContain('guidebook');
   await shot(page, 'act5-03-shop');
   await kbGo(page, 'fountain_square');
   await read();
@@ -658,15 +660,15 @@ test('pointer: Act 5', async ({ page }) => {
   await read();
   await ptrGo(page, 'fountain_square');
   await read();
-  // The Shop first, before the Keeper has asked: the swap works anyway.
+  // The Shop first, before the Keeper has asked: the crowbar works anyway.
   await ptrGo(page, 'shop');
   await read();
   await ptrInteract(page, 'shopkeeper5');
   log = await read();
-  expect(joined(log)).toContain('something local');
-  await ptrUse(page, 'guidebook', 'shopkeeper5');
+  expect(joined(log)).toContain('rolled right under the counter');
+  await ptrUse(page, 'crowbar', 'counter5');
   log = await read();
-  expect(joined(log)).toContain("I'm practically a merchant");
+  expect(joined(log)).toContain('Take it to her');
   await ptrGo(page, 'fountain_square');
   await read();
 
