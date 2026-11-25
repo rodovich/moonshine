@@ -8,7 +8,7 @@ import { cherylDeclines } from './opening/common.js';
 import { act2Maps, act2Items, act2Scripts, act2, migrateAct2 } from './act2/index.js';
 import { act3Maps, act3Items, act3Scripts, withAct3, act3 } from './act3/index.js';
 import { act4Maps, act4Items, act4Scripts, shipPlanAct4, seaCave, withAct4, startAct4, act4End } from './act4/index.js';
-import { act5Maps, act5Items, act5Scripts, withAct5, standInItems, startAct5, act5, shipPlanAct5 } from './act5/index.js';
+import { act5Maps, act5Items, act5Scripts, withAct5, standInItems, startAct5, act5, shipPlanAct5, telescopeAct5 } from './act5/index.js';
 import { act6Maps, act6Items, act6Scripts, addAct6 } from './act6/index.js';
 import { act6Start } from './act6/climax.js';
 import { cheryl } from '../art/cheryl.js';
@@ -36,6 +36,8 @@ act5.next = act6Start;
 const items = { ...standInItems, ...openingItems, ...act2Items, ...act3Items, ...act4Items, ...act5Items, ...act6Items, ...testItemDefs };
 // The Ship Plan (Act 3's) gains its Act 4 and Act 5 looks.
 items.ship_plan = shipPlanAct5(shipPlanAct4(items.ship_plan));
+// Act 2's telescope gains Act 5's line on anything but the Keeper.
+if (items.telescope) items.telescope = telescopeAct5(items.telescope);
 
 export default {
   // Old saves: Act 2's structure pass retired Cheryl's own hat (see act2/common.js).
@@ -59,6 +61,21 @@ export default {
 
   // Runs once when a new game starts.
   onNewGame: openingIntro,
+
+  // Old-save rules, run on every load (Continue or a debug start), never on a new
+  // game. Each does nothing on a save that doesn't need it (structure pass).
+  // Cheryl's own hat is retired: the engine drops the unknown 'hat' item before
+  // these run, so it goes back to the wardrobe on its own. A save past the old hat
+  // trade (the Tourist has the hat, but no telescope was ever placed) gets the
+  // telescope in the Shop window, so Act 5's door thread can be finished.
+  onLoad: [
+    (g) => {
+      if (g.flag('tourist.hasHat') && !g.flag('window.telescope') && !g.flag('got.telescope') && !g.flag('telescope.back')) {
+        g.setFlag('window.telescope');
+        g.setFlag('telescope.migrated');
+      }
+    },
+  ],
 
   defaults: {
     // Using an item on something with no handler for it.

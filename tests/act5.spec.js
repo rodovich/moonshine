@@ -19,7 +19,7 @@ const PRIOR = [
   'tourist.met', 'tourist.hasHat', 'ottilie.met', 'act3.started', 'got.disc', 'got.shipPlan', 'founders.unbolted',
   'act3.surfaced', 'moonEyes.glow', 'act3.crypt', 'act3.done', 'act4.started', 'clockmaker.out', 'clock.lifted',
   'bell.restored', 'mayor.atCrown', 'ambrose.inBelfry', 'read.flyleaf', 'got.throat', 'ottilie.readPlan', 'pump.throat',
-  'pumps.running', 'act4.risen', 'act4.done',
+  'pumps.running', 'act4.risen', 'act4.done', 'got.telescope', 'window.telescope',
 ].join(',');
 const ITEMS = 'moon_chart,crowbar,guidebook,moonglass_disc,ship_plan,square_jug';
 const START = `?map=bilge_dry&x=23&y=6&facing=down&flags=${PRIOR}&items=${ITEMS}&run=act5_start`;
@@ -284,6 +284,8 @@ async function ptrGo(page, to) {
   }
   const [ox, oy] = DIRS[a.dir];
   await clickTileAt(page, a.x + ox, a.y + oy);
+  // A door may say something before it opens (the Clockmaker's, the tower): read on.
+  await readThrough(page, () => clickGame(page, 128, 112), { stop: (st) => st.map === to, timeout: 20000 });
   await waitFor(page, (m) => window.moonshine.snapshot().map === m, to, 10000);
   await waitFor(page, () => { const s = window.moonshine.snapshot(); return s.idle || !!s.text || !!s.choice; }, null, 20000);
 }
@@ -384,6 +386,33 @@ test('keyboard: Act 5', async ({ page }) => {
   log = await read();
   expect(joined(log)).toContain("I'd better fill it first");
 
+  // The Harbor: the Teeth, Mott, the Kid.
+  await kbGo(page, 'harbor_risen');
+  log = await read();
+  expect(joined(log)).toContain('The Teeth');
+  await shot(page, 'act5-05-harbor');
+  await kbInteract(page, 'mott5');
+  log = await read();
+  expect(joined(log)).toContain('Whatever holds her is at the bow end');
+  await kbInteract(page, 'kid5');
+  log = await read();
+  expect(joined(log)).toContain("I'm racing the reef");
+
+  // The lamp room: the Keeper wants her telescope back; the lamp waits for it.
+  await kbGo(page, 'lamp_room');
+  await read();
+  await kbInteract(page, 'keeper5');
+  log = await read();
+  expect(joined(log)).toContain('Why is there a REEF');
+  expect(joined(log)).toContain('my telescope');
+  await kbInteract(page, 'lamp5', 'moonglass_disc');
+  log = await read();
+  expect(joined(log)).toContain("Not till I've got my telescope");
+  await kbGo(page, 'harbor_risen');
+  await read();
+  await kbGo(page, 'bilge_dry');
+  await read();
+
   // Up to Fountain Square: fill it at the Fountain.
   await kbGo(page, 'fountain_square');
   await read();
@@ -396,18 +425,21 @@ test('keyboard: Act 5', async ({ page }) => {
   expect(joined(log)).toContain("I'm carrying it to a boat");
   expect((await snap(page)).items).toContain('bucket_water');
 
-  // The Shop: the guidebook fills the gap in the window; brass polish in return.
+  // The Shop: the telescope lies in the fallen window; with the Keeper asking,
+  // the guidebook swaps for it.
   await kbGo(page, 'shop');
   await read();
   await kbInteract(page, 'shopkeeper5');
   log = await read();
-  expect(joined(log)).toContain("There's a GAP");
+  expect(joined(log)).toContain('like a fallen soldier');
+  expect(joined(log)).toContain('Give it BACK?');
   await kbInteract(page, 'shopkeeper5', 'guidebook');
   log = await read();
-  expect(joined(log)).toContain('Display for display');
+  expect(joined(log)).toContain("I'm practically a merchant");
   s = await snap(page);
-  expect(s.items).toContain('brass_polish');
+  expect(s.items).toContain('telescope');
   expect(s.items).not.toContain('guidebook');
+  expect(s.flags['window.telescope']).toBeFalsy();
   await shot(page, 'act5-03-shop');
   await kbGo(page, 'fountain_square');
   await read();
@@ -442,30 +474,14 @@ test('keyboard: Act 5', async ({ page }) => {
   s = await snap(page);
   expect([s.x, s.y]).toEqual([25, 7]);
 
-  // The Harbor: the Teeth, Mott, the Kid.
+  // Back to the lamp room: the telescope for the Keeper; the disc in the lamp; the relay.
   await kbGo(page, 'harbor_risen');
-  log = await read();
-  expect(joined(log)).toContain('The Teeth');
-  await shot(page, 'act5-05-harbor');
-  await kbInteract(page, 'mott5');
-  log = await read();
-  expect(joined(log)).toContain('Whatever holds her is at the bow end');
-  await kbInteract(page, 'kid5');
-  log = await read();
-  expect(joined(log)).toContain("I'm racing the reef");
-
-  // The lamp room: polish for the Keeper; the disc in the lamp; the relay.
+  await read();
   await kbGo(page, 'lamp_room');
   await read();
-  await kbInteract(page, 'keeper5');
+  await kbInteract(page, 'keeper5', 'telescope');
   log = await read();
-  expect(joined(log)).toContain('Why is there a REEF');
-  await kbInteract(page, 'lamp5', 'moonglass_disc');
-  log = await read();
-  expect(joined(log)).toContain('Not without polish');
-  await kbInteract(page, 'keeper5', 'brass_polish');
-  log = await read();
-  expect(joined(log)).toContain('Go on, then');
+  expect(joined(log)).toContain("I'll be at the window");
   await shot(page, 'act5-06-lamproom');
   await kbInteract(page, 'lamp5', 'moonglass_disc');
   log = await readUntil(page, adv, 'Ready. Steady. EGG.');
@@ -635,18 +651,22 @@ test('pointer: Act 5', async ({ page }) => {
   await ptrGo(page, 'crown');
   await read();
 
-  // Down to the Square and the Shop for the polish.
+  // Down to the Square and the Shop.
   await ptrGo(page, 'lamp_street');
   await read();
   await ptrGo(page, 'hundred_steps');
   await read();
   await ptrGo(page, 'fountain_square');
   await read();
+  // The Shop first, before the Keeper has asked: the swap works anyway.
   await ptrGo(page, 'shop');
   await read();
+  await ptrInteract(page, 'shopkeeper5');
+  log = await read();
+  expect(joined(log)).toContain('something local');
   await ptrUse(page, 'guidebook', 'shopkeeper5');
   log = await read();
-  expect(joined(log)).toContain('light-headed');
+  expect(joined(log)).toContain("I'm practically a merchant");
   await ptrGo(page, 'fountain_square');
   await read();
 
@@ -658,7 +678,7 @@ test('pointer: Act 5', async ({ page }) => {
   expect(joined(log)).toContain('Closer. I can see the rocks');
   await ptrGo(page, 'lamp_room');
   await read();
-  await ptrUse(page, 'brass_polish', 'keeper5');
+  await ptrUse(page, 'telescope', 'keeper5');
   await read();
   await ptrUse(page, 'moonglass_disc', 'lamp5');
   log = await read({ timeout: 180000 });
@@ -718,7 +738,7 @@ test('pointer: Act 5', async ({ page }) => {
 // has a tile beside it that Cheryl can reach from where she'd stand on that
 // map (some only from the mud, after the rope).
 
-const STATE = `${PRIOR},act5.started,rope.tied,boatman.afloat,door.open,kid.gaveDisc,passage.lit,windlass.seen,keeper.polished,got.polish,teeth.seen=3`;
+const STATE = `${PRIOR},act5.started,rope.tied,boatman.afloat,door.open,kid.gaveDisc,passage.lit,windlass.seen,keeper.asked,keeper.telescope,telescope.back,teeth.seen=3`;
 const REACH = [
   { map: 'bilge_dry', from: [[23, 6], [25, 10]], stage: 1 },
   { map: 'harbor_risen', from: [[4, 6]], stage: 1 },

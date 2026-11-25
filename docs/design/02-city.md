@@ -1080,6 +1080,19 @@ The Act 2 part 1 builder (5DfQsiqAZf) built Lamp Street through the Shop on `con
 - In part 1, the Goat Path gate and the rope to the Bilge decline with the lines the builder wrote (the goats have the path; CANAL CLEANING). Its added lines for objects the design didn't cover (the yard wall, the bay tree, the lamps, the views, and a few wrong combinations) are adopted as written.
 - In part 1 the Count thread can only happen after the piano moves, since the guidebook needs the Square.
 
+## As built (structure pass)
+
+The Act 2 builder built the structure pass on `content/act2-structure` (4d380c9) with the dialog from [structure-pass.md](structure-pass.md) sections 3–5. Staging: the Keeper hands over the telescope on the second talk, or straight after the first if Cheryl has already looked at it; the wife walks to the bench and back to put the glasses on him; after the storm-off, the camera pans up to the step, the basin tips, and after the trickle Cheryl says "Steps don't drink."; the Goat Path is 129 steps, about 26 seconds. Lines the builder added, adopted (two edited):
+- Shop window with the telescope: "The Keeper's telescope, in pride of place. Looked at, not looked through. She'd approve." Before the swap, after meeting the Tourist: "Display stock. He'd let it go if something filled the gap. That's how he talks, anyway."
+- Shopkeeper after the swap: "Display for display. I've been thinking about it all morning." / "Customers stop and look at it. Nobody buys it. Perfect." The straw hat on the window: "It's out now. Putting it back would only confuse him."
+- Telescope (item): "The Lighthouse Keeper's telescope. Brass, never used. Every time she turns her back, it points at the sea." On other people (edited): "She said somewhere it'd be looked at. Not passed round."
+- Mott shown the telescope (edited, so it doesn't send the player to try it on the Gate): "She gave it you? …Keep it. I don't need a telescope to see the Gate's wrong. I need a drink."
+- Counting Woman in the Square, shown the Tide-Sheet: "I've got my own copy. As EVIDENCE." The Mayor's after-scene: "Madam, a guidebook and a letter are not official documents—" / "…Miss, did you show her those? Why would you show her those?"
+- Tourist after the hat: "I'm keeping this hat. I'm going to sit right here until the ferry comes or I turn into a raisin."
+- Goat Path: the hairpin, "From the hairpin: the whole open Bowl, all the way to the western Rim. You can't see the Gate from here. It's very restful."; the sea, "The back of the island. Cliff, goats, sea. Gulls wheeling below me, which is wrong, but there it is."; the roofs near the bottom, "The lower town's roofs, nearly at eye level now. Somebody's basin is still out, still full."
+- Signs: "A painted board: HARBOR, and an arrow pointing east along the canal." / "A painted board: THE BILGE, and an arrow pointing west, back along the canal."
+- After the QA description sweep, to match the art: the goat, "A goat. It's eating the gorse and making eye contact."; the Harbor doors, "Not my door. It smells of tar and yesterday's fish."; the lamp-room windows, "From up here: the whole Bowl, the Rim, the mouth, the Teeth. She only has eyes for the lamp."; the Crown's tower door gives the clock's two lines first (one column holds both); after `act2.done`, Lamp Street's view is "Roofs all the way down to the water." and the Woman with Basin drops her moon line.
+
 ## As built (part 2)
 
 The same builder built the Goat Path, Harbor, lamp room, and Bilge on `content/act2b`. This document follows its choices:

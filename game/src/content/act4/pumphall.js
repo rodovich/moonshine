@@ -207,6 +207,7 @@ const objects = [
   ...GRATES.map((x) => ({
     id: `grate_${x}`, unreachable: (g) => !!g.flag('pumps.burst') && 'under the flood',  x, y: 9, w: 2, lookKey: 'grates',
     interact: (g) => {
+      if (g.flag('pumps.burst')) return g.describe('Under water now, with the rest of the floor.');
       if (g.flag('pumps.running')) return g.describe('Dry. The cells under the floor are empty.');
       return g.describe(bump(g, 'look.grates') === 0 ? 'A grate in the floor. Underneath, dark water, very close. Fuller than it should be, I think.' : 'Full.');
     },

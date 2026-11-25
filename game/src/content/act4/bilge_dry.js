@@ -72,6 +72,15 @@ function compose(g) {
   for (let y = 12; y <= 14; y++) for (let x = 0; x < W; x++) if (x < 10) L.set('ground', x, y, `bilge_flood:wet_${q(x, y)}`, false);
   for (const [x, y, k] of [[3, 13, 'a'], [18, 12, 'b'], [14, 5, 'a'], [27, 13, 'b']]) L.set('detail', x, y, `bilge_flood:fish_stranded_${k}`);
   for (let y = 15; y < H; y++) for (let x = 0; x < W; x++) L.set('ground', x, y, lowRoof(x, y), true);
+  // The west end (structure pass): steps up to the Goat Path, the cliff under them;
+  // the Fishmonger's door, which leads back to her cellar; the HARBOR sign at the east end.
+  L.set('ground', 0, 12, 'bilge_west:steps_n_dry', false);
+  L.set('ground', 0, 13, 'bilge_west:steps_m_dry', false);
+  L.set('ground', 0, 14, 'bilge_west:steps_s_dry', false);
+  L.set('ground', 0, 15, 'bilge_west:cliff_a', true);
+  L.set('ground', 0, 16, 'bilge_west:cliff_b', true);
+  L.block(4, 3, false);
+  ['harbor_0', 'harbor_1', 'harbor_2'].forEach((f, i) => L.set('detail', 29 + i, 12, `signpost:${f}`, false));
   // Mooring ropes running taut down to the boats.
   for (const x of [4, 9, 20]) L.set('detail', x, 11, 'reveal:rope_taut_v');
   return L.done();
@@ -131,7 +140,7 @@ const people = [
     behavior: { type: 'patrol', route: [[1, 10], [11, 10]], ghost: true, stopNear: 3, nearPose: 'jog' },
     talkPose: 'jog',
     interact: async (g, self) => {
-      if (bump(g, 'dry.kid') === 0) await g.describe("He jumped. I could. I'm not landing in six feet of mud in my good skirt.");
+      if (bump(g, 'dry.kid') === 0) await g.describe('He jumped. I could. Getting back up six feet of slime is another matter.');
       return g.say(self, "It's a ROAD, Miss! I've done eleven laps! There's a CRAB that's faster than me!");
     },
   },
@@ -163,10 +172,12 @@ const objects = [
     ],
   },
   { id: 'mouth', x: 28, y: 7, w: 4, h: 4, look: "The last of the canal, running out to the Bowl. And the Bowl's down there. Lower. Of course it's lower." },
+  // On the facade row the lines hang from, not the quay under them: a hotspot on walkable
+  // tiles would turn every click along that stretch into a look.
   { id: 'laundry', x: 14, y: 3, w: 6, look: "Every line of washing on the quay is streaming out sideways, hard. The wind's got more of us to push now." },
   // The bronze door and the Water Stairs: looking at either ends the act.
   { id: 'door_view', x: 24, y: 7, w: 4, h: 3, interact: (g) => endOfAct4(g) },
-  { id: 'fish_door', x: 4, y: 2, h: 2, look: notYet },
+  
 ].map((o) => ({ solid: false, use: { '*': cherylDeclines }, ...o }));
 
 
@@ -183,6 +194,8 @@ export const bilgeDryMap = composedMap(compose, {
   exits: [
     { x: 11, y: 0, w: 2, run: (g) => lookBackAtDoor(g) },
     { x: 31, y: 12, h: 3, run: (g) => lookBackAtDoor(g) },
+    { x: 0, y: 12, h: 3, run: (g) => lookBackAtDoor(g) }, // west, up to the Goat Path
+    { x: 4, y: 3, run: (g) => lookBackAtDoor(g) }, // the Fishmonger's door, back to the cellar
   ],
   onEnter: async (g) => {
     if (!g.flag('act4.risen')) return; // the reveal runs it
