@@ -40,6 +40,8 @@ Tessel lives on fish, tourists (a trickle, by ferry), terrace gardens, and gossi
 
 On the night of the late-summer full moon, every household sets a basin, bowl, or bucket of water on its roof or windowsill to *catch the moon*: to see the rising moon reflected in it the moment it clears the Gate. Then you make a wish, or drink a toast, or tip the water down the Hundred Steps in the morning for luck, depending on your family. Most people do it with a teacup. Cheryl does it with a bathtub, and gets in.
 
+On Moonshine Night all of Tessel is up on its roofs, and there's an old, unspoken rule: **nobody looks at anybody else's roof.** Everyone faces the Gate. Cheryl's tub sits in plain view of Her Next Door, and both of them pretend otherwise, as they have for thirty-one years. Cheryl also bathes in a navy-and-cream striped bathing costume older than the Mayor, so the rule has never been tested. The lack of privacy is deliberate: it's a small comedy of good manners, and it says something about Cheryl, who has never once cared who saw her do something she loves. (Client feedback after playing the opening: the rooftop tub looked strangely public. This makes the publicness intentional and visible in play.)
+
 The word *moonshine* runs through the game:
 
 1. **Moonshine Night**, the festival.
