@@ -371,7 +371,8 @@ const objects = [
   },
 
   // ---- The court ----
-  { id: 'lemon', x: 3, y: 14, look: 'The lemon tree. It produces three lemons a year and expects applause for each one.' },
+  // The whole canopy (2-4, 13-15), which is what people click; the trunk is its middle.
+  { id: 'lemon', x: 2, y: 13, w: 3, h: 3, look: 'The lemon tree. It produces three lemons a year and expects applause for each one.' },
   {
     id: 'chess', x: 3, y: 16,
     interact: async (g) => {
