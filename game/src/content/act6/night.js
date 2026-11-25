@@ -52,7 +52,7 @@ export function bilgeDryNight() {
     sheets: { lantern_pool, refill },
     hide: [{ when: inCut, ids: ['fishmonger', 'bridge_man', 'boatman', 'piano', 'big_mover', 'other_mover', 'kid', 'crab_0', 'crab_1', 'crab_2', 'flop',
       // Act 5's people and things on the mud
-      'fishmonger5', 'kid_mud', 'kid_relay', 'big_mover5', 'other_mover5', 'piano5', 'crab5_0', 'crab5_1', 'crab5_2', 'bucket5'] }],
+      'fishmonger5', 'boatman5', 'boat5_boatman', 'kid_mud', 'kid_relay', 'big_mover5', 'other_mover5', 'piano5', 'crab5_0', 'crab5_1', 'crab5_2', 'bucket5'] }],
     entities: [
       ...LANTERNS.map(([x, y], i) => ({ id: `act6_lantern_${i}`, x, y, solid: false, shadow: false, when: inCut, sprite: { sheet: lantern, frame: i % 3 ? 'lantern_a' : 'lantern_b' } })),
       ...crowd,
@@ -85,6 +85,7 @@ export function bilgeDryNight() {
         const rows = { 1: [10], 2: [9, 10], 3: [8, 9, 10] }[stage];
         for (let x = 0; x < 32; x++) {
           if (x === 12 || x === 13) continue; // the bridge deck stands clear
+          if (x < (g.flag('fx.refillFront') ?? 0)) continue; // the rush hasn't got this far west yet
           rows.forEach((y, i) => {
             out.push(['ground', x, y, { tile: i === 0 ? 'refill:rush_top' : stage === 3 && y === 10 ? 'refill:rush_deep' : 'refill:rush', solid: true }]);
             out.push(['detail', x, y, null]);
