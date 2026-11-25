@@ -230,3 +230,25 @@ test('a non-solid patroller on a one-tile corridor: Cheryl gets through, he turn
   await waitFor(page, () => { const s = window.moonshine.snapshot(); return s.x === 8 && s.y === 8; }, null, 12000);
   expect(await watching).toBe(null);
 });
+
+test('using a held item on plain ground beside Cheryl says so and drops it', async ({ page }) => {
+  await boot(page, `${STREET}&x=12&y=8&items=letter`);
+  await waitIdle(page);
+  await page.evaluate(() => { window.moonshine.world.control.holding = 'letter'; });
+  await clickTile(page, 13, 8);
+  await waitFor(page, () => !!window.moonshine.snapshot().text);
+  expect((await snap(page)).text).toContain('nothing there');
+  expect((await snap(page)).holding).toBe(null);
+});
+
+test('start=continue saves (it is the player own game)', async ({ page }) => {
+  await page.goto('/');
+  await page.evaluate(() => localStorage.setItem('moonshine.save.v1', JSON.stringify({ version: 1, map: 'test_street', x: 12, y: 5, facing: 'up', flags: { street_intro: true, door_unlocked: true }, inventory: [] })));
+  await boot(page, '?start=continue');
+  await waitIdle(page);
+  await press(page, 'ArrowUp');
+  await waitFor(page, () => window.moonshine.snapshot().map === 'test_shop');
+  await waitIdle(page);
+  const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('moonshine.save.v1')).map);
+  expect(saved).toBe('test_shop');
+});

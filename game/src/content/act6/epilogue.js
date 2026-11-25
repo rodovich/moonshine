@@ -388,8 +388,14 @@ export function stepsEpilogue(map) {
       }
       return out;
     },
-    // The open step doesn't ask "Go down?" any more: she steps round the rope.
-    triggers: [{ x: 9, y: 19, w: 2, when: epilogue, stop: false, run: async () => {} }],
+    // The open hundredth step (Act 2's exit at (10, 19)): not today.
+    exits: [{
+      x: 10, y: 19, when: epilogue,
+      run: async (g) => {
+        await g.describe("Not today. I've been down enough for one week.");
+        return g.movePlayer([10, 18]);
+      },
+    }],
     onEnter: async (g, base) => {
       if (!epilogue(g)) return base(g);
       await base(g);

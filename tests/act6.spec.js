@@ -339,14 +339,23 @@ test('keyboard: Act 6, the Long Keel to the title screen', async ({ page }) => {
   await kbInteract(page, 'sighting_log');
   expect(joined(await read())).toContain('allow two fingers');
 
-  // The trim wheel, three turns: closer, dead in the Gate, two fingers past.
+  // The trim wheel, three turns toward the Gate (and one back): closer, dead in the Gate, two fingers past.
   await kbInteract(page, 'trim_wheel');
+  await kbChoose(page, 0);
   expect(joined(await read())).toContain('Closer.');
   await kbInteract(page, 'trim_wheel');
+  await kbChoose(page, 1);
+  expect(joined(await read())).toContain('where it started');
+  await kbInteract(page, 'trim_wheel');
+  await kbChoose(page, 0);
+  await read();
+  await kbInteract(page, 'trim_wheel');
+  await kbChoose(page, 0);
   log = await readUntil(page, adv, 'Dead in the Gate');
   await shot(page, 'act6-04-dead-in-the-gate');
   await read();
   await kbInteract(page, 'trim_wheel');
+  await kbChoose(page, 0);
   log = await readUntil(page, adv, 'Moon in the Gate, and moon in the bowl.');
   await shot(page, 'act6-05-moon-true');
   log = log.concat(await read());
@@ -451,6 +460,7 @@ test('pointer: Act 6, the Long Keel to the title screen', async ({ page }) => {
   expect(joined(await read())).toContain('Plugs are plugs.');
   for (let i = 0; i < 3; i++) {
     await ptrInteract(page, 'trim_wheel');
+    await ptrChoose(page, 0);
     log = await read();
   }
   expect(joined(log)).toContain('Put her back to bed.');

@@ -98,7 +98,8 @@ export class SheetArt {
     const canvas = document.createElement('canvas');
     canvas.width = w;
     canvas.height = h;
-    const ctx = canvas.getContext('2d');
+    // Read back later for glow masks and click hit tests.
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
     const img = ctx.createImageData(w, h);
     const d = img.data;
     for (let y = 0; y < h && y < rows.length; y++) {

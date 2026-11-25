@@ -723,7 +723,8 @@ export class World {
     if (!this.picture) this.ambient.drawBark(ctx);
     this.drawHint(ctx);
     this.inventory.draw(ctx);
-    this.textbox.draw(ctx, this.picture ? 0 : this.player.py - this.cam.y);
+    // On tall phones the game draws the box below the frame instead.
+    if (!this.textbox.below) this.textbox.draw(ctx, this.picture ? 0 : this.player.py - this.cam.y);
   }
 
   drawWorld(ctx) {

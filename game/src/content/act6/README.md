@@ -70,7 +70,11 @@ Where the design left something open, or didn't work in play, this is what the b
 - **The plug's glint** is `plug_glint:glint` over the dry Basin every few seconds, with the `plug_glint` sound, until the plug is taken. It draws among the characters, so the moonbeam overhead softens it.
 - **Looking into the full Basin** shows the Basin view at the current trim, with a line for each position, so the player can check the moon before turning the wheel.
 - **The moon glides between trim positions** (about 1.6 s) rather than jumping.
-- **The master stop is pulled from below it (9, 7)**; the room's "1 px tilt" is `g.tilt(0, 1)` easing back over two seconds.
+- **The trim wheel asks which way to turn** (toward the Gate, back, or leave it), so stopping two fingers past rather than dead in the Gate is the player's choice (from the playtest).
+- **Items used on the moonbeam go to the Basin** below it, since a click on the beam lands on the shaft's hotspot.
+- **Lines added from the playtest:** in the lift, "The cage creaks past numbers painted on the shaft wall. Nine. Eight. Up and up."; on surfacing, before the Old Man looks up, "Cistern Court. My own front door, from underneath." (the writer's line); halfway along the Long Keel, "A grate in the floor. Far below, a slow thump, and another. The Middle Sister, still at it."
+- **Act 6 doesn't need the disc**: the Long Keel and the Sighting Room give Cheryl her pool of light themselves.
+- **The master stop is pulled from below it (9, 7)** (she walks there first); the room's "1 px tilt" is `g.tilt(0, 1)` easing back over two seconds.
 - **The bath**: Cheryl steps to (6, 6) beside the Basin, takes her shoes off there (the shoes stay on that tile while she bathes), and sits in the middle of the Basin. After **Later.** she stands at (7, 7) and the Long Keel's `keel` music plays in the room.
 - **The lift doesn't work before the bath**, and says so ("Not yet. Not with the moon off to one side like that.").
 - **The lift ride** is a full-screen picture of the shaft wall sliding down past her disc's pool of light, about four seconds.
@@ -79,7 +83,7 @@ Where the design left something open, or didn't work in play, this is what the b
 - **The door home is a scripted exit** in the epilogue: "Not yet" until the piano has come, then the final scene; after the credits it's an ordinary door again.
 - **The piano stands at (4-5, 12)**, east of Cheryl's door (the design's position; the art index's suggested spot west of it would cover the door). The Movers wait at (6, 12) and (7, 13) and leave down the Squeeze.
 - **The Stair Race** comes up flight 4 and flight 3; the finish tape is across flight 3 at row 21, just below the open hundredth step, where the Counting Woman (7, 18) counts. The Kid starts at the top of landing 3 and stops on the line; the two runners stop on landing 3. Two crowds stand on landing 2 and two on landing 3; the bunting is over landing 2.
-- **The rope barrier round the open hundredth step can be walked through.** The open step spans the whole of flight 3, so a solid barrier would cut the Steps in two. It sits on the ground layer, and the open step no longer asks "Go down?" in the epilogue.
+- **The rope barrier round the open hundredth step can be walked through.** The open step spans the whole of flight 3, so a solid barrier would cut the Steps in two. It sits on the ground layer. In the epilogue, walking onto the open step (Act 2's exit at (10, 19)) gets "Not today. I've been down enough for one week." and a step back, instead of "Go down?".
 - **The Woman with Basin tips her basin when talked to**, on her doorstep (7, 16).
 - **The Tourist stands at (18, 14) with her luggage at (19, 15)**, by the café.
 - **The Crown's clock tick stops** in the epilogue (the clock is gone).
