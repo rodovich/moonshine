@@ -372,7 +372,7 @@ test('keyboard: Act 3', async ({ page }) => {
   expect(joined(log)).toContain('Ottilie said floors, where the light falls.');
   await kbInteract(page, 'mirror', 'paper_charcoal');
   log = await read();
-  expect(joined(log)).toContain('nothing written on it. Not this one.');
+  expect(joined(log)).toContain("But it's a mirror, not a floor. Not this one.");
 
   // The mirror: up-left to the Sisters, straight up to the moons, up-right to the hatch.
   await kbInteract(page, 'mirror');

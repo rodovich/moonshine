@@ -254,7 +254,7 @@ const mirror = {
   use: {
     moonglass_disc: (g) => g.describe("It shows me the disc, and the disc shows it back. Nothing happens. They seem to get on."),
     // Under the open shaft: floor and light, the near miss (structure pass, section 4).
-    paper_charcoal: (g) => (lever(g) ? g.describe('Floor, and light, but nothing written on it. Not this one.') : g.describe('A rubbing of a mirror. No.')),
+    paper_charcoal: (g) => (lever(g) ? g.describe("Light falling on it, just as Ottilie said. But it's a mirror, not a floor. Not this one.") : g.describe('A rubbing of a mirror. No.')),
     crowbar: (g) => g.describe("It turns. I don't need to bully it."),
     '*': cherylDeclines,
   },
