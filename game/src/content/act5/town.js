@@ -267,7 +267,7 @@ const crownDoor5 = {
 
 // Ambrose on the Crown, at his tower step, until Act 4's belfry is registered
 // (withAct5 turns this off then; in Act 5 he's up in the belfry).
-export const crownLinks = { ambroseHere: true };
+export const crownLinks = { ambroseHere: true, belfry: false };
 const ambrose5 = {
   id: 'ambrose5', name: 'Ambrose', x: 6, y: 7, facing: 'down',
   sprite: LOOKS.ambrose, turnToTalk: false,
@@ -297,9 +297,11 @@ export function withCrown5(def) {
         return [layer, x, y, typeof v === 'object' ? { ...v, tile: plain } : plain, ...r];
       });
     },
-    collision: openTiles(base, [[12, 6]]),
+    // The Clockmaker's door (12, 6); the tower door (4-5, 6) up to Ambrose in the belfry.
+    collision: openTiles(base, [[12, 6], [4, 6], [5, 6]]),
     exits: [
       ...(base.exits || []).map((e) => (e.run ? untilAct5(e) : e)),
+      ...(crownLinks.belfry ? [{ x: 4, y: 6, w: 2, to: 'belfry', at: [1, 7], facing: 'up', when: started, blocked: "The tower door. Not now." }] : []),
       {
         x: 12, y: 6, to: 'clockmaker_shop', at: [4, 6], facing: 'up', when: started,
         blocked: "Shut. He's not at home to anyone, least of all me.",
@@ -321,7 +323,10 @@ export function withCrown5(def) {
 
 // The belfry (Act 4's map), if it's registered: Ambrose there instead.
 export function withBelfry5(def) {
-  return { ...def, entities: act5Talk(def.entities, 'ambrose_belfry', ambroseTalk, ambroseUse5) };
+  // Ambrose stands under the bell (4, 3), inside its hotspot; listed first, he's the one who answers.
+  const entities = act5Talk(def.entities, 'ambrose_belfry', ambroseTalk, ambroseUse5);
+  const first = entities.filter((e) => e.id === 'ambrose_belfry');
+  return { ...def, entities: [...first, ...entities.filter((e) => e.id !== 'ambrose_belfry')] };
 }
 
 // ---------------------------------------------------------------------------

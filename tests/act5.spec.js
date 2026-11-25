@@ -17,7 +17,9 @@ const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 const PRIOR = [
   'act1.moonrise', 'act1.done', 'act2.started', 'piano.slid', 'got.crowbar', 'counter.left', 'step.open', 'basin.inside',
   'tourist.met', 'tourist.hasHat', 'ottilie.met', 'act3.started', 'got.disc', 'got.shipPlan', 'founders.unbolted',
-  'act3.surfaced', 'moonEyes.glow', 'act3.crypt', 'act3.done', 'act4.started', 'act4.risen', 'got.throat',
+  'act3.surfaced', 'moonEyes.glow', 'act3.crypt', 'act3.done', 'act4.started', 'clockmaker.out', 'clock.lifted',
+  'bell.restored', 'mayor.atCrown', 'ambrose.inBelfry', 'read.flyleaf', 'got.throat', 'ottilie.readPlan', 'pump.throat',
+  'pumps.running', 'act4.risen', 'act4.done',
 ].join(',');
 const ITEMS = 'moon_chart,crowbar,guidebook,moonglass_disc,ship_plan,square_jug';
 const START = `?map=bilge_dry&x=23&y=6&facing=down&flags=${PRIOR}&items=${ITEMS}&run=act5_start`;
@@ -536,9 +538,14 @@ test('keyboard: Act 5', async ({ page }) => {
   expect(joined(log)).toContain('bumped her HEAD');
   await kbGo(page, 'crown');
   await read();
-  await kbInteract(page, 'ambrose5');
+  // Ambrose, up in the belfry.
+  await kbGo(page, 'belfry');
+  await read();
+  await kbInteract(page, 'ambrose_belfry');
   log = await read();
   expect(joined(log)).toContain('PROPPING HIS SHOP DOOR OPEN');
+  await kbGo(page, 'crown');
+  await read();
   await kbGo(page, 'clockmaker_shop');
   await read();
   await kbInteract(page, 'clockmaker5');
@@ -582,7 +589,8 @@ test('keyboard: Act 5', async ({ page }) => {
   log = await read({ stop: (st) => st.card === 'Moonrise.' });
   await waitFor(page, () => window.moonshine.snapshot().card === 'Moonrise.', null, 20000);
   await shot(page, 'act5-13-moonrise');
-  await waitFor(page, () => window.moonshine.snapshot().scene === 'title', null, 30000);
+  // After the Moonrise card, Act 6 begins in the Windlass Room (or, without Act 6, the title).
+  await waitFor(page, () => { const st = window.moonshine.snapshot(); return st.scene === 'title' || !!st.flags?.['act6.started']; }, null, 30000);
   expect(errors).toEqual([]);
 });
 
@@ -701,6 +709,7 @@ test('pointer: Act 5', async ({ page }) => {
   await ptrUse(page, 'clapper', 'socket');
   log = await read();
   expect(joined(log)).toContain("I'm good at waiting");
-  await waitFor(page, () => window.moonshine.snapshot().scene === 'title', null, 30000);
+  // After the Moonrise card, Act 6 begins in the Windlass Room (or, without Act 6, the title).
+  await waitFor(page, () => { const st = window.moonshine.snapshot(); return st.scene === 'title' || !!st.flags?.['act6.started']; }, null, 30000);
   expect(errors).toEqual([]);
 });

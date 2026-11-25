@@ -45,6 +45,7 @@ export function withAct5(maps) {
   const out = { ...maps };
   if (!out.bilge_dry) out.bilge_dry = bilgeDryStandIn;
   if (!out.lamp_room) out.lamp_room = lampRoomStandIn;
+  crownLinks.belfry = !!out.belfry;
   for (const [id, layer] of Object.entries(LAYERS)) {
     if (!out[id]) continue;
     const before = out[id];

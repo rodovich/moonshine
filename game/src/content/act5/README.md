@@ -11,6 +11,7 @@ The afternoon after the reveal: the rope, the door, and the Tooth, ending at dus
 | `bilge.js` | Act 5 on the dry Bilge: the Fishmonger's bucket, the Boatman from the broken edge, the ring, the rope climb, the bronze door, the Kid on the mud with the disc, the Movers, boats, crabs. |
 | `harbor.js` | The risen Harbor (32 × 15, a new map): the Teeth in three stages, the ferry, Mott, the Kid's laps. The lamp room in Act 5: the Keeper at the window, the polish. |
 | `relay.js` | The disc in the lamp, and the Kid's run to the door (a cutscene across the Harbor and the Bilge). |
+| `teeth.js` | The Teeth's looks by stage, the surf's volume, and the camera's trip out to them. |
 | `clockshop.js` | The Clockmaker's Shop (10 × 8, a new map), the doorstop, and the swap for Mott's jug. |
 | `windlass.js` | The Bow Passage (18 × 8) and the Windlass Room (22 × 14), the Tooth, and the end of the act. Exports the `act5.next` hook for Act 6. |
 | `town.js` | Act 5 on Fountain Square, the Shop, the Crown, the Archive, the Hundred Steps, Lamp Street, and Cistern Court. |
@@ -19,10 +20,11 @@ The afternoon after the reveal: the rope, the door, and the Tooth, ending at dus
 
 ## How Act 5 meets the other acts
 
-- **Coming in:** Act 4's ending should call `startAct5(g)` (exported from `index.js`) instead of its end card. It sets `act5.started` and `teeth.stage = 1`, shows "That afternoon.", and puts Cheryl at the top of the Water Stairs (23, 6). Until Act 4 is merged, start with `&run=act5_start`.
+- **Coming in:** Act 4's ending calls `startAct5(g)` through its hook (`act4End.next`, set in `src/content/index.js`) instead of its end card. It sets `act5.started` and `teeth.stage = 1`, shows "That afternoon.", and puts Cheryl at the top of the Water Stairs (23, 6). Until Act 4 is merged, start with `&run=act5_start`.
 - **Layering:** `withAct5(maps)` wraps other acts' maps (Act 3's `withAct3` pattern). Once `act5.started`: on `bilge_dry` and `lamp_room` every earlier entity, trigger, and exit steps aside and Act 5's take over; on the town maps only the named people step aside (the Mayor's and the Tourist's talk is replaced; the Shopkeeper, the Movers, the piano, the Counting Woman in the Square, the Kid on the Steps, Act 3's dusk people on the Crown are hidden). Ways into Act 2's `harbor` and wet `bilge` (from the Goat Path, the Square, the lamp room) lead to `harbor_risen` and `bilge_dry` instead.
 - **What it relies on:** map ids `bilge_dry`, `lamp_room`, `fountain_square`, `shop`, `crown`, `archive`, `hundred_steps`, `lamp_street`, `cistern_court` (and `belfry`, `goat_path` when they exist); the positions in the design's maps; entity ids `mayor`, `tourist`, `fountain`, `rope`, `shopkeeper`, `hat_display`, `shop_door`, `ambrose`, `ottilie`, `girl_1..3`, `old_man`, `neighbor*`, `kid`, `kid_after`; items `crowbar`, `guidebook`, `moonglass_disc`, `ship_plan`, `square_jug` (a stand-in definition is used until Act 4 defines it).
-- **Going out:** after the **Moonrise.** card, if `act5.next` is set (Act 6 sets it through `src/content/index.js`) it's called with the screen black and Cheryl sitting on the west chain coil (3, 10); otherwise an end card and the title.
+- **Going out:** after the **Moonrise.** card, `act5.next` (Act 6's `act6Start`, set in `src/content/index.js`) is called with the screen black and Cheryl sitting on the west chain coil (3, 10); without it, an end card and the title.
+- **Act 6 and the epilogue:** Act 5's world (dry canals, the risen Harbor, wind, the Teeth) lasts through Act 6's night and gives way once `epilogue` is set (`started` is `act5.started` and not `epilogue`; the loops stop then). From `act6.started` the Windlass Room's evening light through the hawse and its loops are off; Act 6 brings its own.
 - **Wrapped functions and the checker:** wrappers keep the originals as `act5Before` on entities, and wrapped map `onEnter`/`patches`/`lighting` are listed as `before_<map>_<key>` scripts, so `npm run check` still sees the ids they use. `act5_flags` lists the flags Act 5's helpers read.
 
 ## Story flags
@@ -46,24 +48,24 @@ Prior flags (everything Acts 1–4 leave set): `P=act1.moonrise,act1.done,act2.s
 Where the design left something open, or didn't work in play, this is what the build does. The writer (ibWBNxYUAE) has been told about the ones that change the design.
 
 - **The risen Harbor is its own map, `harbor_risen`**, because it's a row taller than Act 2's. Its rows 0–8 follow the art task's Act 2 Harbor scene. Music on it and on `bilge_dry` plays from `onEnter`, so the relay's cutscene visits don't cut the relay music off.
-- **The Teeth sort behind the ferry** (the Teeth as if on row 13, the ferry on row 14, both offset back into place). The first time Cheryl comes out onto the quay at each stage the camera pans to them and she says the stage's line, so the player sees them grow.
+- **The Teeth sort behind the ferry** (the Teeth as if on row 13, the ferry on row 14, both offset back into place). The first time Cheryl is on the Harbor at each stage (arriving, or back at the lighthouse door after the relay) the camera pans down and across to them, holds two seconds while the surf swells, and she says the stage's line in a box at the top of the screen, so the reef stays in view.
 - **The Fishmonger's cellar door is a look, not a way in** ("Ice. Fish. A hatch I'm not opening.").
 - **The Fishmonger is talked to across her stall**; her own stall has no hotspot of its own, so talking across it reaches her.
 - **The ring and the rope:** the rope ties from the ring tile facing the broken edge, from beside the ring, or facing the quay wall from the ring. Walking down onto the rope (25, 8) climbs down; walking up into it from the mud (25, 9) climbs up. Clicking the ring or the rope offers "Climb down?" / "Climb up?" for pointer players.
 - **The Movers are talked to from the bridge** (13, 10), beside the Big Mover; the rest of the mud is out of reach (the Boatman's boat fills the strip by the door).
 - **The relay route:** the Kid dashes west along the Harbor quay (Mott: "Mind the edge, boy!"), bursts into the Bilge on the south quay, runs west, crosses the bridge to the north quay, runs east, jumps off the quay onto the mud by the Movers, hurdles a beached boat and the Boatman's boat, and slaps the disc into the eye. The eye shows the disc (`door_disc`) while it flares; then the door grinds open.
-- **The relay music:** the montage takes about 15 s from "EGG" to the door, and `relay` is 49 s, so at the door the music stops and the egg timer dings on its own (`timer_ding`). Asked the audio task for a cut that fits.
+- **The relay music:** `relay` (15.8 s, cut by the audio task to fit) starts at "EGG" with no fade. The run takes about 10.5 s; the script then waits so that the barnacles crack and the door grinds open (3 s) just before the cue's last note, the egg timer's DING (`RELAY_DING`). The Kid's line is "Fifteen seconds, Miss!" (the design's "Fifty-two" was for the long cue).
 - **The disc comes back from the Kid,** who waits on the mud by the open door with it: talking to him on the mud, or from the broken edge (he throws it up), returns it. He then goes back to his laps at the Harbor.
 - **The Clockmaker sits at (2, 4), his back to us, working at the bench** (2, 3) as the art draws him (`bench_up`); he turns to talk.
 - **The Counting Woman sits on landing 2 at (12, 17).** Her old seat (9, 19) would leave only the open step's tile to pass.
 - **The open hundredth step is a hole Cheryl walks round in Act 5** (solid, with a look), not Act 2's "Go down?" trigger, which covers both tiles at the top of flight 3 and would cut the Steps in half.
 - **Act 3's dusk Crown and Archive step aside in Act 5** (daylight, plain studs, no Act 3 people or ending), since Act 3 keys them on `act3.surfaced`, which stays set.
-- **Ambrose is on the Crown at his step** until Act 4's `belfry` map is registered; then his Act 5 talk goes to the belfry's `ambrose`.
+- **Ambrose is up in Act 4's belfry** (`ambrose_belfry`), with Act 5's talk. Act 4 shuts the tower door once Act 5 starts, so Act 5 opens it again (4-5, 6) as the way up. He stands inside the bell's hotspot, so the layer lists him first. (Without the belfry he'd be on the Crown at his step.)
 - **The DRY CANAL DAY banner hangs over x16–21** (the design's 17–22 would put its east pole on a café chair).
 - **The Windlass Room:** the first look pans east to the hawse and back; the drum creaks and shakes the screen a pixel every 7–12 s until the clapper seats. The ending walks Cheryl to the west coil and sits her on it (`sitcoil_down`, drawn up and right onto the coil).
 - **Lines added for states the design doesn't cover:** the act's opening ("That afternoon." and two lines on the quay), Cheryl after the relay ("He did it. I heard him from here..."), the crowd residents in the Square, the Kid with the disc and egg timer, Mott with the jug and disc, the Clockmaker's yelp when the door swings shut, the Shop's display before and after, the lamp after the relay, the open step, the passage's lamps and door, the Windlass Room's lamps, the empty and seated socket, and declines for Act 5's items on the new people.
 
 ## Stand-ins
 
-- `bilge_dry` and `lamp_room` are stand-ins until Act 4 and Act 2 part 2 are merged.
-- The Goat stair on the risen Harbor says "Mott's goats can have the stair today" until the Goat Path exists.
+- `bilge_dry` and `lamp_room` have stand-ins, unused now that Act 4 and Act 2 part 2 are merged; they can be deleted once those branches are on `main`.
+- **Act 4's mud is solid**, so the layer opens the strip by the door (24-27, 10) where the rope comes down.

@@ -9,7 +9,7 @@ const TEETH_LOOKS = {
   2: ['Closer. I can see the rocks between the surf.'],
   3: ['I can hear them. The sea, chewing.'],
 };
-export const teethLook = (g) => g.describe(...TEETH_LOOKS[stage(g)]);
+export const teethLook = (g, opts = {}) => g.describe(...TEETH_LOOKS[stage(g)], opts);
 
 // The surf loop's volume at each stage.
 export const SURF = { 1: 0.35, 2: 0.65, 3: 1 };
@@ -25,7 +25,8 @@ export async function showTeeth(g) {
   await g.panCamera(13, 13, 1.2);
   g.setLoopVolume('surf', Math.min(1, SURF[s] + 0.3), 600);
   await g.wait(2);
-  await teethLook(g);
+  // The box at the top, so the reef stays in view under it.
+  await teethLook(g, { position: 'top' });
   g.setLoopVolume('surf', SURF[s], 1500);
   await g.followPlayer(2);
 }
