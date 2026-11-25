@@ -112,7 +112,7 @@ function withCrypt(def) {
   return {
     ...def,
     tileset: { ...def.tileset, sheets: { ...def.tileset.sheets, founders_door_open } },
-    lighting: (g) => (unbolted(g) ? 'dusk' : typeof def.lighting === 'function' ? def.lighting(g) : def.lighting),
+    lighting: (g) => (unbolted(g) && !g.flag('epilogue') ? 'dusk' : typeof def.lighting === 'function' ? def.lighting(g) : def.lighting),
     patches: morePatches(def.patches, DOOR_TILES),
     // The doorway's lower row is open ground; the door entity blocks it until it opens.
     collision: Array.from({ length: def.ground.length }, (_, y) => (y === 2 ? '     oo   ' : '          ')),
@@ -145,7 +145,7 @@ function withArchive(def) {
   });
   return {
     ...def,
-    lighting: (g) => (unbolted(g) ? 'dusk' : typeof def.lighting === 'function' ? def.lighting(g) : def.lighting),
+    lighting: (g) => (unbolted(g) && !g.flag('epilogue') ? 'dusk' : typeof def.lighting === 'function' ? def.lighting(g) : def.lighting),
     exits: [
       {
         x: 7, y: 13, w: 2, when: (g) => unbolted(g) && !surfaced(g),
