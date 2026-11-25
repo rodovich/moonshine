@@ -22,7 +22,7 @@ export const act4Items = {
   square_jug: {
     name: 'Square Jug',
     icon: { sheet: items_act4, frame: 'square_jug' },
-    description: "Mott's square jug. Empty. Doesn't roll. Smells like a mistake.",
+    description: "Mott's square jug. Empty. Doesn't roll. Put it down and it stays put. Smells like a mistake.",
     useOn: { object: "A square jug. It doesn't roll. That's its whole personality.", npc: "A square jug. It doesn't roll. That's its whole personality." },
   },
 };
@@ -108,6 +108,17 @@ export function overlayMap(base, o) {
         if (x < 0 || y < 0 || x >= w || y >= h) return;
         cur[layer].set(`${x},${y}`, v);
         out.push([layer, x, y, v]);
+      },
+      // Mark a tile as a counter (Cheryl reaches across it), keeping its art and solidity.
+      counter(x, y, on = true) {
+        const g0 = get('ground', x, y);
+        const name = tileName(g0);
+        if (!name) return;
+        const v = typeof g0 === 'object' ? { ...g0 } : { tile: g0 };
+        if (on) v.counter = true; else delete v.counter;
+        const val = Object.keys(v).length === 1 ? name : v;
+        cur.ground.set(`${x},${y}`, val);
+        out.push(['ground', x, y, val]);
       },
       // Change a tile's solidity, keeping its art.
       block(x, y, solid = true) {

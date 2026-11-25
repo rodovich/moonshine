@@ -349,7 +349,8 @@ export class World {
   pathFor(mover, goals, { closest = false, ignoreEntities = false } = {}) {
     const goalKeys = new Set(goals.map(([x, y]) => `${x},${y}`));
     const avoidExits = mover.isPlayer;
-    const exits = avoidExits ? this.activeExits() : null;
+    // Exits and triggers marked `avoid` (a cordon that turns her back) are walls to her routes.
+    const exits = avoidExits ? [...this.activeExits(), ...this.avoidedTriggers()] : null;
     // Cheryl's routes go around characters when they can. Moving non-solid
     // characters (patrollers, wanderers) never count, since they move on.
     // If characters are the only thing in the way, a second pass plans
@@ -444,12 +445,15 @@ export class World {
   // ahead (across a counter if need be), else a character on her own tile,
   // else something diagonally ahead. Shared by the game and the keyboard
   // reachability check (tests/check-keyboard).
-  zTarget(x, y, facing, self = this.player) {
+  zTarget(x, y, facing, self = this.player, { underfoot = false } = {}) {
     const [dx, dy] = DIR_VEC[facing];
     let e = this.interactableAt(x + dx, y + dy);
     if (!e && this.map.counter(x + dx, y + dy)) e = this.interactableAt(x + 2 * dx, y + 2 * dy);
     const here = this.pickEntity(this.entities.filter((o) => o !== self && !o.isPlayer && o.visible && o.directional && isInteractable(o) && o.x === x && o.y === y));
     if (here && (!e || !e.directional)) e = here;
+    // Using an item with nothing ahead: whatever she stands on (the hollow
+    // step answers the crowbar).
+    if (!e && underfoot) e = this.pickEntity(this.entities.filter((o) => o !== self && !o.isPlayer && o.visible && isInteractable(o) && o.occupies(x, y)));
     if (!e) {
       // Nothing ahead: something diagonally ahead (left or right of the tile in front).
       const [px, py] = [dy, dx]; // perpendicular
@@ -786,6 +790,13 @@ export class World {
   // `blocked` is just floor until it opens.
   activeExits() {
     return (this.mapDef.exits || []).filter((ex) => !ex.when || ex.blocked || safeCall(ex.when, this.api));
+  }
+
+  // Triggers that Cheryl's routes go around unless the tap was on them:
+  // `avoid: true`, or `avoid: (g) => ...` while it holds. For a trigger that
+  // turns her back, so a tap past it doesn't walk her into it every time.
+  avoidedTriggers() {
+    return (this.mapDef.triggers || []).filter((tr) => tr.avoid && (typeof tr.avoid !== 'function' || safeCall(tr.avoid, this.api)));
   }
 
   isExit(x, y, exits = null) {
