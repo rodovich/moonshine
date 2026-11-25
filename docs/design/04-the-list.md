@@ -30,6 +30,14 @@ The brief asks that the changed surface be built up to, revealed excitingly, sig
 6. **The reveal is shown, slowly, then made funny, then made personal.** First a silent pan across the dry Bilge, ending on the bronze door. Then the town's wrong explanations. Then Cheryl's own short monologue: *I did that.*
 7. **It must change play.** The dry canals and the exposed door are where Act 5 happens. The Fountain refills over its hatch, so the Pump Hall can't be reached again.
 
+### Engine calls for this act
+
+All on engine/core (186be2c):
+- The hull leveling and over-tilting: `g.tilt(dx, dy, seconds)` eases to a held offset; `g.tilt(0, 0, seconds)` eases back; shakes add on top.
+- Stepping out into sunlight: `g.fade('out', seconds, 'white_light')`, then `g.fade('in', seconds)`. Use a palette light color, never pure white.
+- Spreading floodwater and draining grates: a loop of `g.setTile(layer, x, y, value)` and `g.wait(0.15)`. For changes that last (the dry Bilge, the refilled Fountain), use the map's `patches(g)` keyed to a flag.
+- The reveal's pan: chain `await g.panCamera(x, y, 0.5)` legs (east along the canal, then down the Water Stairs to the door), hold, then `g.followPlayer(speed)`.
+
 ## What changes when Act 4 begins
 
 Act 4 begins the morning after Act 3's dusk, with the card **Morning.** and Cheryl in her flat at (8, 4). The Wrongness audio level is 0.35 for the whole act (story bible). A faint version of the underground hull creak now plays on the surface too, every 40 seconds or so.
