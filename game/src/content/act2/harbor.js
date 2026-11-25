@@ -99,7 +99,7 @@ const objects = [
   },
   ...[8, 18].map((x) => ({ id: `bollard_${x}`, x, y: 8, lookKey: 'bollards', look: "A bollard. Mott's sitting on the good one." })),
   { id: 'crates', x: 7, y: 4, w: 2, lookKey: 'crates', look: 'Crates of nothing much, waiting for a ferry.' },
-  { id: 'nets', x: 20, y: 4, lookKey: 'crates', look: 'Crates of nothing much, waiting for a ferry.' },
+  { id: 'nets', x: 20, y: 4, look: 'Fishing nets, heaped up to dry. They\'ve been drying since Tuesday. Nothing to catch with them until the ferry runs.' },
   // The lighthouse, round its door (the door itself is the way in).
   ...[[26, 0, 1, 4], [29, 0, 1, 4]].map(([x, y, w, h]) => ({
     id: `lighthouse_${x}`, x, y, w, h, lookKey: 'lighthouse', look: 'The Prow Light. Somebody up there polishes it every hour of the day.',
@@ -150,6 +150,7 @@ const mottNpc = {
       await g.say(self, '...Thirty-one years of moons. Huh.');
       await swig(g, self);
       await g.say(self, "No. Not today. Today I'm drinking.");
+      await g.think("Not today, he says. So some other day. I'll hold him to that.");
     },
     hat: (g, self) => g.say(self, "Keep it. You'll want it. Bright out here, drifting."),
     guidebook: (g, self) => g.say(self, '"The friendly ferryman." Ha.'),
