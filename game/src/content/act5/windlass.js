@@ -170,7 +170,7 @@ function composeWindlass(g) {
   L.set('ground', 2, 3, 'hull:floor_glow', false); L.set('ground', 19, 3, 'hull:floor_glow', false);
   L.set('ground', 15, 1, 'ds:horn', true);
   // The Keepers' ladder: bronze rungs beside the tube, going up into the dark.
-  L.set('ground', 16, 1, 'hull:ladder_top', true); L.set('ground', 16, 2, 'hull:ladder_bot', true);
+  L.set('ground', 16, 1, 'keepers_rungs:rungs_top', true); L.set('ground', 16, 2, 'keepers_rungs:rungs_bot', true);
   for (const [n, x, y] of [['nw', 7, 1], ['ne', 8, 1], ['sw', 7, 2], ['se', 8, 2]]) L.set('ground', x, y, `keel_hatch:keel_sealed_${n}`, true);
   // The drum, wound with chain: it strains and gives until the Tooth is set.
   for (let r = 0; r < 4; r++) for (let c = 0; c < 16; c++) {
