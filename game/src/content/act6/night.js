@@ -137,14 +137,14 @@ export function belfryNight() {
 
 // ---------------------------------------------------------------------------
 // The risen Harbor (Act 5's): Mott at the quay edge raises a mug of tea to the
-// moon, and the Teeth slide away into the dark.
+// moon (beside his bollard, where Act 5 puts him), and the Teeth slide away into the dark.
 
 export function harborRisenNight() {
   return {
     hide: [{ when: inCut, ids: ['mott5', 'teeth', 'kid5'] }],
     entities: [
       {
-        id: 'act6_mott', x: 13, y: 8, facing: 'down', solid: false, when: inCut,
+        id: 'act6_mott', x: 14, y: 8, facing: 'down', solid: false, when: inCut,
         sprite: (g) => ({ sheet: mott_jug, frame: `raise_mug_down_${g.flag('fx.mottToast') || 0}` }),
       },
       // Act 5's Teeth sprite sits on the horizon (8-18, 12-14), sorting as if on row 13.
