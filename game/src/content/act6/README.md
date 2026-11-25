@@ -72,7 +72,7 @@ Where the design left something open, or didn't work in play, this is what the b
 - **The moon glides between trim positions** (about 1.6 s) rather than jumping.
 - **The trim wheel asks which way to turn** (toward the Gate, back, or leave it), so stopping two fingers past rather than dead in the Gate is the player's choice (from the playtest).
 - **Items used on the moonbeam go to the Basin** below it, since a click on the beam lands on the shaft's hotspot.
-- **Lines added from the playtest:** in the lift, "The cage creaks past numbers painted on the shaft wall. Nine. Eight. Up and up."; on surfacing, *Daylight. I'd forgotten about daylight.*; halfway along the Long Keel, "A grate in the floor. Far below, a slow thump, and another. The Middle Sister, still at it."
+- **Lines added from the playtest:** in the lift, "The cage creaks past numbers painted on the shaft wall. Nine. Eight. Up and up."; on surfacing, before the Old Man looks up, "Cistern Court. My own front door, from underneath." (the writer's line); halfway along the Long Keel, "A grate in the floor. Far below, a slow thump, and another. The Middle Sister, still at it."
 - **Act 6 doesn't need the disc**: the Long Keel and the Sighting Room give Cheryl her pool of light themselves.
 - **The master stop is pulled from below it (9, 7)** (she walks there first); the room's "1 px tilt" is `g.tilt(0, 1)` easing back over two seconds.
 - **The bath**: Cheryl steps to (6, 6) beside the Basin, takes her shoes off there (the shoes stay on that tile while she bathes), and sits in the middle of the Basin. After **Later.** she stands at (7, 7) and the Long Keel's `keel` music plays in the room.

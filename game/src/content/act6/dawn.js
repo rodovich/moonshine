@@ -101,7 +101,7 @@ export async function dawn(g) {
   g.sfx('well_grate', { volume: 0.5 });
   await g.wait(0.6);
 
-  await g.think("Daylight. I'd forgotten about daylight.");
+  await g.describe('Cistern Court. My own front door, from underneath.');
   // 3-6. The Old Man looks up from his chess.
   g.facePlayer('left');
   g.pose('epi_old_man', 'talk_right');
