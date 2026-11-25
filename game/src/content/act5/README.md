@@ -58,8 +58,6 @@ Where the design left something open, or didn't work in play, this is what the b
 - **The disc comes back from the Kid,** who waits on the mud by the open door with it: talking to him on the mud, or from the broken edge (he throws it up), returns it. He then goes back to his laps at the Harbor.
 - **The Clockmaker sits at (2, 4), his back to us, working at the bench** (2, 3) as the art draws him (`bench_up`); he turns to talk.
 - **The Counting Woman sits on landing 2 at (12, 17).** Her old seat (9, 19) would leave only the open step's tile to pass.
-- **The open hundredth step is a hole Cheryl walks round in Act 5** (solid, with a look), not Act 2's "Go down?" trigger, which covers both tiles at the top of flight 3 and would cut the Steps in half.
-- **Act 3's dusk Crown and Archive step aside in Act 5** (daylight, plain studs, no Act 3 people or ending), since Act 3 keys them on `act3.surfaced`, which stays set.
 - **Ambrose is up in Act 4's belfry** (`ambrose_belfry`), with Act 5's talk. Act 4 shuts the tower door once Act 5 starts, so Act 5 opens it again (4-5, 6) as the way up. He stands inside the bell's hotspot, so the layer lists him first. (Without the belfry he'd be on the Crown at his step.)
 - **The DRY CANAL DAY banner hangs over x16–21** (the design's 17–22 would put its east pole on a café chair).
 - **The Windlass Room:** the first look pans east to the hawse and back; the drum creaks and shakes the screen a pixel every 7–12 s until the clapper seats. The ending walks Cheryl to the west coil and sits her on it (`sitcoil_down`, drawn up and right onto the coil).

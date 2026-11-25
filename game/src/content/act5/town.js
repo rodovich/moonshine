@@ -305,18 +305,19 @@ export function withCrown5(def) {
         return [layer, x, y, typeof v === 'object' ? { ...v, tile: plain } : plain, ...r];
       });
     },
-    // The Clockmaker's door (12, 6).
+    // The Clockmaker's door (12, 6) is the way into his shop in Act 5. The
+    // tile is open for the checker's sake; before Act 5 a solid, silent
+    // stopper entity keeps it shut, so Acts 2-4 are unchanged.
     collision: openTiles(base, [[12, 6]]),
     exits: [
       // Act 4's tower door up to the belfry stays open in Act 5 (Ambrose is up there).
       ...(base.exits || []).map((e) => (e.run ? untilAct5(e) : e.to === 'belfry' ? { ...e, act5Before: e.when, when: (g) => started(g) || !e.when || e.when(g) } : e)),
       {
         x: 12, y: 6, to: 'clockmaker_shop', at: [4, 6], facing: 'up', when: started,
-        blocked: "Shut. He's not at home to anyone, least of all me.",
       },
     ],
     triggers: (base.triggers || []).map(untilAct5),
-    entities: [...entities, ambrose5, crownDoor5],
+    entities: [...entities, ambrose5, crownDoor5, { id: 'clockshop_door_shut', x: 12, y: 6, solid: true, shadow: false, when: (g) => !started(g) }],
     onEnter: async (g) => {
       if (!started(g)) {
         if (after5(g)) act5Loops(g, []);
@@ -379,22 +380,11 @@ const countingWoman5 = {
   use: { '*': (g, self) => g.say(self, "Don't hand me things. I lose count.") },
 };
 
-// The open hundredth step (10, 19) is a hole Cheryl walks round, not a
-// "Go down?" on the only way past: Act 2's trigger covers both tiles at the
-// top of flight 3, which would cut the Steps in half for Act 5's trips
-// between the Square and the Crown. Act 5 has no business below it.
-const openStep5 = {
-  id: 'open_step5', x: 10, y: 19, solid: true, when: started,
-  look: "The hundredth step, open, and the ladder down. Not today. My business is at the bottom of the canal.",
-  use: { '*': cherylDeclines },
-};
-
 export function withSteps5(def) {
   const base = withSheets(def);
   return {
     ...base,
-    triggers: (base.triggers || []).map((t) => (t.x === 9 && t.y === 19 ? untilAct5(t) : t)),
-    entities: [...hide(base.entities, ['kid', 'kid_after']), countingWoman5, openStep5],
+    entities: [...hide(base.entities, ['kid', 'kid_after']), countingWoman5],
     onEnter: windOnEnter(base),
   };
 }
