@@ -212,8 +212,10 @@ async function giveTelescope(g, self) {
 
 const keeperNpc = {
   id: 'keeper5', name: 'Lighthouse Keeper', x: 5, y: 2, facing: 'up',
-  // At the window: shading her eyes, then with her telescope once she has it back.
-  sprite: (g) => ({ sheet: keeper, frame: hasTelescope(g) ? 'window_up' : 'shade_down' }),
+  // At the window: shading her eyes, then with her telescope raised once she
+  // has it back (holding it across her body while she talks).
+  sprite: (g) => ({ sheet: keeper, frame: hasTelescope(g) ? 'scope_up' : 'shade_down' }),
+  talkPose: 'hold_down_0',
   turnToTalk: false,
   interact: keeperTalk,
   use: {
@@ -253,17 +255,17 @@ const lampObjects = [
     interact: (g) => g.describe(WINDOW_LOOKS[stage(g)]),
   },
   {
-    id: 'dust_sheet5', x: 2, y: 5, solid: true,
+    // Where the telescope stood under it in Act 2 (6, 5).
+    id: 'dust_sheet5', x: 6, y: 5, solid: true,
     look: "The dust sheet the telescope lived under. She's kicked it into a corner.",
   },
 ].map((o) => ({ use: { '*': cherylDeclines }, ...o }));
 
-// The empty dust sheet on the floor (stand-in: the old polish tin's spot, until the art lands).
-const DUST_SHEET = 'lamproom:polish_tin';
 
 function lampPatches(g) {
   if (!started(g)) return [];
-  const out = [['detail', 2, 5, { tile: DUST_SHEET, solid: true }]];
+  // The dust sheet in a heap where the telescope stood (and nothing above it).
+  const out = [['detail', 6, 5, { tile: 'lamproom:sheet_empty', solid: true }], ['overhead', 6, 4, null], ['detail', 6, 4, null]];
   for (let ty = 0; ty < 2; ty++) for (let tx = 0; tx < 2; tx++) out.push(['detail', 3 + tx, 2 + ty, { tile: `lamproom:lamp_x${tx}y${ty}`, solid: true }]);
   return out;
 }
