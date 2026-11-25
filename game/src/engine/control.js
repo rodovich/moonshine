@@ -321,10 +321,14 @@ export class Control {
     const tx = Math.floor((t.x + w.cam.x) / TILE);
     const ty = Math.floor((t.y + w.cam.y) / TILE);
     if (!w.map.inBounds(tx, ty)) return;
-    // Holding an item and tapping plain ground (water, a tile) means "use it
-    // there": she walks over, says it doesn't go there, and puts it away.
+    // Holding an item and tapping terrain (water, a wall) or the ground right
+    // beside her means "use it there": she walks over, says it doesn't go
+    // there, and puts it away. Tapping open floor farther off is just
+    // walking, and she keeps holding it (to get closer to the real target).
+    const p = this.player;
+    const useThere = this.holding && (w.map.solid(tx, ty) || Math.abs(tx - p.x) + Math.abs(ty - p.y) <= 1);
     this.walkTo(tx, ty);
-    if (this.holding) this.useOnGround = true;
+    if (useThere) this.useOnGround = true;
     this.dragging = true;
     this.dragT = 0;
   }
