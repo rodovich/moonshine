@@ -59,16 +59,16 @@ Shared underground legend:
 
 ### Step Gallery (24 × 11)
 
-A long, low deck under the Hundred Steps. The ladder from the hollow step comes down at the west end, in a column of daylight. In the middle of the ceiling is a lidded light shaft over a bronze mirror on a pedestal. The north wall carries two inlays, a lever, and a sealed hatch.
+A long, low deck under the Hundred Steps. The ladder from the hollow step comes down the north wall at the west end, into a spot of daylight. In the middle of the ceiling is a lidded light shaft over a bronze mirror on a pedestal at (11, 6). The north wall carries two inlays, a lever, and a sealed hatch. **The three beam targets lie on straight lines from the mirror:** the Sisters inlay up and to the left at 45° (its right half, x7), the moons inlay straight up (its right half, x11), and the hatch up and to the right at 45° (x15), each four rows up.
 
 ```
      x 0         1         2
        012345678901234567890123
  y  0  XXXXXXXXXXXXXXXXXXXXXXXX
-    1  X######################X
-    2  X#L###II##V###II###OO#LX   L lamps (2, 22); II inlays: Sisters (6-7), moons (14-15)
-    3  X..H...................X   V lever (10); OO the sealed hatch with its moon-lock (19-20)
-    4  X......................X   H ladder up to the Hundred Steps (3, 3)
+    1  X##H###################X   H the ladder up to the Hundred Steps, on the wall face (3, 1-2)
+    2  X#LH##II##II###O###V##LX   L lamps (2, 22); II inlays: Sisters (6-7), moons (10-11)
+    3  X......................X   O the sealed hatch with its moon-lock (15); V lever (19)
+    4  X......................X   daylight spot under the ladder (3, 3)
     5  X......................X
     6  X..........M...........X   M the mirror on its pedestal (11, 6), under the light shaft
     7  X......................X
@@ -81,7 +81,7 @@ A long, low deck under the Hundred Steps. The ladder from the hollow step comes 
 
 **Ceiling ribs** (overhead) cross at x5, x9, x13, x17, x21.
 
-**Exits:** ladder (3, 3) → Hundred Steps (10, 18), facing down. Hatch (19–20, 2), once open → Cradle (3–4, 4), facing up. Floor grate (6, 8), once the ladder is dropped → Lamp Halls (8, 7), facing down.
+**Exits:** ladder (3, 2), entered by walking up into it from (3, 3) → Hundred Steps (10, 18), facing down. Arriving from the Steps puts Cheryl at (3, 3). Hatch (15, 2), once open, entered from (15, 3) → Cradle (3–4, 4), facing up. Floor grate (6, 8), once the ladder is dropped → Lamp Halls (8, 7), facing down.
 
 **Music:** `downstairs`.
 
@@ -97,7 +97,7 @@ A small chamber behind the hatch: the disc in its cradle, and the mouth of the c
     2  X#CC#d#X   CC chute mouth (2-3, 2); d the disc's cradle, a wall niche (5, 2)
     3  X......X
     4  X......X
-    5  XXX..XXX   exit south (3-4, 5) → Step Gallery (19-20, 3)
+    5  XXX..XXX   exit south (3-4, 5) → Step Gallery (15, 3)
 ```
 
 **Light:** `dark: 0.6`; the cradle glows (radius 2, cyan) until the disc is taken, after which the disc lights Cheryl instead.
@@ -113,8 +113,8 @@ The main deck: a long hall with light-pipes coming down from the street above, t
     1  XXXXXXXXXXXXXXXXXXXXXXXX#~~#XXXX   ~~ the flooded north passage (25-26, 1-6)
     2  XXXXXXXXXXXXXXXXXXXXXXXX#~~PXXXX   P the gushing pipe (27, 2)
     3  XXXXXXXXXXXXXXXXXXXXXXXX#~~#XXXX
-    4  X########################~~#XXXX
-    5  X##CC##R#L###DD###L###TW#~~#XXXX   CC chute mouth (3-4); R chain (7); L lamps (9, 18);
+    4  X#######q################~~#XXXX   qQ the counterweighted ladder, on the wall face (8, 4-5)
+    5  X##CC###QL###DD###L###TW#~~#XXXX   CC chute mouth (3-4); L lamps (9, 18);
     6  X........................~~..XXX   DD doorway to the bunk room (13-14); T speaking tube (22);
     7  X............................XXX   W the valve wheel (23)
     8  X............................XXX
@@ -128,13 +128,13 @@ The main deck: a long hall with light-pipes coming down from the street above, t
 - `~` in the north passage (25–26, 1–6) is fast, knee-deep water: solid until the valve turns, then drained floor (walkable, wet-looking).
 - `~` in the south corridor (17–18, 11–13) is still, black, deep water sloping away: always solid.
 
-**Entities:** light-pipes at (5, 8), (12, 8), (20, 8): glass rods from the ceiling with a pool of daylight under each (radius 2). The drop-ladder, hooked up against the ceiling at (8, 6), invisible in the dark until lit. Cheryl lands from the chute at (3, 7).
+**Entities:** light-pipes at (5, 8), (12, 8), (20, 8): glass rods from the ceiling with a pool of daylight under each (radius 2). The drop-ladder is on the north wall at (8, 4–5), hooked up high with its chain and cleat, until pulled down. Cheryl lands from the chute at (3, 7).
 
 **Ceiling ribs** at x4, x8, x12, x16, x20, x24.
 
 **Light:** `dark: 0.9`. Light-pipe pools; dead lamps at (9, 5) and (18, 5) until relit (radius 3 when lit); Cheryl's disc.
 
-**Exits:** north passage (25–26, 0), once drained → Chart Room (7–8, 12), facing up. Bunk room doorway (13–14, 5) → Bunk Room (4–5, 5), facing up. Drop-ladder (8, 6), once dropped → Step Gallery (6, 7), facing down.
+**Exits:** north passage (25–26, 0), once drained → Chart Room (7–8, 12), facing up. Bunk room doorway (13–14, 5) → Bunk Room (4–5, 5), facing up. Drop-ladder (8, 5), once dropped, entered by walking up into it from (8, 6) → Step Gallery (6, 7), facing down. Coming down through the Step Gallery's grate arrives at (8, 6).
 
 **Music:** `downstairs`.
 
@@ -181,18 +181,18 @@ An eight-sided room under the Blue Dome. A pool of light falls from the Eye in O
 
 The corners (`X` at the row ends) are chamfered walls; draw them as 45° wall pieces.
 
-**The floor inlay** (10×6 tiles): Tessel drawn as a ship, in the Founders' pattern language, but pictorial. Hotspots (each is a look target; see the dialog below):
+**The floor inlay** (10×6 tiles): Tessel drawn as a ship, in the Founders' pattern language, but pictorial. Hotspots (each is a look target; see the dialog below). Positions follow the art task's drawing (`chart:inlay_x0y0`…`x9y5`), placed at x3–12, y5–10:
 
 | Hotspot | Tiles | Shows |
 | --- | --- | --- |
-| The town | (6–9, 5) | Little houses stepping up a hill; the Crown; the Steps |
-| The mast | (7, 5–6) | The Bell Tower drawn as a mast, a rope from the bell going down into the hull to a wheel |
-| The hull | (4–11, 7–8) | The hill continuing underground: hollow, full of rooms, decks, ribs |
-| The Sisters | (8–9, 8) | Three upright bars, thin, stout, and middle |
-| The chain | (11–12, 7–10) | From the Prow end, a chain of little eye-shaped links down to an anchor |
-| The shaft and bowl | (5, 5–10) | A straight shaft from a narrow house near the top down to a round bowl at the bottom, with a moon drawn in the bowl |
-| The waterline | (3–12, 9) | A wavy line *under* the hull's widest point: the hill sits on the water |
-| The teapot shadow | (7–8, 7–8) | Inside the Eye's pool of light |
+| The mast | (7, 5–6) | The Bell Tower drawn as a mast at the hill's crown, a rope from the bell going down into the hull |
+| The town | (4–11, 6–7) | Little houses stepping up the hill on both sides of the mast |
+| The teapot shadow | (7–8, 6–8) | Inside the Eye's pool of light, over the middle of the town |
+| The shaft and bowl | (6, 6–9) | A straight cyan line from a house near the top down to a round bowl at the bottom |
+| The waterline | (3, 8–9) and (12, 8–9) | Little waves on either side, at the hill's shoulders: the sea comes up to there |
+| The hull | (4–11, 8–10) | Below the waves, the hill keeps going, curved underneath, hollow, ribbed |
+| The Sisters | (8–9, 9) | Three upright bars, thin, stout, and middle |
+| The chain | (11–12, 8–10) | From the bow end, a chain down to an anchor |
 
 **Light:** `dark: 0.5`; the Eye's pool (radius 3, cool daylight) centered at (7–8, 7–8).
 
@@ -211,7 +211,7 @@ The corners (`X` at the row ends) are chamfered walls; draw them as 45° wall pi
 | --- | --- | --- |
 | `act3.started` | Cheryl first climbs down from the hollow step | |
 | `gallery.lever` | Crowbar used on the lever | Shaft lid open; beam on the mirror |
-| `gallery.mirror` | 0 = toward the hatch's left (no target), 1 = Sisters inlay, 2 = moons inlay, 3 = hatch | Which target is lit |
+| `gallery.mirror` | 0 = flat along the floor, east (no target), 1 = up-left to the Sisters inlay, 2 = straight up to the moons inlay, 3 = up-right to the hatch | Which target is lit |
 | `gallery.hatch` | The beam reaches the moon-lock | Hatch open, for good |
 | `got.disc` | Disc taken | Cheryl carries light |
 | `halls.ladder` | Chain pulled | Drop-ladder down; Step Gallery grate open; two-way shortcut |
@@ -281,18 +281,18 @@ On first arriving in the Step Gallery (from the ladder), after a two-second paus
 
 - **Walls**: First: "Stone, fitted so tight you couldn't get a hair between the blocks. No mortar." / "Nobody in Tessel builds like this. Nobody in Tessel builds *straight*." Then: "Straight lines, all the way along. It feels like being inside a ruler."
 - **Ceiling ribs** (look from under one): "Ribs across the ceiling, every few paces. Like being inside something."
-- **The ladder** (3, 3): "The ladder back up. Daylight, and the Woman with Basin, pretending she can't see me." → climbing up is an exit.
+- **The ladder** (3, 2): "The ladder back up. Daylight, and the Woman with Basin, pretending she can't see me." → climbing up is an exit.
 - **Lamps** (2, 2 and 22, 2): Without the disc: "A lamp of milky glass in a niche. Dead. Cold." With the disc, as a hint: "A dead lamp. It looks like the disc, only hungrier." Use the disc → lit: "It drinks from the disc and wakes up. So do I, a little." Lit: "Lit. Somebody's home."
-- **The lever** (10, 2): First: "A bronze lever, green and seized solid." / "There's a lid in the ceiling over the mirror. I think this opens it." Then: "Seized. I need a lever for my lever. I happen to have a crowbar."
+- **The lever** (19, 2): First: "A bronze lever, green and seized solid." / "There's a lid in the ceiling over the mirror. I think this opens it." Then: "Seized. I need a lever for my lever. I happen to have a crowbar."
 - **Crowbar on the lever** → `gallery.lever`: Cheryl heaves (two shakes, a grind). The ceiling lid scrapes open. Daylight drops onto the mirror (a light column, then a beam in its current direction). "Daylight. Straight down a shaft from somewhere above. Somewhere up there is a grate everybody thinks is a drain."
 - **Lever after**: "Open. It stays open. I'm not touching it again."
 - **The mirror** (11, 6): Before the lever: "A bronze mirror on a pivot. Tarnished, but true. It's pointing at nothing in particular." After the lever, each interaction turns it one step (a clunk), cycling 1 → 2 → 3 → 1, and the beam swings:
-  - **Position 1, the Sisters inlay** (6–7, 2): the inlay lights. "Three bars of different widths, side by side. A thin one, a stout one, and one in the middle." / "They mean something to somebody."
-  - **Position 2, the moons inlay** (14–15, 2): the inlay lights. "Moons, as squares filling up. New, quarter, half, full." / "Somebody watched the moon very carefully. I know the feeling."
-  - **Position 3, the hatch** (19–20, 2): see "The hatch opens."
-  - The mirror starts at position 0, angled toward a blank stretch of wall between the lever and the moons inlay, so the first turn always produces something.
+  - **Position 1, up-left: the Sisters inlay** (6–7, 2): the inlay lights. "Three bars of different widths, side by side. A thin one, a stout one, and one in the middle." / "They mean something to somebody."
+  - **Position 2, straight up: the moons inlay** (10–11, 2): the inlay lights. "Moons, as squares filling up. New, quarter, half, full." / "Somebody watched the moon very carefully. I know the feeling."
+  - **Position 3, up-right: the hatch** (15, 2): see "The hatch opens."
+  - The mirror starts at position 0, throwing the beam flat along the floor to the east, where it pools on nothing. The first turn always produces something.
 - **Inlays**, looked at directly (lit or not): the lines above, without the beam.
-- **The hatch** (19–20, 2): Before: "A square hatch, sealed flush. No handle. A round glass eye in the middle." / "It looks like it's waiting for something." Crowbar: "No seam. Whoever made this didn't make doors for crowbars." (The same as the Founders' Door, deliberately.)
+- **The hatch** (15, 2): Before: "A square hatch, sealed flush. No handle. A round glass eye in the middle." / "It looks like it's waiting for something." Crowbar: "No seam. Whoever made this didn't make doors for crowbars." (The same as the Founders' Door, deliberately.)
 - **The hatch opens** (beam at position 3, the first time) → `gallery.hatch`: the eye fills with light and glows cyan; a chime; the hatch grinds open. "The glass drinks the light, and the hatch opens." / "Not a lock that wants a key. A lock that wants the sun."
 - **Floor grate** (6, 8): Before the drop-ladder: "A grate in the floor. Underneath, a darker kind of dark." After: "The top of the ladder I dropped. My way back, if I want one."
 
@@ -315,7 +315,7 @@ Cheryl sits at the mouth and lets go. Fade to black with a long sliding whoosh t
 - **The hall** (first look anywhere on the floor, or automatically 3 seconds after landing): "A long hall going east, ribbed like the gallery. Pools of daylight here and there, coming down through the ceiling."
 - **Light-pipes**: First: "A glass rod coming down through the ceiling, full of daylight." / "That's the bottom of a moon-eye. Somebody's doorstep is up there." Then: "Somebody's doorstep. I wonder whose."
 - **Lamps** (9, 5) and (18, 5): as in the Step Gallery.
-- **The chain** (7, 5): First: "A bronze chain hanging down the wall. Up in the dark, a ladder hooked against the ceiling." Pull → `halls.ladder`: a rattle, a crash, and the ladder drops to the floor at (8, 6). "That'll save my knees." Then: "The ladder, down. A way back to the gallery and the Steps."
+- **The hooked-up ladder** (8, 4–5): First: "A ladder, hooked up high on the wall, and a bronze chain hanging from its cleat. Up above it, a dark square." Pull the chain → `halls.ladder`: a rattle, a crash, and the ladder drops to the floor. "That'll save my knees." Then: "The ladder, down. A way back to the gallery and the Steps."
 - **The chute mouth** (3–4, 5): "Where I came in. It's a long way up, and it's polished."
 - **The speaking tube** (22, 5): a bronze horn in the wall. Before the valve, each listen plays one faint line in turn (speaker label FAR-OFF VOICE, small italic):
   1. FAR-OFF VOICE: …Tessel: Forward!… …please disperse…
@@ -355,9 +355,9 @@ Afterward, the wheel: "Jammed. Whatever I've done, I've done it." The passage: "
 1. "The floor's a picture. Stone, set in stone."
 2. "A hill, with houses on it. That's the Crown. Those are the Steps. That's us."
 3. "Under it, the hill keeps going. Down and down. It's hollow. It's full of rooms. Like this one."
-4. "A chain from the Prow, down to something on the sea floor."
-5. "And a wavy line, under the hill. Under it. Not around it."
-6. "The hill isn't in the water. It's *on* it."
+4. "A chain from the Prow end, down to something on the sea floor."
+5. "Little waves, either side, halfway up the hill. The sea comes to there. And under it, the hill curves round underneath."
+6. "The hill isn't standing in the sea. It's sitting *on* it."
 7. Internal monologue: *Oh.*
 8. Internal monologue: *Oh, we're a boat.*
 9. The **reveal** cue plays. `chart.seen`.
@@ -369,7 +369,7 @@ Afterward, the wheel: "Jammed. Whatever I've done, I've done it." The passage: "
 - **The Sisters**: "The three bars again. Thin, stout, middle. Amidships, whatever that means. I'm learning the words."
 - **The chain**: "A chain from the Prow to an anchor. The links are drawn like little eyes."
 - **The shaft and bowl**: First: "A straight shaft, from a narrow house near the top of town all the way down to a bowl at the bottom." / "There's a moon drawn in the bowl." / "That's my end of town. That's very nearly my house." Then: "A moon in a bowl. A narrow house. I'll think about that later."
-- **The waterline**: "The wavy line. Under the hull. I keep looking at it and it keeps being true."
+- **The waterline**: "Little waves at the hill's shoulders. I keep looking at them and they keep being true."
 - **The teapot shadow**: "And over the stern, the shadow of a teapot. Ottilie's mother, keeping an eye on things."
 - **Paper and charcoal on the inlay** → `got.shipPlan`: "I kneel on the Founders' floor and rub charcoal over it like a schoolgirl doing a brass." / "Ottilie would faint. Then she'd want it framed." → paper and charcoal removed; *Got Ship Plan.*
 - **Anything else on the inlay**: "No. Not on this."
@@ -449,15 +449,16 @@ Sent early to the art task (Kn_OwEk0wq). Everything is in the underground style 
 - Ceiling ribs (overhead, crossing the full width of a corridor)
 - The bronze ladder up into a square of daylight (underside of the hundredth step)
 - The wall lever (seized, open) and the ceiling lid over the mirror (closed, open: drawn as a shaft opening on the overhead layer)
-- The mirror on a pedestal, in four angles
-- Beam sprites: a vertical daylight column; horizontal and diagonal beams to the three targets; a small glow where a beam lands
+- The mirror on a pedestal, in four angles: flat to the east (rest), up-left, straight up, and up-right
+- Beam sprites: a vertical daylight column onto the mirror; a horizontal beam (for the rest position, ending in a glow on the floor); a vertical beam up to the wall; **45° diagonal beams up-left and up-right** (4 tiles each, ending on the wall); a small glow where a beam lands
+- The art index for these pieces is [art-downstairs.md](../art-downstairs.md) (on the art branch until merged)
 - Two wall inlays (2 wide): three bars of different widths; moon phases as filling squares; both with lit variants. A third, the duty roster (a bell, a wave, alternating), for the Bunk Room
 - The sealed hatch with a moon-lock eye: dark, glowing, open
 - The disc cradle (with and without the disc, glowing)
 - The chute mouth
 - Moonglass lamps in niches: dead and lit
 - Light-pipes: glass rods descending from the ceiling, glowing, with a pool of light below
-- The drop-ladder: hooked up against the ceiling, and down; the bronze chain on the wall; the floor grate in the Step Gallery (closed, and open with a ladder top)
+- The drop-ladder on the wall face: hooked up (with its chain and cleat), and down; the floor grate in the Step Gallery (closed, and open with a ladder top)
 - The speaking tube: a bronze horn
 - The valve wheel (seized, turned); the gushing pipe (animated) and its stopped state; flooded fast-water floor (animated); drained wet floor; still black deep water sloping away (animated very slowly)
 - Bunk Room: stone bunks, a tool rack, a stone table with a cup
