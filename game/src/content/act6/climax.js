@@ -172,6 +172,8 @@ export function windlassAct6(map) {
       interact: brakeLever,
     },
     { id: 'act6_tube', x: 15, y: 1, h: 2, interact: speakingTube },
+    // Act 5's Keepers' ladder beside the tube (rungs at (16, 1-2)): not tonight.
+    { id: 'act6_rungs', x: 16, y: 1, h: 2, look: "Not tonight. Ambrose has the top end. I've got this one." },
     {
       id: 'act6_drum', x: 5, y: 4, w: 16, h: 4,
       interact: (g) => g.describe(g.flag('chain.home') ? "Still. Holding. The clapper's doing a job it never knew it had." : 'The drum. Wound with chain, every link taller than me. Waiting.'),
