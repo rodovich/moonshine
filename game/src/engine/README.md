@@ -304,7 +304,7 @@ Maps, audio, misc:
 | `restorePlayer({ fade })` | Ends a cutscene visit: back to Cheryl's own map and spot, visible. If a script ends without it, the engine restores her (with a console warning). |
 | `cameraFollow(id, speed)` | Keeps the camera on another character as they move, also across cutscene visits (the Kid's relay run); `speed` glides (px per frame), 0 snaps. `followPlayer()` returns to Cheryl. |
 | `map` | Current map id. |
-| `playMusic(id)`, `stopMusic(fadeMs)`, `sfx(id)`, `playCue(id, { resume })`, `windDownMusic(ms)`, `startLoop(id)`, `stopLoop(id, fadeMs)`, `setWrongness(0..1)` | Audio (see below and `src/audio/README.md`). |
+| `playMusic(id, { fadeMs })`, `stopMusic(fadeMs)`, `sfx(id)`, `playCue(id, { resume })`, `windDownMusic(ms)`, `startLoop(id)`, `stopLoop(id, fadeMs)`, `setWrongness(0..1)` | Audio (see below and `src/audio/README.md`). |
 | `sfx(id, { at, range, volume })` | A sound placed in the world: `at` is a tile `[x, y]` or an entity id, and the volume falls off with Cheryl's distance, silent beyond `range` tiles (default 12). Use it for map-wide ambient sounds (a chess tap, the Kid's hop). |
 | `save()` | Save now (saving also happens automatically). |
 | `toTitle()` | Save and return to the title screen (end of a slice). |

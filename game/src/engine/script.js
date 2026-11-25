@@ -466,8 +466,9 @@ export function makeApi(world) {
     },
 
     // ---- Audio ----
-    playMusic(id) {
-      playMusic(id);
+    // opts go to the audio module, e.g. { fadeMs: 0 } for a hard cut.
+    playMusic(id, opts) {
+      playMusic(id, opts);
     },
     stopMusic(fadeMs) {
       stopMusic(fadeMs);
