@@ -20,6 +20,9 @@ export default defineConfig({
   projects: [
     { name: 'desktop', use: { ...devices['Desktop Chrome'], viewport: { width: 768, height: 672 } }, testIgnore: /mobile\.spec\.js/ },
     { name: 'phone', use: { ...devices['Pixel 7'] }, testMatch: /mobile\.spec\.js/ },
+    // Safari: desktop WebKit for the full suite, and an iPhone profile for touch.
+    { name: 'webkit', use: { ...devices['Desktop Safari'], viewport: { width: 768, height: 672 } }, testIgnore: /mobile\.spec\.js/ },
+    { name: 'iphone', use: { ...devices['iPhone 13'] }, testMatch: /mobile\.spec\.js/ },
   ],
   webServer: {
     command: `node tests/serve.js ${PORT}`,

@@ -128,3 +128,12 @@ test('patrolling kid stops while Cheryl is near', async ({ page }) => {
   const k2 = (await snap(page)).entities.find((e) => e.id === 'kid');
   expect(k2.x !== k.x || k2.y !== k.y).toBe(true);
 });
+
+test('audio unlocks on the first key or tap', async ({ page }) => {
+  await boot(page, STREET);
+  await waitIdle(page);
+  await press(page, 'ArrowLeft');
+  await page.waitForTimeout(300);
+  const ready = await page.evaluate(async () => (await import('/src/audio/index.js')).audioReady());
+  expect(ready).toBe(true);
+});

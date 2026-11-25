@@ -360,6 +360,11 @@ node tests/shot.js "?map=test_street" out.png 800 ArrowRight z   # one screensho
 - **Text** is a variable-width bitmap font (`src/art/font.js`, 7 px caps, 9 px cell, 12 px lines), revealed at about 42 characters per second with short pauses after punctuation. Any key or tap reveals the rest; the next press advances. The box sits at the bottom, or the top when Cheryl is in the lower part of the screen. NPC lines have a navy box and a speaker tab; Cheryl's descriptions a warm brown box; her thoughts the warm box in italics with a dashed frame.
 - **One script at a time**, queued; the world pauses player control while scripts run. Autosave after each script and map change.
 
+- **Text boxes unfold** over 4 frames when they open, like SNES windows, but not between back-to-back boxes in a conversation. A key or tap during the unfold isn't lost; it reveals the text as soon as the box is open.
+- **Feel targets** (checked against SNES-era adventures): walking 80 px/s; text about 42 characters a second with punctuation pauses; door fades a quarter second each way in 8 brightness steps; click-to-walk starts on the next frame, and a new click mid-walk re-routes from the tile being entered.
+- **Browsers.** The suite runs in Chromium and WebKit, plus Pixel 7 and iPhone 13 touch profiles (`npx playwright test --project=webkit`, `--project=iphone`). Audio unlocking is retried on every key and pointer gesture (down and up) until it succeeds, since iOS Safari only honors some gestures. Known limit: on iPhones with the ringer switch on silent, Web Audio is muted by the system.
+- **Performance.** `tests/perf.spec.js` walks the 64×48 stress map (`?map=test_big`, 40 wandering people, night lighting with lamps) and measures our CPU time per frame: about 1 ms in Chromium and 0.3 ms in WebKit; 2-2.5 ms with darkness, a hue shift, and the wobble all on; and 6 ms walking (9 ms with effects) with Chromium's CPU throttled 6× (roughly a low-end phone), against a 16.7 ms budget. `?debug=1` shows live update and draw times.
+
 ## Module map
 
 | File | Role |

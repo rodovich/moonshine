@@ -22,8 +22,13 @@ function warnOnce(kind, id, err) {
   console.warn(`[sound] ${kind} "${id}" unavailable:`, err?.message ?? err);
 }
 
+// Call from user gestures until it returns true. initAudio() is safe to call
+// repeatedly; Safari may ignore the first attempt (a pointerdown) and accept a
+// later one (the pointerup), so the engine keeps trying until audio runs.
 export function unlockAudio() {
+  if (audio.audioReady && audio.audioReady()) return true;
   audio.initAudio().catch((err) => warnOnce('init', '', err));
+  return !!(audio.audioReady && audio.audioReady());
 }
 
 export function playMusic(id, opts) {
