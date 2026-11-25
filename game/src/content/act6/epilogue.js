@@ -115,7 +115,7 @@ export function courtEpilogue(map) {
     entities: [
       oldMan, neighborEpi, cat, well, tub, piano, ...movers,
       recast(map, 'nb_door', { look: "Her door. She's up on the roof, admiring her sheets." }),
-      recast(map, 'back_line', { look: ['Her sheets. Whitest of her life, she says.', "They look grey to me. I'm not saying so."] }),
+      recast(map, 'back_line', { look: ['Her sheets. Whitest of her life, she says.', "For once, I'd say she's right."] }),
       recast(map, 'window_5', { when: (g) => epilogue(g) && !!g.flag('epi.leftCourt'), look: 'My window, with a piano in front of it now. Gerald has a sense of occasion.' }),
     ].filter(Boolean),
     exits: [
@@ -142,9 +142,15 @@ export function courtEpilogue(map) {
       },
     ],
     patches: (g) => {
-      const s = g.flag('fx.wellGrate');
-      if (s == null) return [];
       const out = [];
+      // The epilogue's back line: her sheets white again, as on Moonshine Night (not the morning after's grey).
+      if (epilogue(g)) {
+        'abcdefgh'.split('').forEach((c, i) => {
+          out.push(['detail', 11 + i, 1, `laundry:backline_sheets_${c}_n`], ['detail', 11 + i, 2, `laundry:backline_sheets_${c}_s`]);
+        });
+      }
+      const s = g.flag('fx.wellGrate');
+      if (s == null) return out;
       for (let y = 0; y < 2; y++) for (let x = 0; x < 2; x++) out.push(['detail', 9 + x, 16 + y, `well_lift:well_lift_x${x}y${y}_${s}`]);
       return out;
     },
