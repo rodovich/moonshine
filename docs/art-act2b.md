@@ -64,3 +64,5 @@ The Goat Path now comes down to the Bilge, not the Harbor ([design/structure-pas
 | '← THE BILGE' sign at the Harbor's west end (1–3, 4) | `signpost:bilge_0`, `_1`, `_2` | objects |
 | The canal running out under the Harbor quay (1–2, 9) | `harbor_culvert:culvert_l`, `culvert_r` (4 frames, 300 ms: a low arch in the quay wall, the canal water coming out of the dark); risen Harbor (Act 5): `culvert_dry_l`, `culvert_dry_r` (empty, a trickle) | ground |
 | …its water spreading on the harbor (1–2, 10; Act 2 and Act 6 only) | `harbor_culvert:outflow_l`, `outflow_r` (4 frames, 300 ms: foam rings fanning out on the sea) | ground |
+
+The QA description sweep added or changed art for this act: see [art-sweep.md](art-sweep.md).

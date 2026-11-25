@@ -151,3 +151,4 @@ It replaces the open hole and the Act 6 epilogue's rope barrier. Module: `game/s
 The lid spans both halves of the step because the words don't fit legibly in one 16-px tile. The stair's
 side walls stay; only the treads are covered.
 
+The QA description sweep added or changed art for this act: see [art-sweep.md](art-sweep.md).
