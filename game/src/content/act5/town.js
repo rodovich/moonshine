@@ -423,13 +423,8 @@ export function withSteps5(def) {
   const base = withSheets(def);
   return {
     ...base,
-    // The hundredth step boarded over, flush and walkable (from Act 4 on; Act 5
-    // keeps it, in case Act 4's own board is keyed to Act 4 alone).
-    patches: morePatches(base.patches, (g) => (started(g) ? [
-      ['ground', 9, 19, { tile: 'steps_lid:boarded_l', step: 'step_bonk' }],
-      ['ground', 10, 19, { tile: 'steps_lid:boarded_r', step: 'step_bonk' }],
-    ] : [])),
-    entities: [...hide(base.entities, ['kid', 'kid_after', 'hundredth_step']), countingWoman5],
+    // (The hundredth step is boarded over by Act 4's layer, from Act 4 on.)
+    entities: [...hide(base.entities, ['kid', 'kid_after']), countingWoman5],
     onEnter: windOnEnter(base),
   };
 }
