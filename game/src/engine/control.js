@@ -357,7 +357,7 @@ export class Control {
   interactFront() {
     const p = this.player;
     const w = this.world;
-    const e = w.zTarget(p.x, p.y, p.facing);
+    const e = w.zTarget(p.x, p.y, p.facing, p, { underfoot: !!this.holding });
     if (e) {
       this.act(e, this.holding);
     } else if (this.holding) {

@@ -445,12 +445,15 @@ export class World {
   // ahead (across a counter if need be), else a character on her own tile,
   // else something diagonally ahead. Shared by the game and the keyboard
   // reachability check (tests/check-keyboard).
-  zTarget(x, y, facing, self = this.player) {
+  zTarget(x, y, facing, self = this.player, { underfoot = false } = {}) {
     const [dx, dy] = DIR_VEC[facing];
     let e = this.interactableAt(x + dx, y + dy);
     if (!e && this.map.counter(x + dx, y + dy)) e = this.interactableAt(x + 2 * dx, y + 2 * dy);
     const here = this.pickEntity(this.entities.filter((o) => o !== self && !o.isPlayer && o.visible && o.directional && isInteractable(o) && o.x === x && o.y === y));
     if (here && (!e || !e.directional)) e = here;
+    // Using an item with nothing ahead: whatever she stands on (the hollow
+    // step answers the crowbar).
+    if (!e && underfoot) e = this.pickEntity(this.entities.filter((o) => o !== self && !o.isPlayer && o.visible && isInteractable(o) && o.occupies(x, y)));
     if (!e) {
       // Nothing ahead: something diagonally ahead (left or right of the tile in front).
       const [px, py] = [dy, dx]; // perpendicular

@@ -405,6 +405,22 @@ test('no lone word on the last page of a line', async ({ page }) => {
   expect(pages[2]).toEqual([['one.']]);
 });
 
+test('using an item with nothing ahead reaches what Cheryl stands on', async ({ page }) => {
+  // The hollow step (10, 19), the Counting Woman sitting beside it at (9, 19).
+  await boot(page, '?map=hundred_steps&x=10&y=19&facing=right&flags=act1.moonrise,act2.started,piano.slid,movers.met&items=crowbar&seed=3');
+  await waitText(page); // the steps' arrival lines
+  await readAll(page);
+  await waitIdle(page);
+  await page.evaluate(() => {
+    const w = window.moonshine.world;
+    w.player.facing = 'right';
+    w.control.holding = 'crowbar';
+  });
+  expect(await page.evaluate(() => window.moonshine.world.interactableAt(11, 19))).toBeFalsy();
+  await press(page, 'z');
+  await waitFor(page, () => (window.moonshine.snapshot().text || '').includes('brave, not rude'), null, 5000);
+});
+
 test('a tap on the top half of a door goes through the door', async ({ page }) => {
   await boot(page, '?map=cistern_court&x=3&y=13&seed=3');
   await waitIdle(page);
