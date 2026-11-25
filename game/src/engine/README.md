@@ -263,7 +263,7 @@ Time, camera, and screen effects (all resolve when done; durations in seconds):
 
 Effects persist across map changes until cleared, so a scene can carry its mood through a door.
 
-**Lighting** is separate from effects: a map's `lighting` (a preset name, or a function of the state such as `(g) => g.flag('act1.moonrise') ? 'day' : 'dusk'`) is applied on load, and `setLighting` changes it mid-scene. Presets are lists of `{ color, mode, amount }` passes drawn over the world (not the UI); `content.lighting` adds or replaces them.
+**Lighting** is separate from effects: a map's `lighting` (a preset name, or a function of the state such as `(g) => g.flag('act1.moonrise') ? 'day' : 'dusk'`) is applied on load, and `setLighting` changes it mid-scene. The presets come from the art task's `src/art/tints.js`; each is a `{ color, mode, amount }` pass (or a list of them) drawn over the world, not the UI. `content.lighting` adds or replaces presets.
 
 Maps, audio, misc:
 

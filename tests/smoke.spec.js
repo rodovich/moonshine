@@ -239,7 +239,7 @@ test('moonrise demo: picture, auto shouts, card, lighting', async ({ page }) => 
   await press(page, 'z');
   await press(page, 'z');
   await waitFor(page, () => window.moonshine.snapshot().picture, null, 10000);
-  await page.waitForTimeout(3500);
+  await page.waitForTimeout(7500);
   await shot(page, '13-vista');
   await readUntil(page, 'Gate');
   await readAll(page, 'z', 3);

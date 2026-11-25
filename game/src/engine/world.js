@@ -11,6 +11,7 @@ import { Control } from './control.js';
 import { writeSave } from './save.js';
 import { colorOf, loadSheet } from './art.js';
 import { uiSmall } from '../art/ui.js';
+import { TINTS } from '../art/tints.js';
 import { drawText, measure, wrap, LINE_HEIGHT } from './text.js';
 import { STYLES, drawBox } from './ui.js';
 import { playMusic, stopMusic } from './sound.js';
@@ -692,23 +693,12 @@ function sameSprite(a, b) {
 // content.spriteLight overrides it.
 export const SPRITE_LIGHT = 0.5;
 
-// Built-in lighting presets: lists of passes drawn over the world. Content
-// may override or add presets with `content.lighting`.
-export const LIGHTING = {
-  day: [],
-  // Warm and dimming. A soft multiply keeps lights and darks apart (white
-  // walls stay brighter than paving), and a small violet lift in the shadows.
-  dusk: [
-    { color: '#f8c0a0', mode: 'multiply', amount: 0.8 },
-    { color: '#d898a0', mode: 'multiply', amount: 0.35 },
-    { color: '#382048', mode: 'screen', amount: 0.15 },
-  ],
-  // Moonlit: dark and blue, with lifted blacks so detail survives.
-  night: [
-    { color: '#5060b0', mode: 'multiply', amount: 0.85 },
-    { color: '#182850', mode: 'screen', amount: 0.3 },
-  ],
-};
+// Lighting presets come from the art task's time-of-day tints
+// (src/art/tints.js): each is one { color, amount, mode } pass or a list of
+// them. content.lighting may add or replace presets.
+export const LIGHTING = Object.fromEntries(
+  Object.entries(TINTS).map(([name, t]) => [name, (Array.isArray(t) ? t : [t]).filter((p) => (p.amount ?? 1) > 0)]),
+);
 
 // `looks` is how many times the player looked before this time.
 async function runInteract(g, e, looks) {

@@ -17,7 +17,7 @@ import { cloth } from '../../art/cloth.js';
 import { canal } from '../../art/canal.js';
 import { items } from '../../art/items.js';
 import { old_man, kid, shopkeeper } from '../../art/npcs.js';
-import { COLORS } from '../../art/palette.js';
+import { vista, vista_glow, vista_moon, vista_rim, vista_twinkle, vista_cheryl, VISTA_BASINS } from '../../art/vista.js';
 import { indoorTiles as I } from './art.js';
 
 // Tiles can be named here or referenced directly from a legend as
@@ -415,42 +415,40 @@ async function deliverLetter(g, self) {
   await g.say(self, "Sorry. Where was I? Welcome! We're closed.");
 }
 
-// A vista in the manner of the opening's moonrise: a full-screen picture with
-// a moon rising in the wrong place, auto-advancing shouts, a hard cut back to
-// the map under night lighting, and a text card.
-function vista(ctx, ms) {
-  const t = ms / 1000;
-  const sky = ['wrong_void', 'cobalt_deep', 'navy_shade', 'navy', 'plum_shade', 'plum', 'rose_shade', 'coral', 'terra_light', 'ochre_light'];
-  sky.forEach((name, i) => {
-    ctx.fillStyle = COLORS[name];
-    ctx.fillRect(0, i * 14, 256, 14);
-  });
-  // The moon rises behind the rim, right of the notch.
-  const moonY = Math.max(104, 140 - t * 6);
-  ctx.fillStyle = COLORS.lamp_glow;
-  for (let y = -12; y <= 12; y++) {
-    const half = Math.floor(Math.sqrt(144 - y * y));
-    ctx.fillRect(176 - half, Math.round(moonY) + y, half * 2, 1);
-  }
-  // The rim's cliffs, with the Gate notch at the center.
-  ctx.fillStyle = COLORS.wrong_deep;
-  for (let x = 0; x < 256; x++) {
-    const notch = Math.abs(x - 128) < 14 ? 18 - Math.abs(x - 128) : 0;
-    const h = 118 + Math.round(Math.sin(x / 19) * 4 + Math.sin(x / 7) * 2) + Math.max(0, notch);
-    ctx.fillRect(x, h, 1, 160 - h);
-  }
-  // The bay, with the moon's gleam.
-  ctx.fillStyle = COLORS.cobalt_deep;
-  ctx.fillRect(0, 140, 256, 84);
-  ctx.fillStyle = COLORS.water_light;
-  for (let y = 146; y < 200; y += 6) ctx.fillRect(170 + ((y * 7) % 13), y, 12 - ((y / 6) % 5), 1);
+// A vista in the manner of the opening's moonrise, composed from the art
+// task's layers (src/art/vista.js): background, glow, moon, rim over the
+// moon, basin twinkles, and Cheryl in the foreground. Then auto-advancing
+// shouts, a hard cut back to the map under night lighting, and a card.
+function makeVista(g) {
+  const bg = g.sheet(vista);
+  const glow = g.sheet(vista_glow);
+  const moon = g.sheet(vista_moon);
+  const rim = g.sheet(vista_rim);
+  const twinkle = g.sheet(vista_twinkle);
+  const cheryl = g.sheet(vista_cheryl);
+  return (ctx, ms) => {
+    const t = ms / 1000;
+    ctx.drawImage(bg.frame('bowl_dusk'), 0, 0);
+    if (t > 0.5) {
+      const img = glow.frameAt('glow', ms);
+      ctx.globalAlpha = Math.min(1, (t - 0.5) / 1.5);
+      ctx.drawImage(img, 176 - img.width / 2, 88 - img.height);
+      ctx.globalAlpha = 1;
+    }
+    // The moon rises from behind the rim, right of the Gate.
+    const moonY = Math.round(104 - Math.max(0, Math.min(1, (t - 2) / 12)) * 48);
+    ctx.drawImage(moon.frameAt('moon', ms), 176 - 16, moonY - 16);
+    ctx.drawImage(rim.frame('rim'), 0, 0);
+    VISTA_BASINS.forEach(([x, y], k) => ctx.drawImage(twinkle.frameAt('twinkle', ms + k * 137), x - 4, y - 4));
+    ctx.drawImage(cheryl.frame('cheryl_tub'), 0, 128);
+  };
 }
 
 async function moonrise(g) {
   await g.think('Plug in. Water in. Sheets out of the way.', 'Now, the moon.');
   g.stopMusic(2000);
-  await g.showPicture(vista, { fade: 1 });
-  await g.wait(3);
+  await g.showPicture(makeVista(g), { fade: 1 });
+  await g.wait(7);
   await g.think('No.', 'It comes up in the Gate.');
   await g.hidePicture({ fade: 0 }); // hard cut
   await g.setLighting('night', 0);
@@ -461,7 +459,7 @@ async function moonrise(g) {
   await g.shake(3, 0.5);
   await g.wait(1);
   await g.fade('out', 2);
-  await g.card('Cheryl did not sleep well.', 2.5);
+  await g.card('Morning.', 2);
   await g.setLighting('day', 0);
   await g.fade('in', 1);
   await g.think('I\'d like to know why.');
