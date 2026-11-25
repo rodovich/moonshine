@@ -48,10 +48,14 @@ export class TextBox {
   choose({ options, prompt = null, speaker = null, style = 'npc', position = 'bottom', cancelIndex = null }) {
     return new Promise((resolve) => {
       const s = STYLES[style] || STYLES.npc;
-      const lines = prompt ? wrap(prompt, BOX_W - PAD_X * 2).slice(-LINES) : [];
+      // A long prompt pages like normal text; the options appear on its last page.
+      const lines = prompt ? wrap(prompt, BOX_W - PAD_X * 2) : [];
+      const pages = [];
+      for (let i = 0; i < lines.length; i += LINES) pages.push(lines.slice(i, i + LINES));
+      if (!pages.length) pages.push([]);
       this.position = position;
       this.active = {
-        pages: [lines], page: 0, shown: 0, pause: 0, style: s, styleName: style, speaker, resolve,
+        pages, page: 0, shown: 0, pause: 0, style: s, styleName: style, speaker, resolve,
         choice: { options, index: 0, cancelIndex, rects: [] },
       };
       if (!prompt) this.active.shown = Infinity;
@@ -105,7 +109,8 @@ export class TextBox {
       }
       return;
     }
-    if (a.choice && this.revealed()) {
+    const lastPage = a.page === a.pages.length - 1;
+    if (a.choice && this.revealed() && lastPage) {
       const c = a.choice;
       const d = input.menuDir();
       if (d === 'up' || d === 'left') { c.index = (c.index + c.options.length - 1) % c.options.length; sfx('cursor'); }
@@ -132,8 +137,6 @@ export class TextBox {
     if (!this.revealed()) {
       a.shown = Infinity;
       a.pause = 0;
-    } else if (a.choice) {
-      // handled above
     } else if (a.page < a.pages.length - 1) {
       a.page++;
       a.shown = 0;
@@ -169,21 +172,21 @@ export class TextBox {
         });
         remaining -= n;
       });
-      if (this.revealed() && !a.choice && a.auto == null) {
+      if (this.revealed() && a.auto == null && (!a.choice || a.page < a.pages.length - 1)) {
         const frame = this.small.frame(Math.floor(this.tick / 16) % 2 ? 'arrow_1' : 'arrow_0');
         ctx.drawImage(frame, BOX_X + BOX_W - 14, y + BOX_H - 11);
       }
     }
-    if (a.choice && this.revealed()) this.drawChoices(ctx, y, pos, hasText);
+    if (a.choice && this.revealed() && a.page === a.pages.length - 1) this.drawChoices(ctx, y, pos, hasText);
   }
 
   drawLabel(ctx, speaker, boxY, pos) {
     const w = measure(speaker) + 12;
-    const h = 15;
+    const h = 17;
     const lx = BOX_X + 6;
-    const ly = pos === 'top' ? boxY + BOX_H - 2 : boxY - h + 2;
+    const ly = pos === 'top' ? boxY + BOX_H - 3 : boxY - h + 3;
     drawBox(ctx, lx, ly, w, h, this.active.style);
-    drawText(ctx, speaker, lx + 6, ly + 3, { color: 'ui_label' });
+    drawText(ctx, speaker, lx + 6, ly + 4, { color: 'ui_label' });
   }
 
   drawChoices(ctx, boxY, pos, hasText) {

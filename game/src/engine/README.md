@@ -40,7 +40,9 @@ export default {
 };
 ```
 
-Game state is `{ flags, inventory, looks, map, x, y, facing }` (`looks` counts how often each thing has been looked at). It saves to `localStorage` after every script finishes and after every map change. The title screen offers Continue when a save exists.
+Game state is `{ flags, inventory, looks, map, x, y, facing }` (`looks` counts how often each thing has been looked at). It saves to `localStorage` whenever a script finishes (walking through a door is a script), never in the middle of one, so a reload can't land halfway through a cutscene. The title screen offers Continue when a save exists.
+
+**Old saves.** `main` deploys on every push, so players will load saves from older builds. On load the engine fills in missing fields, drops unknown item ids, falls back to `content.start` if the saved map no longer exists, and moves the player to the map's `spawn` (or the nearest open tile) if they'd stand inside something solid or off the map. For renamed flags or items, give the content a `migrate: (state) => state` function; it runs first. Characters' positions after `moveNpc` aren't saved: they reset to the map's layout when it reloads, so put lasting moves in the entity's `x`/`y` behind a `when`, or `g.place` them in `onEnter`.
 
 ## Maps
 
@@ -77,7 +79,7 @@ All layers are the same size as `ground`. The legend is shared by all layers, so
 
 **Patches** change tiles as the story moves on: a taken pepper mill leaves a bare counter, the piano's tiles clear from the Squeeze. `patches(g)` returns `[layer, x, y, value]` entries for the current state (`value` as in the legend, or `null` to clear); the engine re-applies them on map load and after every script, restoring tiles whose patch no longer applies. `g.setTile(...)` makes a one-off change that lasts until the map reloads.
 
-**Exits** fire when the player finishes a step onto them:
+**Exits** fire when the player finishes a step onto them by walking (not during a script: `movePlayer` onto a door does nothing, so call `changeMap` yourself). Click-to-walk paths never cross an exit on the way to somewhere else, and an exit is never chosen as "the nearest reachable tile" for an unreachable click.
 
 ```js
 exits: [
@@ -90,7 +92,7 @@ exits: [
 
 A multi-tile exit keeps the player's offset: stepping onto the middle of a 3-wide edge arrives in the middle of the destination. `sfx` overrides the default `'door'` sound.
 
-**Triggers** run a script when the player steps onto any tile in their area: `{ x, y, w, h, when, run, stop }`. Guard one-shot triggers with a flag in `when`. `stop: false` lets the player keep walking afterwards; by default they stop.
+**Triggers** run a script when the player steps onto any tile in their area: `{ x, y, w, h, when, run, stop }`. Like exits, they don't fire during scripts. Guard one-shot triggers with a flag in `when`. `stop: false` lets the player keep walking afterwards; by default they stop.
 
 ## Tilesets
 
@@ -196,7 +198,9 @@ interact: async (g, self) => {
 },
 ```
 
-Only one script runs at a time; others queue. While a script runs the player can't move, and NPCs stop wandering. If a script throws, the error is logged and the game carries on.
+Only one script runs at a time; others queue. While a script runs the player can't move, and NPCs stop wandering. If a script throws, the error is logged and the game carries on; a `when`, sprite, lighting, or patches function that throws is logged and counts as false. The main loop also catches and logs errors, so a content typo can't freeze the game.
+
+`setFlag`, `giveItem`, and `takeItem` re-check entities, sprite functions, and patches immediately, so `g.setFlag('chest_open'); g.npc('chest_open')` works within the same script. `g.refresh()` does the same on demand.
 
 ## Script API
 
@@ -208,7 +212,7 @@ Text:
 | `say(speaker, ...lines, { auto: 1.2 })` | Any of `say`, `describe`, `think` can end with options. `auto`: each box closes by itself that many seconds after it's fully shown, and input can't skip it (for overlapping shouts in a cutscene). |
 | `describe(...lines)` | Cheryl's descriptions, in her warm-colored box with no label. |
 | `think(...lines)` | Cheryl's internal monologue: warm, italic, dashed frame. |
-| `choose(options)` / `choose(prompt, options, { speaker, cancel })` | Shows options; resolves to the chosen index. X/Escape picks `cancel` (default: the last option). With no `speaker` the prompt is in Cheryl's style. |
+| `choose(options)` / `choose(prompt, options, { speaker, cancel })` | Shows options; resolves to the chosen index. X/Escape picks `cancel` (default: the last option; `cancel: null` disables it). With no `speaker` the prompt is in Cheryl's style. A long prompt pages like normal text, with the options on its last page. |
 
 Text normalizes `...` to an ellipsis and `--` to an em dash. The font has letters, digits, and common punctuation (`. , ! ? ' " ‘ ’ “ ” - — : ; ( ) / … + = * % & # ♪ < > _ $ ·`).
 
@@ -216,7 +220,7 @@ Items and flags:
 
 | Call | What it does |
 |---|---|
-| `giveItem(id, { silent })` | Adds to the inventory and shows "Got X." (unless `silent`). |
+| `giveItem(id, { silent })` | Adds to the inventory and shows "Got X." (unless `silent`). Item calls warn in the console about ids missing from `content.items`. |
 | `takeItem(id)` | Removes; returns whether it was there. |
 | `hasItem(id)`, `items` | Check the inventory. |
 | `setFlag(name, value = true)` | `false`/`null` deletes the flag. Values may be numbers or strings. |
@@ -227,7 +231,7 @@ Characters and objects (an `id` may be an id string, an entity, or `'player'`):
 | Call | What it does |
 |---|---|
 | `npc(id)`, `player` | The entity (has `x`, `y`, `facing`, `name`, …). |
-| `moveNpc(id, target, { speed, ghost, face })` | Walks. `target` is `[x, y]` (pathfinds around things), a list of directions `['up', 'up', 'left']`, or a string `'u u l'`. `speed` is ticks per tile (player 8, NPCs 16). `ghost: true` ignores collisions. A blocked scripted walk waits, re-routes, and after two seconds walks through the obstacle, so cutscenes never hang. |
+| `moveNpc(id, target, { speed, ghost, face })` | Walks. `target` is `[x, y]` (pathfinds around things), a list of directions `['up', 'up', 'left']`, or a string `'u u l'`. `speed` is ticks per tile (player 8, NPCs 16), for this move only. `ghost: true` ignores collisions. A blocked scripted walk waits, re-routes, and after two seconds walks through the obstacle for that one step, so cutscenes never hang (move Cheryl out of the way if you don't want an NPC to pass through her). An unreachable `[x, y]` logs a warning and doesn't move. |
 | `movePlayer(target, opts)` | Same for Cheryl. |
 | `faceNpc(id, dir)`, `facePlayer(dir)` | `dir` is a direction or another entity's id (`'player'`). |
 | `place(id, x, y, facing)` | Teleports. |
@@ -265,7 +269,7 @@ Maps, audio, misc:
 
 | Call | What it does |
 |---|---|
-| `changeMap(id, x, y, facing, { fade, seconds })` | Fades out, loads, fades in, then runs the map's `onEnter`. |
+| `changeMap(id, x, y, facing, { fade, seconds })` | Fades out, loads, fades in, then runs the map's `onEnter`, all before it resolves: `await g.changeMap('b'); await g.say(...)` shows the say after b's intro. |
 | `map` | Current map id. |
 | `playMusic(id)`, `stopMusic(fadeMs)`, `sfx(id)` | Audio (see below). |
 | `playCue(id, { resume })` | A one-shot music cue; the current track dips and comes back (unless `resume: false`). |
@@ -315,10 +319,12 @@ node tests/shot.js "?map=test_street" out.png 800 ArrowRight z   # one screensho
 - **Walk animation follows distance, not the clock.** Walk frames advance one per 8 px moved, so a 4-frame cycle spans two tiles at any speed and feet never slide. The sheets' `walk_*` durations (140/160 ms) are not used for walking; idles and other animations do use `durations`.
 - **Lighting is its own layer**, below screen effects: maps declare dusk/night/day, and scripts crossfade or cut between them, while tints and hue shifts stay free for the Wrongness.
 - **Grid-stepped movement with smooth interpolation.** Characters occupy whole 16×16 tiles and glide between them (the player at 2 px per frame, one tile per 8 frames; NPCs at 1 px per frame). Reasons: click-to-walk pathfinding, collision, and "walk next to that and face it" are exact on a grid, so the player never snags on corners or stops a pixel short; NPCs block whole tiles, so puzzles about who stands where are unambiguous; and it matches the tile-locked feel of many SNES adventures. Holding a direction chains steps with no pause; tapping a direction toward something solid turns Cheryl to face it.
-- **Four directions only**, for both keyboard and pathfinding. Paths prefer fewer turns so they look deliberate.
+- **Four directions only**, for both keyboard and pathfinding. Among equally short paths, A* leans toward fewer turns (a tie-break, not a guarantee).
+- **Characters cast a small oval shadow** (ink at about a third opacity) under their feet; `shadow: false` turns it off for an entity.
+- **Boxes** have a 3 px SNES-style frame (shade, light, deep) with notched corners; the thought box dashes its light line 2 px on, 2 off.
 - **Clicks on unreachable spots** walk to the nearest reachable tile. Clicks on characters or objects walk to the nearest tile beside them (or across a counter), face them, and interact. Holding the pointer down and dragging steers.
 - **Fixed 60 Hz update** with rendering every animation frame; frame times within 1.5 ms of a whole tick count as exactly one tick, so 60 Hz displays get no judder.
-- **Display scaling.** The 256×224 frame is scaled by a whole number of *device* pixels when that uses at least 80% of the possible size; otherwise (very small screens) by the exact fit, with nearest-neighbor sampling. On a typical phone in portrait this gives a crisp 4× in device pixels.
+- **Display scaling.** The 256×224 frame is scaled by a whole number of *device* pixels when that uses at least 80% of the possible size; otherwise (very small screens) by the exact fit, with nearest-neighbor sampling. On a typical phone in portrait this gives a crisp 4× in device pixels. On tall portrait screens the frame sits near the top, leaving room below for thumbs.
 - **Text** is a variable-width bitmap font (`src/art/font.js`, 7 px caps, 9 px cell, 12 px lines), revealed at about 42 characters per second with short pauses after punctuation. Any key or tap reveals the rest; the next press advances. The box sits at the bottom, or the top when Cheryl is in the lower part of the screen. NPC lines have a navy box and a speaker tab; Cheryl's descriptions a warm brown box; her thoughts the warm box in italics with a dashed frame.
 - **One script at a time**, queued; the world pauses player control while scripts run. Autosave after each script and map change.
 
@@ -345,3 +351,5 @@ node tests/shot.js "?map=test_street" out.png 800 ArrowRight z   # one screensho
 | `save.js` | Game state and `localStorage` |
 | `debug.js` | Debug URL parameters |
 | `ui.js` | Box drawing and UI styles |
+
+The inventory shows two rows of eight and scrolls (arrows, or the `<` `>` buttons) when there are more. Descriptions longer than four lines are cut off, with a console warning.

@@ -27,7 +27,8 @@ export class World {
     this.busy = 0; // scripts running
     this.queue = [];
     this.waiters = [];
-    this.cam = { x: 0, y: 0 };
+    this.cam = { x: 0, y: 0 }; // whole pixels, for drawing
+    this.camF = { x: 0, y: 0 }; // exact position, for slow pans
     this.camPan = null; // { x, y } fixed camera center while panning
     this.marker = null;
     this.api = makeApi(this);
@@ -58,6 +59,7 @@ export class World {
     this.removed = new Set(); // ids removed by scripts until the map reloads
     this.patched = [];
     this.refreshEntities();
+    this.placeSafely(def);
     this.control.reset();
     this.camPan = null;
     this.snapCamera();
@@ -68,12 +70,41 @@ export class World {
     }
   }
 
+  // If the player would start inside something solid or off the map (an old
+  // save, a typo in a door's `at`), move them to the map's spawn or the
+  // nearest open tile.
+  placeSafely(def) {
+    const p = this.player;
+    const ok = (x, y) => this.map.inBounds(x, y) && !this.blocked(x, y, p);
+    if (ok(p.x, p.y)) return;
+    console.warn(`[world] ${def.id}: (${p.x},${p.y}) isn't walkable; moving the player`);
+    let best = def.spawn && ok(def.spawn[0], def.spawn[1]) ? def.spawn : null;
+    if (!best) {
+      let bestD = Infinity;
+      const cx = this.map.inBounds(p.x, p.y) ? p.x : Math.floor(this.map.w / 2);
+      const cy = this.map.inBounds(p.x, p.y) ? p.y : Math.floor(this.map.h / 2);
+      for (let y = 0; y < this.map.h; y++) {
+        for (let x = 0; x < this.map.w; x++) {
+          const d = Math.abs(x - cx) + Math.abs(y - cy);
+          if (d < bestD && ok(x, y) && !this.isExit(x, y)) {
+            best = [x, y];
+            bestD = d;
+          }
+        }
+      }
+    }
+    if (best) {
+      p.x = p.fromX = best[0];
+      p.y = p.fromY = best[1];
+    }
+  }
+
   // Bring the map up to date with the game state: add entities whose `when`
   // now passes, remove ones whose `when` fails, re-pick sprites given as
   // functions, and apply the map's tile patches. Runs after every script.
   refreshEntities() {
     for (const def of this.mapDef.entities || []) {
-      const show = !def.when || def.when(this.api);
+      const show = !def.when || safeCall(def.when, this.api);
       let e = this.byId.get(def.id);
       if (show && !e && !this.removed.has(def.id)) {
         e = new Entity(def);
@@ -85,7 +116,7 @@ export class World {
         e = null;
       }
       if (e && typeof def.sprite === 'function') {
-        const sprite = def.sprite(this.api);
+        const sprite = safeCall(def.sprite, this.api) || null;
         if (!sameSprite(sprite, e.sprite)) e.setSprite(sprite);
       }
     }
@@ -100,7 +131,7 @@ export class World {
     // Undo previous patches, then apply the current list.
     for (const [layer, x, y, tile] of [...(this.patched || [])].reverse()) this.map.setTile(layer, x, y, tile);
     this.patched = [];
-    for (const [layer, x, y, value] of fn(this.api) || []) {
+    for (const [layer, x, y, value] of safeCall(fn, this.api) || []) {
       this.patched.push([layer, x, y, this.originalTile(layer, x, y)]);
       this.map.setTile(layer, x, y, value);
     }
@@ -116,7 +147,7 @@ export class World {
   // or a function of the state returning one.
   applyLighting(seconds) {
     let l = this.mapDef.lighting;
-    if (typeof l === 'function') l = l(this.api);
+    if (typeof l === 'function') l = safeCall(l, this.api);
     this.setLighting(l || null, seconds);
   }
 
@@ -172,9 +203,16 @@ export class World {
   }
 
   // Path for an entity to any of `goals`, avoiding solid tiles and entities.
-  // If none is reachable and `closest` is set, path to the nearest reachable tile.
+  // If none is reachable and `closest` is set, path to the nearest reachable
+  // tile. The player's paths never cross an exit unless it's the goal, so a
+  // click near a door can't carry Cheryl through it.
   pathFor(mover, goals, { closest = false, ignoreEntities = false } = {}) {
-    const blocked = (x, y) => (ignoreEntities ? this.map.solid(x, y) : !this.canEnter(mover, x, y));
+    const goalKeys = new Set(goals.map(([x, y]) => `${x},${y}`));
+    const avoidExits = mover.isPlayer;
+    const blocked = (x, y) => {
+      if (ignoreEntities ? this.map.solid(x, y) : !this.canEnter(mover, x, y)) return true;
+      return avoidExits && !goalKeys.has(`${x},${y}`) && this.isExit(x, y);
+    };
     const start = [mover.x, mover.y];
     let path = findPath(start, goals, blocked, this.map.w, this.map.h);
     if (path || !closest || !goals.length) return path;
@@ -200,7 +238,7 @@ export class World {
             sy -= dy;
           }
           const k = `${sx},${sy}`;
-          if (seen.has(k) || !this.map.inBounds(sx, sy) || this.map.solid(sx, sy)) continue;
+          if (seen.has(k) || !this.map.inBounds(sx, sy) || this.map.solid(sx, sy) || this.isExit(sx, sy)) continue;
           seen.add(k);
           spots.push({ x: sx, y: sy, facing: dir });
         }
@@ -231,7 +269,11 @@ export class World {
       job.resolve(undefined);
     } finally {
       this.busy--;
-      this.refreshEntities();
+      try {
+        this.refreshEntities();
+      } catch (err) {
+        console.error('[world] refresh after script', err);
+      }
       if (!this.queue.length) this.save();
       this.next();
     }
@@ -256,13 +298,15 @@ export class World {
     writeSave(this.state);
   }
 
+  // Always called from inside a script (changeMap), so the new map's onEnter
+  // runs inline: `await g.changeMap(...)` returns after it. No save here:
+  // saves happen only between scripts, so a reload never lands mid-cutscene.
   async transition(mapId, x, y, facing, { fade = true, seconds = 0.25 } = {}) {
     if (fade) await this.effects.fade('out', seconds);
     this.loadMap(mapId, x, y, facing);
-    this.save();
     const onEnter = this.mapDef.onEnter;
     if (fade) await this.effects.fade('in', seconds);
-    if (onEnter) this.run(onEnter);
+    if (onEnter) await onEnter(this.api);
   }
 
   // Interact with or use an item on an entity (player already in place).
@@ -278,7 +322,8 @@ export class World {
 
   async interactWith(e, itemId = null) {
     const p = this.player;
-    const face = dirBetween(p.x, p.y, nearestTileOf(e, p.x, p.y)[0], nearestTileOf(e, p.x, p.y)[1]);
+    const [tx, ty] = nearestTileOf(e, p.x, p.y);
+    const face = dirBetween(p.x, p.y, tx, ty);
     if (face) p.facing = face;
     const turn = e.directional && e.def.turnToTalk !== false;
     const prevFacing = e.facing;
@@ -442,6 +487,7 @@ export class World {
   snapCamera() {
     const t = this.cameraTarget();
     this.cam = this.clampCamera(t.x, t.y);
+    this.camF = { ...this.cam };
   }
 
   updateCamera() {
@@ -450,14 +496,15 @@ export class World {
     if (this.camPan && this.camPan.speed) {
       // Glide toward the pan target.
       const s = this.camPan.speed;
-      const dx = want.x - this.cam.x;
-      const dy = want.y - this.cam.y;
+      const dx = want.x - this.camF.x;
+      const dy = want.y - this.camF.y;
       const dist = Math.hypot(dx, dy);
-      if (dist <= s) this.cam = want;
-      else this.cam = { x: Math.round(this.cam.x + (dx / dist) * s), y: Math.round(this.cam.y + (dy / dist) * s) };
+      if (dist <= s) this.camF = { ...want };
+      else this.camF = { x: this.camF.x + (dx / dist) * s, y: this.camF.y + (dy / dist) * s };
     } else {
-      this.cam = want;
+      this.camF = { ...want };
     }
+    this.cam = { x: Math.round(this.camF.x), y: Math.round(this.camF.y) };
   }
 
   // ---- Drawing --------------------------------------------------------
@@ -490,6 +537,7 @@ export class World {
       const lb = b.layer === 'ground' ? 0 : 1;
       return la - lb || a.sortY - b.sortY || a.px - b.px;
     });
+    for (const e of sorted) e.drawShadow(ctx, cx, cy);
     for (const e of sorted) e.draw(ctx, cx, cy);
     this.map.draw(ctx, 'overhead', cx, cy, WIDTH, HEIGHT, ms);
     this.effects.applyLight(ctx);
@@ -562,6 +610,17 @@ export class World {
   }
 }
 
+// Call a content callback (a `when`, a sprite or lighting function); a throw
+// is logged and counts as a falsy result instead of stopping the game.
+export function safeCall(fn, ...args) {
+  try {
+    return fn(...args);
+  } catch (err) {
+    console.error('[content]', err);
+    return undefined;
+  }
+}
+
 export function isInteractable(e) {
   const d = e.def;
   return !!(d.interact || d.use || d.look || d.looks || d.talk);
@@ -625,10 +684,11 @@ export function followRoute(world, e) {
   const [dx, dy] = DIR_VEC[dir];
   const nx = e.x + dx;
   const ny = e.y + dy;
-  if (e.routeGhost || world.canEnter(e, nx, ny)) {
+  if (e.routeGhost || e.routeForce || world.canEnter(e, nx, ny)) {
     e.route.shift();
     e.startStep(dir);
     e.routeBlocked = 0;
+    e.routeForce = false; // walking through only lasts the one step that needed it
     return;
   }
   e.facing = dir;
@@ -638,7 +698,7 @@ export function followRoute(world, e) {
     if (path) e.route = pathToDirs([e.x, e.y], path);
   }
   // A scripted move must finish: after two seconds, walk through whatever is in the way.
-  if (e.routeBlocked > 120 && !world.map.solid(nx, ny)) e.routeGhost = true;
+  if (e.routeBlocked > 120 && !world.map.solid(nx, ny)) e.routeForce = true;
 }
 
 export function pathToDirs(start, path) {

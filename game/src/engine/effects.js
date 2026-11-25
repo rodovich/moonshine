@@ -104,9 +104,18 @@ export class Effects {
     return this.tween('fadeAlpha', alpha, seconds);
   }
 
+  // A new shake replaces one in progress; the earlier promise resolves then.
   shake(amount = 3, seconds = 0.4) {
+    this.shakeDone?.();
+    this.shakeDone = null;
+    const ticks = secs(seconds);
+    if (ticks <= 0) {
+      this.shakeAmp = 0;
+      this.shakeTicks = 0;
+      return Promise.resolve();
+    }
     this.shakeAmp = amount;
-    this.shakeTicks = secs(seconds);
+    this.shakeTicks = ticks;
     return new Promise((resolve) => { this.shakeDone = resolve; });
   }
 
@@ -131,7 +140,10 @@ export class Effects {
   flicker(seconds = 0.5, { color, rate } = {}) {
     if (color) this.flickerColor = colorOf(color);
     if (rate) this.flickerRate = rate;
+    this.flickerDone?.();
+    this.flickerDone = null;
     this.flickerTicks = secs(seconds);
+    if (this.flickerTicks <= 0) return Promise.resolve();
     return new Promise((resolve) => { this.flickerDone = resolve; });
   }
 
@@ -156,8 +168,12 @@ export class Effects {
     if (this.shakeTicks > 0 && --this.shakeTicks === 0) {
       this.shakeAmp = 0;
       this.shakeDone?.();
+      this.shakeDone = null;
     }
-    if (this.flickerTicks > 0 && --this.flickerTicks === 0) this.flickerDone?.();
+    if (this.flickerTicks > 0 && --this.flickerTicks === 0) {
+      this.flickerDone?.();
+      this.flickerDone = null;
+    }
     this.wavePhase += this.waveSpeed;
   }
 

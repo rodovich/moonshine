@@ -9,11 +9,11 @@ import { loadSheet } from './art.js';
 import { uiIcons } from '../art/ui.js';
 import { STYLES, drawBox, inRect } from './ui.js';
 import { drawText, measure } from './text.js';
-import { inArea, isInteractable } from './world.js';
+import { inArea, isInteractable, safeCall } from './world.js';
 import { sfx } from './sound.js';
 
-const BAG_BTN = { x: WIDTH - 24, y: 4, w: 20, h: 20 };
-const HOLD_BANNER = { x: 4, y: 4, w: 0, h: 20 }; // width set when drawn
+const BAG_BTN = { x: WIDTH - 26, y: 3, w: 22, h: 22 };
+const HOLD_BANNER = { x: 4, y: 3, w: 0, h: 22 }; // width set when drawn
 const DIRS = ['up', 'down', 'left', 'right'];
 
 export class Control {
@@ -279,7 +279,7 @@ export class Control {
     if (w.busy) return;
     const p = this.player;
     const def = w.mapDef;
-    const exit = (def.exits || []).find((ex) => inArea(ex, p.x, p.y) && (!ex.when || ex.when(w.api)));
+    const exit = (def.exits || []).find((ex) => inArea(ex, p.x, p.y) && (!ex.when || safeCall(ex.when, w.api)));
     if (exit) {
       this.cancelMove();
       this.bufferedDir = null;
@@ -293,7 +293,7 @@ export class Control {
       });
       return;
     }
-    const trig = (def.triggers || []).find((tr) => inArea(tr, p.x, p.y) && (!tr.when || tr.when(w.api)));
+    const trig = (def.triggers || []).find((tr) => inArea(tr, p.x, p.y) && (!tr.when || safeCall(tr.when, w.api)));
     if (trig) {
       if (trig.stop !== false) this.cancelMove();
       w.run(trig.run);
@@ -305,7 +305,7 @@ export class Control {
     ctx.save();
     ctx.globalAlpha = 0.9;
     drawBox(ctx, BAG_BTN.x, BAG_BTN.y, BAG_BTN.w, BAG_BTN.h, STYLES.npc);
-    ctx.drawImage(this.icons.frame('bag'), BAG_BTN.x + 2, BAG_BTN.y + 2);
+    ctx.drawImage(this.icons.frame('bag'), BAG_BTN.x + 3, BAG_BTN.y + 3);
     ctx.restore();
     // "Using" banner
     if (this.holding) {
@@ -315,8 +315,8 @@ export class Control {
       this.bannerW = wdt;
       drawBox(ctx, HOLD_BANNER.x, HOLD_BANNER.y, wdt, HOLD_BANNER.h, STYLES.cheryl);
       const icon = this.world.inventory.icon(this.holding);
-      if (icon) ctx.drawImage(icon, HOLD_BANNER.x + 3, HOLD_BANNER.y + 2);
-      drawText(ctx, text, HOLD_BANNER.x + 22, HOLD_BANNER.y + 6, { color: STYLES.cheryl.text });
+      if (icon) ctx.drawImage(icon, HOLD_BANNER.x + 3, HOLD_BANNER.y + 3);
+      drawText(ctx, text, HOLD_BANNER.x + 22, HOLD_BANNER.y + 7, { color: STYLES.cheryl.text });
     }
   }
 }

@@ -36,6 +36,13 @@ export function makeApi(world) {
     for (const text of lines.flat()) await tb.show({ text, position: 'auto', ...opts, ...extra });
   }
 
+  const warnedItems = new Set();
+  function checkItem(id) {
+    if (world.content.items?.[id] || warnedItems.has(id)) return;
+    warnedItems.add(id);
+    console.warn(`[script] "${id}" isn't in content.items (a typo?)`);
+  }
+
   function resolveEntity(id) {
     const e = world.entity(id);
     if (!e) throw new Error(`no entity "${id && id.id ? id.id : id}" on map ${world.state.map}`);
@@ -44,9 +51,14 @@ export function makeApi(world) {
 
   // Shared by moveNpc and movePlayer.
   async function move(e, target, opts = {}) {
+    const speedBefore = e.stepTicks;
     if (opts.speed) e.stepTicks = opts.speed;
     if (Array.isArray(target) && typeof target[0] === 'number') {
-      const path = world.pathFor(e, [target], { ignoreEntities: false }) || world.pathFor(e, [target], { ignoreEntities: true }) || [];
+      let path = world.pathFor(e, [target], { ignoreEntities: false }) || world.pathFor(e, [target], { ignoreEntities: true });
+      if (!path) {
+        console.warn(`[script] ${e.id} can't reach (${target}) on ${world.state.map}; not moving`);
+        path = [];
+      }
       e.route = pathToDirs([e.x, e.y], path);
       e.routeGoal = target;
     } else {
@@ -59,6 +71,7 @@ export function makeApi(world) {
     await world.until(() => !e.moving && (!e.route || !e.route.length));
     e.route = null;
     e.routeGhost = false;
+    e.stepTicks = speedBefore;
     if (opts.face) face(e, opts.face);
   }
 
@@ -98,24 +111,29 @@ export function makeApi(world) {
       return tb.choose({
         options, prompt, position: 'auto',
         speaker: speakerName(opts.speaker), style: opts.style || (opts.speaker ? 'npc' : 'cheryl'),
-        cancelIndex: opts.cancel ?? options.length - 1,
+        cancelIndex: 'cancel' in opts ? opts.cancel : options.length - 1,
       });
     },
 
     // ---- Items ----
     async giveItem(id, { silent = false } = {}) {
+      checkItem(id);
       if (!world.state.inventory.includes(id)) world.state.inventory.push(id);
+      world.refreshEntities();
       if (silent) return;
       const def = world.content.items[id] || { name: id };
       sfx('item');
       await tb.show({ text: `Got ${def.name}.`, style: 'npc', position: 'auto' });
     },
     takeItem(id) {
+      checkItem(id);
       const i = world.state.inventory.indexOf(id);
       if (i >= 0) world.state.inventory.splice(i, 1);
+      world.refreshEntities();
       return i >= 0;
     },
     hasItem(id) {
+      checkItem(id);
       return world.state.inventory.includes(id);
     },
     get items() {
@@ -126,6 +144,13 @@ export function makeApi(world) {
     setFlag(name, value = true) {
       if (value === false || value == null) delete world.state.flags[name];
       else world.state.flags[name] = value;
+      // Entities, sprites, and tile patches follow the new state at once.
+      world.refreshEntities();
+    },
+    // Re-check entities' `when`s, sprite functions, and the map's patches now
+    // (setFlag, giveItem, and takeItem already do this).
+    refresh() {
+      world.refreshEntities();
     },
     flag(name) {
       return world.state.flags[name];

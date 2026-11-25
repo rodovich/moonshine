@@ -39,9 +39,6 @@ export class Entity {
     this.fromX = this.x;
     this.fromY = this.y;
     this.t = 0;
-    this.path = null;
-    this.onArrive = null;
-    this.waitTicks = 0;
     // Animation clocks (ms). `phase` keeps neighbors' idles out of step.
     this.animMs = 0;
     this.walkPx = 0;
@@ -176,6 +173,16 @@ export class Entity {
     }
   }
 
+  // A small oval shadow under a character's feet, drawn before any sprite so
+  // it never covers another character. `shadow: false` on the def turns it off.
+  drawShadow(ctx, camX, camY) {
+    if (!this.visible || !this.directional || this.def.shadow === false) return;
+    const img = shadowImage();
+    const x = Math.round(this.px + (this.w * TILE - img.width) / 2 + this.offset[0] - camX);
+    const y = Math.round(this.py + this.h * TILE - img.height + 1 + this.offset[1] - camY);
+    ctx.drawImage(img, x, y);
+  }
+
   // Pixel-accurate hit test against the last drawn frame (world pixels).
   hit(wx, wy) {
     const d = this.lastDrawn;
@@ -187,6 +194,19 @@ export class Entity {
     // Be generous: a hit within 2 px of an opaque pixel counts.
     return opaqueNear(d.img, ix, iy, 2);
   }
+}
+
+let shadowCanvas = null;
+function shadowImage() {
+  if (shadowCanvas) return shadowCanvas;
+  const rows = ['..######..', '##########', '..######..'];
+  shadowCanvas = document.createElement('canvas');
+  shadowCanvas.width = rows[0].length;
+  shadowCanvas.height = rows.length;
+  const ctx = shadowCanvas.getContext('2d');
+  ctx.fillStyle = 'rgba(32, 24, 40, 0.35)'; // ink, see-through
+  rows.forEach((r, y) => [...r].forEach((c, x) => c === '#' && ctx.fillRect(x, y, 1, 1)));
+  return shadowCanvas;
 }
 
 const alphaCache = new WeakMap();

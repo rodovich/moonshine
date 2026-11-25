@@ -11,7 +11,7 @@ import { TextBox } from './textbox.js';
 import { Inventory } from './inventory.js';
 import { World } from './world.js';
 import { Title } from './title.js';
-import { newState, hasSave, loadSave, clearSave } from './save.js';
+import { newState, hasSave, loadSave, clearSave, validateState } from './save.js';
 import { readDebugParams } from './debug.js';
 import { unlockAudio } from './sound.js';
 
@@ -45,7 +45,7 @@ export class Game {
     this.scene = null;
 
     if (this.debug.start) {
-      this.startWorld(this.debug.state, { runNewGame: false });
+      this.startWorld(validateState(this.debug.state, content), { runNewGame: false });
       if (this.debug.run) {
         const script = content.scripts?.[this.debug.run];
         if (script) this.world.run(script);
@@ -65,15 +65,14 @@ export class Game {
   async startFromTitle(choice) {
     await this.effects.fade('out', 0.4);
     this.input.flush();
-    if (choice === 'continue') {
-      const s = loadSave();
-      if (s) {
-        this.startWorld(s, { runNewGame: false });
-      } else {
-        this.startWorld(newState(this.content.start), { runNewGame: true });
-      }
-    } else {
-      clearSave();
+    const saved = choice === 'continue' ? loadSave() : null;
+    try {
+      if (saved) this.startWorld(validateState(saved, this.content), { runNewGame: false });
+      else throw null;
+    } catch (err) {
+      // No save, or a save this build can't load: start fresh.
+      if (err) console.error('[save] could not load the saved game; starting a new one', err);
+      if (choice !== 'continue') clearSave();
       this.startWorld(newState(this.content.start), { runNewGame: true });
     }
     await this.effects.fade('in', 0.4);
@@ -99,6 +98,8 @@ export class Game {
   }
 
   frame(now) {
+    // Ask for the next frame first, so an error below can't stop the loop.
+    requestAnimationFrame(this.frame);
     let dt = now - this.last;
     this.last = now;
     if (dt > 250) dt = STEP; // tab was hidden; don't fast-forward
@@ -108,13 +109,12 @@ export class Game {
     this.acc += dt;
     let n = 0;
     while (this.acc >= STEP - 0.01 && n < 8) {
-      this.update();
+      guard('update', () => this.update());
       this.acc -= STEP;
       n++;
     }
     if (n === 8) this.acc = 0;
-    this.render();
-    requestAnimationFrame(this.frame);
+    guard('render', () => this.render());
   }
 
   update() {
@@ -166,6 +166,14 @@ export class Game {
     this.effects.applyFade(ctx);
     if (this.card) drawCard(ctx, this.card.text);
     this.display.present(this.effects.waveParams());
+  }
+}
+
+function guard(what, fn) {
+  try {
+    fn();
+  } catch (err) {
+    console.error(`[game] ${what}`, err);
   }
 }
 
