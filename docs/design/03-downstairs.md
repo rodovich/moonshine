@@ -119,10 +119,10 @@ The main deck: a long hall with light-pipes coming down from the street above, t
     1  XXXXXXXXXXXXXXXXXXXXXXXX#~~#XXXX   ~~ the flooded north passage (25-26, 1-6)
     2  XXXXXXXXXXXXXXXXXXXXXXXX#~~PXXXX   P the gushing pipe (27, 2)
     3  XXXXXXXXXXXXXXXXXXXXXXXX#~~#XXXX
-    4  X#######q################~~#XXXX   qQ the counterweighted ladder, on the wall face (8, 4-5)
-    5  X##CC###QL###DD###L###TW#~~#XXXX   CC chute mouth (3-4); L lamps (9, 18);
-    6  X........................~~..XXX   DD doorway to the bunk room (13-14); T speaking tube (22);
-    7  X............................XXX   W the valve wheel (23)
+    4  X#######q#############WW#~~#XXXX   qQ the counterweighted ladder, on the wall face (8, 4-5)
+    5  X##CC###QL###DD###L#T#WW#~~#XXXX   CC chute mouth (3-4); L lamps (9, 18);
+    6  X........................~~..XXX   DD doorway to the bunk room (13-14); T speaking tube (20);
+    7  X............................XXX   WW the valve wheel, 2x2 (22-23, 4-5), used from (22-23, 6)
     8  X............................XXX
     9  X............................XXX
    10  X............................XXX
@@ -331,12 +331,12 @@ Cheryl sits at the mouth and lets go. Fade to black with a long sliding whoosh t
 - **Lamps** (9, 5) and (18, 5): as in the Step Gallery.
 - **The hooked-up ladder** (8, 4–5): First: "A ladder, hooked up high on the wall, and a bronze chain hanging from its cleat. Up above it, a dark square." Pull the chain → `halls.ladder`: a rattle, a crash, and the ladder drops to the floor. "That'll save my knees." Then: "The ladder, down. A way back to the gallery and the Steps."
 - **The chute mouth** (3–4, 5): "Where I came in. It's a long way up, and it's polished."
-- **The speaking tube** (22, 5): a bronze horn in the wall. Before the valve, each listen plays one faint line in turn (speaker label FAR-OFF VOICE, small italic):
+- **The speaking tube** (20, 5): a bronze horn in the wall. Before the valve, each listen plays one faint line in turn (speaker label FAR-OFF VOICE, small italic):
   1. FAR-OFF VOICE: …Tessel: Forward!… …please disperse…
   2. *(only if `counter.left`)* FAR-OFF VOICE: …a HUNDRED, Duncan…
   3. FAR-OFF VOICE: …lemons, onions…
   Cheryl, after the first: "A speaking tube. Somebody up there is saying 'Tessel: Forward.' It's coming from the Square." After the valve: "Very quiet up there now. Very, very quiet."
-- **The valve wheel** (23, 5): First: "A big bronze wheel, beside the flooded passage. Its handle's gone; there's only a bare square spindle." Then: "A square spindle. It wants a key."
+- **The valve wheel** (22–23, 4–5; art `machines:valve_spindle_*`, then `valve_key_*`, `valve_key_turned_*`, `valve_key_jammed_*`): First: "A big bronze wheel, beside the flooded passage. Its handle's gone; there's only a bare square spindle." Then: "A square spindle. It wants a key."
 - **Crowbar on the wheel**: "Square. The crowbar's round. Nothing doing." / "Somebody had a key for this."
 - **The north passage, flooded** (25–26, 1–6): First: "The passage north. Toward the Crown." / "Knee-deep and running fast. It'd have me off my feet and down the other corridor in a moment." Then: "Knee-deep and running. Not without a reason to."
 - **The gushing pipe** (27, 2): "Fresh water, gushing out of a cracked pipe. Not seawater. It smells like the Fountain on a hot day."
@@ -350,7 +350,7 @@ Cheryl sits at the mouth and lets go. Fade to black with a long sliding whoosh t
 1. Cheryl fits the valve key onto the spindle and heaves. A groan; a 1 px shake; again; a 2 px shake. The wheel turns with a long grinding squeal.
 2. The gushing pipe slows and stops. Down the passage the water drains away over two seconds with a gurgle (tiles swap from flowing water to wet floor).
 3. Silence for one second.
-4. Down the speaking tube at (22, 5), small and far away: FAR-OFF VOICE: The FOUNTAIN! The Fountain's STOPPED!
+4. Down the speaking tube at (20, 5), small and far away: FAR-OFF VOICE: The FOUNTAIN! The Fountain's STOPPED!
 5. FAR-OFF VOICE: Five hundred YEARS!
 6. Cheryl tries the wheel back. It won't move. "It won't go back. It's jammed for good, key and all."
 7. "I've stopped the Fountain. Five hundred years, and I've stopped it."
