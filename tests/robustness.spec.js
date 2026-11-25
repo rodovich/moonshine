@@ -52,6 +52,40 @@ test('a save from an older build still loads', async ({ page }) => {
   }
 });
 
+test('content.onLoad fixes a loaded save before the map starts, and never runs on a new game', async ({ page }) => {
+  const install = () => page.evaluate(() => {
+    const m = window.moonshine;
+    window.loadLog = [];
+    const enter = m.content.maps.test_street.onEnter;
+    m.content.maps.test_street.onEnter = async (g) => { window.loadLog.push(`enter:${g.hasItem('letter')}`); if (enter) await enter(g); };
+    m.content.onLoad = [
+      (g) => { window.loadLog.push('first'); throw new Error('a broken rule'); },
+      async (g) => { window.loadLog.push('second'); if (g.hasItem('letter') && !g.flag('kept.letter')) g.takeItem('letter'); g.setFlag('migrated'); },
+    ];
+  });
+  await page.goto('/');
+  const save = { version: 1, map: 'test_street', x: 5, y: 6, facing: 'down', flags: { street_intro: true }, inventory: ['letter'] };
+  await page.evaluate((s) => localStorage.setItem('moonshine.save.v1', JSON.stringify(s)), save);
+  await page.goto('/');
+  await page.waitForFunction(() => window.moonshine && window.moonshine.scene);
+  await install();
+  await page.waitForTimeout(700);
+  await press(page, 'Enter'); // Continue
+  await waitFor(page, () => window.moonshine.snapshot().scene === 'world');
+  await waitIdle(page);
+  expect(await page.evaluate(() => window.loadLog)).toEqual(['first', 'second', 'enter:false']);
+  const s = await snap(page);
+  expect(s.items).not.toContain('letter');
+  expect(await page.evaluate(() => window.moonshine.world.state.flags.migrated)).toBe(true);
+  // A new game doesn't run it.
+  await page.goto('/');
+  await page.waitForFunction(() => window.moonshine && window.moonshine.scene);
+  await install();
+  await page.evaluate(() => window.moonshine.startFromTitle('new'));
+  await waitFor(page, () => window.moonshine.snapshot().scene === 'world');
+  expect(await page.evaluate(() => window.loadLog)).not.toContain('second');
+});
+
 test('effects and pans always finish', async ({ page }) => {
   await boot(page, STREET);
   await waitIdle(page);
