@@ -120,6 +120,9 @@ test('keyboard: the whole opening', async ({ page }) => {
 async function moonriseShots(page, advance) {
   const log = [];
   await readThrough(page, advance, { log, stop: (s) => s.picture });
+  // The pins, lined up on the Gate, before the glow.
+  let sawPins = false;
+  await readThrough(page, advance, { log, stop: (s) => { if ((s.text || '').includes('Any second now')) sawPins = true; return sawPins && !s.text; } });
   await page.waitForTimeout(3000);
   await shot(page, 'opening-09-vista-glow');
   await waitFor(page, () => (window.moonshine.snapshot().text || '') === 'No.', null, 30000);

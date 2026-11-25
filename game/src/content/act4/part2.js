@@ -55,6 +55,7 @@ export function withAct4Part2(maps) {
           for (let y = 11; y <= 13; y++) for (let x = 0; x < 32; x++) flood(T, x, y, 2);
           for (let y = 4; y <= 6; y++) for (let x = 0; x <= 9; x++) flood(T, x, y, 2);
           for (const y of [4, 6]) T.set('detail', 10, y, 'bilge_flood:flood2_lap_w');
+          ['l', 'm', 'm', 'r'].forEach((k, i) => T.set('ground', 22 + i, 7, `bilge_deep:wstairs_deep_${k}`));
           T.set('detail', 6, 11, null); T.set('detail', 6, 12, null);
           // The Fishmonger's crate.
           T.set('detail', 4, 4, 'props:crate', true);
@@ -89,7 +90,8 @@ export function withAct4Part2(maps) {
           },
         },
         {
-          id: 'piano_canal', x: 6, y: 8, w: 2, h: 2, solid: false, shadow: false, when: act4,
+          // Its look reaches up the bank to the quay, so it can be looked at from (6-7, 6).
+          id: 'piano_canal', x: 6, y: 7, w: 2, h: 3, solid: false, shadow: false, when: act4,
           sprite: (g) => ({ sheet: bilge_piano, frame: listStage(g) === 2 ? 'piano_lid' : 'piano_halfsunk' }),
           interact: (g) => g.describe(listStage(g) === 2 ? "Just the lid now. It's going down with dignity." : 'The piano, half in the canal, lid up, like a sunbather.'),
         },
@@ -127,7 +129,7 @@ export function withAct4Part2(maps) {
       // Into the shack for the coil, and back.
       g.setSprite(self, { sheet: mottArt });
       self.offset = [0, 0];
-      await g.moveNpc(self, [2, 13], { speed: 18 });
+      await g.moveNpc(self, 'r', { ghost: true, speed: 18 }); // off his crates, to the door
       g.faceNpc(self, 'up');
       g.sfx('door_open');
       await g.moveNpc(self, 'u', { ghost: true, speed: 18 });
@@ -144,7 +146,7 @@ export function withAct4Part2(maps) {
       await getItem(g, 'copper_throat');
       await g.say(self, 'Grandad said it came off "the greedy one." Never knew what that meant. Still don\'t.', "And take the jug. Square, so it don't roll. I've no more use for it.");
       await getItem(g, 'square_jug');
-      await g.moveNpc(self, 'r', { ghost: true, speed: 18 }); // back onto his crates
+      await g.moveNpc(self, 'l', { ghost: true, speed: 18 }); // back onto his crates
       g.setSprite(self, mottSits);
       self.offset = [0, -8];
     }
@@ -154,12 +156,12 @@ export function withAct4Part2(maps) {
       tileset: act4Tiles,
       hide: ['sea_cave'],
       tiles: (g, T) => {
-        T.set('detail', 3, 13, 'props:crate', true); // Mott's crates by his door
-        T.block(0, 21, false);
+        T.set('detail', 1, 13, 'props:crate', true); // Mott's crates, just left of his door, so (2, 13) in front of it stays free
+        T.set('ground', 0, 21, 'cave_low:cave_mouth_low', false);
       },
       exits: [{ x: 0, y: 21, to: 'sea_cave', at: [4, 6], facing: 'up', sfx: 'step_stone', when: act4 }],
       entities: [{
-        id: 'mott_a4', name: 'Mott', x: 3, y: 13, facing: 'down', when: act4,
+        id: 'mott_a4', name: 'Mott', x: 1, y: 13, facing: 'down', when: act4,
         sprite: mottSits, offset: [0, -8], turnToTalk: false,
         interact: async (g, self) => {
           if (g.flag('got.throat')) return g.say(self, cycle(g, 'a4.mottAfter', ["Whatever you're doing, Cheryl, do it before she tips any further.", "I'll stay off the moonshine. I'll want to remember this."]));
@@ -196,11 +198,12 @@ export function withAct4Part2(maps) {
     out.harbor = overlayMap(harbor, {
       when: act4,
       tileset: act4Tiles,
-      hide: ['mott', 'harbor_office'],
+      hide: ['mott', 'harbor_office', 'ferry', 'bollard_8', 'bollard_18'],
       entities: [
+        ...[8, 18].map((x) => ({ id: `bollard_a4_${x}`, x, y: 8, solid: false, when: act4, lookKey: 'bollards_a4', look: 'A bollard. Nobody sitting on it. Nobody sitting on any of them.' })),
         { id: 'bollard_a4', x: 13, y: 8, solid: false, when: act4, look: "Mott's bollard. No Mott, no jug. He'll be at his shack, up the Goat Path." },
         { id: 'harbor_office_a4', x: 12, y: 2, h: 2, solid: false, when: act4, look: 'A new note: GONE TO LOOK FOR THE LANDING. STILL.' },
-        { id: 'ferry_a4', x: 10, y: 9, w: 6, h: 3, solid: false, when: act4, look: "The Persistence is tied up at a tilt. Even the ferry's leaning." },
+        { id: 'ferry_a4', x: 10, y: 9, w: 6, h: 3, solid: false, when: act4, look: "The Persistence, tied up and going nowhere. She's level. I checked. Nothing else is." },
       ].map((o) => ({ use: { '*': cherylDeclines }, ...o })),
       onEnter: surfaceAudio,
     });
@@ -214,10 +217,15 @@ export function withAct4Part2(maps) {
       when: act4,
       tileset: act4Tiles,
       hide: ['keeper'],
-      entities: [firstTalk(find(room, 'keeper'), [
-        "The lamp's rattling in its frame. Rattling! I've tightened every screw. It's the floor. The floor's not right.",
-        "Don't tell me to look out the window. I know what you're going to say. Don't say it.",
-      ])],
+      entities: [{
+        // Act 4's first talk, then her repeat (structure pass): the telescope she gave away in Act 2.
+        ...find(room, 'keeper'), id: 'keeper_a4', when: act4,
+        interact: (g, self) => (bump(g, 'a4.keeper') === 0
+          ? g.say(self,
+            "The lamp's rattling in its frame. Rattling! I've tightened every screw. It's the floor. The floor's not right.",
+            "Don't tell me to look out the window. I know what you're going to say. Don't say it.")
+          : g.say(self, "I gave my telescope away. I don't miss it. ...I keep looking at where it was.")),
+      }],
       onEnter: surfaceAudio,
     });
   }

@@ -5,6 +5,7 @@
 import { items_act4 } from '../../art/act4_sprites.js';
 import { bump, cycle, getItem, talking, cherylDeclines } from '../opening/common.js';
 import { buildLayers } from '../opening/grid.js';
+import { act4Tiles } from './tiles.js';
 
 export { bump, cycle, getItem, talking, cherylDeclines };
 
@@ -136,11 +137,15 @@ export function overlayMap(base, o) {
   };
   return {
     ...base,
-    tileset: o.tileset || base.tileset,
+    // Act 4's sheets on top of the base map's, so an overlay can draw any of them.
+    tileset: { sheets: { ...base.tileset?.sheets, ...act4Tiles.sheets, ...o.tileset?.sheets }, tiles: { ...base.tileset?.tiles, ...act4Tiles.tiles, ...o.tileset?.tiles } },
     patches,
     lighting: o.lighting !== undefined ? pick('lighting') : base.lighting,
     entities: [...baseEntities, ...(o.entities || [])],
-    exits: [...(o.exits || []), ...(base.exits || [])],
+    // `baseExitsAt: [[x, y], ...]` switches off the base map's exits on those tiles while it applies.
+    exits: [...(o.exits || []), ...(base.exits || []).map((e) => ((o.baseExitsAt || []).some(([x, y]) => x >= e.x && y >= e.y && x < e.x + (e.w || 1) && y < e.y + (e.h || 1))
+      ? { ...e, when: (g) => !on(g) && (!e.when || e.when(g)) }
+      : e))],
     // `baseTriggers: false` switches the base map's triggers off while the overlay applies.
     triggers: [...(o.triggers || []), ...(base.triggers || []).map((t) => (o.baseTriggers === false
       ? { ...t, when: (g) => !on(g) && (!t.when || t.when(g)) }

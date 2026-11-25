@@ -9,7 +9,7 @@ import { overlayMap, act4, risen, listing, bump, cycle, getItem, cherylDeclines 
 import { ringTheBell } from './belfry.js';
 import { clockmaker as clockmakerArt } from '../../art/act4_sprites.js';
 import { act4_props } from '../../art/act4_sprites.js';
-import { ambrose as ambroseArt, mayor as mayorArt } from '../../art/act2_npcs.js';
+import { ambrose as ambroseArt, mayor as mayorArt, bench_man_glasses as benchManGlasses } from '../../art/act2_npcs.js';
 import { LOOKS } from '../act2/common.js';
 import { fish as fishArt } from '../../art/landmarks.js';
 
@@ -169,7 +169,10 @@ export function withAct4(maps) {
     when: act4,
     hide: ['ambrose', 'tower_door', 'sundial'],
     tiles: (g, T) => {
-      if (g.flag('clockmaker.out')) { T.block(4, 6, false); T.block(5, 6, false); }
+      if (g.flag('clockmaker.out')) {
+        for (let y = 0; y < 2; y++) for (let x = 0; x < 2; x++) T.set('ground', 4 + x, 5 + y, `tower_open:tower_open_x${x}y${y}`);
+        T.block(4, 6, false); T.block(5, 6, false);
+      }
     },
     exits: [{ x: 4, y: 6, w: 2, to: 'belfry', at: [1, 7], facing: 'up', when: (g) => act4(g) && !!g.flag('clockmaker.out') }],
     entities: [{
@@ -196,7 +199,7 @@ export function withAct4(maps) {
 
   // The Fountain's rims, east and west, so the basin, the hatch, and the fish keep their own clicks.
   const fountainRim = (x) => ({
-    id: `fountain_a4_${x}`, lookKey: 'fountain_a4', x, y: 7, w: 1, h: 4, solid: false, when: act4,
+    id: `fountain_a4_${x}`, lookKey: 'fountain_a4', x, y: 7, w: 1, h: 4, solid: false, when: act4, unreachable: behindRope,
     interact: async (g) => {
       if (g.flag('pumps.burst')) {
         return g.describe('Flowing again. Fuller than before. I shut its feed down there, and the pumps found it anyway.', "There's no getting to that hatch now.");
@@ -209,8 +212,9 @@ export function withAct4(maps) {
     use: { crowbar: (g) => g.describe('Not with the whole Square watching.'), '*': cherylDeclines },
   });
 
+  const behindRope = (g) => fountainDry(g) && mayorHere(g) && 'behind the rope, while the Mayor guards it';
   const hatch = {
-    id: 'ring_hatch', x: 11, y: 8, w: 2, solid: false, when: (g) => fountainDry(g) && !g.flag('hatch.open'),
+    id: 'ring_hatch', x: 11, y: 8, w: 2, solid: false, when: (g) => fountainDry(g) && !g.flag('hatch.open'), unreachable: behindRope,
     interact: async (g) => {
       await g.describe('A bronze ring set in a square hatch, under the coins.', "On the Ship Plan, there's a shaft going down right here.");
       g.pose('player', 'reach_down');
@@ -224,7 +228,7 @@ export function withAct4(maps) {
   };
 
   const basin = {
-    id: 'basin', x: 11, y: 9, w: 2, solid: false, when: fountainDry,
+    id: 'basin', x: 11, y: 9, w: 2, solid: false, when: fountainDry, unreachable: behindRope,
     look: 'Five hundred years of wishes in a heap. Mostly buttons. Somebody wished with a whole spoon.',
   };
 
@@ -251,7 +255,7 @@ export function withAct4(maps) {
     when: (g) => fountainDry(g) && mayorHere(g) && g.player.facing === facing,
     run: async (g) => {
       await g.say('Mayor', 'Miss! Behind the rope, please. Pending an inquiry.');
-      await g.movePlayer([back]);
+      await g.movePlayer(back);
     },
   });
 
@@ -292,7 +296,7 @@ export function withAct4(maps) {
     ],
     // The hatch and basin come before the whole-Fountain hotspot, so they win on their tiles.
     entities: [hatch, basin, cordonSign, mayor4, fountainRim(10), fountainRim(13), {
-      id: 'fish_a4', x: 11, y: 7, w: 2, solid: false, kind: 'object', when: act4, offset: [0, 19], // on the rim row, drawn where Act 2 draws it
+      id: 'fish_a4', x: 11, y: 7, w: 2, solid: false, kind: 'object', when: act4, unreachable: 'up on the Fountain, above the hatch (the rims answer for the Fountain)', offset: [0, 19], // on the rim row, drawn where Act 2 draws it
       sprite: (g) => ({ sheet: fishArt, frame: fountainDry(g) ? 'fish_dry' : 'fish' }),
       interact: (g) => g.describe(fountainDry(g) ? "The bronze fish, with nothing coming out of its mouth. It looks like it's waiting to be asked." : 'The fish, spouting again. Harder than before. It looks pleased with itself.'),
     }],
@@ -348,7 +352,18 @@ export function withAct4(maps) {
     hide: ['girl_1', 'girl_2', 'girl_3', 'bench_man', 'watering_woman'],
     entities: [
       ...girls4,
-      { ...firstTalk(find(lamp, 'bench_man'), ['Says here the Fountain stopped because of "subterranean adjustments." I said adjustments. I said it yesterday.']) },
+      {
+        // Glasses on now (structure pass), on his bench until the reveal, when he's on the Bilge bridge.
+        ...find(lamp, 'bench_man'), id: 'bench_man_a4',
+        when: (g) => act4(g) && !g.flag('act4.risen'),
+        sprite: { sheet: benchManGlasses, frame: 'sit_down' },
+        interact: (g, self) => (bump(g, 'a4.bench_man') === 0
+          ? g.say(self, 'Says here the Fountain stopped because of "subterranean adjustments." I said adjustments. I said it yesterday.')
+          : g.say(self, cycle(g, 'a4.bench_repeat', [
+            "New Tide-Sheet. Glasses on. It says the Bilge is 'a little damp.' I can read every word. I liked it better blurred.",
+            'Low tide "a little lower than usual," it says. Printed. In ink. I can read every word of it.',
+          ]))),
+      },
       { ...firstTalk(find(lamp, 'watering_woman'), ["My husband says the doorsteps are the clock's fault. I said, everything's the clock's fault with you.", 'He said, exactly.']) },
     ],
     onEnter: surfaceAudio,
@@ -358,11 +373,25 @@ export function withAct4(maps) {
   // The Archive: Ottilie reads the Ship Plan.
 
   const archive = maps.archive;
+  // The four leads in her reading of the Ship Plan (structure pass; 04-the-list.md, "Ottilie Brask").
+  const OTTILIE_LEADS = {
+    bell: 'And a rope from the eels right up to... the bell tower? Ambrose will be unbearable.',
+    copper: 'The middle eel has a collar. Copper, it says. Who has that much copper? Mott. In his still.',
+    fountain: "A pipe from the eels straight up to the Fountain. The Founders' wine cellar. Hence the Mayor's rope.",
+    girls: "Thin, Stout, Middle. That's the skipping rhyme! Those girls have been singing about eels for centuries.",
+  };
 
   const ottilie4 = {
     ...find(archive, 'ottilie'), id: 'ottilie_a4', when: act4,
     interact: async (g, self) => {
-      if (g.flag('ottilie.readPlan')) return g.say(self, cycle(g, 'ottilie.a4after', ['Three eels, side by side, in the belly of a ceremonial fish. It all fits.', "Snails for the doorsteps. Eels for the fish. I'm on a roll, Cheryl."]));
+      if (g.flag('ottilie.readPlan')) {
+        // Her lead repeat names the first lead not yet followed (structure pass).
+        const lead = !g.flag('bell.restored') ? OTTILIE_LEADS.bell
+          : !g.flag('got.throat') ? OTTILIE_LEADS.copper
+          : (g.flag('girls.heard') || 0) < 3 ? OTTILIE_LEADS.girls : null;
+        if (lead) return g.say(self, lead);
+        return g.say(self, cycle(g, 'ottilie.a4after', ['Three eels, side by side, in the belly of a ceremonial fish. It all fits.', "Snails for the doorsteps. Eels for the fish. I'm on a roll, Cheryl."]));
+      }
       if (bump(g, 'ottilie.a4') === 0) {
         return g.say(self, 'Cheryl. Glowing doorsteps. A dry fountain. And you, coming out of my door that doesn\'t open.', "I've decided not to think about the door. I'm thinking about the doorsteps. Phosphorescent snails, I think.");
       }
@@ -372,7 +401,9 @@ export function withAct4(maps) {
       ...(find(archive, 'ottilie').use || {}),
       ship_plan: async (g, self) => {
         if (g.flag('ottilie.readPlan')) return g.say(self, 'Thin, Stout, and Middle. I\'ve written it on my hand.');
-        await g.say(self, "Your rubbing! Let me-- oh. Oh, Cheryl. That's a FISH. A big, hollow, ceremonial fish.", 'And glyphs! Founder glyphs! I know these three. This one\'s "thin." This one\'s "stout." This one\'s "middle."', 'Thin, Stout, and Middle. Types of eel, obviously. A thin eel, a stout eel, and a medium eel.', "This is the most important document in Tessel. I'm going to need a bigger monograph.");
+        await g.say(self, "Your rubbing! Let me-- oh. Oh, Cheryl. That's a FISH. A big, hollow, ceremonial fish.", 'And glyphs! Founder glyphs! I know these three. This one\'s "thin." This one\'s "stout." This one\'s "middle."', 'Thin, Stout, and Middle. Types of eel, obviously. A thin eel, a stout eel, and a medium eel.',
+          OTTILIE_LEADS.bell, OTTILIE_LEADS.copper, OTTILIE_LEADS.fountain, OTTILIE_LEADS.girls,
+          "This is the most important document in Tessel. I'm going to need a bigger monograph.");
         g.setFlag('ottilie.readPlan');
         await g.describe('Thin, Stout, and Middle. The three bars. The three sisters in the rhyme.');
       },
@@ -390,21 +421,8 @@ export function withAct4(maps) {
 
   const steps4 = overlayMap(steps, {
     when: act4,
-    // The open hundredth step: in Act 4 it's a hole in the east half of the flight,
-    // with room to pass on the west, so the Steps lead down to the Square again.
-    baseTriggers: false,
-    tiles: (g, T) => { if (g.flag('step.open')) T.block(10, 19, true); },
-    triggers: [{
-      x: 9, y: 19, stop: false,
-      when: (g) => act4(g) && !!g.flag('step.open') && !g.flag('stepped.hundredth'),
-      run: async (g) => { g.setFlag('stepped.hundredth'); await g.describe('I step over the open step, the way you step over a sleeping dog.'); },
-    }],
     hide: ['kid', 'kid_after', 'counting_woman', 'basin_woman'],
     entities: [
-      {
-        id: 'open_step_a4', x: 10, y: 19, solid: false, when: (g) => act4(g) && !!g.flag('step.open'),
-        look: "The hundredth step, open. Downstairs is down there, waiting. I've got the Fountain to see to first.",
-      },
       {
         ...kidBase, id: 'kid_a4', when: act4,
         interact: (g, self) => (bump(g, 'kid.a4') === 0
@@ -427,6 +445,28 @@ export function withAct4(maps) {
     onEnter: surfaceAudio,
   });
 
+  // From Act 4 on, through Acts 5 and 6, the hundredth step is boarded over
+  // (structure pass, client feedback): a plank lid, walkable, MIND THE STEP;
+  // in the epilogue somebody's chalked 100 on it. No hole, no prompt.
+  const boarded = (g) => !!g.flag('step.open') && (!!g.flag('act4.started') || !!g.flag('epilogue'));
+  const stepsBoarded = overlayMap(steps4, {
+    when: boarded,
+    baseTriggers: false,
+    baseExitsAt: [[9, 19], [10, 19]],
+    hide: ['hundredth_step', 'hollow_step', 'hollow_step_free'],
+    tiles: (g, T) => {
+      const lid = g.flag('epilogue') ? 'chalked' : 'boarded';
+      T.raw('ground', 9, 19, { tile: `steps_lid:${lid}_l`, step: 'step_bonk' });
+      T.raw('ground', 10, 19, { tile: `steps_lid:${lid}_r`, step: 'step_bonk' });
+    },
+    entities: [{
+      id: 'boarded_step', x: 9, y: 19, w: 2, solid: false, when: boarded,
+      interact: (g) => (g.flag('epilogue')
+        ? g.describe('Boarded over, and somebody\'s chalked 100 on it. Twice.')
+        : g.describe('Somebody\'s boarded over the hundredth step. MIND THE STEP. BY ORDER.', 'The Mayor\'s handwriting. He\'s never forgiven a step.')),
+    }],
+  });
+
   // ---------------------------------------------------------------------------
   // Cistern Court and the flat.
 
@@ -440,7 +480,7 @@ export function withAct4(maps) {
       firstTalk(find(court, 'old_man'), ["Gerald's pieces won't stay on the board. Gerald says it's a sign. I said, a sign of what. He said, of pieces."]),
       firstTalk(find(court, 'neighbor_morning'), ['The doorsteps GLOWED. So I put my sheets on the step all night. Nothing. Grey as a Tuesday.']),
       { ...find(court, 'well'), id: 'well_a4', when: act4, interact: (g) => g.describe("The well's breathing harder this morning. In and out, slow, like it's asleep.") },
-      { ...find(court, 'cat_morning'), id: 'cat_a4', when: act4, interact: (g) => g.describe("She's moved her bed against the uphill wall. She's not wrong.") },
+      { ...find(court, 'cat_morning'), id: 'cat_a4', when: act4, interact: (g) => g.describe("She's moved herself up against the uphill wall. She's not wrong.") },
     ],
     onEnter: async (g) => { g.playMusic('morning_after'); await surfaceAudio(g); },
     ambient: [{
@@ -481,7 +521,7 @@ export function withAct4(maps) {
   });
 
 
-  return { ...withAct4Part2(maps), crown: crown4, fountain_square: square4, lamp_street: lamp4, archive: archive4, hundred_steps: steps4, cistern_court: court4, flat: flat4 };
+  return { ...withAct4Part2(maps), crown: crown4, fountain_square: square4, lamp_street: lamp4, archive: archive4, hundred_steps: stepsBoarded, cistern_court: court4, flat: flat4 };
 }
 
 // The act's start: the morning after Act 3, in the flat (design: "What changes when Act 4 begins").
