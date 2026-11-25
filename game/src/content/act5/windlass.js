@@ -368,13 +368,25 @@ const windlassObjects = [
   },
   {
     // The tube and, beside it, the Keepers' ladder up to the belfry.
-    id: 'speaking_tube', x: 15, y: 2, w: 2,
+    // The tube. Its first look notices the rungs beside it.
+    id: 'speaking_tube', x: 15, y: 2,
+    interact: async (g) => {
+      const tube = toothSet(g) ? 'Wind. Gulls. Nothing yet.' : 'A tube from somewhere far above. I can hear wind in it, and gulls. And, very faintly, the Mayor.';
+      if (bump(g, 'tube') === 0 && !night(g)) return g.describe(tube, 'And rungs beside it, going up into the dark.');
+      return g.describe(tube);
+    },
+  },
+  {
+    // The Keepers' rungs beside it: looking (or clicking) offers the climb;
+    // walking up into them climbs (the exit at (16, 2)).
+    id: 'keepers_rungs', x: 16, y: 2,
+    // At night Act 6's own rungs (act6_rungs) answer here, with the same line.
+    unreachable: (g) => (night(g) ? "Act 6's rungs answer at night, with the same line" : null),
     interact: async (g) => {
       if (night(g)) return g.describe("Not tonight. Ambrose has the top end. I've got this one.");
-      const tube = toothSet(g) ? 'Wind. Gulls. Nothing yet.' : 'A tube from somewhere far above. I can hear wind in it, and gulls. And, very faintly, the Mayor.';
-      // The first look finds the rungs, and asks straight away.
-      if (bump(g, 'tube') === 0) await g.describe(tube, 'And rungs beside it, going up into the dark. Somebody had to climb up and clean it.');
-      else await g.describe(tube);
+      await g.describe(bump(g, 'rungs') === 0
+        ? 'Bronze rungs, going up into the dark. Somebody had to climb up and clean that tube.'
+        : 'The rungs up to the belfry.');
       const i = await g.choose('Climb up?', ['Yes', 'Not now']);
       if (i === 0) await climbToBelfry(g);
     },
