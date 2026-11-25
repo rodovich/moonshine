@@ -45,8 +45,7 @@ export class TextBox {
       const s = STYLES[style] || STYLES.npc;
       this.applyLayout();
       const lines = wrap(text, this.bw - PAD_X * 2);
-      const pages = [];
-      for (let i = 0; i < lines.length; i += LINES) pages.push(lines.slice(i, i + LINES));
+      const pages = paginate(lines);
       this.position = position;
       this.active = { pages, page: 0, shown: 0, pause: 0, style: s, styleName: style, speaker, resolve, choice: null, auto, autoT: 0, openT: this.openStart() };
     });
@@ -60,8 +59,7 @@ export class TextBox {
       // A long prompt pages like normal text; the options appear on its last page.
       this.applyLayout();
       const lines = prompt ? wrap(prompt, this.bw - PAD_X * 2) : [];
-      const pages = [];
-      for (let i = 0; i < lines.length; i += LINES) pages.push(lines.slice(i, i + LINES));
+      const pages = paginate(lines);
       if (!pages.length) pages.push([]);
       this.position = position;
       this.active = {
@@ -246,4 +244,17 @@ export class TextBox {
       drawText(ctx, o, x + 16, oy, { color: selected ? 'ui_select' : this.active.style.text });
     });
   }
+}
+
+// Lines into pages of LINES. A last page holding one lone word ('one.') takes
+// the line before it too, so no word sits alone on a page (this happens most
+// in the narrower phone panel, where lines wrap differently).
+export function paginate(lines) {
+  const pages = [];
+  for (let i = 0; i < lines.length; i += LINES) pages.push(lines.slice(i, i + LINES));
+  const last = pages[pages.length - 1];
+  if (pages.length > 1 && last.length === 1 && !last[0].trim().includes(' ')) {
+    last.unshift(pages[pages.length - 2].pop());
+  }
+  return pages;
 }

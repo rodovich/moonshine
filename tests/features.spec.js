@@ -393,3 +393,68 @@ test('a thing reachable only diagonally: Z reaches it, and a click walks to the 
   await press(page, 'z');
   await waitFor(page, () => (window.moonshine.snapshot().text || '').includes('plaque'), null, 5000);
 });
+
+test('a tap toward something on an open tile turns Cheryl to face it; holding walks on', async ({ page }) => {
+  // The belfry bell hangs overhead; its tiles are floor.
+  await boot(page, '?map=belfry&x=2&y=3&facing=down&flags=act4.started&seed=3');
+  await waitIdle(page);
+  await readAll(page);
+  await waitIdle(page);
+  await press(page, 'ArrowRight');
+  await page.waitForTimeout(300);
+  let s = await snap(page);
+  expect([s.x, s.y, s.facing]).toEqual([2, 3, 'right']);
+  await press(page, 'z');
+  await waitFor(page, () => (window.moonshine.snapshot().text || '').includes('The bell'), null, 5000);
+  await readAll(page);
+  await waitIdle(page);
+  // Standing on the bell's tiles, Cheryl walks about freely.
+  await press(page, 'ArrowRight');
+  await waitIdle(page);
+  await press(page, 'ArrowUp');
+  await waitIdle(page);
+  s = await snap(page);
+  expect([s.x, s.y]).toEqual([3, 2]);
+  // Facing away from it, holding the key turns, then walks onto it.
+  await runScript(page, "g.place('player', 2, 3, 'left');");
+  await page.keyboard.down('ArrowRight');
+  await page.waitForTimeout(450);
+  await page.keyboard.up('ArrowRight');
+  await waitIdle(page);
+  s = await snap(page);
+  expect(s.x).toBeGreaterThan(2);
+});
+
+test('no lone word on the last page of a line', async ({ page }) => {
+  await boot(page, STREET);
+  const pages = await page.evaluate(async () => {
+    const { paginate } = await import('/src/engine/textbox.js');
+    return [paginate(['a b', 'c d', 'e f', 'one.']), paginate(['a b', 'c d', 'e f', 'one more.']), paginate(['one.'])];
+  });
+  expect(pages[0]).toEqual([['a b', 'c d'], ['e f', 'one.']]);
+  expect(pages[1]).toEqual([['a b', 'c d', 'e f'], ['one more.']]);
+  expect(pages[2]).toEqual([['one.']]);
+});
+
+test('a tap on the top half of a door goes through the door', async ({ page }) => {
+  await boot(page, '?map=cistern_court&x=3&y=13&seed=3');
+  await waitIdle(page);
+  await readAll(page);
+  await waitIdle(page);
+  expect(await page.evaluate(() => window.moonshine.world.map.solid(3, 10))).toBe(true);
+  await clickTile(page, 3, 10); // the wall tile above the flat's door
+  await waitFor(page, () => window.moonshine.snapshot().map === 'flat', null, 10000);
+});
+
+test('a tap past a trigger marked avoid routes around it (the Act 4 cordon)', async ({ page }) => {
+  // Act 4, the Mayor guarding the roped-off Fountain; the four rope triggers
+  // step Cheryl back. Marked avoid, a tap beyond the Fountain goes around them.
+  await boot(page, '?map=fountain_square&x=11&y=13&flags=act1.moonrise,act2.done,act3.started,act3.done,act4.started,halls.valve,clockmaker.atDoor&seed=3');
+  await waitIdle(page);
+  await page.evaluate(() => { for (const t of window.moonshine.world.mapDef.triggers.slice(0, 4)) t.avoid = true; });
+  await clickTile(page, 11, 4);
+  await waitFor(page, () => { const s = window.moonshine.snapshot(); return (s.x === 11 && s.y === 4) || !!s.text; }, null, 20000);
+  const s = await snap(page);
+  expect(s.text || '').not.toContain('Behind the rope');
+  expect([s.x, s.y]).toEqual([11, 4]);
+});

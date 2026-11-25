@@ -349,7 +349,8 @@ export class World {
   pathFor(mover, goals, { closest = false, ignoreEntities = false } = {}) {
     const goalKeys = new Set(goals.map(([x, y]) => `${x},${y}`));
     const avoidExits = mover.isPlayer;
-    const exits = avoidExits ? this.activeExits() : null;
+    // Exits and triggers marked `avoid` (a cordon that turns her back) are walls to her routes.
+    const exits = avoidExits ? [...this.activeExits(), ...this.avoidedTriggers()] : null;
     // Cheryl's routes go around characters when they can. Moving non-solid
     // characters (patrollers, wanderers) never count, since they move on.
     // If characters are the only thing in the way, a second pass plans
@@ -786,6 +787,13 @@ export class World {
   // `blocked` is just floor until it opens.
   activeExits() {
     return (this.mapDef.exits || []).filter((ex) => !ex.when || ex.blocked || safeCall(ex.when, this.api));
+  }
+
+  // Triggers that Cheryl's routes go around unless the tap was on them:
+  // `avoid: true`, or `avoid: (g) => ...` while it holds. For a trigger that
+  // turns her back, so a tap past it doesn't walk her into it every time.
+  avoidedTriggers() {
+    return (this.mapDef.triggers || []).filter((tr) => tr.avoid && (typeof tr.avoid !== 'function' || safeCall(tr.avoid, this.api)));
   }
 
   isExit(x, y, exits = null) {
