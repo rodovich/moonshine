@@ -19,7 +19,7 @@
 
 import { composedMap, blankGrid } from '../opening/grid.js';
 import { act2Tiles } from './tiles.js';
-import { layout, house, pave, lowRoof, bump, cycle, firstMeet, cherylDeclines, actWrongness } from './common.js';
+import { layout, house, pave, lowRoof, bump, cycle, firstMeet, cherylDeclines, actWrongness, notFounderOld } from './common.js';
 import { props } from '../../art/props.js';
 import { fishmonger } from '../../art/act5_sprites.js';
 import { boatman } from '../../art/act4_sprites.js';
@@ -94,6 +94,12 @@ function compose() {
   }
   L.set('detail', 6, 11, 'bilge_flood:flood1_lap_w'); L.set('detail', 6, 12, 'bilge_flood:flood1_lap_w');
   for (let y = 14; y < H; y++) for (let x = 0; x < W; x++) L.set('ground', x, y, lowRoof(x, y), true);
+  // A painted board at the east end: HARBOR ->.
+  ['0', '1', '2'].forEach((n, i) => L.set('detail', 29 + i, 10, `signpost:harbor_${n}`));
+  // The west end: steps up from the flooded quay to the Goat Path, and the cliff below.
+  L.set('ground', 0, 11, 'bilge_west:steps_n_f1', false); L.set('ground', 0, 12, 'bilge_west:steps_m_f1', false);
+  L.set('ground', 0, 13, 'bilge_west:steps_s', false);
+  L.set('ground', 0, 14, 'bilge_west:cliff_a', true); L.set('ground', 0, 15, 'bilge_west:cliff_b', true);
   return L.done();
 }
 
@@ -101,6 +107,7 @@ function compose() {
 // Objects
 
 const objects = [
+  { id: 'sign_harbor', x: 29, y: 10, w: 3, look: 'A painted board: HARBOR, and an arrow pointing east along the canal.' },
   {
     id: 'water_stairs', x: 22, y: 8, w: 4,
     looks: [
@@ -118,6 +125,9 @@ const objects = [
   // (The Fishmonger stands in front of her own door at (4, 3).)
   ...DOORS.filter((x) => x !== 4).map((x) => ({ id: `door_${x}`, x, y: 2, h: 2, lookKey: 'bilge_doors', look: 'Not my door. Wet doorstep, though.' })),
 ].map((o) => ({ solid: false, use: { '*': cherylDeclines }, ...o }));
+
+// Old, but not Founder-old (Ottilie's rubbing instruction: floors, where the light falls).
+for (const o of objects) if (['water_stairs', 'post'].includes(o.id.replace(/_\d+.*$/, ''))) o.use = { ...o.use, paper_charcoal: notFounderOld };
 
 // ---------------------------------------------------------------------------
 // People
@@ -194,6 +204,8 @@ export const bilgeMap = composedMap(compose, {
   exits: [
     { x: 11, y: 0, w: 2, to: 'fountain_square', at: [11, 15], facing: 'up' },
     { x: 31, y: 11, h: 3, to: 'harbor', at: [1, 6], facing: 'right', sfx: 'step_stone' },
+    // West: up the Goat Path (structure pass). Arrives at its bottom, (14, 39–41).
+    { x: 0, y: 11, h: 3, to: 'goat_path', at: [14, 39], facing: 'left', sfx: 'step_stone' },
   ],
   triggers: [
     {

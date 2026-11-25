@@ -6,12 +6,13 @@
 // people. Screenshots of key moments go to tests/screenshots/act2-*.
 //
 // The runs start on Lamp Street the morning after, carrying what a player
-// usually has from the opening (soap, hat, moon chart).
+// usually has from the opening (soap, moon chart). Cheryl's own hat is retired
+// (structure pass): the straw hat comes out of the Shop window.
 import { test, expect } from '@playwright/test';
 import { snap, waitFor, shot } from './helpers.js';
 
 const DIRKEY = { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' };
-const START = '?map=lamp_street&x=3&y=1&facing=down&flags=act1.moonrise,act1.done,got.soap,got.hat,got.moon_chart&items=moon_chart,soap,hat';
+const START = '?map=lamp_street&x=3&y=1&facing=down&flags=act1.moonrise,act1.done,got.soap,got.moon_chart&items=moon_chart,soap';
 
 // ---- shared ---------------------------------------------------------------
 
@@ -73,7 +74,7 @@ async function readUntil(page, advance, substr) {
 const kbAdvance = (page) => () => page.keyboard.press('z');
 
 async function kbWalk(page, x, y) {
-  for (let guard = 0; guard < 120; guard++) {
+  for (let guard = 0; guard < 400; guard++) { // the Goat Path alone is about 130 steps
     const s = await snap(page);
     if (s.x === x && s.y === y) return;
     const next = await page.evaluate(([x, y]) => {
@@ -101,7 +102,13 @@ async function kbWalk(page, x, y) {
 
 // Step onto an exit with an arrow key and wait for the new map.
 async function kbExit(page, x, y, dir, map) {
-  await kbWalk(page, x, y);
+  // A line on the way (wading into the flood, say) interrupts the walk: read it and go on.
+  for (let i = 0; i < 6; i++) {
+    await kbWalk(page, x, y);
+    const s = await snap(page);
+    if (s.x === x && s.y === y && !s.text && !s.busy) break;
+    await readThrough(page, () => page.keyboard.press('z'));
+  }
   await page.keyboard.press(DIRKEY[dir]);
   await waitFor(page, (m) => window.moonshine.snapshot().map === m, map, 6000);
   await waitFor(page, () => { const s = window.moonshine.snapshot(); return s.idle || !!s.text; }, null, 6000);
@@ -146,7 +153,10 @@ async function kbLookItem(page, item) {
 }
 
 async function kbInteract(page, id, item = null) {
-  for (let guard = 0; guard < 120; guard++) {
+  for (let guard = 0; guard < 400; guard++) {
+    // A line on the way (the hollow step's bonk, a wade) interrupts the walk: read it and go on.
+    const s0 = await snap(page);
+    if (s0.text || s0.busy) { await readThrough(page, () => page.keyboard.press('z')); continue; }
     const spot = await page.evaluate((id) => {
       const w = window.moonshine.world;
       const e = w.entity(id);
@@ -374,8 +384,46 @@ test.afterEach(async ({ page }, info) => {
   }
 });
 
-test('keyboard: Act 2 part 1', async ({ page }) => {
-  test.setTimeout(420000);
+// ---- the structure pass's threads, as steps the playthroughs share ----------
+
+// Lamp Street: the Man on Bench can't read; his wife has his glasses in her hair.
+async function kbTideSheet(page, adv) {
+  const read = (opts) => readThrough(page, adv, opts);
+  await kbInteract(page, 'bench_man');
+  let log = await read();
+  expect(joined(log)).toContain("Can't read a word without my glasses.");
+  await kbInteract(page, 'watering_woman');
+  log = await read();
+  expect(joined(log)).toContain("I've had them on since breakfast.");
+  expect(joined(log)).toContain("Somebody's counted the Hundred Steps.");
+  expect((await snap(page)).items).toContain('tide_sheet');
+}
+
+// The lamp room: the Keeper gives Cheryl her telescope on the second talk.
+async function kbTelescope(page, adv) {
+  const read = (opts) => readThrough(page, adv, opts);
+  await kbInteract(page, 'keeper');
+  await read();
+  await kbInteract(page, 'keeper');
+  const log = await read();
+  expect(joined(log)).toContain("it's pointing at the sea");
+  expect((await snap(page)).items).toContain('telescope');
+}
+
+// The Shop: Cheryl puts the telescope in the window herself; out comes the hat.
+async function kbWindowSwap(page, adv) {
+  const read = (opts) => readThrough(page, adv, opts);
+  await kbInteract(page, 'shopkeeper', 'telescope');
+  let log = await read();
+  expect(joined(log)).toContain('Curating is hands-off.');
+  await kbInteract(page, 'hat_display', 'telescope');
+  log = await read();
+  expect(joined(log)).toContain('In goes the telescope. Out comes the hat.');
+  expect((await snap(page)).items).toContain('shop_hat');
+}
+
+test('keyboard: Act 2, the piano first', async ({ page }) => {
+  test.setTimeout(600000);
   const errors = await start(page);
   const adv = kbAdvance(page);
   const read = (opts) => readThrough(page, adv, opts);
@@ -396,7 +444,10 @@ test('keyboard: Act 2 part 1', async ({ page }) => {
   log = await read();
   expect(joined(log)).toContain('Stout is a beer.');
 
-  // Up to the Crown: Ambrose, the Clockmaker, the parapet.
+  // The Tide-Sheet: the husband's glasses, in his wife's hair.
+  await kbTideSheet(page, adv);
+
+  // Up to the Crown: Ambrose, the Clockmaker.
   await kbExit(page, 22, 1, 'up', 'crown');
   await kbInteract(page, 'ambrose');
   await readUntil(page, adv, 'LIKE A COW');
@@ -407,12 +458,13 @@ test('keyboard: Act 2 part 1', async ({ page }) => {
   await shot(page, 'act2-04-clockmaker');
   await read();
 
-  // The Archive: Ottilie gives paper and charcoal and the saying.
+  // The Archive: Ottilie gives paper and charcoal: floors, where the light falls.
   await kbExit(page, 18, 7, 'up', 'archive');
   await kbInteract(page, 'ottilie');
   log = await readUntil(page, adv, 'hundredth step goes down');
   await shot(page, 'act2-05-ottilie');
   log = log.concat(await read());
+  expect(joined(log)).toContain('Where the light falls.');
   expect((await snap(page)).items).toContain('paper_charcoal');
 
   // The crypt and the Founders' Door.
@@ -424,9 +476,12 @@ test('keyboard: Act 2 part 1', async ({ page }) => {
   expect(joined(log)).toContain('Not one of ours.');
   await kbInteract(page, 'founders_door', 'paper_charcoal');
   log = await read();
-  expect(joined(log)).toContain('Nothing carved on it to rub.');
+  expect(joined(log)).toContain('Rubbed to a shine.');
   await kbExit(page, 2, 5, 'left', 'archive');
   await kbExit(page, 7, 12, 'down', 'crown');
+  await kbInteract(page, 'sundial', 'paper_charcoal');
+  log = await read();
+  expect(joined(log)).toContain('Old, but not Founder-old.');
   await kbExit(page, 11, 14, 'down', 'lamp_street');
 
   // The Hundred Steps.
@@ -437,34 +492,35 @@ test('keyboard: Act 2 part 1', async ({ page }) => {
   await kbInteract(page, 'counting_woman');
   await readUntil(page, adv, 'my feet get wet');
   await shot(page, 'act2-07-counting-woman');
-  await read();
+  log = await read();
+  expect(joined(log)).toContain('just room to squeeze past her');
   await kbStepDownAndUse(page, 10);
   log = await read();
   expect(joined(log)).toContain('Water has pooled');
-  await kbInteract(page, 'basin_woman');
+  // The Tide-Sheet first: she keeps it, and wants a proper book.
+  await kbWalk(page, 9, 18);
+  await kbInteract(page, 'counting_woman', 'tide_sheet');
   log = await read();
-  expect(joined(log)).toContain('for luck');
+  expect(joined(log)).toContain('As EVIDENCE.');
+  let s = await snap(page);
+  expect(s.flags['counter.sawPaper']).toBeTruthy();
+  expect(s.items).not.toContain('tide_sheet');
 
   // The Movers and the piano.
   await kbInteract(page, 'big_mover');
   await readUntil(page, adv, 'crowbar and a grudge');
   await shot(page, 'act2-08-movers');
   await read();
-  await kbInteract(page, 'piano');
-  log = await read();
-  expect(joined(log)).toContain('Grease.');
   await kbInteract(page, 'piano', 'soap');
   await readUntil(page, adv, 'Not THAT fast');
   await shot(page, 'act2-09-piano-gone');
   await read();
-  let s = await snap(page);
-  expect(s.flags['piano.slid']).toBeTruthy();
-  expect(s.items).not.toContain('soap');
+  expect((await snap(page)).flags['piano.slid']).toBeTruthy();
   await kbInteract(page, 'crowbar');
   await read();
   expect((await snap(page)).items).toContain('crowbar');
 
-  // Fountain Square.
+  // Fountain Square, the Shop: the window has a gap to fill.
   await kbExit(page, 6, 40, 'down', 'fountain_square');
   await page.waitForTimeout(300);
   await shot(page, 'act2-10-fountain-square');
@@ -475,30 +531,34 @@ test('keyboard: Act 2 part 1', async ({ page }) => {
   await readUntil(page, adv, 'Tessel: Forward!');
   await shot(page, 'act2-11-mayor');
   await read();
-  await kbInteract(page, 'big_mover');
-  await read();
-
-  // The Shop: the hat is display stock.
   await kbExit(page, 4, 4, 'up', 'shop');
   await kbInteract(page, 'shopkeeper');
-  await readUntil(page, adv, 'Display.');
-  await shot(page, 'act2-12-shop');
   await read();
-  await kbInteract(page, 'hat_display');
+  await kbInteract(page, 'shopkeeper');
   log = await read();
-  expect(joined(log)).toContain('Display stock.');
-  await kbInteract(page, 'marble_jar');
-  log = await read();
-  expect(joined(log)).toContain('same side of the jar');
+  expect(joined(log)).toContain('Something brass. Something nautical.');
+  await shot(page, 'act2-12-shop');
   await kbExit(page, 4, 6, 'down', 'fountain_square');
 
-  // Hat for the guidebook; the first look at it is the Steps entry.
-  await kbInteract(page, 'tourist', 'hat');
+  // Down to the Bilge and east to the Harbor; up the lighthouse for the telescope.
+  await kbExit(page, 11, 16, 'down', 'bilge');
+  await kbExit(page, 30, 12, 'right', 'harbor');
+  await kbExit(page, 27, 4, 'up', 'lamp_room');
+  await kbTelescope(page, adv);
+  await kbExit(page, 3, 6, 'down', 'harbor');
+  await kbExit(page, 1, 7, 'left', 'bilge');
+  await kbExit(page, 11, 1, 'up', 'fountain_square');
+
+  // The telescope into the Shop window; the straw hat to the Tourist; the guidebook.
+  await kbExit(page, 4, 4, 'up', 'shop');
+  await kbWindowSwap(page, adv);
+  await shot(page, 'act2-12b-window');
+  await kbExit(page, 4, 6, 'down', 'fountain_square');
+  await kbInteract(page, 'tourist', 'shop_hat');
   log = await read();
-  expect(joined(log)).toContain("you're GIVING it to me?");
+  expect(joined(log)).toContain('you got it out of the WINDOW?');
   s = await snap(page);
   expect(s.items).toContain('guidebook');
-  expect(s.items).not.toContain('hat');
   await kbLookItem(page, 'guidebook');
   await settle(page);
   await shot(page, 'act2-13-guidebook');
@@ -507,37 +567,39 @@ test('keyboard: Act 2 part 1', async ({ page }) => {
   await page.keyboard.press('x');
   await waitFor(page, () => window.moonshine.snapshot().idle);
 
-  // Back up the Steps; the guidebook moves the Counting Woman.
+  // Back up the Steps: twice in print, and she's off to the Mayor.
   await kbExit(page, 11, 1, 'up', 'hundred_steps');
   await kbInteract(page, 'counting_woman', 'guidebook');
   await readUntil(page, adv, 'RIGHT NOW');
   await shot(page, 'act2-14-to-the-mayor');
-  await read();
-  s = await snap(page);
-  expect(s.flags['counter.left']).toBeTruthy();
-  expect(s.items).toContain('guidebook');
-
-  // Her step drinks the water.
-  await kbStepDownAndUse(page, 9);
   log = await read();
   expect(joined(log)).toContain("Steps don't drink.");
+  s = await snap(page);
+  expect(s.flags['counter.left']).toBeTruthy();
+  expect(s.flags['step.found']).toBeTruthy();
+  expect(s.items).toContain('guidebook');
+
+  // The free step goes bonk.
+  await kbWalk(page, 9, 18);
+  await page.keyboard.press('ArrowDown');
+  log = await read();
+  expect(joined(log)).toContain('The Kid was right.');
+  await kbWalk(page, 9, 17);
 
   // The crowbar: the hundredth step goes down.
-  await kbHold(page, 'crowbar');
-  await page.keyboard.press('z');
+  await kbStepDownAndUse(page, 9, 'crowbar');
   await readUntil(page, adv, 'And the hundredth step goes down.');
   await shot(page, 'act2-15-hundredth-step');
   log = await read();
   expect(joined(log)).toContain('is that a HOLE in the STEPS?');
-  s = await snap(page);
-  expect(s.flags['step.open']).toBeTruthy();
+  expect((await snap(page)).flags['step.open']).toBeTruthy();
   await shot(page, 'act2-16-open-step');
 
   // The Steps aren't cut off: Cheryl can still go down past the hole on its west half.
   await kbWalk(page, 9, 21);
   await kbWalk(page, 9, 17);
 
-  // Down the ladder: "Go down?" — Not yet, then Yes.
+  // Down the ladder: "Go down?" -- Not yet, then Yes.
   await kbWalk(page, 10, 18);
   await page.keyboard.press('ArrowDown'); // stepping onto the open step asks
   await waitFor(page, () => !!window.moonshine.snapshot().choice, null, 4000);
@@ -548,7 +610,7 @@ test('keyboard: Act 2 part 1', async ({ page }) => {
   await waitFor(page, () => window.moonshine.snapshot().idle, null, 4000);
   expect((await snap(page)).flags['act2.done']).toBeFalsy();
   await kbWalk(page, 10, 18);
-  await page.keyboard.press('ArrowDown'); // stepping onto the open step asks
+  await page.keyboard.press('ArrowDown');
   await waitFor(page, () => !!window.moonshine.snapshot().choice, null, 4000);
   await settle(page);
   await page.keyboard.press('z');
@@ -557,8 +619,8 @@ test('keyboard: Act 2 part 1', async ({ page }) => {
   expect(errors).toEqual([]);
 });
 
-test('pointer: Act 2 part 1', async ({ page }) => {
-  test.setTimeout(420000);
+test('pointer: Act 2, the piano first, the guidebook before the Tide-Sheet', async ({ page }) => {
+  test.setTimeout(600000);
   const errors = await start(page);
   const adv = ptrAdvance(page);
   const read = (opts) => readThrough(page, adv, opts);
@@ -568,7 +630,6 @@ test('pointer: Act 2 part 1', async ({ page }) => {
   // Straight down to the Steps by following the scrape.
   await ptrExit(page, 27, 15, [27, 14], 'hundred_steps');
   await read();
-  // Look at a moon-eye on the way down.
   await ptrInteract(page, 'moon_eye_13_8');
   let log = await read();
   expect(joined(log)).toContain('A moon-eye');
@@ -582,41 +643,71 @@ test('pointer: Act 2 part 1', async ({ page }) => {
   await ptrInteract(page, 'crowbar');
   await read();
 
-  // The Square and the Tourist.
+  // The Square; down to the Bilge, east to the Harbor, up to the lamp room.
   await ptrExit(page, 6, 41, [6, 40], 'fountain_square');
   await ptrInteract(page, 'tourist');
   await read();
-  await ptrUse(page, 'hat', 'tourist');
+  await ptrExit(page, 11, 17, [11, 16], 'bilge');
+  await ptrExit(page, 31, 12, [30, 12], 'harbor');
+  await ptrInteract(page, 'mott');
   await read();
+  await ptrExit(page, 27, 3, [27, 4], 'lamp_room');
+  // Look at the telescope first: then the Keeper hands it over on the first talk.
+  await ptrInteract(page, 'telescope');
+  log = await read();
+  expect(joined(log)).toContain('Like it\'s being punished.');
+  await ptrInteract(page, 'keeper');
+  log = await read();
+  expect(joined(log)).toContain("it's pointing at the sea");
+  expect((await snap(page)).items).toContain('telescope');
+
+  // Back to the Square and into the Shop: the telescope into the window.
+  await ptrExit(page, 3, 7, [3, 6], 'harbor');
+  await ptrExit(page, 0, 7, [1, 7], 'bilge');
+  await ptrExit(page, 11, 0, [11, 1], 'fountain_square');
+  await ptrExit(page, 4, 3, [4, 4], 'shop');
+  await ptrUse(page, 'telescope', 'hat_display');
+  log = await read();
+  expect(joined(log)).toContain('Out comes the hat.');
+  await ptrExit(page, 4, 7, [4, 6], 'fountain_square');
+  await ptrUse(page, 'shop_hat', 'tourist');
+  await read();
+  expect((await snap(page)).items).toContain('guidebook');
   await ptrLookItem(page, 'guidebook');
   log = await read();
   expect(joined(log)).toContain('there are, in fact, 99');
   await clickGame(page, 198, 94); // Close
   await waitFor(page, () => window.moonshine.snapshot().idle);
-  // A second look reads the next entry.
-  await ptrLookItem(page, 'guidebook');
-  log = await read();
-  expect(joined(log)).toContain('local eccentric');
-  await clickGame(page, 198, 94);
-  await waitFor(page, () => window.moonshine.snapshot().idle);
-  await ptrInteract(page, 'piano');
-  log = await read();
-  expect(joined(log)).toContain('Half a ton of piano');
 
-  // Up through the arch to the Counting Woman.
+  // Up through the arch: the guidebook first. One book won't do.
   await ptrExit(page, 11, 0, [11, 1], 'hundred_steps');
   await ptrUse(page, 'guidebook', 'counting_woman');
-  await read();
+  log = await read();
+  expect(joined(log)).toContain('If the Tide-Sheet printed it');
   let s = await snap(page);
+  expect(s.flags['counter.sawBook']).toBeTruthy();
+
+  // Up to Lamp Street for the Tide-Sheet.
+  await ptrExit(page, 6, 0, [6, 1], 'lamp_street');
+  await ptrInteract(page, 'bench_man');
+  await read();
+  await ptrInteract(page, 'watering_woman');
+  log = await read();
+  expect(joined(log)).toContain("Somebody's counted the Hundred Steps.");
+  await ptrExit(page, 27, 15, [27, 14], 'hundred_steps');
+  await ptrUse(page, 'tide_sheet', 'counting_woman');
+  log = await read();
+  expect(joined(log)).toContain('That\'s a CAMPAIGN.');
+  expect(joined(log)).toContain("Steps don't drink.");
+  s = await snap(page);
   expect(s.flags['counter.left']).toBeTruthy();
 
   // Her step: wait for the Kid to run past it (a click on him would use the crowbar on him).
-  await waitFor(page, () => !window.moonshine.world.entities.some((e) => e.id === 'kid' && e.x <= 9 && e.y >= 18 && e.y <= 21), null, 20000);
+  await waitFor(page, () => !window.moonshine.world.entities.some((e) => e.id === 'kid' && e.x <= 10 && e.y >= 18 && e.y <= 21), null, 20000);
   await ptrUse(page, 'crowbar', 'hollow_step_free');
   log = await read();
   expect(joined(log)).toContain('the hundredth step goes down');
-  s = await snap(page);
-  expect(s.flags['step.open']).toBeTruthy();
+  expect((await snap(page)).flags['step.open']).toBeTruthy();
   // Click the hole: "Go down?" Yes.
   await clickTileAt(page, 10, 19);
   await waitFor(page, () => !!window.moonshine.snapshot().choice, null, 8000);
@@ -627,7 +718,6 @@ test('pointer: Act 2 part 1', async ({ page }) => {
   });
   if (!yes) throw new Error('no choice rects to click');
   await clickGame(page, yes.x + 4, yes.y + 4);
-  // Act 3 goes on from here: down the ladder into the Step Gallery.
   await waitFor(page, () => window.moonshine.snapshot().map === 'step_gallery', null, 20000);
   expect(errors).toEqual([]);
 });
@@ -687,18 +777,21 @@ for (const [map, flags] of [
 }
 
 test('keyboard: the long way round, the Count thread first', async ({ page }) => {
-  test.setTimeout(480000);
+  test.setTimeout(720000);
   const errors = await start(page);
   const adv = kbAdvance(page);
   const read = (opts) => readThrough(page, adv, opts);
   await waitFor(page, () => !!window.moonshine.snapshot().text);
   await read();
 
-  // The Goat Path, from Lamp Street's west edge.
+  // The Tide-Sheet first, on Lamp Street.
+  await kbTideSheet(page, adv);
+
+  // The Goat Path, from Lamp Street's west gate, down the Back to the Bilge.
   await kbWalk(page, 1, 10);
   await page.keyboard.press('ArrowLeft');
   let log = await read();
-  expect(joined(log)).toContain('The Goat Path. Down the back of the island');
+  expect(joined(log)).toContain('The Steps and then some, plus goats.');
   await waitFor(page, () => window.moonshine.snapshot().map === 'goat_path', null, 6000);
   await waitFor(page, () => window.moonshine.snapshot().idle, null, 6000);
   await shot(page, 'act2-20-goat-path');
@@ -708,30 +801,17 @@ test('keyboard: the long way round, the Count thread first', async ({ page }) =>
   await kbInteract(page, 'goat_2');
   log = await read();
   expect(joined(log)).toContain('Meh.');
-
-  // Down to the Harbor: Mott, the moon chart, a swig.
-  await kbExit(page, 1, 22, 'down', 'harbor');
-  await kbInteract(page, 'mott');
-  await readUntil(page, adv, "only because I'm right");
-  await shot(page, 'act2-21-mott');
-  await read();
-  await kbInteract(page, 'mott', 'moon_chart');
+  await kbInteract(page, 'sea_cave');
   log = await read();
-  expect(joined(log)).toContain("Today I'm drinking.");
-  await kbInteract(page, 'sea_view');
+  expect(joined(log)).toContain('A sea cave under the cliff.');
+  await kbExit(page, 14, 40, 'right', 'bilge');
+  expect((await snap(page)).y).toBe(12);
+  // Down onto the flooded end of the south quay: wet feet.
+  await kbWalk(page, 3, 12);
   log = await read();
-  expect(joined(log)).toContain('the Teeth');
+  expect(joined(log)).toContain('under an inch of water');
 
-  // The lamp room.
-  await kbExit(page, 27, 4, 'up', 'lamp_room');
-  await kbInteract(page, 'keeper');
-  await readUntil(page, adv, 'You look at the lamp.');
-  await shot(page, 'act2-22-lamp-room');
-  await read();
-  await kbExit(page, 3, 6, 'down', 'harbor');
-
-  // The Bilge: the Fishmonger, the Boatman, wet feet.
-  await kbExit(page, 1, 7, 'left', 'bilge');
+  // The Bilge: the Fishmonger, the Boatman.
   await kbInteract(page, 'fishmonger');
   await readUntil(page, adv, 'LOOK at it!');
   await shot(page, 'act2-23-bilge');
@@ -739,39 +819,51 @@ test('keyboard: the long way round, the Count thread first', async ({ page }) =>
   await kbInteract(page, 'boatman');
   log = await read();
   expect(joined(log)).toContain('A boatman stays in his boat.');
-  await kbInteract(page, 'water_stairs');
-  log = await read();
-  expect(joined(log)).toContain('keep going');
-  await kbWalk(page, 7, 12);
-  await kbWalk(page, 4, 12);
-  log = await read();
-  expect(joined(log)).toContain('under an inch of water');
 
-  // Up to Fountain Square, the back way: the Tourist's hat.
-  await kbExit(page, 11, 1, 'up', 'fountain_square');
-  await kbInteract(page, 'tourist');
+  // East to the Harbor: Mott's tip; the Keeper's telescope.
+  await kbExit(page, 30, 12, 'right', 'harbor');
+  await kbInteract(page, 'mott');
+  await readUntil(page, adv, "only because I'm right");
+  await shot(page, 'act2-21-mott');
   await read();
+  await kbInteract(page, 'mott', 'moon_chart');
+  log = await read();
+  expect(joined(log)).toContain("Today I'm drinking.");
+  await kbExit(page, 27, 4, 'up', 'lamp_room');
+  await shot(page, 'act2-22-lamp-room');
+  await kbTelescope(page, adv);
+  await kbExit(page, 3, 6, 'down', 'harbor');
+  await kbExit(page, 1, 7, 'left', 'bilge');
+
+  // Up to Fountain Square the back way: the window, the hat, the guidebook.
+  await kbExit(page, 11, 1, 'up', 'fountain_square');
   await kbInteract(page, 'piano_arch');
   log = await read();
   expect(joined(log)).toContain('back end of a piano');
-  await kbInteract(page, 'tourist', 'hat');
+  await kbExit(page, 4, 4, 'up', 'shop');
+  await kbWindowSwap(page, adv);
+  await kbExit(page, 4, 6, 'down', 'fountain_square');
+  await kbInteract(page, 'tourist', 'shop_hat');
   await read();
   expect((await snap(page)).items).toContain('guidebook');
 
-  // All the way back round to the top of the Steps.
+  // All the way back round, up the Goat Path, to the top of the Steps.
   await kbExit(page, 11, 16, 'down', 'bilge');
-  await kbExit(page, 30, 12, 'right', 'harbor');
-  await kbExit(page, 2, 1, 'up', 'goat_path');
-  await kbExit(page, 13, 1, 'up', 'lamp_street');
+  await kbExit(page, 1, 12, 'left', 'goat_path');
+  await kbExit(page, 14, 2, 'right', 'lamp_street');
   await kbExit(page, 27, 14, 'down', 'hundred_steps');
   await read();
 
-  // The guidebook: she storms off and climbs straight over the piano.
+  // The guidebook, then the Tide-Sheet: she storms off and climbs straight over the piano.
   await kbInteract(page, 'counting_woman', 'guidebook');
+  log = await read();
+  expect(joined(log)).toContain('If the Tide-Sheet printed it');
+  await kbInteract(page, 'counting_woman', 'tide_sheet');
   await readUntil(page, adv, "That's a PIANO!");
   await shot(page, 'act2-24-over-the-piano');
   log = await read();
   expect(joined(log)).toContain('And these are MY STEPS.');
+  expect(joined(log)).toContain("Steps don't drink.");
   expect((await snap(page)).flags['counter.left']).toBeTruthy();
 
   // Then the piano, the crowbar, and the hundredth step.
@@ -817,6 +909,6 @@ test("pointer: the long way round, part 2's people", async ({ page }) => {
   await read();
   await ptrInteract(page, 'windows');
   log = await read();
-  expect(joined(log)).toContain('She has her back to all of it.');
+  expect(joined(log)).toContain('She only has eyes for the lamp.');
   expect(errors).toEqual([]);
 });

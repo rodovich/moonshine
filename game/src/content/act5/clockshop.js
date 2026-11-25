@@ -70,7 +70,7 @@ async function giveJug(g, self) {
   // He sets the jug down by the door, and hands her the old lump.
   g.setSprite(self, { sheet: clockmaker });
   await g.moveNpc(self, [6, 5]);
-  g.faceNpc(self, 'right');
+  g.faceNpc(self, 'down');
   g.sfx('knock');
   g.setFlag('clockmaker.jug');
   await g.wait(0.4);
@@ -112,14 +112,15 @@ const clockmakerNpc = {
 const objects = [
   {
     id: 'clocks', x: 1, y: 1, w: 8, lookKey: 'clocks5',
-    looks: [['Thirty clocks, thirty times. All of them perfect. All of them different.', "He keeps them to prove the sun wrong. The sun isn't bothered."], 'Thirty clocks, ticking at each other.'],
+    looks: [['A wall of clocks, every one at a different time. All of them perfect. All of them different.', "He keeps them to prove the sun wrong. The sun isn't bothered."], 'A wall of clocks, ticking at each other.'],
   },
   {
     id: 'bench5', x: 1, y: 3, w: 3,
     look: 'His clock\'s drive, in pieces, laid out in rows. Every screw has its own little dish.',
   },
   {
-    id: 'doorstop', x: 7, y: 5, kind: 'object', solid: true,
+    // Beside the door (4-5, 7), holding its east leaf open.
+    id: 'doorstop', x: 6, y: 6, kind: 'object', solid: true,
     sprite: { sheet: clockshop, frame: 'clapper' },
     when: (g) => !hasClapper(g),
     interact: async (g) => {
@@ -135,7 +136,7 @@ const objects = [
     },
   },
   {
-    id: 'jug_doorstop', x: 7, y: 5, kind: 'object', solid: true,
+    id: 'jug_doorstop', x: 6, y: 6, kind: 'object', solid: true,
     sprite: { sheet: items_act4, frame: 'square_jug' },
     when: jugIn,
     look: "Mott's jug, holding the door. It doesn't roll. It's never looked so happy.",

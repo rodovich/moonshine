@@ -1091,6 +1091,7 @@ The Act 2 builder built the structure pass on `content/act2-structure` (4d380c9)
 - Tourist after the hat: "I'm keeping this hat. I'm going to sit right here until the ferry comes or I turn into a raisin."
 - Goat Path: the hairpin, "From the hairpin: the whole open Bowl, all the way to the western Rim. You can't see the Gate from here. It's very restful."; the sea, "The back of the island. Cliff, goats, sea. Gulls wheeling below me, which is wrong, but there it is."; the roofs near the bottom, "The lower town's roofs, nearly at eye level now. Somebody's basin is still out, still full."
 - Signs: "A painted board: HARBOR, and an arrow pointing east along the canal." / "A painted board: THE BILGE, and an arrow pointing west, back along the canal."
+- After the QA description sweep, to match the art: the goat, "A goat. It's eating the gorse and making eye contact."; the Harbor doors, "Not my door. It smells of tar and yesterday's fish."; the lamp-room windows, "From up here: the whole Bowl, the Rim, the mouth, the Teeth. She only has eyes for the lamp."; the Crown's tower door gives the clock's two lines first (one column holds both); after `act2.done`, Lamp Street's view is "Roofs all the way down to the water." and the Woman with Basin drops her moon line.
 
 ## As built (part 2)
 

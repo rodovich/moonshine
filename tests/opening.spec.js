@@ -96,7 +96,8 @@ test('keyboard: the whole opening', async ({ page }) => {
   await read();
   await kbInteract(page, 'wardrobe');
   await read();
-  expect((await snap(page)).items).toEqual(expect.arrayContaining(['moon_chart', 'hat']));
+  expect((await snap(page)).items).toContain('moon_chart');
+  expect((await snap(page)).items).not.toContain('hat'); // the hat stays in the wardrobe (structure pass)
   await kbWalk(page, 5, 7);
   await page.keyboard.press('ArrowDown');
   await waitFor(page, () => window.moonshine.snapshot().map === 'cistern_court', null, 5000);
