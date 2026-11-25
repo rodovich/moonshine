@@ -381,7 +381,7 @@ const objects = [
     id: 'shaft', x: 7, y: 2, w: 2, solid: false, use: basinUse,
     looks: [['Straight up. All the way up to my roof. To my tub.', "I've been bathing on top of this for thirty-one years."], 'Straight up. Moonlight all the way down.'],
   },
-  { id: 'walls', x: 9, y: 1, w: 4, h: 2, look: 'Eight walls, plain slate. Nothing on them but the wheel and the lift. The Basin is the point.' },
+  { id: 'walls', x: 9, y: 1, w: 4, h: 2, look: 'Eight walls, plain slate. The wheel, the lift, and two bronze sconces with moons in their bowls. The Basin is the point.' },
 ].map((o) => ({ solid: true, ...o, use: { crowbar: (g) => g.describe('No. Not here.'), '*': cherylDeclines, ...(o.use || {}) } }));
 
 // The glint at the bottom of the dry Basin, every few seconds until the plug is taken.

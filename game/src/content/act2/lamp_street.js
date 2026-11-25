@@ -258,7 +258,7 @@ export const lampStreetMap = composedMap(compose, {
       // The west edge: the Goat Path. The first time, Cheryl says where it goes.
       x: 0, y: 9, h: 3, sfx: 'step_stone',
       run: async (g) => {
-        const y = 1 + (g.player.y - 9);
+        const y = Math.max(2, g.player.y - 8); // rows 9-11 arrive on the Goat Path's rows 2, 2, 3
         if (!g.flag('n.goatGate')) {
           g.setFlag('n.goatGate', 1);
           await g.describe('The Goat Path. Down the back of the island the long way. The Steps and then some, plus goats.');
