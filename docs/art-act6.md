@@ -118,3 +118,5 @@ Module `game/src/art/act6_surface.js`. Composed on the dev page: `/dev/art.html?
 | The ferry level at her landing | `ferry_level:persistence_level` (176×80: no list, riding at her proper height, slack ropes, flag out) | sprite, same footprint as `ferry:persistence` (top-left (8·16, 8·16)) |
 | The water back at the Harbor quay (morning) | existing `sea:wash_*` and `sea:sea_*` over the Act 5 hull row | ground: row 10 `sea:wash_a`, row 11 near sea |
 | Luggage at the café (the Pelletiers, the Tourist) | `luggage:luggage` (a stack: hatbox, case, trunk), `luggage:suitcase` | objects |
+
+The QA description sweep added or changed art for this act: see [art-sweep.md](art-sweep.md).
