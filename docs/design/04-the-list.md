@@ -35,13 +35,15 @@ The brief asks that the changed surface be built up to, revealed excitingly, sig
 Act 4 begins the morning after Act 3's dusk, with the card **Morning.** and Cheryl in her flat at (8, 4). The Wrongness audio level is 0.35 for the whole act (story bible). A faint version of the underground hull creak now plays on the surface too, every 40 seconds or so.
 
 **Opening, in the flat:**
-- Internal monologue: *Morning. The Fountain's stopped. The doorsteps glow in the dark.* / *And my teacup has walked to the edge of the table in the night.*
+- Description (automatic): "Morning. The Fountain's stopped. The doorsteps glow in the dark." / "And my teacup has walked to the edge of the table in the night."
 - **The teacup** (on the table, new entity at (5, 4)): "My teacup, at the very edge of the table. Downhill. The table isn't downhill." / Then: "I've moved it back to the middle three times. It keeps going."
 
-**The Ship Plan, first look in Act 4** (after the picture closes, once only):
-- *Three bars, low in the hull, down where the water is. They're pumps. They must be pumps.*
-- *And a rope from the bell, down to a wheel. If the bell turns the wheel, and the wheel drives the pumps…*
-- *Ambrose. I need Ambrose's bell.*
+**The Ship Plan, first look in Act 4** (after the picture closes, once only; descriptions, not monologue):
+- "Three bars, low in the hull, down where the water is. They're pumps. They must be pumps."
+- "And a rope from the bell, down to a wheel. If the bell turns the wheel, and the wheel drives the pumps…"
+- "Ambrose. I need Ambrose's bell."
+
+**Internal monologue in this act** is kept to three moments (story bible budget): the flyleaf ("It's instructions"), the escape ("Up, then"), and the reveal. Everything else is description.
 
 If the player doesn't look at the Ship Plan, Ambrose, Mott, and Ottilie each point at the same three things (see their dialog).
 
@@ -300,7 +302,7 @@ Each line is one box; every line has been measured against the real box. "→" m
 4. Three great strokes of the bell, each with a 1 px shake and the screen flashing slightly warmer. The rope runs down through the floor and back with each one.
 5. After the third stroke, a deep thrum rises from very far below, felt more than heard (2 px shake, slow), then settles into a slow, steady rumble under everything.
 6. "Under the floor, under the tower, under all of it, something very big has started to turn."
-7. Internal monologue: *I can feel it in my teeth.*
+7. "I can feel it in my teeth."
 8. AMBROSE: THERE. HEAR THAT? THAT'S THE SEA SAYING THANK YOU.
 9. AMBROSE: HERE. YOU'VE EARNED A LOOK. MY GRANDMOTHER'S HAND. → he holds out the ledger, open at the flyleaf → `read.flyleaf`.
 10. The flyleaf, in Cheryl's description style, one couplet per box:
@@ -405,7 +407,7 @@ He sits on the crates by his door at (3, 13), sober, shaking a little. The jug a
 - OTTILIE: And glyphs! Founder glyphs! I know these three. This one's "thin." This one's "stout." This one's "middle."
 - OTTILIE: Thin, Stout, and Middle. Types of eel, obviously. A thin eel, a stout eel, and a medium eel.
 - OTTILIE: This is the most important document in Tessel. I'm going to need a bigger monograph.
-- Internal monologue: *Thin, Stout, and Middle. The three bars. The three sisters in the rhyme.*
+- "Thin, Stout, and Middle. The three bars. The three sisters in the rhyme."
 
 **Repeat after** (alternate)
 - OTTILIE: Three eels, side by side, in the belly of a ceremonial fish. It all fits.
@@ -439,7 +441,7 @@ Each Girl now sings her whole version when talked to individually (`girls.heard`
 - SECOND GIRL: Little sister three. She's the littlest so she goes last. It's OBVIOUS.
 - THIRD GIRL: ♪ Up jumps Tessel! ♪ Bump!
 
-**After all three are heard** (once): internal monologue: *Two of them say thin first. Two of them say middle last. Three sisters, one by one.*
+**After all three are heard** (once, as a description): "Two of them say thin first. Two of them say middle last. Three sisters, one by one."
 
 ### The Mayor (Fountain Square, guarding the dry Fountain)
 
@@ -525,7 +527,7 @@ She stands at (8, 17), beside the open hundredth step, counting with tears in he
 
 ### Fountain Square
 
-- **The dry Fountain** (with the Mayor present): First: "The Fountain, dry. Five hundred years, and I stopped it with a wheel and a crowbar." / "There's a rope round it now, and the Mayor in front of the rope." Then: "Dry. A heap of coins in the bottom, and something round and bronze under them."
+- **The dry Fountain** (with the Mayor present): First: "The Fountain, dry. Five hundred years, and I stopped it with a wheel and a key." / "There's a rope round it now, and the Mayor in front of the rope." Then: "Dry. A heap of coins in the bottom, and something round and bronze under them."
 - **The cordon sign**: "PENDING AN INQUIRY. The inquiry is me."
 - **Stepping over the rope** (after `mayor.atCrown`): "Nobody's watching. I step over the rope like it's a playground wall."
 - **The basin floor**: "Five hundred years of wishes in a heap. Mostly buttons. Somebody wished with a whole spoon."
@@ -539,7 +541,7 @@ She stands at (8, 17), beside the open hundredth step, counting with tears in he
 
 ### Pump Hall
 
-On first arriving (after 2 seconds): internal monologue: *Down where the water is.* / *Three sisters, side by side.*
+On first arriving (after 2 seconds), a description: "Down where the water is. Three of them, side by side."
 
 - **The Stout Sister** (5–7, 3–4): First: "A pump, broad as a cart, with a great beam on top. The stout one." / "Asleep. Her beam hasn't moved in a hundred years." Running: "Thump. Thump. Like a heart that's just remembered how."
 - **The Thin Sister** (11, 3–4): First: "A pump, narrow as a chimney. The thin one." Running: "Quick little strokes. She's in a hurry."
@@ -594,8 +596,8 @@ Input is locked until step 12, except where noted. All shakes are 1 px unless no
 2. The cell grates: the water below them begins to drop, visibly, tile by tile, over four seconds.
 3. A long, low creak runs through the whole hull, and the screen eases one pixel back toward level (a slow 2-second shake in one direction).
 4. "The floor's levelling. I can feel it in my knees."
-5. Internal monologue: *It worked. It's working.* (Hold three seconds. Let this be relief.)
-6. Internal monologue: *"Middle sister's greedy. Put her back to bed."*
+5. "It worked. It's working." (Then hold three seconds with no text. Let this be relief.)
+6. "Middle sister's greedy. Put her back to bed."
 7. Control returns briefly: Cheryl must walk to the Middle Sister's valve (16, 5) and use it (the only interaction that does anything; others get "Not now."). → She hauls on it. It won't turn. A hiss, and a sweet, sharp smell.
 8. "It won't close. It smells like Mott's shack." / "The coil's stuck open. Forty years of making moonshine. It's forgotten how to stop."
 9. The creak again, longer, and this time the screen tilts the *other* way and keeps going (a slow drifting shake, 2 px, for three seconds). The cell grates are now dry. The Sisters keep thumping. The music's pitch begins to rise very slightly.
@@ -608,9 +610,9 @@ Input is locked until step 12, except where noted. All shakes are 1 px unless no
 
 Walking up into the emergency ladder changes the map to the Emergency Shaft, with Cheryl at (2–3, 28). She climbs by holding Up. The roar of water fills the bottom of the shaft. Each trigger fires once:
 
-- **Row 22**: internal monologue: *Up and up.* The roar is still loud below.
+- **Row 22**: "Up and up." The roar is still loud below.
 - **Row 14**: the roar has faded to a distant rush. "My arms are fifty-eight years old. They'd like that noted."
-- **Row 7**: near silence. Drips. Then, faint and far too close, a gull cries. Internal monologue: *A gull.* / *That's close. That's very close.*
+- **Row 7**: near silence. Drips. Then, faint and far too close, a gull cries. "A gull. That's close. That's very close."
 - **Row 2**: a slab overhead, light leaking round its edge. "A slab over the hatch. Heavy. It smells of fish." → Cheryl shoves; a grinding scrape; daylight leaks in around the slab.
 
 At the top (row 0), the map changes to the Ice Cellar.
@@ -667,7 +669,7 @@ At the top (row 0), the map changes to the Ice Cellar.
 
 **Ending the act:** looking at the bronze door from anywhere on the north quay, or at the Water Stairs:
 1. "At the bottom of the Water Stairs, where the sea used to be: a door." / "Bronze, barnacled, as big as a cart. A glass eye in the middle." / "The last flight of stairs is broken. Of course it is."
-2. Internal monologue: *A door at the bottom of the sea.* / *Well. The bottom of the canal.* / *Same thing, this week.*
+2. "A door at the bottom of the sea. Well. The bottom of the canal." / "Same thing, this week."
 3. Fade to black. Card: **MOONSHINE** over **End of Act 4. Tessel continues soon.** Back to the title until Act 5 exists.
 
 ### The Fountain, after the reveal

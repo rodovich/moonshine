@@ -4,7 +4,7 @@ This document sets the game's structure: the areas, how they connect, what is ga
 
 ## Target
 
-- **Length:** 2½–3½ hours for a first-time player (Act 1: 8–12 min, Act 2: 30–40, Act 3: 25–35, Act 4: 35–50, Act 5: 30–45, Act 6: 10–15).
+- **Length:** 2½–3½ hours for a first-time player (Act 1: 8–12 min, Act 2: 30–40, Act 3: 18–25, Act 4: 35–50, Act 5: 30–45, Act 6: 10–15).
 - **Size:** about 35 surface screens and 17 underground screens (one screen is 16×14 tiles), 17 NPCs, about 25 inventory items.
 
 ## Design rules
@@ -153,7 +153,9 @@ flowchart TD
     a3lid[Pry open shaft lid] --> a3mirror[Aim mirror at moon-lock → disc]
     a3mirror --> a3chute[Chute to Lamp Halls]
     a3chute --> a3ladder[Kick down ladder: shortcut]
-    a3chute --> a3valve[Turn valve: passage drains, Fountain stops]
+    a3chute --> a3lamp[Relight the bunk room lamp with the disc]
+    a3lamp --> a3key[Take the valve key from the rack]
+    a3key --> a3valve[Turn valve: passage drains, Fountain stops]
     a3valve --> a3chart[Chart Room: the mosaic]
     a3chart --> a3door[Unbolt Founders' Door → Archive]
     a3chart --> a3rub[Take rubbing → Ship Plan]
@@ -223,9 +225,9 @@ flowchart TD
 - *Seeds (optional in Act 2, required later):* Ambrose under the bell; Mott on the quay ("A hand to the left."); the Skipping Girls; the Clockmaker and his letters to the observatory; the sea cave on the Back, where Mott's grandfather "found the copper."
 
 **Act 3** (build-ready in [03-downstairs.md](03-downstairs.md))
-- *Step Gallery.* A seized wall lever (worked with the **crowbar**) opens a lid over a light shaft and lets daylight in. A pivoting bronze mirror (two positions are wrong, one is right, and the wrong ones light up wall inlays) puts the beam on a moon-lock. A sealed hatch opens onto the **moonglass disc** (a light source and, later, a key).
-- *Chute.* A smooth hullstone slide behind the hatch drops Cheryl one-way into the Lamp Halls. Internal monologue on landing.
-- *Lamp Halls.* Dark except near light-pipes; the disc lights a radius around Cheryl. Contents: the ladder up to the Step Gallery (pull its chain to drop it and make a shortcut), a Keepers' bunk room, the flooded corridor downhill ("I'm brave, not stupid."), and, required, the passage north to the Chart Room, flooded knee-deep by a gushing pipe. A big seized valve wheel beside it diverts the flow: turning it (with the crowbar through its spokes) drains the passage, causes a faraway gurgle, and brings a distant voice down a speaking tube shouting "The FOUNTAIN!" The wheel then jams and can't be turned back.
+- *Step Gallery.* A seized wall lever (worked with the **crowbar**) is the Keepers' master shutter: it opens a lid over a light shaft, and every light-pipe shutter under Tessel's doorsteps (which is why they glow at dusk). A pivoting bronze mirror cycles the beam through three targets (a toy rather than a puzzle); one is the moon-lock, and a sealed hatch opens onto the **moonglass disc** (a light source and, later, a key).
+- *Chute.* A smooth hullstone slide behind the hatch drops Cheryl one-way into the Lamp Halls.
+- *Lamp Halls.* Dark except near light-pipes; the disc lights a radius around Cheryl. Contents: the ladder up to the Step Gallery (pull its chain to drop it and make a shortcut), the flooded corridor downhill ("I'm brave, not stupid."), and, required, the passage north to the Chart Room, flooded knee-deep by a gushing pipe. The valve wheel beside it has a bare square spindle; the crowbar slips off. In the pitch-dark Keepers' bunk room, relighting the lamp with the disc reveals a tool rack with the **valve key**. Turning the wheel with it drains the passage, causes a faraway gurgle, and brings a distant voice down a speaking tube shouting "The FOUNTAIN!" The wheel then jams, key and all. From then until the act ends, both ladders up decline; the only way out is the Founders' Door.
 - *Chart Room.* The Keeper's chair, cup, and ledger; the mosaic, lit through the Dome's floor-eye. With paper and charcoal, Cheryl takes a rubbing: the **Ship Plan**, which works as the underground map. The Founders' Door is bolted from this side; unbolting it leads to the crypt, where Ottilie hands over paper and charcoal if Cheryl doesn't have them yet. Surfacing on the Crown at dusk, every moon-eye is glowing.
 
 **Act 4** (starts the morning after Act 3's dusk; build-ready in [04-the-list.md](04-the-list.md))
@@ -273,7 +275,8 @@ What the player can be working on at each stage. "Seed" means talking to an NPC 
 | Guidebook | Act 2, Tourist | Shown to Counting Woman (Act 2) and Clockmaker (Act 4); given to Shopkeeper (Act 5) |
 | Crowbar | Act 2, Movers | Shaft lid (Act 3); broken Tooth (Act 6) |
 | Paper & charcoal | Act 2/3, Ottilie | Rubbing in the Chart Room |
-| Moonglass disc | Act 3, Step Gallery | Light Downstairs; charged in the lamp; Water Stairs moon-lock (Act 5) |
+| Moonglass disc | Act 3, Step Gallery | Light Downstairs; relights lamps (the Bunk Room's reveals the valve key); charged in the lamp; Water Stairs moon-lock (Act 5) |
+| Valve key | Act 3, Bunk Room | The fountain valve (stays jammed on it) |
 | Ship Plan | Act 3, rubbing | Underground map; Ottilie reads it (Act 4) |
 | Copper throat | Act 4, Mott | Middle Sister |
 | Square jug | Act 4, Mott | Clockmaker (Act 5) |
