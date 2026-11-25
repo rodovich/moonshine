@@ -126,6 +126,7 @@ The Act 2 map, in three flood stages, then the dry reveal state.
 - `h` and the door are the first time the city's Founder hull is visible from the surface.
 - The flooded quay tiles are dry again (wet-looking, with stranded fish here and there).
 - The near south quay is now a long drop to the mud; the far bank's mooring ropes run taut down to boats hanging off them.
+- **Ambience:** `['wind', 'runoff']` and never the canal lapping (audio/foundation, c68efaf). During the reveal, wind alone until control returns, then `runoff` joins. In the Pump Hall, the burst plays `burst`, then the `roar` and `spray` loops together.
 
 **Dry-state entities:** boats on their sides in the mud at (3–4, 10), (8–9, 10), (19–20, 10), keels toward the camera, hulls tilted, oars spilled. The Boatman sitting upright in his boat at (22–23, 10), at the foot of the broken stairs. The piano at (15–16, 10) on the mud, upright, lid open. The Piano Movers at (14, 10) and (17, 10), on the mud beside it. Two or three crabs wandering the mud. The Sweaty Kid running laps along the mud (x2–30, y10). The Fishmonger at (5, 4), behind her stall. A **Man on Bridge** at (13, 9), on the bridge, looking down. A stranded fish flopping on the north quay at (10, 5).
 
