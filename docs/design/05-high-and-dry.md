@@ -459,6 +459,21 @@ At his bench, repairing the clock drive she unclamped. Calm now, in a brittle wa
 - **The sealed hatch** (7–8, 1–2): "A sealed hatch, marked with a moon in a bowl. The same as on the Ship Plan, at the bottom of the shaft." / "Shut tight. Not yet, it seems to say."
 - **The chain coils**: "Spare chain, coiled and waiting. A good place to sit, if you're me, and you've nothing to do but wait."
 
+### The Keepers' ladder (the shortcut)
+
+A ladder of bronze rungs runs up beside the speaking tube, from the Windlass Room to a small floor hatch in the belfry, beside Ambrose at the foot of the rope. It's two-way once Cheryl has climbed it from below. (Orchestrator decision; see Decisions.)
+
+- **The speaking tube, first look in the Windlass Room,** gets a second box: "And rungs beside it, going up into the dark. Somebody had to climb up and clean it." From then on, interacting with the tube gives its current look, then a choice: "Climb up?" **Yes** / **Not now**.
+- **The first climb:** darkness with a slow upward scroll of shaft wall lit by the disc, like the dawn lift in Act 6 (about four seconds). The wind in the tube grows louder, then a bell's hum, then Ambrose's voice through the hatch. The hatch lifts and Cheryl climbs out beside the rope. `keepers.ladder` is set.
+  1. AMBROSE: CHERYL. YOU CAME UP THROUGH MY FLOOR.
+  2. AMBROSE: THAT HATCH HAS BEEN THERE FIFTY-TWO YEARS. I THOUGHT IT WAS FOR MICE.
+  3. "The bell to the bow, in one ladder." / "The Keepers didn't take the Steps."
+- **Later climbs,** either way: a short fade (about a second) with the climbing sound, and no lines.
+- **The belfry hatch,** before `keepers.ladder` (Acts 4 and 5): "A little bronze hatch in the floor by the rope. Bolted from underneath. Everything in this town is bolted from the other side." After: "My ladder to the bow." → choice "Climb down?" **Yes** / **Not now**. Down puts Cheryl in the Windlass Room at the foot of the tube.
+- **In Act 6,** while Cheryl waits for the bell, the tube's choice is replaced by: "Not tonight. Ambrose has the top end. I've got this one."
+
+**Art:** the rungs beside the tube in the Windlass Room; the belfry floor hatch (closed, open). **Audio:** reuse the ladder climb, and the dawn lift's shaft scroll if it fits.
+
 ### Items and wrong combinations
 
 | Item | Icon idea | Inventory description |
@@ -592,7 +607,7 @@ The Act 5 builder (b_30JU3Nrc) built this act on `content/act5`; its full list i
 
 - **Act 5 is one afternoon, ending at dusk in the Windlass Room** with the Tooth replaced, so Act 6 can begin with the bell.
 - **Seating the clapper moves from Act 6 to the end of Act 5.** It's the act's payoff; Act 6 then starts with the wait and the bell. (The story bible is updated to match.)
-- **No shortcut between the Crown and the Bilge in Act 5.** A blind playtester crossed town about five times and suggested one (the speaking tube, the hundredth step, or the Fountain hatch). None fits: the tube carries sound, the hundredth step leads to Act 3's maps, which don't reach the bow, and the Fountain is flowing over its hatch. The climb up and down the Steps is the town's shape. Instead, the Ship Plan's Act 5 look draws the tooth, so players can fetch the clapper before they go down the rope, which saves the longest trip.
+- **The speaking tube has a Keepers' ladder beside it, from the Windlass Room to the belfry.** A blind playtester crossed town about five times in Act 5, and the orchestrator decided to add a shortcut once the bronze door is open. The tube fits the story best: it already joins the bell to the bow, the Keepers would have needed a way to service it, and it puts the Windlass Room one climb from the Clockmaker's Shop and Ambrose. Cheryl finds the rungs herself, so it feels discovered rather than given. The hundredth step leads only to Act 3's maps, and the Fountain is flowing over its hatch, so neither would help. The Ship Plan's Act 5 look also draws the tooth, so players can fetch the clapper before going down the rope.
 - **The Kid jumps down for the relay, so the rope and the door are independent.** Cheryl needs both to get through the door herself.
 - **The disc comes back, dimmed,** so Cheryl still carries a light for Act 6.
 - **The Teeth are a visible, growing sprite on the Harbor horizon** and a changing look from the lighthouse, never a fail state.
