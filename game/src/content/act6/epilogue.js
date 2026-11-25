@@ -13,7 +13,8 @@ import { props } from '../../art/props.js';
 import { LOOKS } from '../act2/common.js';
 import { clockmaker } from '../../art/act4_sprites.js';
 import { crowd_a, crowd_b, keeper } from '../../art/act5_sprites.js';
-import { piano_delivered, luggage, well_lift, bunting, step_barrier } from '../../art/act6_surface.js';
+import { piano_delivered, luggage, well_lift, bunting } from '../../art/act6_surface.js';
+import { steps_lid } from '../../art/hundredth.js';
 import { counting_rosette, runner, kid_finish, tourist_case, pelletier_m, pelletier_f } from '../../art/act6_sprites.js';
 import { finalScene } from './ending.js';
 
@@ -372,30 +373,26 @@ export function stepsEpilogue(map) {
     use: npcDecline("I've got my basin, love."),
   });
   return {
-    sheets: { bunting, step_barrier },
-    hide: [{ when: epilogue, ids: ['counting_woman', 'basin_woman', 'kid', 'kid_after'] }],
-    entities: [counter, ...kid, ...runners, ...crowd, basin].filter(Boolean),
-    // Bunting over landing 2; the finish tape across flight 3; the rope barrier round the open step.
+    sheets: { bunting, steps_lid },
+    hide: [{ when: epilogue, ids: ['counting_woman', 'basin_woman', 'kid', 'kid_after', 'hundredth_step', 'open_step_a4'] }],
+    entities: [
+      counter, ...kid, ...runners, ...crowd, basin,
+      // The hundredth step, boarded over (from Act 4 on), with 100! chalked on the board. Walkable.
+      { id: 'epi_lid', x: 9, y: 19, w: 2, solid: false, when: epilogue, look: 'Boarded over, and somebody\'s chalked 100 on it. Twice.' },
+    ].filter(Boolean),
+    // The board is a floor: Act 2's "Go down?" exit under it doesn't fire.
+    hideExits: [{ when: epilogue, x: 10, y: 19 }],
+    // Bunting over landing 2; the finish tape across flight 3; the chalked board over the hundredth step.
     patches: (g) => {
       if (!epilogue(g)) return [];
       const out = [];
       'abcd'.split('').forEach((s, i) => out.push(['overhead', 4 + i, 16, `bunting:over_bunting_${s}`]));
       const broken = g.flag('epi.race') || g.flag('fx.tape') ? 'finish_broken' : 'finish_tape';
       out.push(['detail', STEPS.tape[0], STEPS.tape[1], `bunting:${broken}_l`], ['detail', STEPS.tape[0] + 1, STEPS.tape[1], `bunting:${broken}_r`]);
-      for (let y = 0; y < 3; y++) for (let x = 0; x < 4; x++) {
-        if ((x === 1 || x === 2) && y === 1) continue; // the hole itself
-        out.push(['detail', 8 + x, 18 + y, `step_barrier:step_barrier_x${x}y${y}`]);
-      }
+      out.push(['ground', 9, 19, { tile: 'steps_lid:chalked_l', step: 'step_bonk' }], ['ground', 10, 19, { tile: 'steps_lid:chalked_r', step: 'step_bonk' }]);
+      out.push(['detail', 9, 19, null], ['detail', 10, 19, null]);
       return out;
     },
-    // The open hundredth step (Act 2's exit at (10, 19)): not today.
-    exits: [{
-      x: 10, y: 19, when: epilogue,
-      run: async (g) => {
-        await g.describe("Not today. I've been down enough for one week.");
-        return g.movePlayer([10, 18]);
-      },
-    }],
     onEnter: async (g, base) => {
       if (!epilogue(g)) return base(g);
       await base(g);
@@ -488,7 +485,8 @@ export function harborEpilogue(map) {
       }),
       {
         id: 'epi_keeper', name: 'Lighthouse Keeper', x: 21, y: 7, facing: 'down', when: epilogue,
-        sprite: { sheet: keeper }, behavior: { type: 'face', range: 3 },
+        // With her telescope on the quay, looking out to sea; she holds it across her body to talk.
+        sprite: { sheet: keeper, frame: 'scope_down' }, turnToTalk: false, talkPose: 'hold_down_0',
         interact: lines('keeper', ["It's lovely, isn't it. The sea. Twenty-two years. Who knew."], ['I look at the sea now. Twice a day. Then I polish the telescope.']),
         use: npcDecline("I've no use for that down here. I'm just looking."),
       },

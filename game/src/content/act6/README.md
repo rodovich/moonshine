@@ -83,10 +83,12 @@ Where the design left something open, or didn't work in play, this is what the b
 - **The door home is a scripted exit** in the epilogue: "Not yet" until the piano has come, then the final scene; after the credits it's an ordinary door again.
 - **The piano stands at (4-5, 12)**, east of Cheryl's door (the design's position; the art index's suggested spot west of it would cover the door). The Movers wait at (6, 12) and (7, 13) and leave down the Squeeze.
 - **The Stair Race** comes up flight 4 and flight 3; the finish tape is across flight 3 at row 21, just below the open hundredth step, where the Counting Woman (7, 18) counts. The Kid starts at the top of landing 3 and stops on the line; the two runners stop on landing 3. Two crowds stand on landing 2 and two on landing 3; the bunting is over landing 2.
-- **The rope barrier round the open hundredth step can be walked through.** The open step spans the whole of flight 3, so a solid barrier would cut the Steps in two. It sits on the ground layer. In the epilogue, walking onto the open step (Act 2's exit at (10, 19)) gets "Not today. I've been down enough for one week." and a step back, instead of "Go down?".
+- **The hundredth step is boarded over** (from Act 4 on, per the structure pass): in the epilogue the board has 100! chalked on it (`steps_lid:chalked_l/r`, walkable, `step_bonk` underfoot), Act 2's "Go down?" exit under it doesn't fire, and its look is "Boarded over, and somebody's chalked 100 on it. Twice." No rope, no refusal: the whole flight is open.
 - **The Woman with Basin tips her basin when talked to**, on her doorstep (7, 16).
 - **The Tourist stands at (18, 14) with her luggage at (19, 15)**, by the café.
 - **The Crown's clock tick stops** in the epilogue (the clock is gone).
+- **The final vista has the two bronze sighting pins** (`vista_pins:pins`, drawn after the twinkles and before Cheryl in her tub), lined up on the Gate as in Act 1, with the moon rising dead between them.
+- **The Harbor's epilogue Keeper** looks out to sea through her telescope (`keeper:scope_down`) and holds it across her body to talk (`hold_down_0`).
 - **The final vista's title fades out again before the credits**, and the picture dims a little under them, so the lines read where they cross the moon. The roll starts with the roles: the title has just shown, so it isn't repeated as a line of text.
 - **Long scenes save right after their decisive change**, so a reload partway through keeps the step: the plug (before the fill), each trim turn, moon true, the master stop (before the refill montage), the bath (after its last thought, with Cheryl already out at (7, 7) behind the Basin view), and the dawn (once she's out of the well, the court saved in its plain epilogue morning). The hauling isn't saved midway: a save with the brake thrown but the chain not home would leave the hatch shut for good.
 - **After the credits**, Cheryl is saved in the flat at (5, 7) with `act6.done` and `game.complete`; every map keeps its epilogue state.
@@ -98,3 +100,16 @@ Where the design left something open, or didn't work in play, this is what the b
 ## Stand-ins and gaps
 
 - **The Windlass Room climax** (the bell, the brake, the hauling, the hatch) and the risen Harbor's cut (Mott's toast, the Teeth receding) wait for Act 5's maps. The bell's cut to the belfry and the other four montage cuts play now (`?run=act6_bell`, `act6_lurch`, `act6_refill`).
+
+## Blockers and refusals
+
+Every blocker or refusal in Act 6 gates a puzzle or a story moment (the client's rule: none may only send the player the long way round).
+
+- **The brake is locked until the bell rings**: the bell is the climax's cue ("When the bell says when"), and it rings on its own after 15 seconds.
+- **The Keepers' ladder in the Windlass Room says "Not tonight"** at night: leaving would walk out of the climax.
+- **The Long Keel's west door opens as Cheryl reaches it**: not a blocker.
+- **The trim wheel won't turn before the Basin is full, and the master stop is locked until the moon sits true**: the Sighting Room's puzzle order.
+- **The lift won't go up before the bath**: the bath is the story's peak, and the lift ends the act.
+- **The door home says "Not yet" in the epilogue until the piano has come**: one trip out of the court (any distance) brings Gerald's piano and opens the final scene. It's the design's one gentle gate.
+
+Removed in the sweep: the epilogue's "Not today" refusal at the open hundredth step (now boarded over and walkable), and the rope barrier round it.
