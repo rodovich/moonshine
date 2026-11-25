@@ -15,7 +15,7 @@
 
 import { composedMap, blankGrid } from '../opening/grid.js';
 import { act2Tiles } from './tiles.js';
-import { layout, house, pave, lowRoof, LOOKS, bump, cycle, firstMeet, cherylDeclines, actWrongness, getItem } from './common.js';
+import { layout, house, pave, lowRoof, LOOKS, bump, firstMeet, cherylDeclines, actWrongness, getItem } from './common.js';
 import { props } from '../../art/props.js';
 
 const W = 32, H = 16;
@@ -96,9 +96,17 @@ const objects = [
     ],
   })),
   { id: 'school_doors', x: 12, y: 4, w: 2, look: 'Locked. Good. The building deserves a rest.' },
-  ...HOUSE_DOORS.map(([x, y]) => ({
-    id: `door_${x}`, x, y, lookKey: 'house_doors',
-    interact: (g) => g.describe(cycle(g, 'lamp.doors', ['Not my door.', "The Venns'. They'll be asleep. They're always asleep. It's a gift."])),
+  // Each door has its own line, so walking along the street doesn't repeat (playtest).
+  ...HOUSE_DOORS.map(([x, y], i) => ({
+    id: `door_${x}`, x, y, lookKey: `house_door_${x}`,
+    look: [
+      'Not my door.',
+      "The Venns'. They'll be asleep. They're always asleep. It's a gift.",
+      "The Pellows'. Their knocker is a brass fish. Nobody remembers why, least of all the Pellows.",
+      'Not my door either. Somebody has left a boot on the step, with a note tucked in it for the boot.',
+      'Three locks and the window wide open. That\'s Tessel.',
+      "Old Mrs. Abery's. She scrubs the doorstep on Tuesdays, whatever day it is.",
+    ][i],
   })),
   {
     // Only near the Squeeze: a look hotspot on a walkable row catches clicks meant for walking.
