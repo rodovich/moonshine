@@ -1,5 +1,5 @@
-// "Stairs to the Water" — a surface theme for the wider city of stairs and canals (not yet
-// assigned to a place; it was written for the opening before the story settled).
+// "Stairs to the Water" — the upper town by day: Lamp Street, the Crown, the Hundred Steps,
+// and Fountain Square (docs/design/02-city.md). In the Shop it plays muffled (muffleMusic).
 // F major, a lilting walk with light swing. Flute melody over rippling harp, a round bass, and a
 // soft shaker. The arrangement builds across the loop: A is sparse, A2 adds strings, B is the
 // lyrical bridge, A3 brings in an accordion singing in thirds under the flute.
@@ -75,7 +75,7 @@ const tamb = '(sh_:2 sh tam sh)x2';
 const groove = 'k:4 rim .:2 k rim:4';
 
 export default {
-  id: 'stairs',
+  id: 'neighborhood',
   title: 'Stairs to the Water',
   bpm: 100,
   swing: 0.14,

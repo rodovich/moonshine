@@ -9,9 +9,16 @@
 //   duck   dip the music to this level (0..1) while the effect plays; duckFor sets how long (s)
 // `layers` may be a function returning layers, called on every play (for randomized sounds).
 // Loops (ambience, running water, ticking) have `loop` instead of `layers`; see sfx-world.js.
-// Footsteps, puzzle sounds, ambience, and the Wrongness's sounds are in sfx-world.js.
+// The opening's footsteps, puzzle sounds, ambience, and Wrongness are in sfx-world.js; the wider
+// city (Act 2) in sfx-city.js; the underground and its machines in sfx-under.js; Act 4 (the bell,
+// the pumps, the rise, the climb, the reveal) in sfx-rise.js; Act 5 in sfx-high.js; Act 6 in sfx-home.js.
 
 import { WORLD_SFX } from './sfx-world.js';
+import { CITY_SFX } from './sfx-city.js';
+import { UNDER_SFX } from './sfx-under.js';
+import { RISE_SFX } from './sfx-rise.js';
+import { HIGH_SFX } from './sfx-high.js';
+import { HOME_SFX } from './sfx-home.js';
 
 const UI_SFX = {
   // Dialog text, one per letter or two. Bright, short, square-ish.
@@ -121,4 +128,5 @@ const UI_SFX = {
   },
 };
 
-export const SFX = { ...UI_SFX, ...WORLD_SFX };
+export const SFX_GROUPS = { ui: UI_SFX, world: WORLD_SFX, city: CITY_SFX, under: UNDER_SFX, rise: RISE_SFX, high: HIGH_SFX, home: HOME_SFX };
+export const SFX = { ...UI_SFX, ...WORLD_SFX, ...CITY_SFX, ...UNDER_SFX, ...RISE_SFX, ...HIGH_SFX, ...HOME_SFX };

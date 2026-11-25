@@ -7,7 +7,7 @@
 
 import { DIR_VEC, dirBetween } from './entity.js';
 import { pathToDirs } from './world.js';
-import { playMusic, stopMusic, sfx, playCue, windDownMusic, startLoop, stopLoop, setWrongness } from './sound.js';
+import { playMusic, stopMusic, sfx, playCue, windDownMusic, startLoop, stopLoop, setWrongness, muffleMusic, bendMusic, setLoopVolume } from './sound.js';
 import { loadSheet } from './art.js';
 import { TILE } from './tilemap.js';
 import { WIDTH, HEIGHT } from './display.js';
@@ -476,7 +476,7 @@ export function makeApi(world) {
     // g.sfx(id) plays at full volume. g.sfx(id, { at: [x, y] or an entity id,
     // range: 12 }) fades with Cheryl's distance (in tiles) from the source,
     // silent beyond `range`: the chess tap is clear beside the table and
-    // gone on the roof. `volume` scales it further.
+    // gone on the roof. `volume` scales it further; `pan` (-1..1) places it left or right.
     sfx(id, opts = {}) {
       let volume = opts.volume ?? 1;
       if (opts.at != null) {
@@ -503,6 +503,15 @@ export function makeApi(world) {
     },
     windDownMusic(ms) {
       windDownMusic(ms);
+    },
+    muffleMusic(on, opts) {
+      muffleMusic(on, opts);
+    },
+    bendMusic(cents, ms) {
+      bendMusic(cents, ms);
+    },
+    setLoopVolume(id, v, fadeMs) {
+      setLoopVolume(id, v, fadeMs);
     },
     startLoop(id, opts) {
       startLoop(id, opts);

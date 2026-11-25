@@ -38,6 +38,7 @@
   <div id="music"></div>
   <div>
     <button id="stop">■ Stop (fade)</button>
+    <button id="muffle">🧱 Muffle (as heard from the Shop)</button>
     <button id="wind">⏬ Wind down (music box runs down)</button>
     <label>Crossfade / wind-down <input id="fade" type="number" value="800" min="0" step="100" style="width:6em"> ms</label>
   </div>
@@ -95,6 +96,7 @@ import * as audio from '../src/audio/index.js';
 import { renderMusic, renderSfx, renderLoop, analyze, balanceReport, spectrumReport, BANDS } from '../src/audio/offline.js';
 import { lintSong } from '../src/audio/lint.js';
 import { SONGS } from '../src/audio/music/index.js';
+import { SFX } from '../src/audio/sfx.js';
 
 const $ = (id) => document.getElementById(id);
 const compiled = (id) => audio.getCompiledSong(id);
@@ -124,6 +126,7 @@ for (const id of audio.MUSIC_IDS) {
   $('music').append(b);
 }
 $('stop').onclick = () => { audio.stopMusic(Number($('fade').value)); refreshNow(); };
+$('muffle').onclick = async () => { await audio.initAudio(); const on = !$('muffle').classList.contains('playing'); audio.muffleMusic(on); $('muffle').classList.toggle('playing', on); };
 $('wind').onclick = () => { const ms = Number($('fade').value); audio.windDownMusic(ms >= 1000 ? ms : 4000); refreshNow(); };
 
 // Effects, grouped as in the opening's design.
@@ -133,6 +136,17 @@ const GROUPS = {
   'Puzzle and characters': ['tap_squeak', 'tub_full', 'chess_tap', 'pepper_grind', 'sneeze', 'timer_ding', 'sheets_flap', 'kid_patter', 'kid_hop', 'piano_flat', 'splash'],
   'Ambience': ['swifts', 'dog_bark', 'gull', 'clock_strike', 'well_breath'],
   'The Wrongness': ['wrong_sting', 'groan', 'crack', 'rattle', 'piano_tumble', 'drain', 'drain_glunk', 'drain_gurgle', 'drain_echo'],
+  'The wider city (Act 2)': ['knock', 'shop_bell', 'stone_scrape', 'scrub', 'skip_rope', 'slab_lift', 'piano_slide', 'sink_gurgle', 'step_splash', 'goat', 'boatman_sing', 'girls_chant'],
+  'Downstairs: moving about': ['step_hullstone', 'step_rung', 'lid_pry', 'hatch_open', 'light_beam', 'mirror_turn', 'moonlock_open', 'disc_glow', 'chute_slide', 'ladder_drop', 'tube_voice', 'lever_pull', 'lid_open', 'shutters', 'disc_get', 'lamp_relight', 'bolt_draw', 'founders_door', 'rubbing'],
+  'Downstairs: machines and water': ['valve_turn', 'valve_jam', 'far_gurgle', 'chain_rattle'],
+  'Act 4: the bell and the Fountain': ['clock_rundown', 'lever_clank', 'clamp_lift', 'bell_stroke', 'bell_strokes', 'thrum_rise', 'coins_rattle', 'ring_hatch'],
+  'Act 4: the Pump Hall and the rise': ['valve_squeal', 'pump_cough', 'pump_stall', 'thump_thin', 'thump_stout', 'thump_middle', 'grate_drain', 'hull_creak_long', 'ear_pop', 'groan_great', 'burst', 'hatch_bang'],
+  'Act 5: the risen city': ['bucket_fill', 'bucket_lower', 'pour', 'splash_small', 'rope_throw', 'rope_creak', 'tin_lid', 'disc_drink', 'disc_fade', 'timer_wind', 'leap', 'mud_splat'],
+  'Act 5: the door and the Windlass': ['barnacles_crack', 'door_grind', 'light_spill', 'bronze_door', 'lamp_wake', 'lamps_wake', 'drum_creak', 'stump_lever', 'clapper_seat'],
+  'Act 6: the hauling and the montage': ['bell_tube', 'brake_clack', 'brake_throw', 'wheel_bite', 'link_boom', 'lurch', 'crowd_oof', 'piano_boat', 'chess_scatter', 'sheets_crack', 'emblem_hatch'],
+  'Act 6: the Sighting Room and the bath': ['door_slide_up', 'plug_glint', 'basin_fill', 'moon_settle', 'trim_turn', 'rim_light', 'lamps_blaze', 'master_stop', 'sisters_sleep', 'canal_rush', 'crowd_cheer', 'bath_enter', 'ripples'],
+  'Act 6: the dawn and the epilogue': ['lift_gate', 'lift_ride', 'well_grate', 'race_feet', 'pen_scratch', 'piano_c', 'piano_rhyme'],
+  'Act 4: the climb and the reveal': ['gull_close', 'slab_scrape', 'slab_close', 'bell_low', 'town_rush', 'fish_flop'],
 };
 const listed = new Set(Object.values(GROUPS).flat());
 const other = audio.SFX_IDS.filter((id) => !listed.has(id));
@@ -172,7 +186,7 @@ async function typeText(text, blip) {
 }
 $('talk').onclick = () => typeText("Piano went down the Squeeze in the night. Took the Pelletiers' geraniums with it.", 'blip');
 $('think').onclick = () => typeText("Something's wrong. Not wrong like a dropped stitch. Wrong like a step that isn't there.", 'blip_cheryl');
-for (const [surface, ms] of [['step_stone', 270], ['step_plaster', 270], ['step_tile', 270], ['step_rug', 270], ['step_stairs', 330], ['step_wood', 270], ['step_kid', 110]]) {
+for (const [surface, ms] of [['step_stone', 270], ['step_plaster', 270], ['step_tile', 270], ['step_rug', 270], ['step_stairs', 330], ['step_wood', 270], ['step_kid', 110], ['step_splash', 300], ['step_hullstone', 300], ['step_rung', 380]]) {
   const b = el('button', { textContent: `Walk: ${surface.replace('step_', '')}` });
   b.onclick = async () => {
     await audio.initAudio();
@@ -251,7 +265,8 @@ async function checkAll() {
     rows.push({ kind: 'sfx', id, raw: a, limited: analyze(lim), buffer: raw, length: a.soundUntil });
   }
   for (const id of audio.LOOP_IDS) {
-    const raw = await renderLoop(id, 6, { limiter: false });
+    // Render past the loop's first event (some, like hull_far, wait a while before sounding).
+    const raw = await renderLoop(id, Math.max(6, (SFX[id].loop.offset ?? 0) + 5), { limiter: false });
     const a = analyze(raw);
     rows.push({ kind: 'loop', id, raw: a, limited: a, buffer: raw, length: a.soundUntil });
   }

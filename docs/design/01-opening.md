@@ -203,6 +203,7 @@ Lines are Cheryl's descriptions unless labeled otherwise. Each line is one text 
 - No plug, player doesn't have the plug:
   - First: "My tub. Cast iron, clawfooted, and twice as stubborn as me." / "It took four men and a song to get it up here. The song was the hard part." / "No plug, though. I lent it to him downstairs. A 'chess emergency.'"
   - Then: "No plug. He's got it downstairs, playing chess with it."
+  - The privacy beat, played once, after that look's own line, on the third look (or the first, if the plug thread is already done), so the tub's state hints keep showing: "In full view of Her Next Door's roof. On Moonshine Night nobody looks at anybody else's roof. That's the rule." / "We've both kept it for thirty-one years. She's very good at not looking. So am I."
 - Player has the plug but hasn't used it: "The plug's in my bag. It would do more good in the tub."
 - Use **bath plug** on tub: "In it goes. Brass, with a little chain to pull it out by. A good plug." → remove plug; `tub.plugged`.
 - Plugged, empty: "Plugged. Now the water."
@@ -212,11 +213,11 @@ Lines are Cheryl's descriptions unless labeled otherwise. Each line is one text 
 
 **Tap** (2, 4)
 - Tub not plugged: "The roof tap. I'm not filling the tub just to watch it leave."
-- Plugged and empty: → squeak, pour, the tub fills over about two seconds; `tub.full`. Then: "Cold as the sea. That's how it's done. Hot baths are for Tuesdays." Then, if the sheets are already moved: "Now I sit, and wait for the moon." If not: "Now the view."
+- Plugged and empty: → squeak, pour, the tub fills over about two seconds; `tub.full`. Then: "Cold as the sea. That's how it's done. Hot baths are for Tuesdays." Then, if the sheets are already moved: "Now I sit on the edge of the tub, and wait for the moon." If not: "Now the view."
 - Full: "Full. Any more and I'll be bailing."
 - Morning: "I'm not filling it again until I know where the last lot went."
 
-**Chairs** (2–3, 7): "Two chairs. I only sit in the one." (The same every time.)
+**Chairs** (2–3, 7): "Two chairs. I only sit in the one." (The same every time, except once the tub is full and the sheets are moved: "Not tonight. Tonight it's the tub.")
 
 **Herb pots** (1–2, 2): "Basil, rosemary, and something that blew in and refused to leave. I've grown fond of it."
 
@@ -224,7 +225,7 @@ Lines are Cheryl's descriptions unless labeled otherwise. Each line is one text 
 
 **South roof edge** (any `=` on y9): Dusk: "Tessel, all the way down to the water. Every roof has a basin on it tonight, waiting for the moon." Morning: "Basins on every roof, still full. Nobody wants to be the first to tip theirs out."
 
-**West and north parapets**: "The next roof over is a long step and a short fall. I was nineteen once. Never again."
+**West and north parapets**: "The next roof over is a long step and a short fall. I've made it before. Not tonight, and not in my good cardigan."
 
 **Low wall** (x9): "The wall between my roof and hers. Low enough to talk over. She does."
 
@@ -247,7 +248,7 @@ Lines are Cheryl's descriptions unless labeled otherwise. Each line is one text 
 
 **Neighbor's door** (14, 11): Dusk: "Her door. She's up on the roof with her sheets, where she always is on Moonshine Night." Morning: "Shut. She's upstairs being disappointed at her sheets."
 
-**Windows** (any `w` in the facade): "Blue shutters. Everyone in Tessel has blue shutters, except Her Next Door, who has green ones and opinions."
+**Windows**: Cheryl's (blue shutters): "Blue shutters. Everyone in Tessel has blue shutters, except Her Next Door, who has green ones and opinions." Her Next Door's (green shutters, x11, 13, 16, 18 on row 10): "Her green shutters. She repaints them every spring, in case anyone's forgotten they're green."
 
 ### Court
 
@@ -287,9 +288,11 @@ Lines are Cheryl's descriptions unless labeled otherwise. Each line is one text 
 - Third: "A note on the lid: BACK AFTER MOON. DO NOT TOUCH PIANO."
 - Then: → plays one key (a slightly flat note). "Middle C. A little flat. I'd know."
 - Use **soap** on it: "Not now. It isn't going anywhere."
-- Walking or clicking into the blocked Squeeze: "I'm not climbing over a piano at my age. Besides, I'm not going anywhere tonight."
+- Walking or clicking into the blocked Squeeze: "I'm not climbing over a piano I didn't order. Besides, I'm not going anywhere tonight."
 
-**The Squeeze** (morning): First: "The Squeeze is clear. There's a long scrape down every step, and at the bottom, a lot of surprised geraniums." Walking into the exit leaves the slice.
+**The Squeeze** (morning): First: "The Squeeze is clear. There's a long scrape down every step, and at the bottom, a lot of surprised geraniums." Walking into the exit leaves the slice, after one last thought before the fade: *Down, then.* (It echoes Act 4's *Up, then.*)
+
+**The drain grate** (6, 20): Dusk: "The court drain. Tomorrow every basin in Tessel gets tipped out, and it all goes downhill. Somewhere." Morning: "The drain's making a noise like somebody breathing through a straw. It never used to make any noise at all."
 
 ### Cheryl's flat
 
@@ -330,7 +333,7 @@ Lines are Cheryl's descriptions unless labeled otherwise. Each line is one text 
 - After: "A jug, a basin, and a mirror I avoid before ten."
 
 **Plug hook** (6, 8)
-- Before the plug comes back: "The plug hook. Empty. Oh — I lent the plug to him downstairs. A 'chess emergency.'"
+- Before the plug comes back: "The plug hook. Empty. Oh — I lent the plug to him downstairs. A 'chess emergency.'" (Once the tub has explained the plug: "The plug hook. Empty. The plug's downstairs, being a king.")
 - While Cheryl has the plug or it's in the tub: "The plug hook. Empty, but only because the plug is busy."
 - Morning: "The plug hook. Empty. I'm going to find out why."
 
@@ -388,6 +391,7 @@ Stands at (17,5) among her sheets. Idle animation: smoothing a sheet, then stepp
 
 **Repeat** (alternate)
 - NEIGHBOR: Bring me my prop and I'll move them. I'm not unreasonable. I'm just right.
+- NEIGHBOR: And it's the striped costume tonight, is it? Good. Not that I'll be looking. Nobody looks. That's the rule.
 - NEIGHBOR: I can hear you thinking. You think very loudly for a quiet woman.
 
 **Give clothes prop** (works without talking first) → remove prop; `neighbor.sheetsMoved`
@@ -404,7 +408,7 @@ Stands at (17,5) among her sheets. Idle animation: smoothing a sheet, then stepp
 - Egg timer: NEIGHBOR: I don't need timing. The moon does the timing.
 - Soap: NEIGHBOR: Lovely. Are you saying something? You're saying something.
 - Bath plug: NEIGHBOR: That's yours. Keep it away from my laundry.
-- Anything else: NEIGHBOR: I've no use for that, and I've told you so.
+- Anything else: first time, NEIGHBOR: I've no use for that. After that: NEIGHBOR: I've no use for that, and I've told you so.
 
 **Morning** (at 14,3, facing the grey sheets)
 - First: NEIGHBOR: Grey. GREY. Thirty years of Moonshine Nights and they've come out grey.
@@ -418,7 +422,7 @@ Stands at (17,5) among her sheets. Idle animation: smoothing a sheet, then stepp
 About ten. Runs laps of the well (see the map notes) at a steady jog, hopping the hurdle each time round. Sweat drops fly off him at the corners. Whenever Cheryl is within two tiles of him, or the player clicks or taps him, he stops where he is and jogs in place, facing her, so talking to him and giving him things work like any standing NPC.
 
 **First talk** → `kid.wantsTimer`
-- SWEATY KID: Can't stop! Stair Race in nine days. I'm gonna win it by SO much.
+- SWEATY KID: Can't stop! Stair Race in three days. I'm gonna win it by SO much.
 - SWEATY KID: I'm doing laps. Forty laps. Or thirty. I keep losing count, because the well's round.
 - SWEATY KID: If I had a timer I'd know if I was getting faster. Mum says I'm only getting sweatier.
 - SWEATY KID: The prop? It's my hurdle. Watch! → he hops the hurdle once and comes back.
@@ -484,12 +488,12 @@ Each NPC has its own "Anything else" decline (listed with their dialog), so givi
 **Trigger:** interact with the tub when `tub.full` and `neighbor.sheetsMoved`. Input is locked until step 17. "Auto" boxes advance on their own after about 1.2 seconds and do not wait for input. All other boxes wait for input.
 
 1. Internal monologue: *Plug in. Water in. Sheets out of the way.* / *Now, the moon.*
-2. Cheryl walks to (3,5), just south of the tub, turns east, and sits on the tub's edge (sit pose).
+2. **The costume.** Cheryl walks behind the chimney stack (to (8, 3), hidden by its overhead caps). A beat. Her cardigan lands folded on the nearer chair (2, 7) (a folded-cardigan object appears). She steps out in her **striped bathing costume**, navy and cream, knee-length, with a matching cap over her bun (a new sprite set, used only for this sequence). From the Neighbor's roof, without turning round: NEIGHBOR: Not looking. (auto box) Cheryl walks to (3, 5), just south of the tub, turns east, and sits on the tub's edge, feet in the water (sit pose, costume version).
 3. **Cistern Court** fades out over two seconds. Ambient sound rises: the festival murmur from the city below. Far off, the Mayor's new clock on the Crown strikes the hour (three strokes, fading).
 4. Crossfade (one second) to the **vista**.
-5. **Vista.** The Bowl at dusk from Cheryl's roof, looking east. Foreground: Cheryl's silhouette from behind, lower left (the bun and its coral tie), and the rim of the tub. Below her, roofs stepping down to the water, each with a tiny basin that twinkles. Middle: the dark Bowl with a long gleam. Background: the Rim's cliffs, deep violet against a sky shading from apricot to indigo, with the Gate notch at screen center (x ≈ 128). Music: **Moonrise**, a music box playing the rhyme melody slowly.
-6. A glow brightens behind the Rim, *to the right of the Gate* (x ≈ 176). Hold two seconds. The music box keeps playing; the murmur continues.
-7. The moon's rim appears over the cliff at x ≈ 176 and rises slowly (about six seconds until half of it is up). As it appears, the festival murmur stops dead. A single dog barks, far off. The music box slows, drifts flat, and stops mid-phrase.
+5. **Vista.** The Bowl at dusk from Cheryl's roof, looking east. Foreground: Cheryl's silhouette from behind, lower left, sitting on the tub's rim in her striped bathing costume and cap, and the rim of the tub. Below her, roofs stepping down to the water, lit warm from behind her by the last of the sunset, each with a tiny basin that twinkles, and the first lamps coming on. Middle: the Bowl, calm, reflecting the cool eastern sky. Background: the Rim's cliffs, glowing faintly rose in the last sun (alpenglow), against the **eastern** sky at dusk (the sun is setting behind Cheryl, in the west, so there is no sunset glow in this direction): deep blue above, a soft rose-pink band just above the Rim, and a blue-grey band (the Earth's shadow) along the cliff tops. The Gate notch is at screen center (x ≈ 128). See the story bible's "The sky over Tessel." Music: **Moonrise**, a music box playing the rhyme melody slowly.
+6. A pale, silvery glow brightens behind the Rim, *to the right of the Gate* (x ≈ 176): moonlight, not sunset. Hold two seconds. The music box keeps playing; the murmur continues.
+7. The moon's rim appears over the cliff at x ≈ 176 and rises slowly (about six seconds until half of it is up), large, pale peach-gold as it clears the Rim and whitening as it climbs, with a cool silver halo, laying a faint peach-gold path across the Bowl toward Cheryl. As it appears, the festival murmur stops dead. A single dog barks, far off. The music box slows, drifts flat, and stops mid-phrase.
 8. Internal monologue over the vista: *No.* / *It comes up in the Gate.* / *It has come up in the Gate every year of my life.*
 9. **Hard cut** (no fade) back to the roof, now under the **night** tint, with Cheryl seated at the tub.
 10. **The groan.** A long, low metallic groan from far below (about three seconds). Light screen shake (1 px) for its whole length. The tub water sloshes. The chimney pots rattle. The sheets on the back line swing out to one side and hang there at an angle. Auto boxes: SWEATY KID: WHOA! then NEIGHBOR: My SHEETS!
@@ -498,7 +502,7 @@ Each NPC has its own "Anything else" decline (listed with their dialog), so givi
 13. **The drain.** *Glunk.* The plug is yanked out of sight (tub anim: plug gone), a whirlpool spins in the tub, and the water drains in about 1.5 seconds with a gurgle. Then, from the drain, a long hollow echo falls away and away, and about 2.5 seconds later there's a tiny, faraway splash.
 14. Silence for 1.5 seconds. A gull. Wind.
 15. Cheryl stands. Internal monologue: *That drain goes to the gutter. The gutter goes to the lane.* / *That sound went somewhere else entirely.*
-16. The Neighbor walks to the low wall at (10, 4) and says this over it: NEIGHBOR: Did you FEEL that? The whole house went sideways! / NEIGHBOR: It's the bleach. I've overdone the bleach.
+16. The Neighbor walks to the low wall at (10, 4) and says this over it, looking straight at Cheryl for the first time all evening: NEIGHBOR: Did you FEEL that? The whole house went sideways! / NEIGHBOR: It's the bleach. I've overdone the bleach. / NEIGHBOR: …I'm looking. Sorry. I'll stop. → she turns her back.
 17. Internal monologue: *Something's wrong.* / *Not wrong like a dropped stitch. Wrong like a step that isn't there.*
 18. Fade to black over two seconds. Text card, centered: **Morning.** (2 seconds.)
 19. Set `act1.moonrise` and the morning state. Fade in on the flat under the **day** tint, with Cheryl standing at (8,4) by the bed. Music: **Morning After**.
@@ -555,6 +559,7 @@ The tints (dusk, night, day) are global color treatments by the engine, not sepa
 
 **Sprites**
 - **Cheryl:** walk in 4 directions; idle in 4 directions; reach/interact (up, side, down); sit on the tub edge facing east; stand up
+- **Cheryl in her bathing costume** (moonrise sequence only): a navy-and-cream striped, knee-length, old-fashioned bathing costume with a matching cap over her bun; walk (left, right, down, a few steps), stand, sit on the tub edge facing east with her feet in the water, stand up. Plus a small object: her cardigan folded on a chair. The Act 1 vista's silhouette is her in the costume and cap, from behind
 - **Old Man:** seated idle (2 frames: thinking, reaching for a piece); turning the pepper mill; sneeze; talk
 - **Neighbor:** idle smoothing (2 frames); walk in 4 directions; reaching up to the line
 - **Sweaty Kid:** run in 4 directions (4 frames); jog in place (2 frames); hop; arms up; sweat-drop particle (2 frames)
@@ -609,8 +614,13 @@ The opening content task (WCVWR8hxu8) built this slice on `content/opening`; its
 - The sheet move is staged: she unpegs the x15 sheets from (16, 4) and the x12 sheets from (13, 4), props the back line from (14, 3), the sheets go up in three beats, and she returns to (16, 3).
 - The blocked-Squeeze line fires when Cheryl steps down onto (15–16, 22). In the morning, the Squeeze's line plays on her first step onto the stair top (15–16, 24), and the exit is row 25.
 - The end card reads **Moonshine** in the title style, over "End of the opening." and "Tessel continues soon."
+- Moonrise staging: Cheryl sits on the middle of the tub's rim; the moon clears the ridge before *No.*, and the Gate goes dark; after the crack, the camera pans down to the empty Squeeze, then back for the drain.
+- After the playtest (xwPAb3NfPz), the lines for the tap, the chairs, the green shutters, the plug hook, the Neighbor's decline, the court drain, and the final *Down, then.* are the builder's wording, adopted above.
 
 ## Decisions
+
+- **The rooftop tub is public on purpose** (client feedback: it looked strangely exposed). On Moonshine Night all Tessel is on its roofs and nobody looks at anybody else's; Cheryl and Her Next Door have both kept that rule for thirty-one years. Cheryl bathes in a striped bathing costume, changing behind the chimney stack. It reads in play three ways: the tub's look, the Neighbor's repeat line, and the costume change with the Neighbor's "Not looking." A screen was rejected because it would block the view of the Gate across the Neighbor's terrace, which is the point of the scene.
+- **Client feedback on age and sky:** Cheryl's lines never lean on her age; the moonrise sky follows the story bible's "The sky over Tessel."
 
 - **Revised after review (xaKh8TS_PJ):** the hurdle's position fixed on the map; an item-use hint; the Kid stops within two tiles or when clicked; per-NPC declines for wrong items; flat collision and a shelf line; the tap points to the next step; fewer ship clues in the morning (the bed and drain lines no longer say "boat" or "rope"); Gerald's game is seventeen years, so it can't be read as a clue to Cheryl's past; the Pelletiers' cat added (an existing art-kit sprite).
 - **The slice is two maps: Cistern Court (roof and court in one scrolling map) and the flat.** That's big enough for two parallel threads and small enough to polish soon.

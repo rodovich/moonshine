@@ -142,7 +142,7 @@ The summit plaza. The Bell Tower stands to the northwest, with its new clock fac
     3  ~~##CC##~RRRRR~#w#ww#w#~
     4  ##########w#w###w#ww#w##   shop facade (9-13); dome facade (15-22)
     5  ##########w#w###w#ww#w##
-    6  ####DD#####D######DD####   tower door (4-5); shop door (11); Dome door (18-19)
+    6  ####DD######D#####DD####   tower door (4-5); shop door (12); Dome door (18-19)
     7  ........................
     8  ........................
     9  ...........SS...........   SS the sundial (11-12, 9-10)
@@ -871,7 +871,7 @@ Cheryl's descriptions unless labeled. "First / then" follows the look counter.
   - Crowbar while she's sitting there: "She's sitting on it. I'm brave, not rude."
 - **Crowbar on any other step**: "These steps are older than the Mayor's great-grandmother. I'm not prying them up at random."
 - **The piano** (bottom landing, before it slides): First: "The piano, wedged in the arch like a cork. The label still says No. 9, Cistern Court." Then: "Somebody sent me a piano, and the piano has other ideas." After `movers.met`, first look: "Grease. Where would I get grease on a Moonshine morning?" Second and later looks, while Cheryl has the soap: "Grease, he said. My soap is slippery enough to lose in a bath." (The soap stays on the washstand in Cheryl's flat until taken, if the player skipped it in Act 1.)
-- **The blocked arch** (walking into it): "I'm not climbing over a piano at my age. The Goat Path goes round the long way."
+- **The blocked arch** (walking into it): "I'm not climbing over a piano that isn't mine. The Goat Path goes round the long way."
 - **The crowbar** (after the piano slides) → take: "Their crowbar. They'll want it back. They'll have to catch a piano first."
 - **Landing 3 view parapet**: "Halfway down Tessel. Halfway up, if you're the Kid."
 - **Bench, pots, cat**: "A bench for the halfway point. Nobody has ever sat on it going down." / "Geraniums." / "Another cat, on the uphill side."
@@ -1058,6 +1058,40 @@ The Clockmaker is heard, not seen, in this slice.
 - [ ] A player who skipped the soap or the hat in Act 1 can still get them from the flat.
 - [ ] First-time players finish in 30–40 minutes.
 
+## As built (part 1)
+
+The Act 2 part 1 builder (5DfQsiqAZf) built Lamp Street through the Shop on `content/act2a`; its full list of build decisions is in `game/src/content/act2/README.md`. This document follows them:
+
+- The scrape marks run along y10 as designed (x3–28), turning down x27–28 to the Steps; their look hotspot is only at x3–5, so it doesn't eat walking clicks.
+- After it slides, the piano rests against the Fountain's **east** rim at (14–15, 8–9), with the Movers at (16, 8) and (15, 10). (On the north rim, the bronze fish stood across its keys.)
+- The Skipping Girls are at (10–12, 6): turners at 10 and 12, the jumper at 11, the rope over all three.
+- Lamp Street's bench is at (20–21, 11); the Man on Bench sits on it from (20, 12).
+- The Woman with Basin's door is (7, 15) and she stands at (7, 16); her water runs east along row 18 from x7 and slips into the joint at (10, 18), above the hollow step.
+- The Clockmaker's shop door on the Crown is at x12 (the painted clock and a window of clocks take x10–11).
+- The Tourist sits at (19, 14) on a café chair facing her table at (19, 13); the tables are at (19, 13) and (22, 13).
+- The Shop's barometer hangs at (7, 0).
+- Lamp Street and the Square use the audio task's lighter `town` ambience, not the festival `crowd`.
+- Each NPC's look line plays once, as Cheryl's description, before their first talk.
+- The Skipping Girls' chant shows as two short barks, one per half of the couplet.
+- In part 1, the Goat Path gate and the rope to the Bilge decline with the lines the builder wrote (the goats have the path; CANAL CLEANING). Its added lines for objects the design didn't cover (the yard wall, the bay tree, the lamps, the views, and a few wrong combinations) are adopted as written.
+- In part 1 the Count thread can only happen after the piano moves, since the guidebook needs the Square.
+
+## As built (part 2)
+
+The same builder built the Goat Path, Harbor, lamp room, and Bilge on `content/act2b`. This document follows its choices:
+
+- Lamp Street's west edge (0, 9–11) is a gap in the wall to the Goat Path (no gate art); the gate line plays the first time, before the map changes.
+- The Fishmonger stands at (4, 4), in front of her door, not under a stall's canopy. The Bilge's west mooring post is at (10, 6), so the north quay's west end stays open.
+- In the Counting Woman's storm-off, the camera pans down to the arch so the piano, both Movers, and her climb over it are in frame, with the lines at the top of the screen; then it follows Cheryl again.
+- The Lighthouse Keeper polishes from (4, 4), facing the lamp (up).
+- Mott sits on the middle bollard at (13, 8) and swigs from his jug every so often.
+- Wading into the flooded street plays its first and second looks on the first and second wades (no hotspot on the water).
+- The bronze fish's line is the Fountain's second look (the fish sits on the solid Fountain): the Fountain's first look, then the fish, then the Fountain's repeat.
+- Lines the builder added, adopted as written: the Bilge cat, the harbor water, the lighthouse from below, and the cliff behind the Harbor.
+- From part 1, moved for reachability: the Woman with Watering Can at (24, 6), the bay tree at (2, 5).
+- Act 2's Wrongness is 0.1 throughout.
+- The blocked arch uses the age-free line ("I'm not climbing over a piano that isn't mine…"), per the client's note on Cheryl's age.
+
 ## Decisions
 
 - **Act 2 is eleven maps, all at day, ending at the hundredth step.** The act's job is to open the city, introduce everyone who matters later, and get Cheryl underground.
@@ -1067,7 +1101,7 @@ The Clockmaker is heard, not seen, in this slice.
 - **Former pupils call Cheryl "Miss."** It's a warm, cheap way to show her history with the town.
 - **The Clockmaker is only heard in Act 2.** He appears in Act 4, when his thread starts, which saves a sprite for this slice.
 - **The Founders' Door is seen (bolted) in Act 2** and opened from the other side in Act 3. It's the player's first look at Founder architecture.
-- **Build Act 2 in two parts** (suggested by the reviewer, xaKh8TS_PJ). **2a:** Lamp Street, the Crown, the Archive and crypt, the Hundred Steps, Fountain Square, and the Shop. The Goat Path gate is shut ("The goats have the path today.") and the Square's way down to the Bilge is roped off ("CANAL CLEANING. KEEP OUT. — by order of the Mayor"). Both threads work, provided the piano goes first, and the act can be finished. **2b:** the Goat Path, Harbor, lamp room, and Bilge loop; then open the gate and the rope. That gets a polished, playable Act 2 out sooner. In 2a, the blocked arch line drops its Goat Path half: "I'm not climbing over a piano at my age."
+- **Build Act 2 in two parts** (suggested by the reviewer, xaKh8TS_PJ). **2a:** Lamp Street, the Crown, the Archive and crypt, the Hundred Steps, Fountain Square, and the Shop. The Goat Path gate is shut ("The goats have the path today.") and the Square's way down to the Bilge is roped off ("CANAL CLEANING. KEEP OUT. — by order of the Mayor"). Both threads work, provided the piano goes first, and the act can be finished. **2b:** the Goat Path, Harbor, lamp room, and Bilge loop; then open the gate and the rope. That gets a polished, playable Act 2 out sooner. In 2a, the blocked arch line drops its Goat Path half: "I'm not climbing over a piano that isn't mine."
 - **The hollow step is flush with landing 2 and paved like it,** so everyone steps over it without counting. That's why the count is ninety-nine. (From review.)
 - **The guidebook can be read,** one entry per look, so the Count thread and the Act 4 Clockmaker lure are discoverable rather than found by trying every item on everyone. (From review.)
 - **Residents refuse to notice the open step.** It extends the "wrong explanations" running joke to its limit: some things Tessel just won't see.

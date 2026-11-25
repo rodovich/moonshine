@@ -14,14 +14,13 @@ test('title screen starts a new game', async ({ page }) => {
   expect((await snap(page)).scene).toBe('title');
   await page.keyboard.press('Enter');
   await waitFor(page, () => window.moonshine.snapshot().scene === 'world');
-  await waitText(page); // the street's intro thought
+  await waitText(page, 10000); // the opening's first thought
   const s = await snap(page);
-  expect(s.map).toBe('test_street');
-  expect(s.text).toContain('engine test street');
+  expect(s.map).toBe('cistern_court');
+  expect(s.text).toContain('Moonshine Night');
   await page.waitForTimeout(1200);
   await shot(page, '02-intro-thought');
-  await press(page, 'z');
-  await press(page, 'z');
+  await readAll(page);
   await waitFor(page, () => !!window.moonshine.snapshot().hint);
   await page.waitForTimeout(600);
   await shot(page, '02b-controls-hint');

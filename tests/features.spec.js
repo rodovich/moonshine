@@ -55,7 +55,8 @@ test('item use precedence: target, item useOn, decline, default', async ({ page 
   expect(await said("await g.npc('old_man'); return window.moonshine.world.useItemOn(g.npc('old_man'), 'brass_key');")).toContain('My key');
   expect(await said("return window.moonshine.world.useItemOn(g.npc('old_man'), 'letter');")).toContain('everything I need');
   expect(await said("return window.moonshine.world.useItemOn(g.npc('kid'), 'brass_key');")).toContain('strangers');
-  expect(await said("return window.moonshine.world.useItemOn(g.npc('cat'), 'letter');")).toContain('going to help');
+  // The content's default: Cheryl's fallback lines, in turn (docs/design/01-opening.md).
+  expect(await said("return window.moonshine.world.useItemOn(g.npc('cat'), 'letter');")).toMatch(/^No\.$|not where that goes|somehow|explain it later/);
 });
 
 test('barks and emotes don\'t stop the player', async ({ page }) => {
