@@ -1,4 +1,5 @@
-// "Stairs to the Water" — the opening neighborhood.
+// "Stairs to the Water" — a surface theme for the wider city of stairs and canals (not yet
+// assigned to a place; it was written for the opening before the story settled).
 // F major, a lilting walk with light swing. Flute melody over rippling harp, a round bass, and a
 // soft shaker. The arrangement builds across the loop: A is sparse, A2 adds strings, B is the
 // lyrical bridge, A3 brings in an accordion singing in thirds under the flute.
@@ -45,7 +46,7 @@ const lead = {
     G5:6 F5:2 D5:4 Bb5 |
     Bb5:3 A5:1 G5:4 E5 C5 |
     A5:4 G5:2 E5 F#5:4 A5:2 C6 |
-    Bb5:4 A5:2 G5 F5 E5 D5 C5 |`,
+    Bb5:4 A5:2 G5 E5 F5 D5 C5 |`,
 };
 
 // Accordion harmony for A3: mostly a third or sixth under the flute, like two old friends singing.
@@ -74,7 +75,7 @@ const tamb = '(sh_:2 sh tam sh)x2';
 const groove = 'k:4 rim .:2 k rim:4';
 
 export default {
-  id: 'neighborhood',
+  id: 'stairs',
   title: 'Stairs to the Water',
   bpm: 100,
   swing: 0.14,
@@ -90,6 +91,7 @@ export default {
   ],
   patterns: {
     I: {
+      harmony: 'F | C7 |',
       lead: '.:16 | .:16 |',
       harp: `${arp('F3', 'C4', 'F4', 'A4')} | ${arp('G3', 'Bb3', 'C4', 'E4')} |`,
       pad: '.:16 | .:16 |',
@@ -98,6 +100,7 @@ export default {
       shaker: `.:16 | ${shaker} |`,
     },
     A: {
+      harmony: 'F | C/E | Bb | C | Dm | Bb | Gm7 C7 | F |',
       lead: lead.A,
       harp: `${H.F} | ${H.CE} | ${H.Bb} | ${H.C} | ${H.Dm} | ${H.Bb} | ${H.Gm7C7} | ${H.F} |`,
       pad: '(.:16 |)x8',
@@ -110,18 +113,20 @@ export default {
       shaker: `(${shaker} |)x8`,
     },
     A2: {
+      harmony: 'F | C/E | Bb | C | Dm | Gm | C7 | F |',
       lead: lead.A2,
       harp: `${H.F} | ${H.CE} | ${H.Bb} | ${H.C} | ${H.Dm} | ${H.Gm} | ${H.C7} | ${H.F} |`,
-      pad: `@strings v100 C4:16 | C4 | D4 | E4 | F4 | D4 | E4:8 Bb3 | A3:16 |`,
+      pad: `@strings v100 C4:16 | C4 | D4 | G4 | F4 | D4 | E4:8 Bb3 | A3:16 |`,
       bass: `${bassA1to4} ${bassA2_5to7}
         F2:4 C3 F2 A2 |`,
       drum: `(${groove} |)x7 k:4 rim k:2 rim_ rim rim_ |`,
       shaker: `(${shaker} |)x8`,
     },
     B: {
+      harmony: 'Bb | C | Am | Dm7 | Gm7 | C7 | Am7 D7 | Gm7 C7 |',
       lead: lead.B,
       harp: `${H.Bb} | ${H.C} | ${H.Am} | ${H.Dm} | ${H.Gm} | ${H.C7} | ${H.Am7D7} | ${H.Gm7C7} |`,
-      pad: '@strings v90 D4:16 | E4 | E4 | F4 | D4 | E4 | E4:8 F#4 | F4:8 E4 |',
+      pad: '@strings v90 D4:16 | E4 | E4 | F4 | D4 | E4 | E4:8 F#4 | F4:8 Bb3 |',
       bass: `
         Bb1:6 F2:2 Bb2:4 F2 |
         C2:6 G2:2 C3:4 G2 |
@@ -135,6 +140,7 @@ export default {
       shaker: `(${shaker} |)x7 ${shaker} |`,
     },
     A3: {
+      harmony: 'F | C/E | Bb | C | Dm | Gm | C7 | F |',
       lead: lead.A2,
       harp: `${H.F} | ${H.CE} | ${H.Bb} | ${H.C} | ${H.Dm} | ${H.Gm} | ${H.C7} | ${H.F} |`,
       pad: harmonyA3,
@@ -146,4 +152,8 @@ export default {
   },
   intro: ['I'],
   loop: ['A', 'A2', 'B', 'A3'],
+  lintAllow: [
+    { match: 'A/bass bar 8 beat 4', why: 'E2 is a leading tone into F2 at the top of the next section' },
+    { match: 'A3/bass bar 8 beat 4', why: 'E2 is a leading tone into F2 when the loop restarts' },
+  ],
 };

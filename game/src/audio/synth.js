@@ -14,6 +14,8 @@ const WAVES = {
   reed: [1, 0.75, 0.6, 0.48, 0.38, 0.3, 0.22, 0.16, 0.12, 0.09, 0.07, 0.05],
   string: Array.from({ length: 24 }, (_, i) => 1 / (i + 1)),
   bass: [1, 0.6, 0.28, 0.14, 0.07, 0.035],
+  guitar: [1, 0.5, 0.33, 0.22, 0.12, 0.09, 0.05, 0.035, 0.02],
+  piano: [1, 0.62, 0.42, 0.3, 0.24, 0.15, 0.12, 0.08, 0.06, 0.045, 0.03, 0.02],
   marimba: [1, 0, 0, 0.22, 0, 0, 0, 0, 0, 0.05],
   vibe: [1, 0, 0, 0.35, 0, 0, 0, 0, 0, 0.08],
   choir: [1, 0.55, 0.7, 0.25, 0.12, 0.08, 0.04],
@@ -86,17 +88,18 @@ function applyEnv(param, t, dur, peak, env) {
 
 function applyFilter(ctx, spec, t, keyFreq) {
   const f = ctx.createBiquadFilter();
+  const top = Math.min(20000, ctx.sampleRate * 0.49); // stay under Nyquist at any sample rate
   f.type = spec.type || 'lowpass';
   f.Q.value = spec.q ?? 0.7;
   const track = spec.track ?? 0;
   const ratio = keyFreq ? Math.pow(keyFreq / 261.63, track) : 1;
   const sweep = Array.isArray(spec.freq) ? spec.freq : null;
-  const base = Math.min((sweep ? sweep[1] : spec.freq) * ratio, 20000);
+  const base = Math.min((sweep ? sweep[1] : spec.freq) * ratio, top);
   if (sweep) {
-    f.frequency.setValueAtTime(Math.min(sweep[0] * ratio, 20000), t);
+    f.frequency.setValueAtTime(Math.min(sweep[0] * ratio, top), t);
     f.frequency.exponentialRampToValueAtTime(base, t + (spec.time ?? 0.2));
   } else if (spec.env) {
-    f.frequency.setValueAtTime(Math.min(base + spec.env * ratio, 20000), t);
+    f.frequency.setValueAtTime(Math.min(base + spec.env * ratio, top), t);
     f.frequency.setTargetAtTime(base, t, (spec.decay ?? 0.2) / 3);
   } else {
     f.frequency.value = base;
@@ -228,9 +231,10 @@ function freqOf(v) {
 
 /**
  * Play a list of one-shot layers (a drum hit or a sound effect). Layer kinds:
- *   { type: 'tone', wave, freq: f | [from, to], sweep, dur, env, gain, at, filter, vibrato }
+ *   { type: 'tone', wave, freq: f | [from, to], sweep, curve, path: [[sec, f], ...], dur, env, gain,
+ *     at, filter, vibrato, detune }
  *   { type: 'noise', dur, env, gain, at, filter }
- *   { type: 'notes', inst, notes: [[pitch, at, dur, vel?, bendCents?], ...], gain }
+ *   { type: 'notes', inst, notes: [[pitch, at, dur, vel?, bendCents?, detuneCents?], ...], gain }
  * opts: { dest, vel, pitch (frequency multiplier for every layer) }
  * Returns { end, choke(time) }.
  */
@@ -247,9 +251,9 @@ export function playLayers(ctx, layers, t0, opts) {
       const g = ctx.createGain();
       g.gain.value = L.gain ?? 1;
       g.connect(out.node);
-      for (const [p, at, dur, v = 0.8, bend = 0] of L.notes) {
+      for (const [p, at, dur, v = 0.8, bend = 0, detune = 0] of L.notes) {
         const f = freqOf(p) * pm;
-        const vce = playNote(ctx, L.inst, { time: t + at, dur, freq: f, vel: v * vel, bend, dest: g });
+        const vce = playNote(ctx, L.inst, { time: t + at, dur, freq: f, vel: v * vel, bend, detune, dest: g });
         voices.push(vce);
         end = Math.max(end, vce.end);
       }
@@ -266,7 +270,10 @@ export function playLayers(ctx, layers, t0, opts) {
       src = makeOsc(ctx, L.wave || 'square');
       const f = Array.isArray(L.freq) ? L.freq.map(freqOf) : [freqOf(L.freq), freqOf(L.freq)];
       src.frequency.setValueAtTime(f[0] * pm, t);
-      if (f[1] !== f[0]) {
+      if (L.path) {
+        // Pitch contour: [[seconds, freq], ...] after the start, ramped exponentially.
+        for (const [pt, pf] of L.path) src.frequency.exponentialRampToValueAtTime(freqOf(pf) * pm, t + pt);
+      } else if (f[1] !== f[0]) {
         const st = L.sweep ?? dur;
         if (L.curve === 'linear') src.frequency.linearRampToValueAtTime(f[1] * pm, t + st);
         else src.frequency.exponentialRampToValueAtTime(f[1] * pm, t + st);
@@ -304,6 +311,62 @@ export function playLayers(ctx, layers, t0, opts) {
       for (const v of voices) v.choke(at);
       const stopAt = Math.max(at, ctx.currentTime) + 0.03;
       if (stopAt < end) for (const s of sources) { try { s.stop(stopAt); } catch { /* ignore */ } }
+    },
+  };
+}
+
+/**
+ * A continuous sound for looping ambience (wind, running water, a crowd's hum).
+ * spec: { type: 'noise' | 'tone', wave, freq, gain, filter: { type, freq, q },
+ *         lfo: { target: 'gain' | 'filter' | 'freq', rate, depth } }
+ * depth is a fraction of gain, Hz for the filter, or cents for pitch.
+ * Fades in over `fadeIn` seconds from time t. Returns { stop(time, fadeSec) }.
+ */
+export function startBed(ctx, spec, t, dest, fadeIn = 0.3) {
+  const src = spec.type === 'tone' ? makeOsc(ctx, spec.wave || 'sine') : makeNoise(ctx);
+  if (spec.type === 'tone') src.frequency.value = freqOf(spec.freq);
+  const g = ctx.createGain();
+  const level = spec.gain ?? 0.2;
+  g.gain.setValueAtTime(0, t);
+  g.gain.linearRampToValueAtTime(level, t + Math.max(fadeIn, 0.005));
+  let node = src;
+  let filter = null;
+  if (spec.filter) {
+    filter = ctx.createBiquadFilter();
+    filter.type = spec.filter.type || 'lowpass';
+    filter.frequency.value = spec.filter.freq;
+    filter.Q.value = spec.filter.q ?? 0.7;
+    src.connect(filter);
+    node = filter;
+  }
+  // The LFO adds to a separate gain so it doesn't disturb the fade automation.
+  const wob = ctx.createGain();
+  node.connect(wob);
+  wob.connect(g);
+  g.connect(dest);
+  const extra = [];
+  if (spec.lfo) {
+    const lfo = ctx.createOscillator();
+    lfo.frequency.value = spec.lfo.rate;
+    const lg = ctx.createGain();
+    lg.gain.value = spec.lfo.depth;
+    lfo.connect(lg);
+    if (spec.lfo.target === 'filter' && filter) lg.connect(filter.frequency);
+    else if (spec.lfo.target === 'freq' && spec.type === 'tone') lg.connect(src.detune);
+    else { wob.gain.value = 1 - spec.lfo.depth; lg.connect(wob.gain); }
+    lfo.start(t);
+    extra.push(lfo);
+  }
+  if (spec.type === 'noise') src.start(t, Math.random() * 1.5); else src.start(t);
+  return {
+    stop(at, fadeSec = 0.3) {
+      const s = Math.max(at, ctx.currentTime);
+      g.gain.cancelScheduledValues(s);
+      // After the fade-in the level is known; reading .value would be wrong for future times.
+      g.gain.setValueAtTime(s >= t + fadeIn ? level : g.gain.value, s);
+      g.gain.linearRampToValueAtTime(0, s + Math.max(fadeSec, 0.005));
+      const end = s + Math.max(fadeSec, 0.005) + 0.05;
+      for (const n of [src, ...extra]) { try { n.stop(end); } catch { /* ignore */ } }
     },
   };
 }

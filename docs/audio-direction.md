@@ -1,13 +1,15 @@
 # Audio direction
 
-Moonshine should sound like a well-loved SNES adventure: warm, slightly soft "sampled" instruments, a little echo, and melodies you hum after you stop playing. Everything is synthesized at runtime with Web Audio ([decisions.md](decisions.md)); there are no audio files. The code is in `game/src/audio/` and its API is documented in [game/src/audio/README.md](../game/src/audio/README.md). Listen to everything on the dev page, `game/dev/audio.html`.
+Moonshine should sound like a well-loved SNES adventure: warm, slightly soft "sampled" instruments, a little echo, and melodies you hum after you stop playing. Everything is synthesized at runtime with Web Audio ([decisions.md](decisions.md)); there are no audio files. The code is in `game/src/audio/` and its API is documented in [game/src/audio/README.md](../game/src/audio/README.md). Listen to everything on the dev page, `game/dev/audio.html`, which also plays the opening's moonrise sequence in order.
+
+The story and places come from [story-bible.md](story-bible.md) and [design/01-opening.md](design/01-opening.md) (its "Audio needed" list is what round 2 delivered).
 
 ## Sonic identity
 
 - **Warm and a little muffled.** Instruments are oscillators with hand-shaped harmonic spectra, soft envelopes, and lowpass filters, and the whole mix passes through a gentle 11 kHz lowpass. Nothing is bright or harsh. This stands in for the SNES's small, interpolated samples.
-- **Echo, not reverb.** Each track has a stereo echo whose repeats darken as they fade, like the SNES echo unit. The surface uses short, light echo; deeper and stranger places get longer, wetter echo.
-- **Few voices.** Music uses at most 6 monophonic channels, and up to 3 sound effects can play at once, so the game stays near the SNES's 8 voices. A new note on a channel cuts off the previous one. Chords are arpeggiated or split across channels, as composers did then.
-- **Melody first.** Every track has a clear tune on one lead voice. Accompaniment ripples and supports; it never competes.
+- **Echo, not reverb.** Each track has a stereo echo whose repeats darken as they fade, like the SNES echo unit. Homey places use short, light echo; deeper and stranger places get longer, wetter echo.
+- **Few voices.** Music uses at most 6 monophonic channels, and up to 3 sound effects can play at once, so the game stays near the SNES's 8 voices. (Ambient loops such as wind and the crowd are extra, but they are quiet beds.) A new note on a channel cuts off the previous one. Chords are arpeggiated or split across channels, as composers did then.
+- **Melody first.** Every track has a clear tune on one lead voice that is the loudest voice in every section (checked; see below). Accompaniment ripples and supports; it never competes.
 
 ## Instrument palette
 
@@ -15,77 +17,101 @@ Defined in `game/src/audio/instruments.js`.
 
 | Instrument | Sound | Used for |
 |---|---|---|
-| `flute` | breathy lead with delayed vibrato | main melodies on the surface |
-| `ocarina` | hollow, rounder lead | quiet or mysterious melodies |
+| `accordion` | two detuned reeds | Cistern Court's lead: Cheryl's home |
+| `flute` | breathy lead with delayed vibrato | the title; counter-melodies and descants |
+| `ocarina` | hollow, rounder lead | quiet or uneasy melodies (Morning After) |
+| `musicbox` | steel comb: bright tine, inharmonic partial, a click | the skipping rhyme (Moonrise) |
+| `guitar` | warm nylon pluck | waltz accompaniment |
 | `harp` | plucked, bright attack that mellows | rippling arpeggios (water, steps) |
-| `marimba` | short wooden mallet | playful figures, light counterlines |
-| `vibes` | metal mallet with shimmer | twinkles, the item jingle |
+| `piano` | upright, two slightly detuned strings | the piano in the Squeeze (and its fall) |
+| `marimba` | short wooden mallet | playful figures |
+| `vibes` | metal mallet with shimmer | the item jingle |
 | `bell` | glassy, with an inharmonic partial | the underground's voice; the title |
-| `accordion` | two detuned reeds | café warmth; harmony lines on the surface |
 | `strings` | slow, soft pad | sustained guide tones |
 | `choir` | soft "ooh" pad | the underground, big moments |
-| `bass` | round fingered bass | walking bass on the surface |
+| `bass` | round fingered bass | walking and waltz bass on the surface |
 | `bowbass` | sustained bowed bass | slow pieces |
 | `wrongbell`, `wrongpad` | bells that sag flat; a pad that beats against itself | the Wrongness only |
-| `kit` | soft kick, rim, brushy snare, shaker, hat, tambourine, tom, cymbal swell | light percussion |
+| `kit` | soft kick, rim, brushy snare, shaker, hat, tambourine, tom, cymbal swell, clock tick and tock | light percussion |
 
 ## The three worlds
 
-**The surface city** is sunlit, lived-in, and a little old-fashioned: major keys (the neighborhood is in F), flute, harp, accordion, round bass, and light hand percussion (shaker, rim, tambourine), with a gentle swing. Tunes are stepwise and singable, and the arrangement builds and thins as a loop goes round, so it doesn't wear out.
+**The surface city (Tessel)** is sunlit, lived-in, and a little old-fashioned: major keys, accordion, flute, guitar, harp, round bass, and light hand percussion (shaker, rim, tambourine). Tunes are stepwise and singable, and the arrangement changes as a loop goes round, so it doesn't wear out.
 
-**The underground** (not composed yet) belongs to a different civilization, so it should sound related but foreign: bells, choir, and bowed bass; no hand percussion, only slow pulses; modes that sit outside the surface's major keys (the title's D-flat chord is the first taste); longer, wetter echo. Its melodies should use the same intervals as the surface motifs, rearranged, hinting that the two worlds share a history.
+**The underground** (not composed yet) is the Founders' work, so it should sound related to the surface but foreign: bells, choir, and bowed bass; no hand percussion, only slow pulses; modes outside the surface's major keys (the title's D-flat chord is the first taste); longer, wetter echo. Its melodies should be built from the skipping rhyme's intervals, because the rhyme is the Founders' own manual.
 
-**The Wrongness** is something slipping out of tune. It reuses the surface's own material and corrupts it: notes sag flat as they ring, pads beat against themselves, and the home motif fails to land, sliding down chromatically against a tritone. It should be unsettling, never loud or a jump scare: residents don't notice it, so it lives at the edge of hearing.
+**The Wrongness** is something slipping out of tune. It reuses the surface's own material and corrupts it: notes sag flat as they ring, pads beat against themselves, and the rhyme fails to land, sliding down by half steps against a tritone. It is unsettling, never a jump scare. The physical Wrongness sounds of the opening (the groan of the chain, the crack of the Tooth) are the one exception: those are meant to be enormous.
 
 ## Leitmotifs
 
-- **Home motif.** A rising A–C–F (third, then fourth, landing on the tonic), usually "and-a-ONE" into a held note. It opens the neighborhood theme and the title theme, and the item jingle is built on it. Use it for Cheryl's sense of home and for her goal.
-- **The flat sixth.** The D-flat major chord in F (♭VI): the title turns to it twice, and its last phrase climbs D♭–E♭–F. It is the color of the hidden city. Save it on the surface for moments that brush against the underground.
-- **The Wrongness slip.** The home motif's A–C–F, continued downward by half steps (F–E–E♭–D–D♭), over F in the bass with a B held against it. Pieces about the Wrongness should quote the slip, and any surface theme can be "infected" by bending its notes flat.
+- **The skipping rhyme** is the game's central motif ([story-bible.md](story-bible.md), "The skipping rhyme"; the tune is `RHYME` in `music/moonrise.js`). It is a chant in F: *MOON-shine* (C–A), *MOON-shine* (D–A), *catch it in a cup* falling to G; *ring the bell when the tide turns up* rising to C; then the three sisters climb a step at a time and *drink up the sea* comes home to F. It plays on a music box at the moonrise, is sung broadly in the title, and should return underground and at the ending.
+- **Cheryl's home theme** is Cistern Court's opening phrase: a waltz that climbs a broken chord (F–B♭–D) and settles back. Morning After plays it in G minor. Use it for Cheryl's home, her ritual, and her plug.
+- **The flat sixth.** The D-flat chord in F (♭VI): the title turns to it twice, and its last phrase climbs D♭–E♭–F. It is the color of the hidden city. Save it on the surface for moments that brush against the underground.
+- **The Wrongness slip.** The rhyme's "Moonshine, moonshine" with the second one a half step low, then "catch it in a cup" sliding down by half steps (C–B–B♭–A–A♭) over F in the bass with a B held against it. The music box running down at the moonrise is the same idea: the rhyme slowing and sagging flat.
 
 ## Tracks
 
-| id | Title | Key, tempo | Form | Length |
-|---|---|---|---|---|
-| `title` | Moonshine | F major, 72 bpm | 2-bar intro, 16-bar loop | 53.3 s loop |
-| `neighborhood` | Stairs to the Water | F major, 100 bpm, light swing | 2-bar intro, loop A A2 B A3 (8 bars each) | 76.8 s loop |
-| `wrongness` | Something Wrong | slips off F, 66 bpm | 2-bar one-shot cue | 7.3 s plus echo |
+| id | Title | Key, meter, tempo | Form | Length | Where |
+|---|---|---|---|---|---|
+| `title` | Moonshine | F major, 4/4, 72 bpm | 2-bar intro, 16-bar loop | 53.3 s loop | title screen |
+| `cistern_court` | Cistern Court | B♭ major, 3/4, 88 bpm | 2-bar intro, A A2 B A3 (8 bars each) | 65.5 s loop | the opening at dusk; Cheryl's home theme |
+| `moonrise` | Moonrise | F major, 4/4, 63 bpm | 8-bar loop | 30.5 s loop | the moonrise vista; runs down with `windDownMusic` |
+| `morning_after` | Morning After | G minor, 3/4, 76 bpm | 16-bar loop | 37.9 s loop | the morning after Moonshine Night |
+| `wrongness` | Something Wrong | slips off F, 66 bpm | 2-bar one-shot cue | 7.3 s plus echo | `playCue` when the Wrongness shows itself |
+| `stairs` | Stairs to the Water | F major, 4/4, 100 bpm, light swing | 2-bar intro, A A2 B A3 | 76.8 s loop | not yet assigned: a surface theme for the wider city |
 
-- **Stairs to the Water** builds across its loop: A is flute, harp, bass, and percussion; A2 adds strings; B is a lyrical bridge through the relative minor that ends on a little drum fill; A3 brings in an accordion singing in thirds under the flute, with tambourine.
-- **Moonshine** opens on rippling harp and a bell, states the home motif slowly, and turns twice to D-flat before resolving upward.
-- **Something Wrong** interrupts whatever is playing (`playCue('wrongness')`): the music dips out, the cue plays, and the music fades back in.
+- **Cistern Court** is an unhurried waltz: an accordion over a nylon guitar's oom-pah-pah. Each time round it changes: A is guitar and accordion; A2 swaps the guitar for rippling harp; B hands the tune to the flute in G minor while the accordion holds long notes; A3 brings it all back with a soft flute descant.
+- **Moonrise** is three music-box voices (tune, a broken-chord comb, low notes) with a long echo. At the moment the moon appears, the game calls `windDownMusic(ms)`: from the next note on, each step takes longer than the last and every note is flatter, until the box stops wherever it has got to and the last notes ring out. This is the design's "slows, drifts flat, and stops mid-phrase".
+- **Morning After** is Cistern Court's tune in G minor on a lone ocarina, over a harp's pah-pah, a bowed bass, and a ticking clock. Its second half quotes "Moonshine, moonshine" and doesn't finish it. Its last note is F♯, so the loop comes back to F with a small lurch. It is very slightly out of tune (song wrongness 0.12).
+- **Moonshine** (title) sings the rhyme's first couplet on the flute, turns twice to D-flat, then sings the sisters' couplet and climbs D♭–E♭–F.
+- **Something Wrong** is the rhyme collapsing (see the Wrongness slip).
+- **Stairs to the Water** was the round 1 opening theme. The story moved the opening to a waltz, so this one waits for a place in the wider city.
 
 The game can also turn up a global Wrongness amount (`setWrongness(0..1)`) as the threat grows: notes in every track then drift slightly out of tune and some sag flat. At 0.1–0.2 it should only feel faintly off; 0.5 is clearly sick.
 
 ## Sound effects
 
-Defined in `game/src/audio/sfx.js`.
+Defined in `game/src/audio/sfx.js` (interface) and `game/src/audio/sfx-world.js` (everything else). Many are randomized a little on each play so repeats don't sound mechanical. Loops are started and stopped with `startLoop` / `stopLoop`.
 
-| id | Description |
+| Group | ids |
 |---|---|
-| `blip` | dialog text: short, bright, square-ish (one every other letter) |
-| `blip_cheryl` | Cheryl's narration and inner voice: lower, rounder, a little uneven, like a thought |
-| `step` | a soft step on stone, varied in pitch each time |
-| `bump` | walking into something solid |
-| `confirm` | interact / confirm: two quick rising notes |
-| `cancel` | cancel / back: two falling notes |
-| `menu_open`, `menu_close` | a quick harp run up or down with a breath of air |
-| `item_get` | a fanfare on the home motif ending on the home chord; the music dips under it |
-| `door` | a short wooden creak, then the latch and thump |
-| `splash` | something going into water, with bubbles |
-| `wrong_sting` | the home chord on bells, each note slipping flat at its own rate over a sagging drone; the music dips under it |
+| Interface | `blip` (dialog text), `blip_cheryl` (Cheryl's narration: lower, rounder, uneven), `cursor`, `confirm` (select), `cancel`, `menu_open`, `menu_close`, `item_get` (a fanfare; dips the music), `give` |
+| Footsteps | `step_stone` (cobbles and paving, also `step`), `step_plaster` (the whitewashed roof), `step_tile` (terracotta floors indoors), `step_rug`, `step_stairs` (stone steps), `step_wood` (boards: piers, boats, later), `step_kid` (the Sweaty Kid's light feet) |
+| Doors and movement | `door` (open and shut, for map exits), `door_open`, `door_close`, `bump` |
+| Puzzle and characters (the opening) | `tap_squeak`, `water_pour` (loop), `tub_full`, `chess_tap`, `pepper_grind`, `sneeze` (the Old Man: ah… ah… CHOO), `timer_tick` (loop), `timer_ding`, `sheets_flap`, `kid_patter` (a run of the Kid's steps), `kid_hop`, `piano_flat` (one A, a little flat), `splash` |
+| Ambience | `crowd` (loop: the festival murmur below; stop it dead with `stopLoop('crowd', 0)`), `wind` (loop), `swifts`, `dog_bark` (one dog, far off), `gull`, `clock_strike` (the Mayor's clock on the Crown, three strokes, fading), `well_breath` (the morning well's cold whoosh) |
+| The Wrongness | `wrong_sting` (the home chord on bells slipping flat), `groan` (a chain under strain, 3 s; dips the music), `crack` (the Tooth shearing), `rattle` (chimney pots and timbers), `piano_tumble` (a chord crash, then thumps and jangles receding, 3.5 s), `drain` (glunk, gurgle, a hollow sound falling away, a far splash 2.5 s later; 5 s in all) |
+
+The dev page's "moonrise sequence" button plays these in the design's order with suggested timings (see `MOONRISE` in `game/dev/audio.html`): fade Cistern Court and start the crowd and clock; 5 s later the music box; at the moon, stop the crowd dead, wind the music down over about 4.5 s, and bark the dog; after the cut, the groan with the rattle, the crack, the piano, the drain, then a gull and the wind.
 
 ## Mixing levels
 
-Measured with the dev page's level check (offline render at full volume, before the safety clipper):
+Measured with the checks below (offline render at full volume, before the safety clipper):
 
-- **Music:** peaks about −4 to −5 dBFS, RMS about −17 dBFS. The lead sits 6–8 dB (RMS) above the harp and pads.
-- **UI sounds** (blips, steps, confirm, cancel, menus): peaks between −9 and −16 dBFS, so they read clearly over music without startling.
-- **Jingles and stings** (item get, Wrongness sting): peaks about −4 dBFS, with the music ducked to 10–15% underneath so they never clash harmonically.
+- **Music:** peaks −2 to −6 dBFS, RMS −15 to −20 dBFS, and A-weighted loudness within about 2 dB across the looping tracks.
+- **Balance within a track:** the melody is at least 3 dB louder (A-weighted, each voice alone) than every other voice in every section; in practice 4.5–13 dB.
+- **Interface sounds:** peaks −9 to −17 dBFS, so they read over music without startling. Footsteps −13 to −18 (the rug and the Kid quieter).
+- **Big moments** (item get, the Wrongness sting, the groan, the crack, the piano): peaks −3 to −6 dBFS, with the music ducked underneath where they would clash.
+- **Ambience:** distant things are quiet (crowd, wind, gull, dog, swifts: peaks −20 to −28).
 - **Default player volumes:** master 0.8, music 0.8, SFX 0.9 (sliders are squared, so they feel even). Settings persist in `localStorage` under `moonshine.audio`.
-- A soft clipper (exactly linear below −3 dBFS) guards the output. It should almost never engage; if a new piece trips it, turn the piece down instead.
+- A soft clipper (exactly linear below −3 dBFS) guards the output. It should almost never engage; if something trips it, turn that thing down instead.
 
-`node tests/audio/check-audio.mjs` fails if anything peaks above −1 dBFS or is nearly silent.
+## Checking the music
+
+Nobody on the project can listen, so the checks stand in for ears. All three run in `node tests/audio/check-audio.mjs`, and the first in `node --test tests/audio/`.
+
+1. **Music lint** (`game/src/audio/lint.js`; `node tests/audio/lint-music.mjs --all` prints it). Each pattern declares its chords (`harmony: 'Bb | Eb | Cm F7 |'`). The lint warns on:
+   - melody notes a beat or longer (or half a beat on a strong beat) that are neither chord tones nor safe tensions (9ths, 6ths, 11ths on minor chords);
+   - accompaniment notes of that length that aren't chord tones, and bass notes likewise, except stepwise approach notes off the downbeat;
+   - two voices a semitone or a minor ninth apart for half a beat or more;
+   - melodic leaps over an octave (and notes wide leaps and tritones);
+   - a melody with fewer than 6 pitches, fewer than 3 note lengths, or fewer than 35% distinct bars.
+
+   It also notes close voices below G3 (mud). A song can allow a specific warning with `lintAllow: [{ match, why }]`; every allowance states why.
+2. **Balance:** each voice of each section is rendered alone and measured with A-weighting (so low notes don't count for more than the ear hears). The melody must lead by 3 dB.
+3. **Spectrum:** each track's energy by band. Sub-bass (under 60 Hz) must stay below −12 dB of the total, low-mid (200–500 Hz) no more than 3 dB above mid (500–2000 Hz), and presence (2–6 kHz) above −35 dB.
+
+Plus levels: nothing may peak above −1 dBFS or be nearly silent, and the moonrise must actually stop after winding down.
 
 ## Music data format
 
@@ -93,24 +119,31 @@ A song is a JS module under `game/src/audio/music/` that default-exports an obje
 
 ```js
 export default {
-  id: 'neighborhood',          // same as its key in music/index.js
-  title: 'Stairs to the Water',
-  bpm: 100,
+  id: 'cistern_court',         // same as its key in music/index.js
+  title: 'Cistern Court',
+  bpm: 88,
   stepsPerBeat: 4,             // default 4: one step is a sixteenth note
-  beatsPerBar: 4,              // default 4
-  swing: 0.14,                 // delay odd steps by this fraction of a step (0 = straight)
-  gain: 0.85,                  // overall level of the song
+  beatsPerBar: 3,              // default 4
+  swing: 0.06,                 // delay odd steps by this fraction of a step (0 = straight)
+  gain: 1.2,                   // overall level of the song
   wrongness: 0,                // built-in detuning for this song (see setWrongness)
-  echo: { delay: 0.3, feedback: 0.3, wet: 0.28, lowpass: 2600, spread: 0.023 },
+  echo: { delay: 0.34, feedback: 0.3, wet: 0.26, lowpass: 2400, spread: 0.023 },
   channels: [                  // at most 6; each plays one note at a time
-    { id: 'lead', inst: 'flute', vol: 0.85, pan: 0.08, echo: 0.35, transpose: 0 },
+    { id: 'lead', inst: 'accordion', vol: 0.85, pan: 0.05, echo: 0.3, transpose: 0 },
+    { id: 'flute', inst: 'flute', vol: 0.6, role: 'counter' },  // roles: see below
     // ...
   ],
   patterns: {                  // each pattern gives every channel the same number of steps
-    A: { lead: 'A4:2 C5 F5:3 E5:1 F5:4 A5 | ...', bass: '...' },
+    A: {
+      harmony: 'Bb | Bb | Eb | Eb | Cm | F7 | Bb | F7 |',  // for the lint
+      lead: 'F4:4 Bb4 D5 | F5:6 Eb5:2 D5:4 | ...',
+      bass: '...',
+    },
+    B: { melody: 'flute', /* the flute has the tune in this section */ },
   },
   intro: ['I'],                // patterns played once
   loop: ['A', 'A2', 'B', 'A3'],// patterns repeated forever; null for a one-shot cue
+  lintAllow: [{ match: 'A/bass bar 8 beat 4', why: 'a leading tone into the next section' }],
 };
 ```
 
@@ -129,12 +162,14 @@ Each channel's part is a string of whitespace-separated tokens:
 | `v60` | set this channel's volume to 60% of its base level, from here on |
 | `@harp` | switch this channel's instrument from here on (it stays switched, so set it at the start of each pattern that relies on it) |
 
-Song modules may use small JS helpers to build these strings (for example, an `arp()` function for broken chords), as long as the result is easy to read.
+Harmony strings: chords separated by spaces split a bar evenly unless given `:steps` (`F:4 C:12`); `N` means no chord. Chord symbols are a root plus `m`, `7`, `maj7`, `m7`, `6`, `m6`, `9`, `m9`, `add9`, `dim`, `dim7`, `m7b5`, `aug`, `sus2`, `sus4`, or `7sus4`, with an optional `/bass`.
 
-Errors are specific: a bad token, a wrong bar length, or channels of unequal length throw an error naming the song, pattern, channel, and bar. `node --test tests/audio/` compiles every song.
+Channel roles (for the lint and balance checks): `melody`, `counter` (a secondary tune), `acc`, `bass`, `perc`. By default `lead` is the melody, `bass` is the bass, kits are percussion, and everything else is accompaniment.
+
+Song modules may use small JS helpers to build these strings (for example, an `arp()` function for broken chords), as long as the result is easy to read.
 
 ## Process
 
-- Add a song: write the module, register it in `music/index.js`, run `node --test tests/audio/` and `node tests/audio/check-audio.mjs`, then listen on the dev page.
-- Keep loops 45–95 seconds, and write the loop seam so the last bar leads back into the first.
+- Add a song: write the module with its harmony, register it in `music/index.js`, run `node --test tests/audio/` and `node tests/audio/check-audio.mjs`, fix what they report, then listen on the dev page if you can.
+- Write the loop seam so the last bar leads back into the first. Loops are 30–95 seconds (the home theme 60–90).
 - Keep music to 6 channels.

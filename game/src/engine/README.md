@@ -242,7 +242,7 @@ Maps, audio, misc:
 
 ## Audio boundary
 
-The engine calls audio only through `src/engine/sound.js`, a bridge to the audio module (`src/audio/index.js`, documented in `src/audio/README.md`). It exports `unlockAudio()` (first key press or tap), `playMusic(id)`, `stopMusic()`, `playCue(id)`, `sfx(id)`, and `setWrongness(0..1)`. The bridge maps the engine's generic sound ids (`text`, `text_cheryl`, `cursor`, `select`, `item`) to the audio ids and ignores unknown ids with a one-time console warning, so content can name music or sounds before they exist. Maps play their `music` on entry.
+The engine calls audio only through `src/engine/sound.js`, a bridge to the audio module (`src/audio/index.js`, documented in `src/audio/README.md`). It exports `unlockAudio()` (first key press or tap), `playMusic(id)`, `stopMusic()`, `playCue(id)`, `windDownMusic(ms)`, `sfx(id)`, `startLoop(id)`, `stopLoop(id, fadeMs)`, `stopAllLoops()`, and `setWrongness(0..1)`. The bridge maps the engine's generic sound ids (`text`, `text_cheryl`, `select`, `item`) to the audio ids (`cursor` has its own sound) and ignores unknown ids with a one-time console warning, so content can name music or sounds before they exist. Maps play their `music` on entry.
 
 ## Debug parameters
 
