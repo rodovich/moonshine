@@ -237,8 +237,29 @@ test('using a held item on plain ground beside Cheryl says so and drops it', asy
   await page.evaluate(() => { window.moonshine.world.control.holding = 'letter'; });
   await clickTile(page, 13, 8);
   await waitFor(page, () => !!window.moonshine.snapshot().text);
-  expect((await snap(page)).text).toContain('nothing there');
+  expect((await snap(page)).text).toContain("isn't where that goes");
   expect((await snap(page)).holding).toBe(null);
+});
+
+test('using a held item on plain ground farther away: walks there, then says so and drops it', async ({ page }) => {
+  await boot(page, `${STREET}&x=12&y=8&items=letter`);
+  await waitIdle(page);
+  await page.evaluate(() => { window.moonshine.world.control.holding = 'letter'; });
+  await clickTile(page, 6, 8);
+  await waitFor(page, () => !!window.moonshine.snapshot().text, null, 10000);
+  const s = await snap(page);
+  expect(s.text).toContain("isn't where that goes");
+  expect([s.x, s.holding]).toEqual([6, null]);
+});
+
+test('the title marks a finished game', async ({ page }) => {
+  await page.goto('/');
+  await page.evaluate(() => localStorage.setItem('moonshine.save.v1', JSON.stringify({ version: 1, map: 'test_street', x: 12, y: 8, facing: 'down', flags: { 'game.complete': true }, inventory: [] })));
+  await page.goto('/');
+  await page.waitForFunction(() => window.moonshine && window.moonshine.scene);
+  expect(await page.evaluate(() => window.moonshine.scene.finished)).toBe(true);
+  await page.waitForTimeout(800);
+  await page.screenshot({ path: 'tests/screenshots/32-title-finished.png' });
 });
 
 test('start=continue saves (it is the player own game)', async ({ page }) => {
@@ -251,4 +272,43 @@ test('start=continue saves (it is the player own game)', async ({ page }) => {
   await waitIdle(page);
   const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('moonshine.save.v1')).map);
   expect(saved).toBe('test_shop');
+});
+
+test('an idle character in a one-tile corridor steps out of Cheryl\'s way, then goes home', async ({ page }) => {
+  await boot(page, `${STREET}&x=18&y=8&facing=left`);
+  await waitIdle(page);
+  await page.evaluate(() => {
+    const w = window.moonshine.world;
+    for (let x = 10; x <= 17; x++) {
+      w.map.setTile('ground', x, 7, { tile: 'street:retain_top', solid: true });
+      w.map.setTile('ground', x, 9, { tile: 'street:retain_top', solid: true });
+    }
+    const k = w.byId.get('kid'); // out of the way
+    k.x = k.fromX = 20; k.y = k.fromY = 5; k.def = { ...k.def, behavior: 'idle' };
+    const om = w.byId.get('old_man'); // stands in the corridor
+    om.x = om.fromX = 13; om.y = om.fromY = 8;
+    om.home = { x: 13, y: 8, facing: 'down' };
+  });
+  // A route exists (planning goes through characters).
+  expect(await page.evaluate(() => { const w = window.moonshine.world; return !!w.pathFor(w.player, [[8, 8]]); })).toBe(true);
+  const watching = watchOverlap(page, 14);
+  await clickTile(page, 8, 8);
+  await waitFor(page, () => { const s = window.moonshine.snapshot(); return s.x === 8 && s.y === 8; }, null, 14000);
+  // Then, with Cheryl gone by, he walks back to his spot.
+  await page.evaluate(() => window.moonshine.world.control.walkTo(5, 6));
+  await waitFor(page, () => { const o = window.moonshine.world.byId.get('old_man'); return o.x === 13 && o.y === 8 && !o.yieldHome; }, null, 14000);
+  expect(await watching).toBe(null);
+});
+
+test('a character marked blocks: true holds its tile; routes go around or not at all', async ({ page }) => {
+  await boot(page, `${STREET}&x=12&y=8`);
+  await waitIdle(page);
+  const r = await page.evaluate(() => {
+    const w = window.moonshine.world;
+    const om = w.byId.get('old_man');
+    om.def = { ...om.def, blocks: true };
+    const through = w.pathFor(w.player, [[om.x, om.y]]);
+    return through === null;
+  });
+  expect(r).toBe(true);
 });

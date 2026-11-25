@@ -58,7 +58,7 @@ export class Game {
         else console.warn(`[debug] no script "${this.debug.run}" in content.scripts`);
       }
     } else {
-      this.scene = new Title(this, { canContinue: hasSave() && !!loadSave() });
+      this.scene = new Title(this, titleState());
       this.effects.fadeAlpha = 1;
       this.effects.fade('in', 0.6);
     }
@@ -90,7 +90,7 @@ export class Game {
     this.input.flush();
     this.card = null;
     this.world = null;
-    this.scene = new Title(this, { canContinue: hasSave() && !!loadSave() });
+    this.scene = new Title(this, titleState());
     this.effects.setLight([], 0);
     await this.effects.clear(0);
     await this.effects.fade('in', 0.6);
@@ -216,6 +216,11 @@ export class Game {
     if (this.card) drawCard(ctx, this.card.text);
     this.display.present(this.effects.waveParams(), this.touchBarImage(), this.dialogImage());
   }
+}
+
+function titleState() {
+  const save = hasSave() ? loadSave() : null;
+  return { canContinue: !!save, finished: !!(save && save.flags && save.flags['game.complete']) };
 }
 
 function guard(what, fn) {

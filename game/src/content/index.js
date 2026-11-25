@@ -61,7 +61,7 @@ export default {
   defaults: {
     // Using an item on something with no handler for it.
     useFail: async (g) => cherylDeclines(g),
-    // Using an item (keyboard) while facing nothing.
-    nothingToUseOn: "There's nothing there to use it on.",
+    // Using an item on nothing in particular (facing nothing, or tapping plain ground).
+    nothingToUseOn: "No. That isn't where that goes.",
   },
 };
