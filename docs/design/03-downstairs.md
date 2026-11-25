@@ -291,7 +291,10 @@ All Cheryl unless labeled. "First / then" follows the look counter.
 
 On first arriving in the Step Gallery (from the ladder), after a two-second pause with Cheryl standing in the daylight column:
 - *Under the Steps.*
-- *All this, under the Steps. All this time.*
+- *Thirty-one years I've gone up and down those Steps. Every day, most days twice.*
+- *And all this was underneath. All this time.*
+
+(The middle line was added after a blind playtest found the first underground moment too plain. It measures the wonder against Cheryl's own life on the Steps.)
 
 ### Step Gallery
 
