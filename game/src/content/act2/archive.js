@@ -110,7 +110,8 @@ const ottilieTalk = async (g, self) => {
       'Cheryl! You saw the moon. Everyone saw the moon. Nobody is asking the right question.',
       'The right question is: what did the Founders know? The Founders knew EVERYTHING. Then they went into the hill.',
       "Eels, I used to think. Now I'm leaning toward smugglers. Smugglers would know about moons.",
-      "You've got your investigating look. Here. Paper and charcoal. If you find anything old, take a rubbing.");
+      "You've got your investigating look. Here. Paper and charcoal. For Founder work, mind. And the Founders put their best work on FLOORS.",
+      "Look down, Cheryl. Where the light falls. Nothing up here's worth it. I've rubbed my Door to death.");
     g.setFlag('ottilie.met');
     await getItem(g, 'paper_charcoal');
     return g.say(self,
@@ -119,6 +120,7 @@ const ottilieTalk = async (g, self) => {
   }
   const lines = [
     '"Ninety-nine steps up to the Crown, and the hundredth step goes down." Humility. Probably.',
+    'Floors, Cheryl. Where the light falls. Primary sources.',
     "The Founders' Door is in the crypt. It doesn't open. I've written a monograph about how it doesn't open.",
     'Mind the teapot. It\'s on the Eye. The Eye is ancient glass. The teapot was my mother\'s. Both are irreplaceable.',
   ];
@@ -128,7 +130,6 @@ const ottilieTalk = async (g, self) => {
 const ottilieUse = {
   moon_chart: (g, self) => g.say(self, "Thirty-one years of data! ...They're all in the same place, Cheryl. That's not data, that's a habit.", 'Except the last one. Well. Everyone has an off night.'),
   guidebook: (g, self) => g.say(self, '"Founded by fishermen in the year of the Great Shoal." FISHERMEN. I could scream. I may scream.'),
-  hat: (g, self) => g.say(self, "It suits you. It always has. Put it on, the Dome's drafty."),
   soap: (g, self) => g.say(self, 'Lavender. Is this about book club? I said I was sorry.'),
   paper_charcoal: (g, self) => g.say(self, "Not on ME, Cheryl. On something OLD. ...Don't say it."),
   '*': (g, self) => g.say(self, "Is it old? It isn't old. Bring me something old."),
@@ -190,7 +191,7 @@ const cryptObjects = [
     looks: [DOOR.first, DOOR.then],
     use: {
       crowbar: (g) => g.describe("There isn't a seam to get it into. Whoever made this didn't make doors for crowbars."),
-      paper_charcoal: (g) => g.describe('Nothing carved on it to rub. Just smooth, perfect stone.'),
+      paper_charcoal: (g) => g.describe("Rubbed to a shine. Ottilie's been here before me. Forty times, she says."),
       '*': (g) => g.describe("It doesn't want that."),
     },
   },

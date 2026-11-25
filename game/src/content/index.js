@@ -5,7 +5,7 @@
 import { testMaps, testItemDefs, testScripts, testCharacters } from './test/index.js';
 import { openingMaps, openingItems, openingScripts, openingIntro, opening } from './opening/index.js';
 import { cherylDeclines } from './opening/common.js';
-import { act2Maps, act2Items, act2Scripts, act2 } from './act2/index.js';
+import { act2Maps, act2Items, act2Scripts, act2, migrateAct2 } from './act2/index.js';
 import { act3Maps, act3Items, act3Scripts, withAct3, act3 } from './act3/index.js';
 import { act4Maps, act4Items, act4Scripts, shipPlanAct4, seaCave, withAct4, startAct4, act4End } from './act4/index.js';
 import { act5Maps, act5Items, act5Scripts, withAct5, standInItems, startAct5, act5, shipPlanAct5, telescopeAct5 } from './act5/index.js';
@@ -40,6 +40,8 @@ items.ship_plan = shipPlanAct5(shipPlanAct4(items.ship_plan));
 if (items.telescope) items.telescope = telescopeAct5(items.telescope);
 
 export default {
+  // Old saves: Act 2's structure pass retired Cheryl's own hat (see act2/common.js).
+  migrate: (state) => migrateAct2(state),
   title: 'Moonshine',
 
   // Where a new game begins: Cheryl on her roof, by the tub.
