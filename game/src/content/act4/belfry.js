@@ -148,7 +148,7 @@ export async function showFlyleaf(g, amb) {
 export async function ringTheBell(g) {
   const amb = g.npc('ambrose_belfry');
   g.faceNpc(amb, 'up');
-  await g.say(amb, "THE TURN'S AT TWENTY PAST. TULLS DON'T NEED CLOCKS. WE NEED KNEES.");
+  await g.say(amb, "THE TURN'S AT TWENTY PAST TWO. TULLS DON'T NEED CLOCKS. WE NEED KNEES.");
   g.pose(amb, 'ring_up_0');
   await g.wait(2);
   g.sfx('gull');
@@ -200,7 +200,7 @@ const ambroseBelfry = {
       await g.say(self, 'THE LEDGER? GO ON.');
       return showFlyleaf(g, self);
     }
-    return g.say(self, 'TWENTY PAST, AND TEN TO NINE TONIGHT. THE SEA KEEPS BETTER TIME THAN HE DOES.');
+    return g.say(self, 'TWENTY PAST TWO, AND HALF PAST EIGHT TONIGHT. THE SEA KEEPS BETTER TIME THAN HE DOES.');
   },
   use: {
     ship_plan: (g, self) => g.say(self, 'A ROPE FROM THE BELL TO A WHEEL. I KNEW IT. I ALWAYS KNEW IT WAS ATTACHED TO SOMETHING.'),

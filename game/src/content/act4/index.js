@@ -9,7 +9,6 @@ import { shaftMap, cellarMap } from './climb.js';
 import { bilgeDryMap, act4End, endOfAct4, revealFromCellar } from './bilge_dry.js';
 import { seaCaveMap, seaCave } from './seacave.js';
 import { withAct4, startAct4 } from './surface.js';
-import { ship_plan } from '../../art/chartroom.js';
 
 // Act 4's own maps. Its states of earlier acts' maps come from withAct4(maps).
 export const act4Maps = {
@@ -20,16 +19,6 @@ export const act4Maps = {
   ice_cellar: cellarMap,
   bilge_dry: bilgeDryMap,
   sea_cave: seaCaveMap,
-};
-
-// Act 3 defines the Ship Plan (with its full-screen examine). Until Act 3 is
-// in the game, this stand-in lets Act 4 be played from debug parameters.
-export const act4FallbackItems = {
-  ship_plan: {
-    name: 'Ship Plan',
-    icon: { sheet: ship_plan, frame: Object.keys(ship_plan.frames).find((f) => /icon/.test(f)) || Object.keys(ship_plan.frames)[0] },
-    description: 'My rubbing of the Founders\' floor. Tessel, drawn as a boat. I\'ve folded it in quarters, which feels rude.',
-  },
 };
 
 // The Ship Plan's first two looks in Act 4 (after its picture closes).

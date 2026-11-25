@@ -7,7 +7,7 @@ import { openingMaps, openingItems, openingScripts, openingIntro, opening } from
 import { cherylDeclines } from './opening/common.js';
 import { act2Maps, act2Items, act2Scripts, act2 } from './act2/index.js';
 import { act3Maps, act3Items, act3Scripts, withAct3, act3 } from './act3/index.js';
-import { act4Maps, act4Items, act4FallbackItems, act4Scripts, shipPlanAct4, seaCave, withAct4, startAct4 } from './act4/index.js';
+import { act4Maps, act4Items, act4Scripts, shipPlanAct4, seaCave, withAct4, startAct4 } from './act4/index.js';
 import { cheryl } from '../art/cheryl.js';
 
 // Each act layers its states onto earlier acts' maps, in order: Act 3 (the crypt,
@@ -22,7 +22,7 @@ act3.next = startAct4;
 // The sea cave's mouth opens onto the Goat Path once Act 2 part 2 registers it.
 seaCave.goatPath = maps.goat_path ? 'goat_path' : null;
 
-const items = { ...act4FallbackItems, ...openingItems, ...act2Items, ...act3Items, ...act4Items, ...testItemDefs };
+const items = { ...openingItems, ...act2Items, ...act3Items, ...act4Items, ...testItemDefs };
 // The Ship Plan (Act 3's) gains its Act 4 looks.
 items.ship_plan = shipPlanAct4(items.ship_plan);
 

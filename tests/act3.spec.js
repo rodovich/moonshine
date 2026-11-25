@@ -1,6 +1,6 @@
 // Plays Act 3, Downstairs (docs/design/03-downstairs.md), start to finish:
 // once by keyboard alone and once by pointer alone, from the open hundredth
-// step to the end card. Screenshots of key moments go to tests/screenshots/act3-*.
+// step to the hand-off into Act 4. Screenshots of key moments go to tests/screenshots/act3-*.
 //
 // The keyboard run arrives with Ottilie's paper and takes the rubbing on the
 // way through. The pointer run arrives without it, gets it from Ottilie in the
@@ -532,9 +532,8 @@ test('keyboard: Act 3', async ({ page }) => {
   await page.waitForTimeout(300);
   await shot(page, 'act3-16-vista');
   log = log.concat(await read({ stop: (st) => !!st.flags['act3.done'] }));
-  await page.waitForTimeout(1500);
-  await shot(page, 'act3-17-end-card');
-  await waitFor(page, () => window.moonshine.snapshot().scene === 'title', null, 20000);
+  // Act 4 picks up the next morning, in the flat.
+  await waitFor(page, () => window.moonshine.snapshot().map === 'flat' && !!window.moonshine.snapshot().flags['act4.started'], null, 20000);
   expect(errors).toEqual([]);
 });
 
@@ -681,6 +680,7 @@ test('pointer: Act 3', async ({ page }) => {
   await clickTileAt(page, 11, 13);
   await waitFor(page, () => window.moonshine.snapshot().picture, null, 10000);
   await read({ stop: (st) => !!st.flags['act3.done'] });
-  await waitFor(page, () => window.moonshine.snapshot().scene === 'title', null, 20000);
+  // Act 4 picks up the next morning, in the flat.
+  await waitFor(page, () => window.moonshine.snapshot().map === 'flat' && !!window.moonshine.snapshot().flags['act4.started'], null, 20000);
   expect(errors).toEqual([]);
 });

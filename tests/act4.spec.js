@@ -10,7 +10,7 @@ import { boot, snap, waitFor, shot } from './helpers.js';
 import { settle, readThrough, pageTexts, kbAdvance, kbWalk, kbInteract, ptrAdvance, ptrWalk, ptrInteract, ptrUse } from './playthrough.js';
 
 const START = '?map=flat&x=8&y=4&seed=1'
-  + '&flags=act1.moonrise,act2.started,act2.done,piano.slid,counter.left,step.open,act3.surfaced,halls.valve,moonEyes.glow,got.moon_chart'
+  + '&flags=act1.moonrise,act2.started,act2.done,piano.slid,counter.left,step.open,act3.surfaced,act3.done,founders.unbolted,halls.valve,moonEyes.glow,got.shipPlan,got.moon_chart'
   + '&items=moon_chart,guidebook,crowbar,ship_plan,copper_throat&run=act4_start';
 
 async function mapIs(page, id) {
