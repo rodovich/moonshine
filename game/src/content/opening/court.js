@@ -432,6 +432,7 @@ const oldMan = {
       if (bump(g, 'oldMan.morning') === 0) {
         return g.say(self, "Piano went down the Squeeze in the night. Took the Pelletiers' geraniums with it.", "Gerald says it was the wind. Gerald's an idiot.");
       }
+      if (g.flag('act2.started')) return g.say(self, "Gerald says the board's tilting. I said, then play uphill.");
       return g.say(self, 'Every piece slid to one end of the board. Gerald blames me. I blame the board.');
     }
     if (g.flag('oldMan.hasPepperKing')) {
@@ -534,6 +535,7 @@ const neighborTalk = async (g, self) => {
           "The moon wasn't straight on. I don't know where it was, but it wasn't straight on.",
           "And the house LEANED. I've changed bleach. Mother's recipe. There's vinegar in it, and something she wouldn't tell me.");
       }
+      if (g.flag('act2.started')) return g.say(self, "I'm rewashing them. I'll moon them again next month. Mother would.");
       return g.say(self, 'Mother would be mortified. Mother would blame the moon. Mother was usually right.');
     }
     if (g.flag('neighbor.sheetsMoved')) {
@@ -702,7 +704,7 @@ const kidMorning = {
   id: 'kid_morning', name: 'Sweaty Kid', x: 15, y: 22, facing: 'down',
   sprite: { sheet: sweaty_kid, walk: [1, 2, 3, 4] },
   behavior: { type: 'face', range: 3 },
-  when: morning,
+  when: (g) => morning(g) && !g.flag('act2.started'), // in Act 2 he's on the Hundred Steps
   interact: async (g, self) => {
     if (bump(g, 'kid.morning') === 0) {
       return g.say(self, 'Did you see the well? It BREATHED. I put my face over it and it breathed on me.', "It smelled like fish. Old fish. Like the bottom of the sea's armpit.");
@@ -743,6 +745,10 @@ const swifts = [0, 1].map((i) => ({
 
 // ---------------------------------------------------------------------------
 
+// Set by src/content/index.js: where the Squeeze leads in the morning ('lamp_street'
+// once Act 2's maps are registered), or null for the end-of-slice card.
+export const opening = { squeezeTo: null };
+
 export const courtMap = composedMap(compose, {
   id: 'cistern_court',
   name: 'Cistern Court',
@@ -751,7 +757,12 @@ export const courtMap = composedMap(compose, {
   spawn: [3, 6],
   exits: [
     { x: 3, y: 11, to: 'flat', at: [5, 7], facing: 'up' },
-    { x: 15, y: 25, w: 2, when: morning, run: (g) => endOfSlice(g) },
+    // Down the Squeeze in the morning: to Lamp Street when Act 2 is in the game,
+    // else the end-of-slice card.
+    {
+      x: 15, y: 25, w: 2, when: morning,
+      run: (g) => (opening.squeezeTo ? g.changeMap(opening.squeezeTo, 3 + g.player.x - 15, 1, 'down') : endOfSlice(g)),
+    },
   ],
   triggers: [
     {
@@ -833,7 +844,7 @@ function endCard() {
   };
 }
 
-async function endOfSlice(g) {
+export async function endOfSlice(g) {
   g.stopMusic(1500);
   await g.fade('out', 1.5);
   g.place('player', 15, 23, 'up');

@@ -1,12 +1,12 @@
 // The opening: Moonshine Night in Cistern Court (docs/design/01-opening.md).
 
-import { courtMap, flySwifts } from './court.js';
+import { courtMap, flySwifts, opening } from './court.js';
 import { flatMap } from './flat.js';
 import { openingItems } from './common.js';
 import { moonrise } from './moonrise.js';
 
 export const openingMaps = { cistern_court: courtMap, flat: flatMap };
-export { openingItems };
+export { openingItems, opening };
 
 // The start of a new game: the roof at sunset.
 export async function openingIntro(g) {

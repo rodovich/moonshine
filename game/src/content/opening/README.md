@@ -22,7 +22,7 @@ Set pieces drive the art with short-lived flags that `compose` reads: `fx.tap`, 
 
 ## Story flags
 
-`oldMan.wantsKing`, `oldMan.hasPepperKing`, `kid.wantsTimer`, `kid.hasTimer`, `neighbor.wantsProp`, `neighbor.sheetsMoved`, `tub.plugged`, `tub.full`, `act1.moonrise` (the morning), `act1.done` (left by the Squeeze). Taken things are `got.<item>`. `n.<name>` flags are counters for lines that change with repeat looks or alternate (`bump` and `cycle` in `common.js`). `hint.bag` marks the one-time item hint.
+`oldMan.wantsKing`, `oldMan.hasPepperKing`, `kid.wantsTimer`, `kid.hasTimer`, `neighbor.wantsProp`, `neighbor.sheetsMoved`, `tub.plugged`, `tub.full`, `act1.moonrise` (the morning), `act1.done` (left by the Squeeze). `act2.started` (set by Act 2 on first entering Lamp Street) takes the Kid out of the court and gives the Old Man and the Neighbor new repeat lines. The Squeeze leads to Lamp Street once `src/content/index.js` finds that map; until then it shows the end card. Taken things are `got.<item>`. `n.<name>` flags are counters for lines that change with repeat looks or alternate (`bump` and `cycle` in `common.js`). `hint.bag` marks the one-time item hint.
 
 ## Jumping to a moment
 
