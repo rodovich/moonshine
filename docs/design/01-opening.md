@@ -220,7 +220,7 @@ Lines are Cheryl's descriptions unless labeled otherwise. Each line is one text 
 
 **Chairs** (2–3, 7): "Two chairs. I only sit in the one." (The same every time, except once the tub is full and the sheets are moved: "Not tonight. Tonight it's the tub.")
 
-**Herb pots** (1–2, 2): "Basil, rosemary, and something that blew in and refused to leave. I've grown fond of it."
+**Herb pots** (1–2, 2): "Basil, rosemary, and something that blew into the rosemary pot and refused to leave. I've grown fond of it." (Two pots are drawn; reworded after the QA sweep.)
 
 **Chimney** (7–8, 2): "My chimney pots, in their little tin hats. Hers next door go bareheaded. Make of that what you will."
 

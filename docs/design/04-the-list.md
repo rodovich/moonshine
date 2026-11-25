@@ -813,6 +813,7 @@ The structure-pass lines above are in as written (the Kid's jump, the Man on Ben
 - The ferry: "The Persistence, tied up and going nowhere. She's level. I checked. Nothing else is."
 - The Harbor's other bollards: "A bollard. Nobody sitting on it. Nobody sitting on any of them."
 - The Pump Hall grates after the burst: "Under water now, with the rest of the floor."
+- The Fountain ladder after the burst (drawn dry above the water): "The water's over the foot of it, and the floor between is all flood. That way's gone."
 - The Crown's tower, first look in Act 4 (the clock and the door share a column): "The Mayor's clock. Twelve minutes ahead of the sundial now, and prouder than ever." then the door. It matches the Clockmaker's "TWELVE minutes."
 - The boarded step is owned by Act 2's steps.js for every act; its walk-over lines play once. Walking into the Fishmonger's door after the reveal ends the act like the other exits.
 
