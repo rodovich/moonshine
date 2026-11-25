@@ -73,7 +73,7 @@ export function withAct4(maps) {
       g.setFlag('clockmaker.atDoor');
       const cm = g.npc('clockmaker_door');
       g.faceNpc(cm, 'player');
-      await clockmaker(g, cm, "Miss! I'm very busy. The sun is TWELVE minutes wrong now. Twelve. It's getting worse.", "I've checked the clock nine times. The clock is perfect. Therefore the sun is wrong. That's just logic, Miss.", 'I wrote to the observatory. They wrote back "Are you all right?" I am NOT all right.');
+      await clockmaker(g, cm, "Miss! I'm very busy. The sun is TWELVE minutes wrong now. Twelve. It's getting worse.", "I've checked the clock nine times. The clock is perfect. Therefore the sun is wrong. That's just logic, Miss.", 'I wrote to the observatory. They wrote back "Are you all right?" I am NOT all right.', "And nobody has ever written down what time Tessel keeps. If they had, I'd have it framed. Or burned.");
     },
     use: { guidebook: (g) => (g.flag('clockmaker.out') ? cherylDeclines(g) : g.flag('clockmaker.atDoor') ? showGuidebook(g, g.npc('clockmaker_door')) : g.describe("Nobody's answering. I'll knock first.")), '*': cherylDeclines },
   };
