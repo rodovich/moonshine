@@ -28,8 +28,8 @@ export const STATES = {
   'act 4 mayor away': 'act1.moonrise,act2.started,act2.done,piano.slid,counter.left,step.open,act3.done,act4.started,mayor.atCrown,bell.restored',
   'act 4 burst': 'act1.moonrise,act2.started,act2.done,piano.slid,counter.left,step.open,act3.done,act4.started,pumps.burst,cellar.shut,act4.risen',
   'act 5': 'act1.moonrise,act2.started,act2.done,piano.slid,counter.left,step.open,act3.done,act4.started,act4.done,act5.started',
-  'act 6': 'act1.moonrise,act2.started,act2.done,piano.slid,counter.left,step.open,act3.done,act4.done,act5.done,act6.started',
-  'epilogue': 'act1.moonrise,act2.started,act2.done,piano.slid,counter.left,step.open,act3.done,act4.done,act5.done,act6.started,epilogue',
+  'act 6': 'act1.moonrise,act2.started,act2.done,piano.slid,counter.left,step.open,act3.started,act3.done,act4.started,act4.risen,pumps.burst,act4.done,act5.started,teeth.stage=3,door.open,rope.tied,got.clapper,tooth.out,tooth.set,act5.done,act6.started,bell.final,brake.thrown,chain.home,hatch.open,keel.doorOpen',
+  'epilogue': 'act1.moonrise,act2.started,act2.done,piano.slid,counter.left,step.open,act3.started,act3.done,act4.started,act4.risen,pumps.burst,act4.done,act5.started,teeth.stage=3,door.open,rope.tied,got.clapper,tooth.out,tooth.set,act5.done,act6.started,chain.home,moon.true,sisters.asleep,bathed,epilogue,epi.leftCourt,epi.piano,epi.race',
 };
 
 export async function checkKeyboard(page) {
