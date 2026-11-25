@@ -12,6 +12,9 @@ import {
 } from '../../art/act4_surface.js';
 import { sisters, pumphall, tidewheel, tide_channel, eshaft, seacave, seagrate, mainpipe } from '../../art/act4_under.js';
 import { act4_props } from '../../art/act4_sprites.js';
+import { steps_lid } from '../../art/hundredth.js';
+import { tower_open, cave_low, bilge_deep } from '../../art/sweep.js';
+import { bilge_west, signpost } from '../../art/act2b_harbor.js';
 
 export const act4Tiles = {
   sheets: {
@@ -20,7 +23,7 @@ export const act4Tiles = {
     reveal, reveal_mouth, reveal_door, bilge_flood, square4,
     belfry, belfry_bell, belfry_props, ice_cellar, ice_cellar_props,
     sisters, pumphall, tidewheel, tide_channel, eshaft, seacave, seagrate, mainpipe,
-    act4_props,
+    act4_props, steps_lid, tower_open, cave_low, bilge_deep, bilge_west, signpost,
   },
   tiles: { ...act2Tiles.tiles },
 };
