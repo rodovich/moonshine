@@ -83,7 +83,7 @@ New sheets are in `game/src/art/act6_under.js`. On the dev page: `/dev/art.html?
 | Long Keel lamps (2, 7, …, 37, upper wall row y1) waking | the existing `keel_hatch:lamp_dead`, `lamp_wake_0..4` (hold the last frame), `lamp_lit`, with `hull:floor_glow` under each lit one | ground |
 | Long Keel ribs (every four tiles) | the existing `hull:face_rib_top/base` and `over_rib_v` | ground; overhead |
 | The Sighting Room's door at the Keel's west end (0, 3–4), sliding up, the moon-in-bowl carving on its lintel | `keel:keel_door_closed_top/bot`, `keel_door_opening_top/bot_0..2` (260 ms), `keel_door_open_top/bot` | ground |
-| Windlass Room at night: the chain coming in through the moonlit hawse (21, 3–4) | `windlass_night:hawse_in_top/bot_0..3` (220 ms, one link-length per loop) | ground |
+| Windlass Room at night: the chain coming in through the moonlit hawse (21, 3–4) | `windlass_night:hawse_in_top/bot_0..3` (220 ms, one link-length per loop; the same big opening and links as Act 5's hawse, the links travelling in toward the drum) | ground |
 | The drum turning; the brake thrown | the existing `windlass_drum:drum_x<c>y<r>_0..3` and `brake:brake_thrown` | objects; sprite |
 | The Long Keel hatch's emblem lighting (7–8, 1–2), then open | `keel_lit:keel_lit_<q>_0/1` (500 ms), then the existing `keel_hatch:keel_open_<q>` | ground |
 
@@ -96,7 +96,7 @@ Module `game/src/art/act6_surface.js`. Composed on the dev page: `/dev/art.html?
 | Lantern poles along the dry Bilge quays (Dry Canal Day, night) | `lantern:lantern_a`, `lantern_b` (16×32, 2-frame flicker; `b` has bunting tied to the pole). The lantern hangs east of the pole | sprite, on the quays (the scene puts them at x 2, 7, 18, 24, 29 on row 6 and x 4, 10, 16, 22, 27 on row 12) |
 | The pool of lamplight under each lantern | `lantern_pool:pool`, `pool_wide` (a dithered warm ring in emissive colors) | objects, the tile east of the pole |
 | The crowd, the Mayor on the bridge | existing bodies: `crowd_a`, `crowd_b`, `counting_woman`, `basin_woman`, `watering_woman`, `kid`, `mayor:gesture_down` | sprites |
-| The Teeth sliding away | `teeth_recede:recede_0..5` (176×32, 500/400/450/400/600/800 ms: stage 3, 2, 1, then gone) and `teeth_recede:gone` to hold | overhead sprite, where the Act 5 stages are: top-left (8·16, 13·16) |
+| The Teeth sliding away | `teeth_recede:recede_0..5` (176×48, 500/400/450/400/600/800 ms: stage 3, 2, 1, then gone) and `teeth_recede:gone` to hold | overhead sprite, where the Act 5 stages are: top-left (8·16, 12·16) |
 | The canals refilling | `refill:rush_top` (the highest flooded row: water rushing west with a foaming lip), `refill:rush` (the rows under it), `refill:rush_deep` (the bottom row at stage 3); 4 frames each, 120/120/160 ms | ground, replacing the trench rows: stage 1 row 10; stage 2 rows 9 and 10; stage 3 rows 8 to 10 (the bridge deck at 12 and 13 stays). Then cut to the wet Bilge |
 | The Boatman's boat lifting with the piano in it | `boatman_piano:piano_rock` (act6_sprites.js) | sprite at x = 23·16, its feet on the row below the water's surface: 11·16, 10·16, 9·16 for stages 1 to 3 |
 | The piano delivered by Cheryl's door, upright and shining | `piano_delivered:piano_delivered` (32×32, ribbon, bow and a No. 9 tag; a glint every 1.6 s) | sprite, bottom-centred at (2·16+8, 13·16), just west of the door |
