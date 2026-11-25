@@ -337,8 +337,8 @@ test('keyboard: Act 3', async ({ page }) => {
   const read = (opts) => readThrough(page, adv, opts);
   let log, s;
 
-  // Down the hundredth step.
-  await page.keyboard.press('ArrowDown');
+  // Down the hundredth step: once open it's a solid hole at (10, 19); facing it, Z asks "Go down?".
+  await page.keyboard.press('z');
   await kbChoose(page, 0);
   await waitFor(page, () => window.moonshine.snapshot().map === 'step_gallery', null, 15000);
   log = await readUntil(page, adv, 'All this time.');
