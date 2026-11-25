@@ -88,7 +88,14 @@ function compose(g) {
 // The Clockmaker, heard through the belfry: lines at the top of the screen.
 const clockmaker = (g, line) => g.say('Clockmaker', line, { position: 'top' });
 
+// The tower's middle column holds both the clock face (rows 1-3) and the door
+// below it, and only one hotspot there can be reached from the plaza; so the
+// first time, Cheryl looks up at the clock before she knocks.
 async function towerDoor(g) {
+  if (!g.flag('n.clockSeen')) {
+    g.setFlag('n.clockSeen', 1);
+    await g.describe('The Mayor\'s clock. The plaque says TESSEL ENTERS THE MODERN AGE.', "It's eleven minutes ahead of the sundial and very pleased about it.");
+  }
   const n = bump(g, 'tower.door');
   if (n === 0) {
     await g.describe('Bolted from inside. There\'s a card in the keyhole: CLOCK IN PROGRESS. NO ADMITTANCE.');

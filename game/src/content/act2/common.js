@@ -3,8 +3,7 @@
 
 import { shopkeeper } from '../../art/npcs.js';
 import { items_act2, piano } from '../../art/act2_objects.js';
-import { items, items2 } from '../../art/items.js';
-import { counting_woman, mover, tourist, mayor, ambrose, basin_woman, girl, rope, watering_woman, bench_man } from '../../art/act2_npcs.js';
+import { counting_woman, mover, tourist, mayor, ambrose, basin_woman, girl, rope, watering_woman, bench_man, watering_woman_glasses, bench_man_glasses } from '../../art/act2_npcs.js';
 import { bump, cycle, getItem, talking, cherylDeclines } from '../opening/common.js';
 
 export { bump, cycle, getItem, talking, cherylDeclines };
@@ -33,23 +32,22 @@ export const act2Items = {
     looksRepeat: 'cycle',
     useOn: { object: 'The guidebook has an opinion about this. It\'s wrong.' },
   },
-  // The structure pass's guidebook and Tide-Sheet threads. Icons are STAND-INS
-  // (existing icons) until the art task's land.
+  // The structure pass's guidebook and Tide-Sheet threads.
   telescope: {
     name: 'Telescope',
-    icon: { sheet: items_act2, frame: 'crowbar' },
+    icon: { sheet: items_act2, frame: 'telescope' },
     description: "The Lighthouse Keeper's telescope. Brass, never used. Every time she turns her back, it points at the sea.",
-    useOn: { npc: 'Brass wants looking at, she said. Somewhere it will be looked at.' },
+    useOn: { npc: "She said somewhere it'd be looked at. Not passed round." },
   },
   shop_hat: {
     name: 'Straw Hat',
-    icon: { sheet: items2, frame: 'hat' },
+    icon: { sheet: items_act2, frame: 'shop_hat' },
     description: 'A wide straw hat, out of the Shop window. Display stock, retired.',
     useOn: { npc: "It's for the Tourist. She's peeling." },
   },
   tide_sheet: {
     name: 'Tide-Sheet',
-    icon: { sheet: items, frame: 'letter' },
+    icon: { sheet: items_act2, frame: 'tide_sheet' },
     description: 'The Tide-Sheet. Tide times, weather, and a letter from a visitor who has counted the Steps.',
     looks: ["'Sir: I have counted your Hundred Steps. There are ninety-nine. Also, there is no shade. A Visitor.'"],
   },
@@ -151,9 +149,11 @@ export const LOOKS = {
   basin_woman: { sheet: basin_woman, frame: 'down_0' },
   basin_tip: { sheet: basin_woman, frame: 'tip_down' },
   watering_woman: { sheet: watering_woman, frame: 'water_down' },
+  watering_woman_glasses: { sheet: watering_woman_glasses, frame: 'water_down' },
   tourist: { sheet: tourist, frame: 'sit_up' },
   tourist_hat: { sheet: tourist, frame: 'sit_up_hat' },
   bench_man: { sheet: bench_man, frame: 'sit_down' },
+  bench_man_glasses: { sheet: bench_man_glasses, frame: 'sit_down' },
   mayor: { sheet: mayor, frame: 'gesture_down' },
   big_mover: { sheet: mover, palette: 'big' },
   other_mover: { sheet: mover, palette: 'other' },

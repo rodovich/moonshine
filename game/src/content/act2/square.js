@@ -126,7 +126,7 @@ export async function hatWindow(g) {
 async function swapTelescope(g) {
   const keeper = g.npc('shopkeeper');
   g.takeItem('telescope');
-  g.sfx('give');
+  g.sfx('telescope');
   g.setFlag('window.telescope');
   await g.describe('In goes the telescope. Out comes the hat. The window is still complete.');
   await g.say(keeper, "...Display for display. That isn't selling. That's curating. I've never curated before.");
@@ -331,11 +331,10 @@ function composeShop(g) {
     L.set('detail', x, 3, `shop:counter_${x === 2 ? 'l' : x === 6 ? 'r' : 'm'}`, true);
     L.counter[3][x] = true;
   }
-  // The marble jar and the window display: the straw hat, then (STAND-IN until
-  // the art lands) the bare display table once the telescope is in.
+  // The marble jar and the window display: the straw hat, then the telescope.
   L.set('detail', 1, 5, 'shop:marble_jar', true);
   if (g.flag('window.telescope')) {
-    L.set('detail', 7, 5, 'furniture:table_l', true); L.set('detail', 8, 5, 'furniture:table_r', true);
+    L.set('detail', 7, 5, 'shop:display_scope_l', true); L.set('detail', 8, 5, 'shop:display_scope_r', true);
   } else {
     L.set('detail', 7, 5, 'shop:display_l', true); L.set('detail', 8, 5, 'shop:display_r', true);
   }

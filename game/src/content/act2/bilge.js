@@ -94,8 +94,12 @@ function compose() {
   }
   L.set('detail', 6, 11, 'bilge_flood:flood1_lap_w'); L.set('detail', 6, 12, 'bilge_flood:flood1_lap_w');
   for (let y = 14; y < H; y++) for (let x = 0; x < W; x++) L.set('ground', x, y, lowRoof(x, y), true);
-  // A painted board at the east end: HARBOR -> (STAND-IN sign until the art lands).
-  L.set('detail', 30, 10, 'props:sign_board');
+  // A painted board at the east end: HARBOR ->.
+  ['0', '1', '2'].forEach((n, i) => L.set('detail', 29 + i, 10, `signpost:harbor_${n}`));
+  // The west end: steps up from the flooded quay to the Goat Path, and the cliff below.
+  L.set('ground', 0, 11, 'bilge_west:steps_n_f1', false); L.set('ground', 0, 12, 'bilge_west:steps_m_f1', false);
+  L.set('ground', 0, 13, 'bilge_west:steps_s', false);
+  L.set('ground', 0, 14, 'bilge_west:cliff_a', true); L.set('ground', 0, 15, 'bilge_west:cliff_b', true);
   return L.done();
 }
 
@@ -103,7 +107,7 @@ function compose() {
 // Objects
 
 const objects = [
-  { id: 'sign_harbor', x: 30, y: 10, look: 'A painted board: HARBOR, and an arrow pointing east along the canal.' },
+  { id: 'sign_harbor', x: 29, y: 10, w: 3, look: 'A painted board: HARBOR, and an arrow pointing east along the canal.' },
   {
     id: 'water_stairs', x: 22, y: 8, w: 4,
     looks: [

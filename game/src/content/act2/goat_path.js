@@ -4,14 +4,12 @@
 // switchbacks over bare rock and gorse, rough steps where it's steep, Mott's
 // shack partway down, the sea cave mouth at the waterline near the bottom.
 // From docs/design/structure-pass.md, section 5, and docs/design/02-city.md.
-//
-// Terrain is built from existing art (the goat path's dirt, the headland's rock,
-// the sea with its cliff lips) until the art task's cliff-path tiles land.
+// Art: the art task's painted cliff (GOAT_PATH_TILES in game/src/art/act2b_goat.js).
 
 import { composedMap, blankGrid } from '../opening/grid.js';
 import { act2Tiles } from './tiles.js';
-import { layout, pave, lowRoof, bump, firstMeet, cherylDeclines, actWrongness } from './common.js';
-import { goat } from '../../art/act2b_goat.js';
+import { layout, pave, bump, firstMeet, cherylDeclines, actWrongness } from './common.js';
+import { goat, GOAT_PATH_TILES } from '../../art/act2b_goat.js';
 
 const W = 16, H = 42;
 
@@ -54,34 +52,19 @@ const CAVE = [1, 37];
 function compose() {
   const L = layout(W, H, blankGrid);
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-    if (isSea(x, y)) {
-      // The sea at the cliff foot; next to land, the tile with the cliff lip on that side.
-      let f = 'sea';
-      if (!isSea(x + 1, y) && x + 1 < W) f = 'cliff_e';
-      else if (x > 0 && !isSea(x - 1, y)) f = 'cliff_w';
-      else if (y + 1 < H && !isSea(x, y + 1)) f = 'cliff_s';
-      else if (y > 0 && !isSea(x, y - 1)) f = 'cliff_n';
-      L.set('ground', x, y, `goatpath:${f}`, true);
-    } else if (isPath(x, y)) {
-      // The last stretch is the Bilge's own paving; the rest is goat-worn dirt.
-      const quay = y >= 39 && x >= 9;
-      L.set('ground', x, y, quay ? pave(x, y) : `goatpath:${['path_a', 'path_b', 'path_c'][(x * 7 + y * 13) % 3]}`, false);
-      if (STEPS.some((r) => inRect(r, x, y))) L.step[y][x] = 'step_stairs';
-    } else if (x >= 14 && y >= 28 && y <= 38) {
-      // The lower town's roofs, nearly at eye level by now.
-      L.set('ground', x, y, lowRoof(x, y), true);
-    } else {
-      // Bare rock and gorse; a gull on a ledge here and there.
-      const gull = (x * 5 + y * 3) % 23 === 0;
-      L.set('ground', x, y, `headland:${gull ? 'cliff_gull' : `cliff_${y % 2 ? 's' : 'n'}${x % 2 ? 'e' : 'w'}`}`, true);
-    }
+    const walk = isPath(x, y);
+    const frame = GOAT_PATH_TILES[y][x];
+    if (y >= 39 && x >= 9 && walk) L.set('ground', x, y, pave(x, y), false); // the Bilge's own paving
+    else if (frame) L.set('ground', x, y, frame, !walk);
+    else L.set('ground', x, y, pave(x, y), !walk);
+    if (walk && STEPS.some((r) => inRect(r, x, y))) L.step[y][x] = 'step_stairs';
   }
   // Mott's shack: the still glints in its window; the door (3, 15) has his sign.
   for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) L.set('ground', SHACK[0] + c, SHACK[1] + r, `mott_shack:shack_x${c}y${r}`, true);
   // Empty square jugs, stacked by the yard.
   L.set('detail', JUGS[0][0], JUGS[0][1], 'mott_jugs:jugs_l', true); L.set('detail', JUGS[1][0], JUGS[1][1], 'mott_jugs:jugs_r', true);
-  // The sea cave's mouth at the waterline.
-  L.set('ground', CAVE[0], CAVE[1], 'goatpath:cave_mouth', true);
+  // Gulls wheeling over the drop, below the path.
+  for (const [x, y] of [[0, 5], [0, 13], [0, 19]]) L.set('detail', x, y, 'gull:wheel');
   return L.done();
 }
 
@@ -127,7 +110,7 @@ const goats = [
   behavior: { type: 'wander', area: d.area, pause: [1.5, 4] },
   interact: async (g, self) => {
     g.sfx('goat');
-    if (bump(g, 'goat.look') === 0) await g.describe("A goat. It's eating a geranium and making eye contact.");
+    if (bump(g, 'goat.look') === 0) await g.describe("A goat. It's eating the gorse and making eye contact.");
     await g.say(self, 'Meh.');
   },
   use: {
@@ -147,7 +130,7 @@ export const goatPathMap = composedMap(compose, {
   tileset: act2Tiles,
   music: 'harbor',
   lighting: 'day',
-  ambience: ['wind', 'goats'],
+  ambience: ['goatpath'],
   step: 'step_stone',
   spawn: [14, 2],
   exits: [

@@ -909,6 +909,6 @@ test("pointer: the long way round, part 2's people", async ({ page }) => {
   await read();
   await ptrInteract(page, 'windows');
   log = await read();
-  expect(joined(log)).toContain('She has her back to all of it.');
+  expect(joined(log)).toContain('She only has eyes for the lamp.');
   expect(errors).toEqual([]);
 });

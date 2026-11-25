@@ -38,8 +38,8 @@ export function harborTopRows(L) {
     if (y === 3) f = `cliff_foot_${x % 2 ? 'b' : 'a'}`;
     L.set('ground', x, y, `headland:${f}`, true);
   }
-  // A painted board at the west end: <- THE BILGE (STAND-IN sign until the art lands).
-  L.set('detail', 1, 4, 'props:sign_board', true);
+  // A painted board at the west end: <- THE BILGE.
+  ['0', '1', '2'].forEach((n, i) => L.set('detail', 1 + i, 4, `signpost:bilge_${n}`, true));
   const top = [], base = [];
   for (let x = 5; x <= 22; x++) {
     const door = DOORS[x];
@@ -69,6 +69,9 @@ function compose() {
     for (let y = 10; y < H; y++) L.set('ground', x, y, `sea:sea_${q(x, y)}`, true);
   }
   L.set('ground', 30, 9, 'harbor_quay:keyhole_l', true); L.set('ground', 31, 9, 'harbor_quay:keyhole_r', true);
+  // The canal runs out under the quay here.
+  L.set('ground', 1, 9, 'harbor_culvert:culvert_l', true); L.set('ground', 2, 9, 'harbor_culvert:culvert_r', true);
+  L.set('ground', 1, 10, 'harbor_culvert:outflow_l', true); L.set('ground', 2, 10, 'harbor_culvert:outflow_r', true);
   return L.done();
 }
 
@@ -81,9 +84,9 @@ const objects = [
     id: 'ferry', x: 10, y: 9, w: 6, h: 3,
     looks: ["Mott's ferry, the Persistence. It hasn't crossed since Tuesday.", 'There\'s a mainland over there, with the Pelletiers on it, waiting.'],
   },
-  { id: 'sign_bilge', x: 1, y: 4, look: 'A painted board: THE BILGE, and an arrow pointing west, back along the canal.' },
+  { id: 'sign_bilge', x: 1, y: 4, w: 3, look: 'A painted board: THE BILGE, and an arrow pointing west, back along the canal.' },
   { id: 'harbor_office', x: 12, y: 2, h: 2, look: 'The Harbor Office. A note on the door: GONE TO LOOK FOR THE LANDING.' },
-  ...[6, 18].map((x) => ({ id: `door_${x}`, x, y: 2, h: 2, lookKey: 'harbor_doors', look: 'Not my door. Fishing nets drying on the handle.' })),
+  ...[6, 18].map((x) => ({ id: `door_${x}`, x, y: 2, h: 2, lookKey: 'harbor_doors', look: 'Not my door. It smells of tar and yesterday\'s fish.' })),
   {
     id: 'sea_view', x: 19, y: 9, w: 11,
     looks: [
@@ -153,7 +156,7 @@ const mottNpc = {
       await g.say(self, "No. Not today. Today I'm drinking.");
       await g.think("Not today, he says. So some other day. I'll hold him to that.");
     },
-    telescope: (g, self) => g.say(self, "She gave it you? ...Well. Look at the Gate with it, then. Tell me I'm wrong."),
+    telescope: (g, self) => g.say(self, "She gave it you? ...Keep it. I don't need a telescope to see the Gate's wrong. I need a drink."),
     guidebook: (g, self) => g.say(self, '"The friendly ferryman." Ha.'),
     '*': (g, self) => g.say(self, 'Not unless it holds the island still.'),
   },
@@ -204,7 +207,12 @@ function composeLamp(g) {
   for (let y = 0; y < 2; y++) for (let x = 0; x < 2; x++) L.set('detail', 3 + x, 2 + y, `lamproom:lamp_x${x}y${y}`, true);
   L.set('ground', 3, LH - 1, 'lamproom:stair_down_l', false); L.set('ground', 4, LH - 1, 'lamproom:stair_down_r', false);
   // The telescope under a dust sheet, facing the wall, until she gives it away.
-  if (!telescopeGone(g)) L.set('detail', 6, 5, 'props:crate', true);
+  if (!telescopeGone(g)) {
+    L.set('detail', 6, 5, 'lamproom:scope_sheet_bot', true);
+    L.set('detail', 6, 4, 'lamproom:scope_sheet_top', true);
+  } else {
+    L.set('detail', 6, 5, 'lamproom:sheet_empty', true);
+  }
   return L.done();
 }
 
@@ -217,6 +225,7 @@ async function giveTelescope(g, self) {
     "That thing. Take it. Every time I turn my back, it's pointing at the sea.",
     "Brass wants looking AT, not looking through. Put it somewhere it'll be looked at.");
   g.setFlag('got.telescope');
+  g.sfx('telescope');
   await getItem(g, 'telescope');
 }
 
@@ -248,7 +257,7 @@ const lampObjects = [
     id: 'telescope', x: 6, y: 5, when: (g) => !telescopeGone(g),
     look: 'A brass telescope under a dust sheet, facing the wall. Like it\'s being punished.',
   },
-  { id: 'windows', x: 1, y: 1, w: 6, look: 'From up here: the whole Bowl, the Rim, the mouth, the Teeth. She has her back to all of it.' },
+  { id: 'windows', x: 1, y: 1, w: 6, look: 'From up here: the whole Bowl, the Rim, the mouth, the Teeth. She only has eyes for the lamp.' },
 ].map((o) => ({ solid: false, use: { '*': cherylDeclines }, ...o }));
 
 export const lampRoomMap = composedMap(composeLamp, {

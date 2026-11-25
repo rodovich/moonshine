@@ -107,7 +107,7 @@ const objects = [
   },
   {
     id: 'lamp_view', x: 0, y: 13, w: 27, lookKey: 'lamp_view',
-    look: 'Roofs all the way down to the water, and every basin still full.',
+    interact: (g) => g.describe(g.flag('act2.done') ? 'Roofs all the way down to the water.' : 'Roofs all the way down to the water, and every basin still full.'),
   },
   { id: 'yard_wall', x: 7, y: 8, w: 5, lookKey: 'yard', look: 'The school yard. Hopscotch squares I painted in my second year. Somebody keeps repainting them.' },
   { id: 'yard_wall_e', x: 14, y: 8, w: 5, lookKey: 'yard', look: 'The school yard. Hopscotch squares I painted in my second year. Somebody keeps repainting them.' },
@@ -168,7 +168,8 @@ const rope = {
 
 const wateringWoman = {
   id: 'watering_woman', name: 'Woman with Watering Can', x: 27, y: 5, facing: 'down',
-  sprite: LOOKS.watering_woman,
+  // Her husband's glasses up in her hair, until she gives them back.
+  sprite: (g) => (g.flag('glasses.back') ? LOOKS.watering_woman : LOOKS.watering_woman_glasses),
   turnToTalk: false,
   interact: async (g, self) => {
     if (firstMeet(g, 'watering_woman')) {
@@ -194,7 +195,7 @@ async function returnGlasses(g, self) {
     "...His glasses? On my-- oh, for heaven's sake. I've had them on since breakfast.",
     "Don't tell him.");
   const home = [self.x, self.y];
-  g.setSprite(self, { sheet: LOOKS.watering_woman.sheet, frame: 'down_0' });
+  g.setSprite(self, { sheet: LOOKS.watering_woman_glasses.sheet, frame: 'down_0' });
   await g.moveNpc(self, [20, 10]);
   g.faceNpc(self, 'down');
   g.sfx('give');
@@ -212,7 +213,7 @@ async function returnGlasses(g, self) {
 
 const benchMan = {
   id: 'bench_man', name: 'Man on Bench', x: 20, y: 11, facing: 'down',
-  sprite: LOOKS.bench_man,
+  sprite: (g) => (g.flag('glasses.back') ? LOOKS.bench_man_glasses : LOOKS.bench_man),
   turnToTalk: false,
   interact: async (g, self) => {
     if (g.flag('glasses.back')) return g.say(self, 'Refracted. Look it up.');
