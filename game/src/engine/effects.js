@@ -44,6 +44,8 @@ export class Effects {
     this.wavePhase = 0;
     this.shakeAmp = 0;
     this.shakeTicks = 0;
+    this.tiltX = 0;
+    this.tiltY = 0;
     this.flickerTicks = 0;
     this.flickerColor = '#ffffff';
     this.flickerRate = 4;
@@ -157,6 +159,8 @@ export class Effects {
       this.tween('tintAmount', 0, seconds),
       this.tween('hue', 0, seconds),
       this.tween('waveAmp', 0, seconds),
+      this.tween('tiltX', 0, seconds),
+      this.tween('tiltY', 0, seconds),
     ]);
   }
 
@@ -182,10 +186,19 @@ export class Effects {
     this.wavePhase += this.waveSpeed;
   }
 
+  // Ease the whole screen to a steady offset of (dx, dy) pixels over
+  // `seconds` and hold it there (a hull listing); tilt(0, 0, s) eases back.
+  tilt(dx, dy, seconds = 1) {
+    return Promise.all([this.tween('tiltX', dx, seconds), this.tween('tiltY', dy, seconds)]);
+  }
+
+  // Screen offset this frame: the held tilt (whole pixels) plus any shake.
   shakeOffset() {
-    if (!this.shakeAmp) return [0, 0];
+    const tx = Math.round(this.tiltX || 0);
+    const ty = Math.round(this.tiltY || 0);
+    if (!this.shakeAmp) return [tx, ty];
     const a = this.shakeAmp * Math.min(1, this.shakeTicks / 10 + 0.3);
-    return [Math.round((Math.random() * 2 - 1) * a), Math.round((Math.random() * 2 - 1) * a)];
+    return [tx + Math.round((Math.random() * 2 - 1) * a), ty + Math.round((Math.random() * 2 - 1) * a)];
   }
 
   // Effects on the world image (before UI).

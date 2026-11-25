@@ -266,11 +266,12 @@ Time, camera, and screen effects (all resolve when done; durations in seconds):
 | `wait(seconds)` | Pause. |
 | `fade('out' \| 'in' \| alpha, seconds, color)` | Fade to/from a color (default black), in 8 brightness steps. |
 | `shake(pixels, seconds)` | Screen shake. |
+| `tilt(dx, dy, seconds)` | Eases the whole screen to a steady offset of a pixel or two and holds it (a hull over-tilting), unlike a jittery shake; `tilt(0, 0, seconds)` eases back. Shakes add on top. |
 | `tint(color, amount, seconds, mode)` | Color wash over the world. `mode` is a canvas blend: `'source-over'` (default), `'multiply'`, `'screen'`, `'color'`, `'hue'`, `'saturation'`, `'difference'`. Amount 0 removes it. |
 | `hueShift(degrees, seconds)` | Rotates every color's hue (palette-shift look), snapped to 15-bit color. 0 restores. |
 | `distort(pixels, seconds, { freq, speed })` | Per-scanline wobble. 0 removes it. |
 | `flicker(seconds, { color, rate })` | Rapid inverted flashes. |
-| `clearEffects(seconds)` | Removes tint, hue shift, and distortion. |
+| `clearEffects(seconds)` | Removes tint, hue shift, distortion, and tilt. |
 | `panCamera(x, y, speed)` / `followPlayer(speed)` | Glide the camera to a tile and back to Cheryl. |
 | `setLighting(name, seconds)`, `lighting` | Crossfade the scene lighting to `'day'`, `'dusk'`, `'night'`, a preset from `content.lighting`, or `null`; 0 seconds is a hard cut. Lasts until the next map load, which applies that map's own `lighting`. |
 | `showPicture(spec, { fade })` / `hidePicture({ fade })` | Replace the map with a full-screen 256×224 picture (a vista): `{ sheet, frame, palette }` or a function `(ctx, ms)` that draws it, `ms` since it appeared. Text boxes, shake, and effects still work over it. `fade` is in seconds; 0 is a hard cut. |
