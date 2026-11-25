@@ -285,7 +285,7 @@ const objects = [
       ? "Not tonight. Tonight it's the tub."
       : 'Two chairs. I only sit in the one.'),
   },
-  { id: 'herbs', x: 1, y: 2, w: 2, look: 'Basil, and rosemary, and something that blew into the rosemary and refused to leave. I\'ve grown fond of it.' },
+  { id: 'herbs', x: 1, y: 2, w: 2, look: 'Basil, rosemary, and something that blew into the rosemary pot and refused to leave. I\'ve grown fond of it.' },
   { id: 'chimney', x: 7, y: 2, w: 2, look: 'My chimney pots, in their little tin hats. Hers next door go bareheaded. Make of that what you will.' },
   {
     id: 'roof_edge', x: 0, y: 9, w: 7,
