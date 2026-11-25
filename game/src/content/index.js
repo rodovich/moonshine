@@ -5,6 +5,7 @@
 import { testMaps, testItemDefs, testScripts, testCharacters } from './test/index.js';
 import { openingMaps, openingItems, openingScripts, openingIntro } from './opening/index.js';
 import { cherylDeclines } from './opening/common.js';
+import { act2Maps, act2Items, act2Scripts } from './act2/index.js';
 import { cheryl } from '../art/cheryl.js';
 
 export default {
@@ -16,13 +17,13 @@ export default {
   // Sitting on the tub's edge, she sits on its rim, a little above her tile.
   player: { name: 'Cheryl', sprite: { sheet: cheryl }, poseOffsets: { sit_right: [0, -4], rise_right: [0, -2] } },
 
-  maps: { ...openingMaps, ...testMaps },
+  maps: { ...openingMaps, ...act2Maps, ...testMaps },
   // People defined once and placed by story state (see the engine README).
   characters: { ...testCharacters },
-  items: { ...openingItems, ...testItemDefs },
+  items: { ...openingItems, ...act2Items, ...testItemDefs },
 
   // Named scripts, runnable with ?run=<name> for testing.
-  scripts: { ...openingScripts, ...testScripts },
+  scripts: { ...openingScripts, ...act2Scripts, ...testScripts },
 
   // Runs once when a new game starts.
   onNewGame: openingIntro,
