@@ -3,13 +3,13 @@
 // Moonrise sequence". Input is locked for the whole thing (it's one script).
 
 import { fx } from '../../art/fx.js';
-import { vista, vista_rim, vista_glow, vista_moon, vista_twinkle, vista_cheryl, VISTA_BASINS } from '../../art/vista.js';
+import { vista, vista_gate_cold, vista_rim, vista_glow, vista_moon, vista_twinkle, vista_cheryl, VISTA_BASINS } from '../../art/vista.js';
 
 // The vista, drawn each frame per docs/art-opening.md. The script moves it
 // along by setting times on `scene` (in the picture's own milliseconds).
 function makeVista(g) {
   const art = {
-    bowl: g.sheet(vista), rim: g.sheet(vista_rim), glow: g.sheet(vista_glow),
+    bowl: g.sheet(vista), cold: g.sheet(vista_gate_cold), rim: g.sheet(vista_rim), glow: g.sheet(vista_glow),
     moon: g.sheet(vista_moon), twinkle: g.sheet(vista_twinkle), cheryl: g.sheet(vista_cheryl),
   };
   const scene = { now: 0, glowAt: null, moonAt: null };
@@ -17,6 +17,12 @@ function makeVista(g) {
   scene.draw = (ctx, ms) => {
     scene.now = ms;
     ctx.drawImage(art.bowl.frame('bowl_dusk'), 0, 0);
+    // As the moon clears the ridge, the Gate's apricot drains to violet: it's empty.
+    if (scene.moonAt != null) {
+      const t = (ms - scene.moonAt) / 1000;
+      if (t >= 8) ctx.drawImage(art.cold.frame('cold_1'), 0, 0);
+      else if (t >= 7) ctx.drawImage(art.cold.frame('cold_0'), 0, 0);
+    }
     if (scene.glowAt != null && ms >= scene.glowAt) {
       const t = ms - scene.glowAt;
       ctx.drawImage(art.glow.frame(`glow_${t < 1200 ? 0 : t < 2400 ? 1 : 2}`), 116, 42);
@@ -26,15 +32,6 @@ function makeVista(g) {
       const t = (ms - scene.moonAt) / 1000;
       const cy = Math.max(56, t < 6 ? 104 - t * 3 : 86 - (t - 6) * 6);
       ctx.drawImage(art.moon.frameAt('moon', ms), 176 - 16, Math.round(cy) - 16);
-      // The Gate, where the moon should be, goes cold and empty.
-      const cold = Math.min(0.6, Math.max(0, (t - 1) / 5) * 0.6);
-      if (cold > 0) {
-        const grad = ctx.createLinearGradient(0, 78, 0, 100);
-        grad.addColorStop(0, 'rgba(40, 48, 96, 0)');
-        grad.addColorStop(1, `rgba(40, 48, 96, ${cold})`);
-        ctx.fillStyle = grad;
-        ctx.fillRect(104, 78, 48, 34);
-      }
     }
     ctx.drawImage(art.rim.frame('rim'), 0, 0);
     VISTA_BASINS.forEach(([x, y], i) => ctx.drawImage(art.twinkle.frameAt('twinkle', ms + phases[i]), x - 3, y - 3));
@@ -51,11 +48,11 @@ export async function moonrise(g) {
   await g.movePlayer([3, 5]);
   g.facePlayer('right');
   await g.wait(0.3);
-  // She sits on the tub's near rim, in the middle (no floor shadow while she's up there).
+  // She sits on the tub's front rim, shins down its face (no floor shadow while she's up there).
   g.player.def.shadow = false;
-  g.pose('player', 'rise_right', { offset: [4, -6] });
+  g.pose('player', 'rise_right', { offset: [0, -8] });
   await g.wait(0.15);
-  g.pose('player', 'sit_right', { offset: [7, -13] });
+  g.pose('player', 'sit_right', { offset: [0, -17] });
   await g.wait(0.6);
 
   // 3. The court's music fades; the festival below; the Crown clock strikes
@@ -142,7 +139,7 @@ export async function moonrise(g) {
   await g.wait(1.2);
 
   // 15. Cheryl stands.
-  g.pose('player', 'rise_right', { offset: [4, -6] });
+  g.pose('player', 'rise_right', { offset: [0, -8] });
   await g.wait(0.25);
   g.pose('player', null);
   g.player.def.shadow = undefined;

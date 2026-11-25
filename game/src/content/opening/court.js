@@ -221,7 +221,7 @@ async function fillTub(g) {
   g.sfx('tub_full');
   await g.wait(0.3);
   await g.describe('Cold as the sea. That\'s how it\'s done. Hot baths are for Tuesdays.');
-  if (g.flag('neighbor.sheetsMoved')) await g.describe('Now I sit on the edge of the tub, and wait for the moon.');
+  if (g.flag('neighbor.sheetsMoved')) await g.describe('Now I sit on the edge of the tub and wait for the moon.');
   else await g.describe('Now the view.');
 }
 
@@ -259,7 +259,7 @@ const objects = [
   {
     id: 'chairs', x: 2, y: 7, w: 2,
     interact: (g) => g.describe(!morning(g) && g.flag('tub.full') && g.flag('neighbor.sheetsMoved')
-      ? "Not tonight. Tonight it's the tub."
+      ? "Not tonight. Tonight I sit on the edge of the tub."
       : 'Two chairs. I only sit in the one.'),
   },
   { id: 'herbs', x: 1, y: 2, w: 2, look: 'Basil, rosemary, and something that blew in and refused to leave. I\'ve grown fond of it.' },
@@ -338,14 +338,14 @@ const objects = [
   })),
   ...[[11, 10], [13, 10], [16, 10], [18, 10]].map(([x, y]) => ({
     id: `window_${x}`, x, y, h: 2, lookKey: 'nb_windows',
-    look: "Her green shutters. She repaints them every spring, in case anyone's forgotten they're green.",
+    look: "Green shutters. Hers. She painted them herself, and she'll tell you so.",
   })),
   {
     // The court's drain: every basin in Tessel empties downhill tonight.
     id: 'drain', x: 6, y: 20, solid: false,
     interact: (g) => g.describe(morning(g)
-      ? "The drain's making a noise like somebody breathing through a straw. It never used to make any noise at all."
-      : 'The court drain. Tomorrow every basin in Tessel gets tipped out, and it all goes downhill. Somewhere.'),
+      ? "The drain's quiet this morning. Too quiet, for a drain."
+      : 'A drain in the cobbles. Every so often it gurgles, like something a long way down is clearing its throat.'),
   },
 
   // ---- The court ----
@@ -583,8 +583,7 @@ const neighborUse = {
   soap: (g, self) => g.say(self, "Lovely. Are you saying something? You're saying something."),
   bath_plug: (g, self) => g.say(self, "That's yours. Keep it away from my laundry."),
   moon_chart: (g, self) => g.say(self, "See? Outside the Gate! I knew it wasn't straight on. Not that anyone asked me."),
-  // "...and I've told you so" only once she has.
-  '*': (g, self) => g.say(self, bump(g, 'neighbor.declined') ? "I've no use for that, and I've told you so." : "I've no use for that."),
+  '*': (g, self) => g.say(self, "I've no use for that. I'm bleaching."),
 };
 
 // Her Next Door appears in three places: among her sheets at dusk (smoothing
@@ -617,13 +616,13 @@ function onKidWaypoint(g, self, next) {
   if ([0, 1, 4, 5].includes(reached)) sweat(g, self);
   if (reached === 2 && !g.flag('kid.hasTimer')) {
     g.pose(self, 'hop');
-    g.sfx('kid_hop');
+    g.sfx('kid_hop', { at: self });
   } else if (reached === 3) {
     if (self.pose === 'hop') g.pose(self, null);
   } else if (reached === 0 && g.flag('kid.hasTimer')) {
     laps++;
     if (laps % 3 === 0) {
-      g.sfx('timer_ding');
+      g.sfx('timer_ding', { at: self });
       g.pose(self, 'arms_up');
       self.patrolWait = 70;
       setTimeout(() => { if (self.pose === 'arms_up') self.setPose(null); }, 1150);
@@ -780,7 +779,7 @@ export const courtMap = composedMap(compose, {
     {
       x: 15, y: 25, w: 2, when: morning,
       run: async (g) => {
-        await g.think('Down, then.');
+        await g.describe('Right. The plug, the moon, the piano. In that order, mostly.');
         if (opening.squeezeTo) return g.changeMap(opening.squeezeTo, 3 + g.player.x - 15, 1, 'down');
         return endOfSlice(g);
       },
@@ -816,7 +815,7 @@ export const courtMap = composedMap(compose, {
       every: [0.5, 0.55], when: (g) => !morning(g),
       run: (g) => {
         const k = g.npc('kid');
-        if (k.moving && Math.abs(k.x - g.player.x) + Math.abs(k.y - g.player.y) <= 9) g.sfx('kid_patter');
+        if (k.moving) g.sfx('kid_patter', { at: k, range: 9 });
       },
     },
     // In the morning the well breathes: a cold mist every few seconds.
@@ -835,11 +834,11 @@ function oldManFidgets(g) {
   const old = g.npc('old_man');
   if (old.pose) return;
   g.pose(old, 'think_right_1');
-  g.sfx('chess_tap');
+  g.sfx('chess_tap', { at: old });
   setTimeout(() => {
     if (old.pose !== 'think_right_1') return;
     old.setPose(null);
-    g.sfx('chess_tap');
+    g.sfx('chess_tap', { at: old });
   }, 900);
 }
 
