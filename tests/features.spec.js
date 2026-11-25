@@ -336,3 +336,19 @@ test('click-to-talk reaches a character who keeps moving', async ({ page }) => {
   await clickTile(page, kid[0], kid[1]);
   await waitFor(page, () => window.moonshine.snapshot().speaker === 'Sweaty Kid', null, 15000);
 });
+
+test('click-to-use chases a fast runner until he stops, then uses the item', async ({ page }) => {
+  await boot(page, `${STREET}&x=13&y=8&items=letter`);
+  await waitIdle(page);
+  await page.evaluate(() => {
+    const w = window.moonshine.world;
+    const k = w.byId.get('kid');
+    k.stepTicks = 7; // faster than Cheryl
+    k.def = { ...k.def, behavior: { type: 'patrol', route: [[14, 6], [19, 6], [19, 9], [14, 9]], stopNear: 2 } };
+    w.control.holding = 'letter';
+  });
+  await page.waitForTimeout(700);
+  const at = await page.evaluate(() => { const w = window.moonshine.world; const d = w.byId.get('kid').lastDrawn; return w.game.display.toClient(d.x + d.w / 2 - w.cam.x, d.y + d.h - 10 - w.cam.y); });
+  await page.mouse.click(at.x, at.y);
+  await waitFor(page, () => (window.moonshine.snapshot().text || '').includes('SPEED'), null, 15000);
+});
