@@ -315,3 +315,13 @@ test('a character marked blocks: true holds its tile; routes go around or not at
   });
   expect(r).toBe(true);
 });
+
+test('a malformed scripted walk never hangs a scene', async ({ page }) => {
+  await boot(page, `${STREET}&x=12&y=8`);
+  await waitIdle(page);
+  // [[x, y]] (a coordinate wrapped in a list) and a bad direction both finish.
+  const r = await runScript(page, "await g.movePlayer([[12, 9]]); await g.moveNpc('kid', ['up', 'sideways', 'down']); return [g.player.x, g.player.y];", 8000);
+  expect(r.done).toBe(true);
+  expect(r.v).toEqual([12, 9]);
+  expect(await page.evaluate(() => window.moonshine.world.busy)).toBe(0);
+});
