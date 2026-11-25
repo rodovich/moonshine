@@ -82,7 +82,7 @@ Walks use the engine's names: `<dir>_0` stands, `<dir>_1`, `<dir>_2` step.
 | --- | --- |
 | Cheryl: walk and idle, 4 directions | `cheryl:<dir>_0..2`; blink `idle_<dir>` (2 frames) |
 | Cheryl: reach / interact (up, side, down) | `cheryl:reach_up`, `reach_left`, `reach_right`, `reach_down` |
-| Cheryl: sit on the tub edge facing east; stand up | `cheryl:sit_right` (and `sit_left`); `rise_right` is the half-way frame between `sit_right` and `right_0` |
+| Cheryl: sit on the tub edge facing east; stand up | `cheryl:sit_right` (and `sit_left`); `rise_right` is the half-way frame between `sit_right` and `right_0`. For the moonrise she stands on (3,5) and the sprite is drawn with offset `[0, -17]`, so her seat lands on the tub's rim and her shins hang down its front (and hide her ground shadow, which stays on the floor otherwise). See `?only=scene:court&state=moonrise` |
 | Old Man: seated idle (thinking, reaching for a piece) | `old_man_seated:think_right` (frame 0 chin on hand, frame 1 reaching; durations 2600/900 ms) |
 | Old Man: turning the pepper mill | `old_man_seated:mill_right` (2 frames) |
 | Old Man: sneeze | `old_man_seated:sneeze_right_0` (head back), `sneeze_right_1` (achoo) |
@@ -121,5 +121,7 @@ Cheryl's silhouette shows her bun with its coral tie and her coral cardigan. Dra
 4. `vista_rim:rim` at (0, 0), over the moon.
 5. `vista_twinkle:twinkle` at each point in `VISTA_BASINS` (exported by `vista.js`), offset by (−3, −3), each with its own phase.
 6. `vista_cheryl:cheryl_tub` at (0, 128).
+
+The Gate goes cold: as the moon clears the ridge off to the side, draw `vista_gate_cold:cold_0` (half) and then `cold_1` (full) over the background, after step 1 and before the glow. The notch's apricot drains to violet while the glow stays on the moon, so the wrongness is unmistakable. The dev scene switches at 7 s and 8 s.
 
 `game/dev/scene-vista.js` plays the sequence in a loop; `?still` holds the moment the moon is half up.

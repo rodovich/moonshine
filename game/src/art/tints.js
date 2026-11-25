@@ -5,13 +5,13 @@
 // The tile art is painted in neutral late-morning light; these washes turn it to
 // dusk or moonlit night. See docs/art-direction.md ("Time of day").
 export const TINTS = {
-  // Last light: a rose-amber wash and a faint violet one, so whitewash goes rose and
-  // shadows cool — clearly sunset, not afternoon (the moonrise depends on it).
-  dusk: [{ color: '#e88060', amount: 0.5, mode: 'multiply' }, { color: '#7060a0', amount: 0.18, mode: 'multiply' }],
+  // Last light: a deep rose-amber wash and a violet one. Whitewash goes rose and dim and
+  // shadows cool, so the opening reads as sunset with the moon on its way, not midday.
+  dusk: [{ color: '#e07048', amount: 0.62, mode: 'multiply' }, { color: '#584888', amount: 0.3, mode: 'multiply' }],
   // Moonlight: cool, dark blue, with enough value left to read every shape.
   night: { color: '#3850a0', amount: 0.7, mode: 'multiply' },
-  // Day: the art as painted.
-  day: { color: '#ffffff', amount: 0, mode: 'multiply' },
+  // Day: a light, slightly warm grey, so whitewash in full sun isn't blown out.
+  day: { color: '#e0d8d0', amount: 0.35, mode: 'multiply' },
 };
 
 // Colors that give off their own light. Wherever a tile uses one of these,
