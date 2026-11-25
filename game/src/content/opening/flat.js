@@ -131,8 +131,8 @@ const entities = [
     id: 'wardrobe', x: 10, y: 5, h: 2,
     interact: async (g) => {
       if (morning(g)) {
-        if (g.flag('got.hat')) return g.describe('My good cardigan, and my other good cardigan. The hat is out seeing the world.');
-        return take(g, 'hat', "My hat. It's daytime, and I'm going out.");
+        // The hat stays in the wardrobe now (structure pass): look only.
+        return g.describe("My good cardigan, my other good cardigan, and my hat. I'll want both cardigans by tonight.");
       }
       if (bump(g, 'wardrobe') === 0) return g.describe('My good cardigan, my other good cardigan, and my hat.');
       return g.describe("The hat's for daytime. It isn't daytime.");

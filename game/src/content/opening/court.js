@@ -755,7 +755,6 @@ const kidMorning = {
   },
   use: {
     moon_chart: (g, self) => g.say(self, "Is that a race map? ...It's just ticks. Boring ticks."),
-    hat: (g, self) => g.say(self, 'No hats! Hats are drag!'),
     soap: (g, self) => g.say(self, 'I had a bath last WEEK.'),
     '*': (g, self) => g.say(self, "Can't carry it! Aerodynamics!"),
   },
