@@ -73,9 +73,15 @@ function compose(g) {
   for (let y = 11; y <= 15; y++) { L.set('ground', 1, y, 'terrace:ledge_w', true); L.set('ground', 4, y, 'terrace:ledge_e', true); }
 
   // The hollow step (9–10, 19): flush with landing 2, wet at the joint; open at the end.
-  const hs = open(g) ? 'hollow_open' : 'hollow_wet';
-  L.set('ground', 9, 19, `steps:${hs}_l`, false);
-  L.set('ground', 10, 19, `steps:${hs}_r`, false);
+  if (open(g)) {
+    // The hole is the step's east half; its west half is just the top of flight 3,
+    // so people can still go up and down the Steps past it.
+    L.set('ground', 9, 19, 'steps:steps_l', false);
+    L.set('ground', 10, 19, 'steps:hollow_open_r', true);
+  } else {
+    L.set('ground', 9, 19, 'steps:hollow_wet_l', false);
+    L.set('ground', 10, 19, 'steps:hollow_wet_r', false);
+  }
   L.step[19][9] = L.step[19][10] = 'step_stairs';
 
   // The view parapet on landing 3's east edge.
@@ -167,6 +173,15 @@ const objects = [
   // The hollow step: only the free half while she sits on the other.
   { id: 'hollow_step', x: 10, y: 19, when: (g) => !counted(g), interact: hollowLook, use: hollowUse },
   { id: 'hollow_step_free', x: 9, y: 19, w: 2, when: (g) => counted(g) && !open(g), interact: hollowLook, use: hollowUse },
+  {
+    // The open step: a solid hole at (10, 19). Looking at it (or clicking it) asks.
+    id: 'hundredth_step', x: 10, y: 19, when: open,
+    interact: async (g) => {
+      const i = await g.choose('Go down?', ['Yes', 'Not yet']);
+      if (i === 0) return goDown(g);
+    },
+    use: { '*': (g) => g.describe("I'm not dropping anything down there. I'd only want it back.") },
+  },
   { id: 'view', x: 15, y: 26, h: 3, look: 'Halfway down Tessel. Halfway up, if you\'re the Kid.' },
   { id: 'bench', x: 2, y: 27, w: 2, look: 'A bench for the halfway point. Nobody has ever sat on it going down.' },
   ...[[1, 8], [15, 8], [1, 17], [14, 17]].map(([x, y]) => ({ id: `pot_${x}_${y}`, x, y, lookKey: 'geraniums', look: 'Geraniums.' })),
@@ -372,7 +387,7 @@ const basinWoman = {
 // so he can't stand on the hollow step once the Counting Woman has gone.
 
 const LAP = [[10, 18], [10, 27], [13, 27], [10, 27]];
-const LAP_OPEN = [[10, 27], [13, 27]]; // once the step is open, landing 3 only
+const LAP_OPEN = [[9, 18], [9, 27], [13, 27], [9, 27]]; // once the step is open, past the hole on its west half
 
 function onKidWaypoint(g, self) {
   if (Math.random() < 0.5) {
@@ -416,8 +431,8 @@ const kids = [
     behavior: { type: 'patrol', route: LAP, stopNear: 2, nearPose: 'jog', noStop: [[9, 18, 2, 7]], onWaypoint: onKidWaypoint },
   },
   {
-    ...kidBase, id: 'kid_after', x: 10, y: 27, when: open,
-    behavior: { type: 'patrol', route: LAP_OPEN, stopNear: 2, nearPose: 'jog', onWaypoint: onKidWaypoint },
+    ...kidBase, id: 'kid_after', x: 9, y: 27, when: open,
+    behavior: { type: 'patrol', route: LAP_OPEN, stopNear: 2, nearPose: 'jog', noStop: [[9, 18, 1, 7]], onWaypoint: onKidWaypoint },
   },
 ];
 
@@ -465,6 +480,7 @@ async function openStep(g) {
 }
 
 async function goDown(g) {
+  g.place('player', 10, 19, 'up');
   g.facePlayer('up');
   g.sfx('step_stairs');
   await g.tween('player', { offset: [0, 8], seconds: 0.4, clipBelow: true });
@@ -499,17 +515,6 @@ export const stepsMap = composedMap(compose, {
     { x: 6, y: 41, w: 2, to: 'fountain_square', at: [11, 4], facing: 'down', when: slid, sfx: 'step_stone' },
   ],
   triggers: [
-    {
-      // The open step. A trigger, not an exit: the engine's pathfinding treats
-      // exit tiles as off-limits even while their `when` is false, which would
-      // cut the Steps in half before the step opens.
-      x: 9, y: 19, w: 2, when: open,
-      run: async (g) => {
-        const i = await g.choose('Go down?', ['Yes', 'Not yet']);
-        if (i === 0) return goDown(g);
-        await g.movePlayer([g.player.x, 18]);
-      },
-    },
     {
       // Walking down into the piano.
       x: 6, y: 39, w: 2,
