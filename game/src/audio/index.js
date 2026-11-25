@@ -85,7 +85,15 @@ export function startSfx(ctx, graph, id, when, opts = {}) {
   if (!def) throw new Error(`unknown sfx "${id}"`);
   const g = ctx.createGain();
   g.gain.value = (def.gain ?? 1) * (opts.volume ?? 1);
-  g.connect(graph.sfx);
+  if (opts.pan) {
+    // Place the effect left (-1) or right (1), e.g. lamps waking down a corridor.
+    const p = ctx.createStereoPanner();
+    p.pan.value = Math.max(-1, Math.min(1, opts.pan));
+    g.connect(p);
+    p.connect(graph.sfx);
+  } else {
+    g.connect(graph.sfx);
+  }
   let send = null;
   if (def.echo) {
     send = ctx.createGain();
@@ -329,7 +337,7 @@ function endCue() {
 }
 
 /**
- * Play a sound effect. opts: { pitch (semitones), volume (0..1) }.
+ * Play a sound effect. opts: { pitch (semitones), volume (0..1), pan (-1 left .. 1 right) }.
  * Effects marked `mono` cut off their own previous instance (text blips, footsteps).
  */
 export function sfx(id, opts = {}) {
