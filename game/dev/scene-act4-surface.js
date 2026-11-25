@@ -110,14 +110,21 @@ function dry(lit) {
   ['n', 'down', 'n', 'up', 's'].forEach((p, i) => { L.set('ground', 12, 7 + i, `canal:bridge_${p}_l`); L.set('ground', 13, 7 + i, `canal:bridge_${p}_r`); });
   [['hull_n', 8], ['hull_s', 9], ['mud', 10]].forEach(([r, y]) => L.set('ground', 11, y, `reveal:${r}_pier_w`));
   [['qwall', 7], ['hull_n', 8], ['hull_s', 9], ['mud', 10]].forEach(([r, y]) => L.set('ground', 14, y, `reveal:${r}_pier_e`));
-  // the Water Stairs (22-25): top step, limestone flight, slate flight, broken last flight
+  // the Water Stairs (22-25): top step (6), limestone flight (7), the broken last flight (8);
+  // under the break, row 9 is bare hull, so the stairs fail to reach the mud or the door
   [22, 23, 24, 25].forEach((x, i) => {
     const k = i === 0 ? 'l' : i === 3 ? 'r' : 'm';
     L.set('ground', x, 6, `reveal:wstairs_top_${k}`);
     L.set('ground', x, 7, `reveal:wstairs_${k}`);
-    L.set('ground', x, 8, `reveal:wstairs_slate_${k}`);
-    L.set('ground', x, 9, `reveal:wstairs_broken_${k}`);
+    L.set('ground', x, 8, `reveal:wstairs_broken_${k}`);
   });
+  // the last of the canal running out east along the mud (28-31, 10), over the trench's broken
+  // end into the Bowl, lower down
+  ['a', 'b', 'c'].forEach((c, i) => L.set('ground', 28 + i, 10, `reveal_mouth:trickle_${c}`));
+  L.set('ground', 31, 10, 'reveal_mouth:mouth_mud');
+  L.set('ground', 31, 9, 'reveal_mouth:mouth_hull');
+  // laundry across the north quay, streaming hard east in the wind (overhead, 14-19, 4)
+  'abcdef'.split('').forEach((c, i) => L.set('overhead', 14 + i, 4, `cloth:over_wind_${c}`));
   // the bronze door (26-27, 8-9), set into the hull
   for (let dy = 0; dy < 2; dy++) for (let dx = 0; dx < 2; dx++) L.set('ground', 26 + dx, 8 + dy, `reveal_door:bronze_door_x${dx}y${dy}${lit ? '_lit' : ''}`);
   // taut mooring ropes from the north quay's posts down to the boats
@@ -142,7 +149,7 @@ function dry(lit) {
     { sheet: 'mover', frame: 'lookup_down', alt: 'other', ...at(17, 10) },
     { sheet: 'clockmaker', frame: 'look_down', alt: 'bridge', ...at(13, 9) },
     { sheet: 'critters', frame: 'crab_walk', ...at(6, 10) },
-    { sheet: 'critters', frame: 'crab_idle', ...at(29, 10) },
+    { sheet: 'critters', frame: 'crab_idle', ...at(26, 10) },
     { sheet: 'critters', frame: 'fish_flop', ...at(10, 5) },
   ];
   return done(L, lit ? 'bilge_dry: the reveal (moon-lock charged)' : 'bilge_dry: the reveal', sprites, { tint: null });
