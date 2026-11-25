@@ -248,11 +248,16 @@ export class World {
 
   // Interactable entity at a tile (solid or not).
   interactableAt(x, y) {
-    for (const e of this.entities) {
-      if (e.isPlayer || !e.visible) continue;
-      if (e.x <= x && e.y <= y && x < e.x + e.w && y < e.y + e.h && isInteractable(e)) return e;
-    }
-    return null;
+    return this.pickEntity(this.entities.filter((e) => !e.isPlayer && e.visible
+      && e.x <= x && e.y <= y && x < e.x + e.w && y < e.y + e.h && isInteractable(e)));
+  }
+
+  // When several interactable things share a tile, characters win over
+  // objects with sprites, which win over sprite-less hotspots (the Kid
+  // standing on the hollow step).
+  pickEntity(list) {
+    const rank = (e) => (e.directional ? 0 : e.art ? 1 : 2);
+    return list.length ? list.reduce((a, b) => (rank(b) < rank(a) ? b : a)) : null;
   }
 
   blocked(x, y, mover = null) {
@@ -763,6 +768,12 @@ export class World {
     const layer = this.layer('dark');
     layer.fillStyle = colorOf(def.darkColor || 'void');
     layer.fillRect(0, 0, WIDTH, HEIGHT);
+    // Light pools stay inside the map: no glow over the void around a room.
+    const mapRect = [-cx, -cy, this.map.w * TILE, this.map.h * TILE];
+    layer.save();
+    layer.beginPath();
+    layer.rect(...mapRect);
+    layer.clip();
     layer.globalCompositeOperation = 'destination-out';
     for (const l of lights) {
       for (const [k, a] of [[1, 0.4], [0.75, 0.6], [0.5, 1]]) {
@@ -770,12 +781,14 @@ export class World {
         layer.drawImage(discImage(Math.round(l.r * TILE * k)), Math.round(l.px - cx - l.r * TILE * k), Math.round(l.py - cy - l.r * TILE * k));
       }
     }
-    layer.globalAlpha = 1;
-    layer.globalCompositeOperation = 'source-over';
+    layer.restore();
     ctx.save();
     ctx.globalAlpha = Math.min(1, dark);
     ctx.drawImage(layer.canvas, 0, 0);
     // Colored lights tint their pool (inner bands a little more).
+    ctx.beginPath();
+    ctx.rect(...mapRect);
+    ctx.clip();
     ctx.globalCompositeOperation = 'screen';
     for (const l of lights) {
       if (!l.color) continue;

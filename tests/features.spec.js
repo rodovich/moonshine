@@ -279,3 +279,59 @@ test('ambient script events and music as a function of state', async ({ page }) 
   `);
   expect(r.v).toBe('title');
 });
+
+test('interaction targeting: characters beat hotspots, shared tiles, moving targets, tall things', async ({ page }) => {
+  await boot(page, `${STREET}&x=8&y=7&facing=right`);
+  await waitIdle(page);
+  const w = (fn) => page.evaluate(fn);
+  // 1. A hotspot under the Old Man: Z talks to him, not the hotspot.
+  await w(() => {
+    const world = window.moonshine.world;
+    world.mapDef.entities.push({ id: 'grate', x: 9, y: 7, solid: false, look: 'A drain grate.' });
+    world.refreshEntities();
+  });
+  await press(page, 'z');
+  await waitText(page);
+  expect((await snap(page)).speaker).toBe('Old Man');
+  for (let i = 0; i < 30; i++) {
+    const s = await snap(page);
+    if (!s.text && !s.busy) break;
+    if (s.choice) await press(page, 'Enter'); else await press(page, 'z');
+  }
+  await waitIdle(page, 10000);
+  // 4. Clicking a lamp's top (overhead) reaches a hotspot on the post below.
+  await w(() => {
+    const world = window.moonshine.world;
+    world.mapDef.entities.push({ id: 'lamp', x: 7, y: 7, look: 'A lamp. Lit early.' });
+    world.refreshEntities();
+  });
+  await clickTile(page, 7, 6);
+  await waitText(page, 10000);
+  expect((await snap(page)).text).toContain('Lit early');
+  await readAll(page);
+  await waitIdle(page);
+  // 2. A non-solid character on Cheryl's own tile: Z still reaches him.
+  await runScript(page, `
+    const k = g.npc('kid');
+    k.solid = false; k.def = { ...k.def, behavior: 'idle' };
+    g.place('kid', g.player.x, g.player.y, 'up');
+  `);
+  await press(page, 'z');
+  await waitText(page);
+  expect((await snap(page)).speaker).toBe('Sweaty Kid');
+  await readAll(page);
+  await waitIdle(page);
+});
+
+test('click-to-talk reaches a character who keeps moving', async ({ page }) => {
+  await boot(page, `${STREET}&x=13&y=8`);
+  await waitIdle(page);
+  await page.evaluate(() => {
+    const k = window.moonshine.world.byId.get('kid');
+    k.def = { ...k.def, behavior: { type: 'patrol', route: [[14, 6], [19, 6], [19, 9], [14, 9]] } };
+  });
+  await page.waitForTimeout(600);
+  const kid = await page.evaluate(() => { const k = window.moonshine.world.byId.get('kid'); return [k.x, k.y]; });
+  await clickTile(page, kid[0], kid[1]);
+  await waitFor(page, () => window.moonshine.snapshot().speaker === 'Sweaty Kid', null, 15000);
+});
