@@ -72,8 +72,8 @@ function composeGallery(g) {
   // The floor grate: the drop-ladder's top once it's down.
   L.set('ground', 6, 8, g.flag('halls.ladder') ? 'ds:grate_open' : 'ds:grate_closed', false);
 
-  // The ribs are drawn as rib faces on the wall (see wall()); an overhead rib
-  // across the floor would hide Cheryl, who is one tile wide.
+  // The ribs are drawn as rib faces on the wall (see wall()); even the art's
+  // see-through beams overhead left Cheryl hard to see in this dark room.
   // The light shaft over the mirror: its lid, and the daylight column once open.
   L.set('overhead', 11, 4, lever(g) ? 'ds_day:over_shaft_open' : 'ds_day:over_shaft_shut');
   if (lever(g)) {
@@ -217,7 +217,7 @@ const galleryObjects = [
   })),
   {
     id: 'hatch', x: 15, y: 2, when: (g) => !hatchOpen(g), solid: true,
-    looks: [["A square hatch, sealed flush. No handle. A round glass eye in the middle.", "It looks like it's waiting for something."], "A glass eye in the middle. It looks like it's waiting for something."],
+    looks: [["A square hatch, sealed flush. No handle. A round glass eye in the middle, looking down at the mirror.", "It looks like it's waiting for something."], "A glass eye in the middle, looking down at the mirror. It looks like it's waiting for something."],
     use: { crowbar: (g) => g.describe("No seam. Whoever made this didn't make doors for crowbars."), '*': cherylDeclines },
   },
   {
