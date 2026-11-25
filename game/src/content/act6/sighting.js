@@ -108,6 +108,7 @@ export async function plugBasin(g) {
   g.takeItem('found_plug');
   await g.describe("The Basin's own stopper went missing centuries ago. Mine fits.", 'Plugs are plugs.');
   g.setFlag('basin.plugged');
+  g.save(); // the step survives a reload during the long scene after it
   // Water wells up through the grille, slow and clean, over about four seconds.
   g.sfx('basin_fill');
   for (let i = 0; i < 4; i++) {
@@ -186,6 +187,7 @@ export async function trimWheel(g) {
   g.setFlag('fx.trim', null);
   g.pose('player', null);
   g.setFlag('trim', step);
+  g.save(); // the step survives a reload during the long scene after it
   await g.wait(0.2);
   const v = basinView(g, { step: from });
   await showBasin(g, v, { hold: 0.4 });
@@ -219,6 +221,7 @@ export async function moonTrue(g, v) {
     await g.wait(0.14);
   }
   g.setFlag('moon.true');
+  g.save(); // the step survives a reload during the long scene after it
   g.sfx('lamps_blaze');
   await g.wait(3.2);
   // 5. The master stop unlocks with a clack and rises an inch.
@@ -245,6 +248,7 @@ export async function masterStop(g) {
   g.pose('player', 'heave_up');
   await g.wait(0.7);
   g.setFlag('sisters.asleep');
+  g.save(); // the step survives a reload during the long scene after it
   g.pose('player', null);
   // 1. Far off, a cough, and a thump that stops. Then silence.
   g.sfx('sisters_sleep');
