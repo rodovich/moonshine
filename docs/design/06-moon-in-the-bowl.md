@@ -370,9 +370,7 @@ The ferry *Persistence* is tied up at the landing, level, as it should be. Two n
 
 Plain and short, in the game's font, over the final vista. Roles, not people (decided by the orchestrator). Headings in gold; a blank line between entries:
 
-- **MOONSHINE**
-- *(gap)*
-- **Story and design** / Claude (Anthropic)
+- **Story and design** / Claude (Anthropic) *(the roll starts here; the MOONSHINE title has just shown over the vista)*
 - **Art** / Claude (Anthropic)
 - **Music and sound** / Claude (Anthropic)
 - **Engine** / Claude (Anthropic)
@@ -484,7 +482,9 @@ The Act 6 builder (A7CXb-ur4K) built the Long Keel, the Sighting Room, the dawn,
 - The lift before the bath: "Not yet. Not with the moon off to one side like that." (repeat: "'Up,' says the arrow. Not yet.").
 - Cheryl's shoes stay at (6, 6) while she bathes.
 - The Stair Race's finish is a tape across flight 3 at row 21, just below the open step, with the Counting Woman at (7, 18). The rope round the open step can be walked through (a solid barrier would cut the Steps in two).
-- The title on the final vista fades out before the credits roll; MOONSHINE is still the first credit line.
+- The title is the art's MOONSHINE overlay in the sky above the moon; it fades out before the credits roll, and the roll starts with "Story and design" (no repeated MOONSHINE line).
+- The montage cuts are staged on Act 4's dry Bilge, the belfry, the lamp room, and the wet Bilge; Mott's toast uses Act 5's risen Harbor.
+- The Harbor epilogue: the Pelletiers at (15–16, 6) with their luggage at (17, 6) ("The Pelletiers' luggage. A week on the mainland, and they bought a hatbox."); the Keeper at (21, 7); Mott on his bollard at (13, 8). Epilogue declines adopted as written: the Fishmonger ("Not today, Miss. Today I'm just enjoying the smell."), the Boatman ("I've got everything a man needs, Miss. A boat. Water under it."), the Pelletiers ("We've got enough luggage, thank you."), Mott ("No, no. I've given up the jug. Tea, now. Mostly tea."), the Keeper ("I've no use for that down here. I'm just looking.").
 - Lines the builder added, adopted as written: the signed log; the master stop afterward; the shaft and walls; the Keel's lamps; the drum, hawse, coil, sealed hatch, and speaking tube before the hauling; the Old Man after the piano ("Play it when you're ready. Gerald's in no hurry."); the tub with the new plug ("Next year. On Moonshine Night. With the moon in the Gate."); the Movers ("Delivered."); the Stair Race runners and crowd; the Tourist's luggage; and the epilogue declines for the Clockmaker, Ambrose, Ottilie, and the Shopkeeper.
 
 ## Decisions
