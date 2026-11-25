@@ -70,6 +70,9 @@ function bilge(stage) {
       }
     }
     sprites.push({ sheet: 'bilge_piano', frame: stage === 1 ? 'piano_halfsunk' : 'piano_lid', x: 7 * 16, y: 10 * 16 });
+    // the Boatman in his boat (2x1 at 14-15, 9): boat and man are one 32x32 sprite, bottom-centred on the two tiles
+    sprites.push({ sheet: 'boatman', frame: stage === 1 ? 'rock' : 'sing', x: 15 * 16, y: 10 * 16 });
+    if (stage === 2) sprites.push({ sheet: 'note_bubble', frame: 'note', x: 14 * 16 + 10, y: 10 * 16 - 30 });
   }
   // fish stalls and mooring posts on the north quay
   for (const x of [2, 5, 8]) L.set('objects', x, 5, 'props:crate');
@@ -131,7 +134,9 @@ function dry(lit) {
     { sheet: 'bilge_boats', frame: 'boat_side_a', x: 4 * 16, y: 11 * 16 },
     { sheet: 'bilge_boats', frame: 'boat_side_b', x: 9 * 16, y: 11 * 16 },
     { sheet: 'bilge_boats', frame: 'boat_side_c', x: 20 * 16, y: 11 * 16 },
-    { sheet: 'bilge_boats', frame: 'boat_upright', x: 23 * 16, y: 11 * 16 },
+    // the Boatman, sitting very upright in his beached boat at the foot of the broken stairs (22-23, 10)
+    { sheet: 'boatman_mud', frame: 'mud', x: 23 * 16, y: 11 * 16 },
+    { sheet: 'note_bubble', frame: 'note', x: 22 * 16 + 10, y: 11 * 16 - 30 },
     { sheet: 'bilge_piano', frame: 'piano_mud', x: 16 * 16, y: 11 * 16 },
     { sheet: 'mover', frame: 'lookup_down', alt: 'big', ...at(14, 10) },
     { sheet: 'mover', frame: 'lookup_down', alt: 'other', ...at(17, 10) },

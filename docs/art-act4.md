@@ -91,6 +91,18 @@ Modules: `act4_sprites.js` (new), plus new frames in `act2_npcs.js` and `cheryl.
 | The teacup (Cheryl's flat) | `act4_props:teacup` (objects layer, on a table) |
 | Copper coil and square jug icons | `items_act4:copper_coil`, `items_act4:square_jug` |
 
+### The Boatman
+
+Boat and man are one 32×32 sprite (`act4_sprites.js`), so he reads as part of the boat: draw it bottom-centered on the boat's 2×1 tiles (x = the boat's right tile × 16, y = the row below the boat × 16). Bald, a ring of white hair, a neat white moustache, a navy-and-cream striped jersey; the near gunwale hides his waist. The frame's bottom three rows are a strip of water or mud under the hull.
+
+| Use | Frames |
+| --- | --- |
+| Afloat in the wet Bilge (Act 2, Act 4 floods) | `boatman:rock` (4 frames, 450 ms, gentle bob and lean); singing `boatman:sing` (2 frames, chin up, mouth open) |
+| Beached on the dry canal, very upright (Act 4 dry, Act 5) at (22–23, 10) | `boatman_mud:mud` (2 frames: a long hold, then a moustache twitch); singing `boatman_mud:sing` |
+| Act 5: the bucket | `boatman_mud:pour_0` (bucket raised over the boat), `pour_1` (tipping, water pouring in) |
+| Act 5: "AFLOAT!" | `boatman_mud:afloat` (2 frames: arms up, beaming, a little hop) |
+| The singing note | `note_bubble:note` (16×16, 4 frames: pops in, holds, fades, gone; 120/1200/300/200 ms). Draw it bottom-centered about 30 px above his feet line, a little left of center, and move it up a few px per frame while it plays |
+
 ## Underground
 
 Module `game/src/art/act4_under.js`. Composed on the dev page: `/dev/art.html?only=scene:act4_under` with `&state=` `pumphall` (asleep, the Middle Sister's throat empty), `pumphall_run`, `pumphall_burst`, `wheel`, `wheel_turn`, `shaft`, `cave`, `cave_turn`. Multi-tile pieces are named `<name>_x<col>y<row>`, with `_<frame>` for animated ones.
