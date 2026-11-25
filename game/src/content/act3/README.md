@@ -10,14 +10,13 @@ The first descent: from the hundredth step, through the Step Gallery, the Cradle
 | `gallery.js` | The Step Gallery (24 × 11): the ladder, the lever, the mirror and its beam, the inlays, the moon-locked hatch, the grate. The Cradle (8 × 6): the disc and the chute. |
 | `halls.js` | The Lamp Halls (32 × 14): light-pipes, lamps, the drop-ladder, the speaking tube, the valve, the flooded and the drowned passages. The Bunk Room (10 × 7): the dark lamp, the tool rack, the valve key. |
 | `chart.js` | The Chart Room (16 × 14): the floor inlay and its first look, the Keeper's chair, cup, and ledger, the Founders' Door and its bolt. |
-| `surface.js` | Act 3's states of Act 2's maps: the way down at the hundredth step, the crypt with the door open and Ottilie's scene, the Archive at dusk, the Crown at dusk with the glowing moon-eyes, the residents, the vista, and the end card. |
+| `surface.js` | Act 3's states of Act 2's maps: the crypt with the door open and Ottilie's scene, the Archive at dusk, the Crown at dusk with the glowing moon-eyes, the residents, the vista, and the end card. |
 | `common.js` | Act 3's items, the underground's wall, floor, and rib helpers, lamps, shared lines, and the settings every Downstairs map shares. |
-| `arrival.js` | Tells the Step Gallery that Cheryl is coming down its ladder. |
 | `tiles.js` | The tileset. |
 
 ## How Act 3 meets Act 2
 
-Act 2's maps belong to Act 2 (`../act2/`). `withAct3(maps)` in `surface.js` returns them with Act 3's states layered on, without editing them: extra exits, triggers, and entities; `when`s on the Act 2 entities that step aside (the closed Founders' Door, day-time Ambrose); extra tile patches; lighting and `onEnter` chained. `src/content/index.js` applies it to the whole map set. What it relies on in Act 2: the map ids `hundred_steps`, `crypt`, `archive`, `crown`; the open-step trigger at (9, 19); the crypt's door at (5–6, 1–2), its `founders_door` entity, and its stair at (1, 5); the Archive's door (7–8, 13) and its `ottilie`; the Crown's parapet row 14, stair (11–12, 14–15), and `ambrose`; the items `crowbar` and `paper_charcoal`.
+Act 2's maps belong to Act 2 (`../act2/`). The way down is Act 2's own hook: `src/content/index.js` sets `act2.stepTo = 'step_gallery'`, and the hundredth step's ladder leads to (3, 3) there. For the way back up, `withAct3(maps)` in `surface.js` returns them with Act 3's states layered on, without editing them: extra exits, triggers, and entities; `when`s on the Act 2 entities that step aside (the closed Founders' Door, day-time Ambrose); extra tile patches; lighting and `onEnter` chained. `src/content/index.js` applies it to the whole map set. What it relies on in Act 2: the map ids `hundred_steps`, `crypt`, `archive`, `crown`; the crypt's door at (5–6, 1–2), its `founders_door` entity, and its stair at (1, 5); the Archive's door (7–8, 13) and its `ottilie`; the Crown's parapet row 14, stair (11–12, 14–15), and `ambrose`; the items `crowbar` and `paper_charcoal`.
 
 ## Story flags
 
@@ -48,7 +47,7 @@ Where the design left something open, or didn't work in play, this is what the b
 - **The beam is lit**: small lights run along it and a glow sits where it lands, so the darkness doesn't dim it.
 - **Each target's lines play the first time the beam lights it**; later turns just clunk and swing the beam.
 - **The ladder up, the grate, and the drop-ladder are walked into** (walking up into the ladder, onto the open grate, or up into the dropped ladder climbs at once). Clicking or facing one gives its look line and then a "Climb up?" / "Climb down?" choice, so a pointer player can climb and the look line isn't lost. The hooked-up ladder's look is followed by "Pull the chain?".
-- **Ladders are climbed on screen**: Cheryl climbs out of sight before the fade, and comes down the Step Gallery's ladder into the daylight on her first arrival, before "Under the Steps."
+- **Ladders up are climbed on screen**: Cheryl climbs out of sight before the fade.
 - **The light-pipes** are at (6, 8), (14, 8), (22, 8), clear of the ribs, and solid (glass rods to the floor).
 - **The flooded passage's floor is walkable ground**, blocked by the passage hotspot until the valve turns, so arriving from the Chart Room at (25–26, 1) is on open floor. "Drained. Wet, but walkable. North." plays the first time Cheryl steps onto it (a hotspot on a walkable passage would catch clicks meant for walking).
 - **The gushing pipe** is looked at from below, at (27, 6); after the valve it has a dry line.
@@ -61,7 +60,7 @@ Where the design left something open, or didn't work in play, this is what the b
 - **Ottilie's crypt scene** has her come down the stair to (4, 3), beside Cheryl at (5, 3), and go back up. She carries her lamp (her `lamp_*` frames as a walking sheet) and lights the dusk crypt around her.
 - **The Crown at dusk** has its own light: a dusk tint plus a light indigo darkness, with a cyan pool at each moon-eye and a warm one at each lamp post, so the studs read as lights. The residents stand at (6, 7) (Ambrose, at his step), (10, 10) (the Kid, by the sundial), and (14, 12) (the Woman with Watering Can, near the stair). Cheryl has one line on arriving: "Dusk already. And the plaza is full of little blue lights." The Crown has no music at dusk, only the `glow_shimmer` loop; by day it plays its music from `onEnter`.
 - **The vista starts when Cheryl steps onto row 13**, anywhere along the parapet (the stair at x11–12 is beyond it). After the end card Cheryl is saved at (11, 12) on the plaza; on Continue, the way down the stair shows the end card again, until Act 4 exists.
-- **The moon-eye studs on the Crown** are patched in at the design's positions in their plain form by day too, so they're there to light up.
+- **The moon-eye studs on the Crown** are Act 2's (`CROWN_MOON_EYES`); Act 3 swaps them for their glowing frames at dusk.
 - **Lines added for states the design doesn't cover:** a lit lamp used again ("It's already lit. It doesn't want seconds."), the moons inlay with paper ("Four moons. I'll remember four moons."), the mirror with the disc, paper, or crowbar, the grate and the jammed valve with the crowbar, the passage and the drowned corridor with anything, the light-pipes and ledger with paper, the duty roster with paper, the Ship Plan on the inlay, Ottilie in the crypt if talked to mid-scene, and the dusk residents' "not now" answers to items.
 
 ## Stand-ins (until the art lands)

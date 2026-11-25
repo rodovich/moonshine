@@ -20,7 +20,7 @@ export async function openingIntro(g) {
     "A tub on the roof and the moon on its way. Thirty-one years, and I haven't missed one.",
     "Everything's ready. Nearly. On Moonshine Night there's always a nearly.",
   );
-  g.hint(g.usingTouch ? 'Tap to walk. Tap things to look.' : 'Arrows: walk   Z: look/talk   X: bag', 6);
+  g.hint(g.usingTouch ? 'Tap to walk. Tap things to look.' : 'Arrows/click: walk   Z/click: look, talk   X: bag', 6);
 }
 
 export const openingScripts = {

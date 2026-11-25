@@ -1,27 +1,25 @@
-// Shared pieces for Act 2: items, tile helpers, stand-in character looks, and
+// Shared pieces for Act 2: items, tile helpers, the residents' looks, and
 // the small dialog helpers (the opening's, reused).
 
-import { items, items2 } from '../../art/items.js';
-import { old_man, shopkeeper, kid } from '../../art/npcs.js';
-import { neighbor } from '../../art/opening_npcs.js';
-import { court_props } from '../../art/court.js';
+import { shopkeeper } from '../../art/npcs.js';
+import { items_act2, piano } from '../../art/act2_objects.js';
+import { counting_woman, mover, tourist, mayor, ambrose, basin_woman, girl, rope, watering_woman, bench_man } from '../../art/act2_npcs.js';
 import { bump, cycle, getItem, talking, cherylDeclines } from '../opening/common.js';
 
 export { bump, cycle, getItem, talking, cherylDeclines };
 
 // ---------------------------------------------------------------------------
-// Items new in Act 2. Icons are stand-ins (recolored opening icons) until the
-// art task draws paper_charcoal, guidebook, and crowbar.
+// Items new in Act 2.
 
 export const act2Items = {
   paper_charcoal: {
     name: 'Paper and Charcoal',
-    icon: { sheet: items, frame: 'letter', palette: { b: 'charcoal', B: 'charcoal_deep' } },
+    icon: { sheet: items_act2, frame: 'paper_charcoal' },
     description: "Ottilie's paper and a stub of charcoal. For rubbings. Primary sources, Cheryl.",
   },
   guidebook: {
     name: 'Guidebook',
-    icon: { sheet: items, frame: 'letter', palette: { W: 'coral_light', w: 'coral', v: 'coral_shade', b: 'brass_light', B: 'brass' } },
+    icon: { sheet: items_act2, frame: 'guidebook' },
     description: 'Tessel: A Pocket Companion. Confidently wrong on every page. I\'ve grown fond of it.',
     // One entry per look, in order (docs/design/02-city.md, "Reading the guidebook").
     looks: [
@@ -36,7 +34,7 @@ export const act2Items = {
   },
   crowbar: {
     name: 'Crowbar',
-    icon: { sheet: items2, frame: 'clothes_prop', palette: { o: 'iron_light', O: 'iron', p: 'iron_deep', W: 'white_light' } },
+    icon: { sheet: items_act2, frame: 'crowbar' },
     description: "The Movers' crowbar. Heavy, honest, and slightly bent.",
     useOn: { npc: 'No. Absolutely not. Put it away, Cheryl.' },
   },
@@ -119,33 +117,36 @@ export function layout(W, H, blankGrid) {
 }
 
 // ---------------------------------------------------------------------------
-// Characters. Most Act 2 residents have no bodies yet; until the art task
-// draws them, each wears a palette swap of an existing body (see README.md).
+// Characters (art: game/src/art/act2_npcs.js, index in docs/art-act2.md).
+// Residents who sit or hold a pose wear a static animated frame and don't
+// turn to talk; those who walk somewhere use their walking sheet.
+
+export const SHEETS = { counting_woman, mover, tourist, mayor, ambrose, basin_woman, girl, rope, watering_woman, bench_man, shopkeeper, piano };
 
 export const LOOKS = {
-  ambrose: { sheet: old_man, palette: 'plum' },
-  counting_woman: { sheet: neighbor, palette: { A: 'cobalt_light', a: 'cobalt', Z: 'cobalt_shade', B: 'mustard_light', b: 'mustard_shade', H: 'hair_brown', h: 'hair_brown_shade' } },
-  basin_woman: { sheet: neighbor, palette: { A: 'sage_light', a: 'sage', Z: 'sage_shade', H: 'hair_black', h: 'hair_black_shade', F: 'skin2_light', f: 'skin2', x: 'skin2_shade' } },
-  watering_woman: { sheet: neighbor, palette: { A: 'ochre_light', a: 'ochre', Z: 'ochre_shade', B: 'leaf_light', b: 'leaf_shade' } },
-  tourist: { sheet: neighbor, palette: { F: 'bloom_pink', f: 'coral_light', x: 'coral', A: 'white_light', a: 'white', Z: 'white_shade', H: 'hair_ginger', h: 'hair_ginger_shade', B: 'teal', b: 'teal_shade' } },
-  bench_man: { sheet: old_man, palette: 'mustard' },
-  mayor: { sheet: shopkeeper, palette: 'mustard' },
-  big_mover: { sheet: shopkeeper, palette: 'coral' },
-  other_mover: { sheet: shopkeeper, palette: { A: 'iron_light', a: 'iron', Z: 'iron_deep', H: 'hair_ginger', h: 'hair_ginger_shade', F: 'skin3_light', f: 'skin3', x: 'skin3_shade' } },
+  ambrose: { sheet: ambrose, frame: 'sit_down' },
+  counting_woman_sitting: { sheet: counting_woman, frame: 'sit_down' },
+  counting_woman: { sheet: counting_woman },
+  basin_woman: { sheet: basin_woman, frame: 'down_0' },
+  basin_tip: { sheet: basin_woman, frame: 'tip_down' },
+  watering_woman: { sheet: watering_woman, frame: 'water_down' },
+  tourist: { sheet: tourist, frame: 'sit_up' },
+  tourist_hat: { sheet: tourist, frame: 'sit_up_hat' },
+  bench_man: { sheet: bench_man, frame: 'sit_down' },
+  mayor: { sheet: mayor, frame: 'gesture_down' },
+  big_mover: { sheet: mover, palette: 'big' },
+  other_mover: { sheet: mover, palette: 'other' },
   shopkeeper: { sheet: shopkeeper },
-  girl1: { sheet: kid, palette: 'coral' },
-  girl2: { sheet: kid, palette: 'mustard' },
-  girl3: { sheet: kid, palette: { A: 'rose_light', a: 'rose', Z: 'rose_shade', H: 'hair_brown', h: 'hair_brown_shade' } },
+  girl_a: { sheet: girl, palette: 'a', frame: 'turn_right' },
+  girl_c: { sheet: girl, palette: 'c', frame: 'jump_down' },
+  girl_b: { sheet: girl, palette: 'b', frame: 'turn_left' },
+  rope: { sheet: rope, frame: 'rope' },
 };
 
-// The piano as one 32×32 sprite, stitched from the opening's four piano tiles.
-const pf = court_props.frames;
-const stitch = (a, b) => a.map((r, i) => r + b[i]);
-export const pianoSheet = {
-  palette: court_props.palette,
-  size: [32, 32],
-  frames: { piano: [...stitch(pf.piano_nw, pf.piano_ne), ...stitch(pf.piano_sw, pf.piano_se)] },
-};
+// A Mover's pose ('scrub_down', 'push_up', 'run_down', ...): a static frame in his palette.
+export const moverPose = (who, frame) => ({ sheet: mover, palette: who, frame });
+
+export const pianoSprite = (frame) => ({ sheet: piano, frame });
 
 // "Miss" — first talk sets met.<id>; returns true the first time.
 export function firstMeet(g, id) {

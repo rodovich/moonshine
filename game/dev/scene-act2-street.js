@@ -35,7 +35,7 @@ for (let x = 15; x <= 19; x++) for (let y = 0; y <= 2; y++) set(ground, x, y, b(
 // The Goat Path gate at the street's west edge.
 set(objects, 0, 5, 'act2_props:goat_gate');
 // The piano's scrape marks along the street (rows 6), and the crowbar where it fell.
-for (let x = 0; x < W; x++) set(objects, x, 6, `act2_marks:over_scrape_${x % 2 ? 'b' : 'a'}`);
+for (let x = 0; x < W; x++) set(objects, x, 6, `act2_marks:scrape_${x % 2 ? 'b' : 'a'}`);
 set(objects, 7, 5, 'act2_props:crowbar_ground');
 
 // The school yard (cols 1–7, rows 9–12): tiles, a hopscotch, the low wall and its gate.

@@ -1,5 +1,4 @@
-// Act 3 on the surface: the way down at the hundredth step, and the way up
-// through the Founders' Door into Ottilie's crypt, the Archive, and the Crown
+// Act 3 on the surface: the way up through the Founders' Door into Ottilie's crypt, the Archive, and the Crown
 // at dusk, where every moon-eye in Tessel glows. From docs/design/03-downstairs.md
 // ("Crypt and Crown at dusk", "Surfacing").
 //
@@ -17,7 +16,6 @@ import { loadSheet } from '../../engine/art.js';
 import { drawText, drawTextCentered, measure } from '../../engine/text.js';
 import { LOOKS, talking } from '../act2/common.js';
 import { WRONGNESS, unbolted } from './common.js';
-import { arrival } from './arrival.js';
 
 const surfaced = (g) => !!g.flag('act3.surfaced');
 const done = (g) => !!g.flag('act3.done');
@@ -34,32 +32,6 @@ function chain(...fns) {
 
 function morePatches(base, extra) {
   return (g) => [...(base ? base(g) : []), ...extra(g)];
-}
-
-// ---------------------------------------------------------------------------
-// Down the hundredth step (replacing Act 2's end-of-act card)
-
-async function downTheStep(g) {
-  const i = await g.choose('Go down?', ['Yes', 'Not yet']);
-  if (i !== 0) return g.movePlayer([g.player.x, 18]);
-  g.facePlayer('up');
-  g.sfx('step_rung');
-  await g.tween('player', { offset: [0, 8], seconds: 0.4, clipBelow: true });
-  g.sfx('step_rung');
-  await g.tween('player', { offset: [0, 18], seconds: 0.4, clipBelow: true });
-  g.sfx('step_rung');
-  await g.tween('player', { offset: [0, 32], seconds: 0.5, clipBelow: true });
-  await g.fade('out', 0.3);
-  // She comes down the gallery's ladder into the daylight (see gallery.js).
-  arrival.byLadder = true;
-  g.pose('player', 'climb_up');
-  await g.tween('player', { offset: [0, -24], seconds: 0, clipBelow: false });
-  await g.changeMap('step_gallery', 3, 3, 'up', { seconds: 0.4 });
-}
-
-function withSteps(def) {
-  const triggers = (def.triggers || []).map((t) => (t.x === 9 && t.y === 19 ? { ...t, run: downTheStep } : t));
-  return { ...def, triggers };
 }
 
 // ---------------------------------------------------------------------------
@@ -188,12 +160,14 @@ function withArchive(def) {
 // ---------------------------------------------------------------------------
 // The Crown at dusk
 
-// Moon-eye studs in the plaza paving and the stair (plain by day, glowing at dusk).
+// Moon-eye studs in the plaza paving and the stair (as Act 2 places them).
 const STUDS = [[5, 8], [9, 12], [14, 9], [18, 12], [3, 10], [20, 8]];
 const quad = (x, y) => `${y % 2 ? 's' : 'n'}${x % 2 ? 'e' : 'w'}`;
 
+// Act 2 places the plain studs; at dusk they glow.
 function studPatches(g) {
-  const glow = g.flag('moonEyes.glow') && surfaced(g) ? '_glow' : '';
+  if (!(g.flag('moonEyes.glow') && surfaced(g))) return [];
+  const glow = '_glow';
   return [
     ...STUDS.map(([x, y]) => ['ground', x, y, `moon_eyes:pave_${quad(x, y)}_eye${glow}`]),
     ['ground', 11, 14, { tile: `moon_eyes:stairs_l_eye${glow}`, step: 'step_stairs' }],
@@ -355,7 +329,6 @@ function stopShimmer(def) {
 
 export function withAct3(maps) {
   const out = { ...maps };
-  if (out.hundred_steps) out.hundred_steps = withSteps(out.hundred_steps);
   if (out.crypt) out.crypt = withCrypt(out.crypt);
   if (out.archive) out.archive = stopShimmer(withArchive(out.archive));
   if (out.crown) out.crown = withCrown(out.crown);
@@ -363,4 +336,4 @@ export function withAct3(maps) {
 }
 
 // Named scripts (runnable with ?run=, and visible to npm run check).
-export const surfaceScripts = { downTheStep, throughFoundersDoor, showEndCard, crownEnding };
+export const surfaceScripts = { throughFoundersDoor, showEndCard, crownEnding };

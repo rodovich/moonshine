@@ -22,7 +22,6 @@
 import { composedMap } from '../opening/grid.js';
 import { act3Tiles } from './tiles.js';
 import { ds_mirror } from '../../art/downstairs.js';
-import { arrival } from './arrival.js';
 import {
   UNDER, WRONGNESS, deck, wall, floor, ribs, lever, hatchOpen, hasDisc, valveTurned,
   wallHotspots, lampEntity, nicheTile, founderUse, getItem, cherylDeclines, ladderDeclines,
@@ -283,16 +282,6 @@ export const galleryMap = composedMap(composeGallery, {
   onEnter: async (g) => {
     g.setWrongness(WRONGNESS);
     keepLoops(g, lever(g) ? ['beam_hum'] : []);
-    if (arrival.byLadder) {
-      // Down the ladder from the hundredth step, into the daylight.
-      arrival.byLadder = false;
-      for (const dy of [-16, -8, 0]) {
-        g.sfx('step_rung');
-        await g.tween('player', { offset: [0, dy], seconds: 0.3 });
-      }
-      g.pose('player', null);
-      g.facePlayer('down');
-    }
     if (g.flag('act3.started')) return;
     g.setFlag('act3.started');
     await g.wait(2);

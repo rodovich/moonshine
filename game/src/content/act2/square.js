@@ -14,9 +14,8 @@
 
 import { composedMap, blankGrid } from '../opening/grid.js';
 import { act2Tiles } from './tiles.js';
-import { layout, house, pave, lowRoof, LOOKS, pianoSheet, bump, cycle, firstMeet, getItem, cherylDeclines } from './common.js';
+import { layout, house, pave, lowRoof, LOOKS, pianoSprite, bump, cycle, firstMeet, getItem, cherylDeclines } from './common.js';
 import { fish } from '../../art/landmarks.js';
-import { items2 } from '../../art/items.js';
 
 const W = 24, H = 18;
 const slid = (g) => !!g.flag('piano.slid');
@@ -32,7 +31,7 @@ function compose(g) {
   house(L, 8, 0, { roofRows: 2, top: '#w#', base: '###', palette: 'ochre' });
   house(L, 13, 0, { roofRows: 2, top: '#w#', base: '###', palette: 'white_sage' });
   house(L, 16, 0, { roofRows: 2, top: '#w#D#ww#', base: '#w#D#ww#', palette: 'sky' });
-  L.set('detail', 20, 3, 'props:sign_board');
+  L.set('detail', 20, 3, 'square_props:plaque');
   // The arch (x11–12): shaded paving through, the arch's top over it.
   for (let y = 0; y <= 3; y++) for (const x of [11, 12]) L.set('ground', x, y, pave(x, y, true), false);
   L.set('overhead', 11, 1, 'buildings:over_arch_l'); L.set('overhead', 12, 1, 'buildings:over_arch_r');
@@ -41,17 +40,19 @@ function compose(g) {
   for (let y = 0; y < 4; y++) for (let x = 0; x < 4; x++) L.set('detail', 10 + x, 7 + y, `fountain:fountain_x${x}y${y}`, true);
 
   // ---- Market stalls and café tables ----
-  for (const [x0, pal] of [[1, 'blue'], [4, 'green']]) {
-    L.set('overhead', x0, 12, `cloth:over_awning_l@${pal}`); L.set('overhead', x0 + 1, 12, `cloth:over_awning_r@${pal}`);
-    L.set('detail', x0, 13, 'furniture:counter_l', true); L.set('detail', x0 + 1, 13, 'furniture:counter_r', true);
+  for (const x0 of [1, 4]) {
+    L.set('overhead', x0, 12, 'square_props:over_stall_nw'); L.set('overhead', x0 + 1, 12, 'square_props:over_stall_ne');
+    L.set('detail', x0, 13, 'square_props:stall_sw', true); L.set('detail', x0 + 1, 13, 'square_props:stall_se', true);
     L.block(x0, 12); L.block(x0 + 1, 12);
   }
-  for (const x0 of [18, 21]) {
-    L.set('detail', x0, 13, 'furniture:table_l', true); L.set('detail', x0 + 1, 13, 'furniture:table_r', true);
+  // Two café tables, a chair facing each across it; the Tourist sits on the near chair of the first.
+  for (const x of [19, 22]) {
+    L.set('detail', x, 13, 'square_props:cafe_table', true);
+    L.set('detail', x, 12, 'square_props:cafe_chair', true);
+    L.set('detail', x, 14, 'square_props:cafe_chair_back', x !== 19); // the Tourist's chair: she's solid herself
   }
-  L.set('detail', 18, 12, 'furniture:chair_r', true); L.set('detail', 22, 12, 'furniture:chair_l', true);
   // The Mayor's crate.
-  L.set('detail', 8, 11, 'props:crate', true);
+  L.set('detail', 8, 11, 'square_props:mayor_crate', true);
 
   // ---- Lamps ----
   L.lamp(3, 5); L.lamp(20, 5);
@@ -63,7 +64,7 @@ function compose(g) {
     L.set('ground', 11, y, 'steps:steps_l', true);
     L.set('ground', 12, y, 'steps:steps_r', true);
   }
-  L.set('detail', 11, 16, 'standins:rope_l'); L.set('detail', 12, 16, 'standins:rope_r');
+  L.set('detail', 10, 16, 'act2_props:rope_l'); L.set('detail', 11, 16, 'act2_props:rope_m'); L.set('detail', 12, 16, 'act2_props:rope_r');
   return L.done();
 }
 
@@ -90,7 +91,7 @@ const objects = [
     id, x, y: 12, w: 2, h: 2, lookKey: 'stalls',
     interact: (g) => g.describe(cycle(g, 'stalls', ['Lemons, onions, and yesterday\'s gossip, all fresh.', 'Moonshine Night basins, half price. Nobody\'s buying. Bad luck, apparently.'])),
   })),
-  ...[18, 21].map((x) => ({ id: `cafe_${x}`, x, y: 12, w: 2, h: 2, lookKey: 'cafe', look: "Tessel's real government meets here every morning, over coffee." })),
+  ...[19, 22].map((x) => ({ id: `cafe_${x}`, x, y: 12, h: 2, lookKey: 'cafe', look: "Tessel's real government meets here every morning, over coffee." })),
   {
     id: 'mayor_door', x: 19, y: 2, h: 2,
     looks: ["The Mayor's office. Closed while the Mayor reassures people outside.", 'There\'s a telephone in there. It has never rung. He polishes it.'],
@@ -100,7 +101,7 @@ const objects = [
     interact: (g) => hatWindow(g),
   },
   {
-    id: 'rope', x: 11, y: 16, w: 2,
+    id: 'rope', x: 10, y: 16, w: 3,
     looks: [
       ['A rope across the stair down to the Bilge, and a sign: CANAL CLEANING. KEEP OUT. -- by order of the Mayor.', "The Bilge will keep. It's kept for five hundred years."],
       'CANAL CLEANING. KEEP OUT. I taught him to spell "canal." He still puts two Ns in it in his head.',
@@ -128,7 +129,7 @@ const fishStatue = {
 // The piano: its back end in the arch, then against the Fountain once it slides.
 const pianoArch = {
   id: 'piano_arch', x: 11, y: 0, w: 2, h: 2, kind: 'object',
-  sprite: { sheet: pianoSheet, frame: 'piano' },
+  sprite: pianoSprite('piano_back'),
   when: (g) => !slid(g),
   looks: ["The back end of a piano, wedged in the arch from the Steps side. I'd know that label anywhere.", "The Movers are on the other side of this. They'll want it moved more than I do."],
   use: { '*': cherylDeclines },
@@ -137,7 +138,7 @@ const pianoFountain = {
   // Against the Fountain's east rim (the design has the north rim, but there
   // the bronze fish, drawn tall, stands right across its keys).
   id: 'piano', x: 14, y: 8, w: 2, h: 2, kind: 'object',
-  sprite: { sheet: pianoSheet, frame: 'piano' },
+  sprite: pianoSprite('piano_level'),
   when: slid,
   look: "Half a ton of piano, resting against the Fountain with its lid open, as if it's thinking of a tune.",
   use: { soap: (g) => g.describe("It's had all the soap it's getting."), '*': cherylDeclines },
@@ -175,9 +176,9 @@ const mayorUse = {
 
 const mayor = {
   id: 'mayor', name: 'Mayor', x: 8, y: 11, facing: 'down',
-  sprite: LOOKS.mayor,
-  offset: [0, -7],
-  emote: { frame: 'exclaim', every: [8, 14] },
+  sprite: LOOKS.mayor, // on his crate, gesturing grandly at nobody
+  offset: [0, -9],
+  turnToTalk: false,
   interact: async (g, self) => {
     if (counted(g)) {
       if (!g.flag('mayor.count')) {
@@ -224,7 +225,8 @@ const countingWoman = {
 
 const tourist = {
   id: 'tourist', name: 'Stranded Tourist', x: 19, y: 14, facing: 'up',
-  sprite: LOOKS.tourist,
+  sprite: (g) => (g.flag('tourist.hasHat') ? LOOKS.tourist_hat : LOOKS.tourist),
+  turnToTalk: false,
   interact: async (g, self) => {
     if (g.flag('tourist.hasHat')) {
       return g.say(self, cycle(g, 'tourist.after', ['Shade. Portable shade. I could weep.', "I'm going to sit right here until the ferry comes or I turn into a raisin."]));
@@ -263,7 +265,7 @@ export const squareMap = composedMap(compose, {
   tileset: act2Tiles,
   music: 'neighborhood',
   lighting: 'day',
-  ambience: ['crowd'],
+  ambience: ['town'],
   step: 'step_stone',
   spawn: [11, 4],
   exits: [
@@ -293,11 +295,7 @@ const SW = 10, SH = 8;
 function composeShop() {
   const L = layout(SW, SH, blankGrid);
   for (let y = 2; y < SH - 1; y++) for (let x = 1; x < SW - 1; x++) {
-    let fr = 'floor';
-    if ((x * 7 + y * 3) % 11 === 0) fr = 'floor_b';
-    if (y === 2) fr = x === 1 ? 'floor_nw' : 'floor_n';
-    else if (x === 1) fr = 'floor_w';
-    L.set('ground', x, y, `interior:${fr}`, false);
+    L.set('ground', x, y, 'shop:floor', false);
   }
   for (let x = 1; x < SW - 1; x++) {
     L.set('ground', x, 0, 'interior:wall_upper', true);
@@ -308,18 +306,18 @@ function composeShop() {
   L.set('ground', 0, 1, 'interior:wall_lower_w', true); L.set('ground', SW - 1, 1, 'interior:wall_lower_e', true);
   for (let y = 2; y < SH - 1; y++) { L.set('ground', 0, y, 'interior:wall_side_w', true); L.set('ground', SW - 1, y, 'interior:wall_side_e', true); }
   L.set('ground', 0, SH - 1, 'interior:wall_south_w', true); L.set('ground', SW - 1, SH - 1, 'interior:wall_south_e', true);
-  // Shelves on the back wall, the barometer between them.
-  for (let x = 1; x <= 4; x++) L.set('detail', x, 1, `furniture:shelf_${x % 2 ? 'l' : 'r'}`);
-  L.set('detail', 7, 1, 'furniture:shelf_l'); L.set('detail', 8, 1, 'furniture:shelf_r');
-  L.set('detail', 6, 1, 'standins:barometer');
-  // The counter (talk across it).
+  // Shelves of lanterns, lamp oil, brass polish and string; the barometer over them, stuck on FAIR.
+  'abcd'.split('').forEach((c, i) => L.set('ground', 1 + i, 1, `shop:shelving_${c}`, true));
+  L.set('ground', 7, 1, 'shop:shelving_e', true); L.set('ground', 8, 1, 'shop:shelving_f', true);
+  L.set('detail', 7, 0, 'shop:barometer');
+  // The counter, with its bell (talk across it).
   for (let x = 2; x <= 6; x++) {
-    L.set('detail', x, 3, `furniture:counter_${x % 2 ? 'r' : 'l'}`, true);
+    L.set('detail', x, 3, `shop:counter_${x === 2 ? 'l' : x === 6 ? 'r' : 'm'}`, true);
     L.counter[3][x] = true;
   }
-  // The marble jar and the window display.
-  L.set('detail', 1, 5, 'standins:marble_jar', true);
-  L.set('detail', 7, 5, 'furniture:table_l', true); L.set('detail', 8, 5, 'furniture:table_r', true);
+  // The marble jar and the window display with the straw hat.
+  L.set('detail', 1, 5, 'shop:marble_jar', true);
+  L.set('detail', 7, 5, 'shop:display_l', true); L.set('detail', 8, 5, 'shop:display_r', true);
   // The door.
   L.set('ground', 4, SH - 1, 'interior:door', false); L.set('ground', 5, SH - 1, 'interior:door', false);
   return L.done();
@@ -335,17 +333,10 @@ const shopObjects = [
     ],
   },
   { id: 'shelves', x: 1, y: 1, w: 4, lookKey: 'shop_shelves', look: 'Brass polish, lamp oil, string, lanterns. Everything a lighthouse could want. All display.' },
-  { id: 'shelves_e', x: 7, y: 1, w: 2, lookKey: 'shop_shelves', look: 'Brass polish, lamp oil, string, lanterns. Everything a lighthouse could want. All display.' },
-  { id: 'barometer', x: 6, y: 1, look: "The barometer says FAIR. It's said FAIR for nine years. He won't tap it in case it changes its mind." },
+  { id: 'shelves_e', x: 8, y: 1, lookKey: 'shop_shelves', look: 'Brass polish, lamp oil, string, lanterns. Everything a lighthouse could want. All display.' },
+  { id: 'barometer', x: 7, y: 0, look: "The barometer says FAIR. It's said FAIR for nine years. He won't tap it in case it changes its mind." },
   ...[2, 6].map((x) => ({ id: `counter_${x}`, x, y: 3, lookKey: 'counter', look: 'A counter, polished by a lifetime of not selling things.' })),
 ].map((o) => ({ solid: false, use: { '*': cherylDeclines }, ...o }));
-
-const hatOnDisplay = {
-  id: 'hat_sprite', x: 8, y: 5, solid: false, kind: 'object',
-  sprite: { sheet: items2, frame: 'hat' },
-  offset: [-8, -6],
-  interact: (g) => hatWindow(g),
-};
 
 const shopkeeper = {
   id: 'shopkeeper', name: 'Shopkeeper', x: 4, y: 2, facing: 'down',
@@ -383,5 +374,5 @@ export const shopMap = composedMap(composeShop, {
   spawn: [4, 6],
   exits: [{ x: 4, y: SH - 1, w: 2, to: 'fountain_square', at: [4, 4], facing: 'down' }],
   onEnter: async (g) => { g.sfx('shop_bell'); },
-  entities: [...shopObjects, hatOnDisplay, shopkeeper],
+  entities: [...shopObjects, shopkeeper],
 });
