@@ -99,25 +99,35 @@ The Act 2 map, in three flood stages, then the dry reveal state.
 
 **Stage 3**: never seen on the surface. The player is underground when the list is worst.
 
-**Dry (the reveal, `act4.risen`)**: the canal rows become a deep, dry trench.
+**Dry (the reveal, `act4.risen`)**: a separate map, `bilge_dry`, **32 × 17**, one row taller than the wet Bilge so the trench can be deep. Rows 0–6 are the same as the wet map. The canal becomes a trench five rows deep, and the south quay and roofs move down one row.
 
 ```
      x 0         1         2         3
        01234567890123456789012345678901
-    6  ......................WWWW......   the Water Stairs' top steps (22-25, 6-7), walkable
-    7  nnnnnnnnnnnnBBnnnnnnnnWWWWDDnnnn   n the old quay wall face; DD the bronze door (26-27, 7-8)
-    8  hhhhhhhhhhhhBBhhhhhhhhbbbbDDhhhh   h the exposed hull wall: Founder slate, barnacles, a tide line
-    9  mmmmmmmmmmmmBBmmmmmmmmmmmmmmmmmm   m the mud bed
-   10  ssssssssssssBBssssssssssssssssss   s the near quay lip
+    6  ......................WWWW......   the Water Stairs' top step (22-25, 6), walkable
+    7  nnnnnnnnnnnnBBnnnnnnnnWWWWnnnnnn   n the old quay wall face (stone); stairs continue down (22-25, 7)
+    8  hhhhhhhhhhhhBBhhhhhhhhWWWWDDhhhh   h the exposed hull: Founder slate, barnacles, weed; stairs (22-25, 8)
+    9  hhhhhhhhhhhhBBhhhhhhhhbbbbDDhhhh   tide line along the top of row 8; bbbb the broken last flight
+   10  mmmmmmmmmmmmBBmmmmmmmmmmmmmmmmmm   m the mud bed
+   11  ssssssssssssBBssssssssssssssssss   s the near quay lip
+   12  ................................   SOUTH QUAY (y12-14); east edge (x31, y12-14) → Harbor
+   13  ................................
+   14  ................................
+   15  rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
+   16  rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
 ```
 
-- `bbbb` (22–25, 8): the Water Stairs' last flight, broken: the steps end in a jagged drop. Solid. (Act 5 crosses it with the Boatman's rope.)
+- **The trench reads as deep:** the old stone quay wall (row 7) gives way, at a crisp tide line, to two full rows of exposed Founder hull (rows 8–9): dark fitted slate, barnacles thickest at the bottom, hanging weed. The bridge (12–13, 7–11) now visibly spans a ditch, with its supports going down to the mud.
+- `WWWW` (22–25, 6–8): the Water Stairs, walkable down to row 8. `bbbb` (22–25, 9): the last flight, broken: the steps end in a jagged drop to the mud. Solid. (Act 5 crosses it with the Boatman's rope.)
+- `DD` (26–27, 8–9): **the bronze door**, set in the hull rows beside the foot of the stairs. Founder work, not a house door: square with chamfered corners, bronze gone green under the barnacles, a moon-lock eye in its middle. About the size of a cart.
 - `m`: mud. Not reachable from the quays in Act 4 (the drop is six feet, and Cheryl won't jump). Walkable for NPCs placed there.
-- `h` and the door: the first time the city's Founder hull is visible from the surface. The door is bronze, about the size of a cart, with a moon-lock eye in its middle, crusted with barnacles and weed.
+- `h` and the door are the first time the city's Founder hull is visible from the surface.
 - The flooded quay tiles are dry again (wet-looking, with stranded fish here and there).
 - The near south quay is now a long drop to the mud; the far bank's mooring ropes run taut down to boats hanging off them.
 
-**Dry-state entities:** boats on their sides in the mud at (3–4, 9), (8–9, 9), (19–20, 9). The Boatman sitting upright in his boat at (22–23, 9), at the foot of the Water Stairs. The piano at (15–16, 9) on the mud, upright, lid open. The Piano Movers at (14, 9) and (17, 9), on the mud beside it. Two or three crabs wandering the mud. The Sweaty Kid running laps along the mud (x2–30, y9). The Fishmonger at (5, 4), behind her stall. A **Man on Bridge** at (13, 8), on the bridge, looking down. A stranded fish flopping on the north quay at (10, 5).
+**Dry-state entities:** boats on their sides in the mud at (3–4, 10), (8–9, 10), (19–20, 10), keels toward the camera, hulls tilted, oars spilled. The Boatman sitting upright in his boat at (22–23, 10), at the foot of the broken stairs. The piano at (15–16, 10) on the mud, upright, lid open. The Piano Movers at (14, 10) and (17, 10), on the mud beside it. Two or three crabs wandering the mud. The Sweaty Kid running laps along the mud (x2–30, y10). The Fishmonger at (5, 4), behind her stall. A **Man on Bridge** at (13, 9), on the bridge, looking down. A stranded fish flopping on the north quay at (10, 5).
+
+**Exits on `bilge_dry`:** north (11–12, 0) → Fountain Square, as before; east (31, 12–14) → Harbor (1, 6–8). The Harbor's west edge leads to `bilge_dry` (30, 12–14) once `act4.risen`. The Fishmonger's door (4, 3) is where the reveal begins.
 
 ### Pump Hall (26 × 12), under Fountain Square
 
@@ -643,7 +653,7 @@ At the top (row 0), the map changes to the Ice Cellar.
 3. Hold two seconds on Cheryl.
 4. A gull cries.
 5. The camera pans slowly east (about one tile per 0.4 seconds) along the canal: the empty trench; the old quay walls and below them the dark Founder slate, barnacled, with a clear tide line; a boat lying on its side; crabs; the bridge spanning nothing; the piano upright on the mud with its lid open; the Movers standing beside it, looking up; the Boatman sitting very upright in his beached boat at the foot of the Water Stairs.
-6. The camera tilts down the Water Stairs and holds on the **bronze door** at (26–27, 7–8): huge, barnacled, a moon-lock eye in its middle. Hold three seconds. A single low bell tone (the discovery sting's root note, very soft).
+6. The camera tilts down the Water Stairs and holds on the **bronze door** at (26–27, 8–9): huge, barnacled, a moon-lock eye in its middle. Hold three seconds. A single low bell tone (the discovery sting's root note, very soft).
 7. Music: `neighborhood` begins, played thin and strange: the arrangement stripped to a single flute, at Wrongness 0.5, notes sagging.
 8. The camera glides back to Cheryl.
 9. Internal monologue: *…Ah.*
