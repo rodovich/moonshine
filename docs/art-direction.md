@@ -119,11 +119,11 @@ The tiles are painted in neutral late-morning light. Dusk, night, and day are gl
 - **Night** multiplies by a moonlit blue at 70%: dark and cool, but every shape still readable.
 - **Day** is the art as painted.
 
-Check new tiles under `?tint=dusk` and `?tint=night` on the dev page. Tints compress hue, so never rely on hue alone for contrast (a coral cardigan against terracotta pots, a pale blue door on white): separate important shapes by value too. Shapes that depend on a small hue difference (a pale blue door on white) can vanish at night; separate them by value too. Lamp glows and lit windows can't brighten under a multiply tint, so they read as warm accents, not light sources.
+Check new tiles under `?tint=dusk` and `?tint=night` on the dev page. Tints compress hue, so never rely on hue alone for contrast (a coral cardigan against terracotta pots, a pale blue door on white): separate important shapes by value too. Shapes that depend on a small hue difference (a pale blue door on white) can vanish at night; separate them by value too. Lamp glows and lit windows can't brighten under a multiply tint, so they read as warm accents, not light sources. Light some windows at dusk and night with the buildings sheet's `_lit` swaps (warm glass): a few, not all, so the town looks lived in.
 
 ## Walkable roofs
 
-Roof terraces people walk on (Cheryl's roof) are paved like a street, not left as the flat, empty top surface of an unwalkable roof: a whitewashed plaster floor in slabs with joints, a step darker than an unwalkable roof's top, with 2×2 macro variants and a cracked slab. They are bordered by parapets that show their top (lightest), their inner face (toward the terrace, base value, visible on the north parapet because it faces south), and, on the south edge, the drop beyond. The low wall between two roofs is a parapet seen from both sides.
+Roof terraces people walk on (Cheryl's roof) are paved like a street, not left as the flat, empty top surface of an unwalkable roof: a whitewashed plaster floor in slabs with joints, a step darker than an unwalkable roof's top, with 2×2 macro variants and a cracked slab. They are bordered by parapets that show their top (lightest), their inner face (toward the terrace, base value, visible on the north parapet because it faces south), and, on the south edge, the drop beyond. The low wall between two roofs is a parapet seen from both sides. The facade below a walkable roof uses the dimmer `facade` plaster swap (`white_dim` for the wall face), so floor, coping, shade band, and wall read as four distinct steps; and a sheet hung on a line running north–south is seen nearly edge-on, as a tall narrow drape lit on its west side with a soft shadow to the east.
 
 ## Interiors
 

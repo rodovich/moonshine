@@ -27,6 +27,7 @@ export const COLORS = {
   // Surface: plaster. Whitewash is the default; the others are for variety.
   white_light: '#f8f8f0',
   white: '#e8e8e0',
+  white_dim: '#d0d0c8',
   white_shade: '#c0c0d0',
   white_deep: '#8888a8',
 
