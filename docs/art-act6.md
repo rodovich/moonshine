@@ -86,6 +86,7 @@ New sheets are in `game/src/art/act6_under.js`. On the dev page: `/dev/art.html?
 | Long Keel ribs (every four tiles) | the existing `hull:face_rib_top/base` and `over_rib_v` | ground; overhead |
 | The Sighting Room's door at the Keel's west end (0, 3–4), sliding up, the moon-in-bowl carving on its lintel | `keel:keel_door_closed_top/bot`, `keel_door_opening_top/bot_0..2` (260 ms), `keel_door_open_top/bot` | ground |
 | Windlass Room at night: the chain coming in through the moonlit hawse (21, 3–4) | `windlass_night:hawse_in_top/bot_0..3` (220 ms, one link-length per loop; the same big opening and links as Act 5's hawse, the links travelling in toward the drum) | ground |
+| Windlass Room at night: the Keepers' ladder beside the speaking tube (16, 1–2) | the same `keepers_rungs:rungs_top/rungs_bot` as Act 5 (see [art-act5.md](art-act5.md), Underground); unchanged at night | ground |
 | The drum turning; the brake thrown | the existing `windlass_drum:drum_x<c>y<r>_0..3` and `brake:brake_thrown` | objects; sprite |
 | The Long Keel hatch's emblem lighting (7–8, 1–2), then open | `keel_lit:keel_lit_<q>_0/1` (500 ms), then the existing `keel_hatch:keel_open_<q>` | ground |
 

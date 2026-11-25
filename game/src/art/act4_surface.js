@@ -4117,6 +4117,61 @@ export const belfry = {
   },
 };
 
+export const keepers_hatch = {
+  palette: {
+    o: 'wood_light',
+    O: 'wood',
+    p: 'wood_shade',
+    P: 'wood_deep',
+    n: 'ink',
+    k: 'void',
+    l: 'bronze_light',
+    b: 'bronze',
+    B: 'bronze_shade',
+    D: 'bronze_deep',
+    v: 'verdigris',
+  },
+  size: [16, 16],
+  frames: {
+    shut: [
+      'Pooooooooooooooo',
+      'POOpOOOOOOOOOOOO',
+      'POPPPPPPPPPPPPOO',
+      'PPPlllllllllBPPP',
+      'ooPlbbbbbbbvBPoo',
+      'OOPlblDbbblDBPOO',
+      'OOPlbbbBBbbbBPOO',
+      'PPPlbbBlbBbbBPPP',
+      'ooPlbbBbDBbbBPPo',
+      'OOPlbbbBBbbbBPPO',
+      'OOPlblDbbblDBPPO',
+      'PPPlvbbbbbbbBPPP',
+      'ooPBBvBBBBBBBPoo',
+      'OOPPPPPPPPPPPPOO',
+      'OOOOOPOOOOOOOOOO',
+      'PPPPPPPPPPPPPPPP',
+    ],
+    open: [
+      'Ponnnnnnnnnnnnoo',
+      'PnBBBlbbbbDBBBnO',
+      'PnBBBBBBBBlBBBnO',
+      'PPDDDDDDDDDDDDPP',
+      'oobBBBBBBBBBBBoo',
+      'OObkkkkkkkkkkBOO',
+      'OObkkkkkkkkkkBOO',
+      'PPbkkBlbbbBkkBPP',
+      'oobkkkkkkkkkkBPo',
+      'OObkkkkkkkkkkBPO',
+      'OObkkDBBBBDkkBPO',
+      'PPbkkkkkkkkkkBPP',
+      'oobkkDDDDDDkkBoo',
+      'OObDDDDDDDDDDBOO',
+      'OOOOOPOOOOOOOOOO',
+      'PPPPPPPPPPPPPPPP',
+    ],
+  },
+};
+
 export const belfry_bell = {
   palette: {
     Y: 'bronze_light',
