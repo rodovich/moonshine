@@ -397,6 +397,7 @@ export const sightingMap = showSource(composedMap(compose, {
   entities: objects,
   ambient: [glint],
   onEnter: async (g) => {
+    g.setWrongness(g.flag('moon.true') ? 0 : 0.5);
     if (g.flag('n.sightEntered')) {
       if (g.flag('bathed') || g.flag('moon.true')) g.playMusic('keel');
       return;

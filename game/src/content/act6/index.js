@@ -5,9 +5,9 @@
 
 import { sightingMap, bath, takePlug, plugBasin, moonTrue, trimWheel, masterStop, sightingLog, basinInteract, lift } from './sighting.js';
 import { keelMap, wakeLamps, keelDoor } from './keel.js';
-import { act6Items } from './common.js';
+import { act6Items, epilogue } from './common.js';
 import { act6 } from './state.js';
-import { extendMap } from './extend.js';
+import { extendMap, joined } from './extend.js';
 import { windlassAct6, act6Start, bell, hauling, brakeLever, speakingTube } from './climax.js';
 import { pianoScene, stairRace, courtEpilogue, lampStreetEpilogue, crownEpilogue, archiveEpilogue, cryptEpilogue, squareEpilogue, shopEpilogue, stepsEpilogue } from './epilogue.js';
 import { flatEnding, finalScene, endingVista } from './ending.js';
@@ -38,6 +38,13 @@ const EXTENSIONS = {
 export function addAct6(maps) {
   for (const [id, ext] of Object.entries(EXTENSIONS)) {
     if (maps[id]) maps[id] = extendMap(maps[id], ext(maps[id]));
+  }
+  // The audio's Wrongness isn't saved, and earlier acts set theirs on entering
+  // their maps; from the epilogue on, every map sets it back to 0 after its own onEnter.
+  for (const [id, map] of Object.entries(maps)) {
+    if (id.startsWith('test_')) continue;
+    const base = map.onEnter;
+    maps[id] = { ...map, onEnter: joined(async (g) => { if (base) await base(g); if (epilogue(g)) g.setWrongness(0); }, base) };
   }
   if (!maps[act6.ids.windlass]) {
     maps.long_keel = { ...maps.long_keel, exits: maps.long_keel.exits.filter((e) => e.to !== act6.ids.windlass) };

@@ -96,7 +96,6 @@ export function wakeLamps(g) {
 
 // The west end: the Sighting Room's door slides up as she comes near, and she says so.
 export async function keelDoor(g) {
-  g.setFlag('n.keelDoor', 1);
   g.sfx('door_slide_up');
   for (let f = 0; f < 3; f++) {
     g.setTile('ground', 0, 3, `keel:keel_door_opening_top_${f}`);
@@ -174,7 +173,8 @@ export const keelMap = showSource(composedMap(compose, {
   triggers,
   entities: objects,
   ambient: [{ every: [0.1, 0.1], run: wakeLamps }],
-  onEnter: async () => {
+  onEnter: async (g) => {
     waking = [];
+    g.setWrongness(g.flag('moon.true') ? 0 : 0.5);
   },
 }), compose, awake);

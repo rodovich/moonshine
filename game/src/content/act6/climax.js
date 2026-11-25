@@ -222,6 +222,7 @@ export function windlassAct6(map) {
     }],
     onEnter: async (g, base) => {
       if (!night(g)) return base(g);
+      g.setWrongness(0.5);
       bellClock = 0;
       if (!g.flag('brake.thrown')) g.startLoop('tube_wind', { fadeMs: 1000 });
       if (g.flag('chain.home')) g.playMusic('keel');

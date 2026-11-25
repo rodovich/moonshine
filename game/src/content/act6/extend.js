@@ -21,7 +21,8 @@ const fn = (v) => (typeof v === 'function' ? v : () => v);
 // A wrapper whose source text (for `npm run check`, which reads scripts'
 // source for the flags, items, and maps they use) includes what it wraps.
 export function joined(wrapper, ...parts) {
-  const src = [wrapper, ...parts].filter((p) => typeof p === 'function').map((p) => Function.prototype.toString.call(p)).join('\n');
+  // Parts may be wrappers themselves: their own toString includes what they wrap.
+  const src = [Function.prototype.toString.call(wrapper), ...parts.filter((p) => typeof p === 'function').map((p) => p.toString())].join('\n');
   wrapper.toString = () => src;
   return wrapper;
 }
