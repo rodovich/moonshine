@@ -9,9 +9,9 @@ import { findPath, nearestReachable } from './pathfind.js';
 import { makeApi } from './script.js';
 import { Control } from './control.js';
 import { writeSave } from './save.js';
-import { colorOf, loadSheet } from './art.js';
+import { colorOf, loadSheet, rgbSetOf } from './art.js';
 import { uiSmall } from '../art/ui.js';
-import { TINTS } from '../art/tints.js';
+import { TINTS, EMISSIVE } from '../art/tints.js';
 import { drawText, measure, wrap, LINE_HEIGHT } from './text.js';
 import { STYLES, drawBox } from './ui.js';
 import { playMusic, stopMusic } from './sound.js';
@@ -554,7 +554,12 @@ export class World {
     this.map.draw(ctx, 'detail', cx, cy, WIDTH, HEIGHT, ms);
     this.drawMarker(ctx, cx, cy);
     const lit = this.effects.hasLight();
-    if (lit) this.effects.applyLight(ctx, 1);
+    if (lit) {
+      this.effects.applyLight(ctx, 1);
+      // Emissive pixels (lit windows, lamps) skip the lighting.
+      this.map.drawGlow(ctx, 'ground', cx, cy, WIDTH, HEIGHT, ms, this.emissive());
+      this.map.drawGlow(ctx, 'detail', cx, cy, WIDTH, HEIGHT, ms, this.emissive());
+    }
     const sorted = [...this.entities].sort((a, b) => {
       const la = a.layer === 'ground' ? 0 : 1;
       const lb = b.layer === 'ground' ? 0 : 1;
@@ -566,9 +571,18 @@ export class World {
     if (lit) this.compositeLit(ctx, sprites, this.content.spriteLight ?? SPRITE_LIGHT);
     const over = lit ? this.layer('overhead') : ctx;
     this.map.draw(over, 'overhead', cx, cy, WIDTH, HEIGHT, ms);
-    if (lit) this.compositeLit(ctx, over, 1);
+    if (lit) {
+      this.compositeLit(ctx, over, 1);
+      this.map.drawGlow(ctx, 'overhead', cx, cy, WIDTH, HEIGHT, ms, this.emissive());
+    }
     if (this.game.debug.debug) this.drawDebug(ctx, cx, cy);
     this.effects.applyWorld(ctx);
+  }
+
+  // Colors that skip lighting: src/art/tints.js EMISSIVE, or content.emissive.
+  emissive() {
+    if (!this.emissiveSet) this.emissiveSet = rgbSetOf(this.content.emissive || EMISSIVE);
+    return this.emissiveSet;
   }
 
   // A cleared, transparent offscreen layer the size of the screen.

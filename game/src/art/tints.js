@@ -12,3 +12,9 @@ export const TINTS = {
   // Day: the art as painted.
   day: { color: '#ffffff', amount: 0, mode: 'multiply' },
 };
+
+// Colors that give off their own light. Wherever a tile uses one of these,
+// those pixels skip the dusk and night tints, so lit window glass, lamp
+// flames, and relic glows stay bright while everything around them dims.
+// (Added by the engine task at the art director's suggestion; edit freely.)
+export const EMISSIVE = ['lamp_glow', 'lamp_warm', 'relic_amber', 'relic_cyan'];
