@@ -41,7 +41,7 @@ The engine calls these through its bridge, `src/engine/sound.js`, which also for
 - machines and water: `valve_turn`, `valve_jam`, `far_gurgle`, `chain_rattle`
 - Act 4: `clock_rundown`, `lever_clank`, `clamp_lift`, `bell_stroke`, `bell_strokes`, `thrum_rise`, `coins_rattle`, `ring_hatch`, `valve_squeal`, `pump_cough`, `pump_stall`, `thump_thin`, `thump_stout`, `thump_middle`, `grate_drain`, `hull_creak_long`, `ear_pop`, `groan_great`, `burst`, `hatch_bang`, `gull_close`, `slab_scrape`, `slab_close`, `bell_low`, `town_rush`, `fish_flop`
 
-**Loops:** `crowd`, `wind`, `water_pour`, `timer_tick`; the city's `town`, `canal`, `gulls`, `goats`, `clock_tick`, `trickle`, `door_hum`, `glow_shimmer`; downstairs `hull`, `drips`, `moonglass_hum`, `beam_hum`, `tube_murmur`, `water_gush`, `pump_run`, `chain_haul`, `tide_wheel`; Act 4 `belfry_tick`, `thrum`, `hull_far`, `pump_thin`, `pump_stout`, `shaft_hum`, `valve_hiss`, `roar`, `water_spread`, `air_whistle`, `slack_lap`, `channel_rush`, `shouting`, `crabs`. All are listed and described in docs/audio-direction.md.
+**Loops:** `crowd`, `wind`, `water_pour`, `timer_tick`; the city's `town`, `canal`, `gulls`, `goats`, `clock_tick`, `trickle`, `door_hum`, `glow_shimmer`; downstairs `hull`, `drips`, `moonglass_hum`, `beam_hum`, `tube_murmur`, `water_gush`, `pump_run`, `chain_haul`, `tide_wheel`; Act 4 `belfry_tick`, `thrum`, `hull_far`, `pump_thin`, `pump_stout`, `shaft_hum`, `valve_hiss`, `spray`, `roar`, `water_spread`, `air_whistle`, `slack_lap`, `channel_rush`, `shouting`, `crabs`, `runoff`. All are listed and described in docs/audio-direction.md.
 
 Suggested use:
 
