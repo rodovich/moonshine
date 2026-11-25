@@ -143,11 +143,8 @@ export function withSquare5(def) {
   return {
     ...base,
     patches: morePatches(base.patches, squarePatches),
-    // The stair's foot is the way down; its top stays solid until Act 5 clears it.
-    collision: openTiles(base, [[11, 17], [12, 17]]),
     exits: [
       ...(base.exits || []),
-      { x: 11, y: 17, w: 2, to: 'bilge_dry', at: [11, 1], facing: 'down', when: started, sfx: 'step_stairs', checkFlags: ['act5.started'] },
     ],
     triggers: (base.triggers || []).map(untilAct5),
     entities: [
@@ -258,13 +255,6 @@ const ambroseUse5 = {
   '*': (g, self) => g.say(self, 'NOT NOW, CHERYL. I\'M LISTENING TO THE SEA.'),
 };
 
-const crownDoor5 = {
-  id: 'clockshop_door5', x: 12, y: 5, solid: false, when: started,
-  interact: (g) => (g.flag('got.clapper')
-    ? g.describe("The Clockmaker's door, shut. Something square is holding it from the inside.")
-    : g.describe("The Clockmaker's door, propped open with something heavy. Clocks ticking inside, all at once.")),
-};
-
 // A map's ground tile at (x, y), by name, without its properties (solidity).
 function tileAt(def, x, y) {
   const v = def.legend[def.ground[y][x]];
@@ -317,7 +307,7 @@ export function withCrown5(def) {
       },
     ],
     triggers: (base.triggers || []).map(untilAct5),
-    entities: [...entities, ambrose5, crownDoor5, { id: 'clockshop_door_shut', x: 12, y: 6, solid: true, shadow: false, when: (g) => !started(g) }],
+    entities: [...entities, ambrose5, { id: 'clockshop_door_shut', x: 12, y: 6, solid: true, shadow: false, when: (g) => !started(g) }],
     onEnter: async (g) => {
       if (!started(g)) {
         if (after5(g)) act5Loops(g, []);

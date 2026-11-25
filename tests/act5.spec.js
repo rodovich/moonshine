@@ -713,3 +713,61 @@ test('pointer: Act 5', async ({ page }) => {
   await waitFor(page, () => { const st = window.moonshine.snapshot(); return st.scene === 'title' || !!st.flags?.['act6.started']; }, null, 30000);
   expect(errors).toEqual([]);
 });
+
+// ---- reachability ----------------------------------------------------------
+// Every object or person on an Act 5 map can be walked up to and used: each
+// has a tile beside it that Cheryl can reach from where she'd stand on that
+// map (some only from the mud, after the rope).
+
+const STATE = `${PRIOR},act5.started,rope.tied,boatman.afloat,door.open,kid.gaveDisc,passage.lit,windlass.seen,keeper.polished,got.polish,teeth.seen=3`;
+const REACH = [
+  { map: 'bilge_dry', from: [[23, 6], [25, 10]], stage: 1 },
+  { map: 'harbor_risen', from: [[4, 6]], stage: 1 },
+  { map: 'harbor_risen', from: [[4, 6]], stage: 3 },
+  { map: 'lamp_room', from: [[3, 6]] },
+  { map: 'fountain_square', from: [[11, 4]] },
+  { map: 'shop', from: [[4, 6]] },
+  { map: 'crown', from: [[11, 12]] },
+  { map: 'belfry', from: [[1, 7]] },
+  { map: 'clockmaker_shop', from: [[4, 6]] },
+  { map: 'hundred_steps', from: [[6, 1], [6, 40]] },
+  { map: 'lamp_street', from: [[22, 5]] },
+  { map: 'archive', from: [[7, 12]] },
+  { map: 'bow_passage', from: [[2, 4]] },
+  { map: 'windlass_room', from: [[1, 6]] },
+];
+
+for (const r of REACH) {
+  test(`every Act 5 object can be reached: ${r.map}${r.stage ? ` (Teeth ${r.stage})` : ''}`, async ({ page }) => {
+    const [x, y] = r.from[0];
+    const errors = await start(page, `?map=${r.map}&x=${x}&y=${y}&flags=${STATE},teeth.stage=${r.stage || 1}&items=${ITEMS}`);
+    await readThrough(page, () => page.keyboard.press('z'));
+    const unreachable = await page.evaluate((from) => {
+      const w = window.moonshine.world;
+      const p = w.player;
+      const out = [];
+      for (const e of w.entities) {
+        if (e.isPlayer || !e.visible) continue;
+        const d = e.def || {};
+        if (!(d.interact || d.look || d.looks || d.talk || d.talks)) continue;
+        const spots = w.interactSpots(e);
+        let ok = false;
+        for (const [fx, fy] of from) {
+          for (const s of spots) {
+            if (s.x === fx && s.y === fy) { ok = true; break; }
+            const saved = [p.x, p.y];
+            p.x = fx; p.y = fy;
+            const path = w.pathFor(p, [[s.x, s.y]]);
+            [p.x, p.y] = saved;
+            if (path && path.length && path[path.length - 1][0] === s.x && path[path.length - 1][1] === s.y) { ok = true; break; }
+          }
+          if (ok) break;
+        }
+        if (!ok) out.push(e.id);
+      }
+      return out;
+    }, r.from);
+    expect(unreachable).toEqual([]);
+    expect(errors).toEqual([]);
+  });
+}

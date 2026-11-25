@@ -369,7 +369,7 @@ const objects = [
     use: { bucket: (g) => g.describe("Ice. I'd be here till Tuesday waiting for it to melt."), '*': cherylDeclines },
   },
   // Her own stall (5-6) has no hotspot: talking across it reaches her.
-  ...[2, 8].map((x) => ({ id: `stall5_${x}`, x, y: 5, w: 2, solid: true, lookKey: 'stalls5', look: 'Fish on ice. The ice is the wettest thing in the Bilge.' })),
+  ...[2, 8].map((x) => ({ id: `stall5_${x}`, x, y: 6, w: 2, solid: true, lookKey: 'stalls5', look: 'Fish on ice. The ice is the wettest thing in the Bilge.' })),
 ].map((o) => ({ use: { '*': cherylDeclines }, ...o }));
 
 const fishmongerNpc = {
@@ -381,16 +381,21 @@ const fishmongerNpc = {
 };
 
 const boatman = {
-  id: 'boatman5', name: 'Boatman', x: 22, y: 10, w: 2, facing: 'down', kind: 'npc', turnToTalk: false,
+  // His footprint reaches up the hull to the broken edge, so clicking him from the quay walks to the
+  // stairs above; he's drawn on the mud. His boat (a separate solid footprint) blocks the mud.
+  id: 'boatman5', name: 'Boatman', x: 22, y: 8, w: 2, h: 3, solid: false, facing: 'down', kind: 'npc', turnToTalk: false,
   sprite: (g) => ({ sheet: boatman_mud, frame: afloat(g) ? 'afloat' : 'mud' }),
   emote: { frame: 'note', every: [5, 9] },
-  interact: boatmanTalk,
+  // From above, with the Kid on the mud holding the disc, he throws it up first.
+  interact: (g) => (kidHasDisc(g) ? kidThrowsDisc(g) : boatmanTalk(g)),
   use: {
     bucket: (g) => g.describe("An empty bucket. He'd only look at it sadly. I'd better fill it first."),
     bucket_water: lowerBucket,
     '*': edgeUse['*'],
   },
 };
+
+const boatBlock = { id: 'boat5_boatman', x: 22, y: 10, w: 2, solid: true, shadow: false };
 
 const kidMud = {
   id: 'kid_mud', name: 'Sweaty Kid', x: 24, y: 10, facing: 'up', solid: true,
@@ -416,26 +421,34 @@ async function moversTalk(g) {
 
 const movers = [
   { id: 'big_mover5', name: 'Big Mover', x: 14, y: 10, facing: 'left', sprite: { sheet: mover, palette: 'big' } },
-  { id: 'other_mover5', name: 'Other Mover', x: 17, y: 10, facing: 'down', sprite: { sheet: mover, palette: 'other', frame: 'lookup_down' } },
+  // Reaching up to the quay wall (17, 7), so he can be called down to from the quay.
+  { id: 'other_mover5', name: 'Other Mover', x: 17, y: 7, h: 4, solid: false, facing: 'down', sprite: { sheet: mover, palette: 'other', frame: 'lookup_down' } },
 ].map((m) => ({ ...m, interact: moversTalk, use: { '*': (g) => g.say('Big Mover', "Very nice, Miss. It won't lift a piano.") } }));
 
 const piano = {
-  id: 'piano5', x: 15, y: 10, w: 2, kind: 'object',
+  // Up to the quay wall, so it can be looked at from the quay; drawn on the mud.
+  id: 'piano5', x: 15, y: 7, w: 2, h: 4, solid: false, kind: 'object',
   sprite: { sheet: bilge_piano, frame: 'piano_mud' },
   look: 'The piano, upright on the mud, lid open. It got further down Tessel than any of us.',
 };
 
-const boats = [[3, 'boat_side_a'], [8, 'boat_side_b'], [19, 'boat_side_c']].map(([x, frame]) => ({
-  id: `boat5_${x}`, x, y: 10, w: 2, kind: 'object', lookKey: 'boats5',
+// The middle boat's hotspot is a tile wider to the west (the fish stall stands
+// above it on the quay), with its drawing nudged back over its own two tiles.
+const boats = [[3, 'boat_side_a', 3, 2], [8, 'boat_side_b', 7, 3], [19, 'boat_side_c', 19, 2]].map(([x, frame, hx, hw]) => ({
+  id: `boat5_${x}`, x: hx, y: 7, w: hw, h: 4, solid: false, kind: 'object', lookKey: 'boats5',
   sprite: { sheet: bilge_boats, frame },
+  offset: [(x - hx) * 16 - (hw - 2) * 8, 0],
   look: 'Boats, lying on their sides like dogs asleep in the sun.',
 }));
+
+// The boats and the piano block the mud (their hotspots above are open, for clicking from the quay).
+const mudBlocks = [[3, 'boat5'], [8, 'boat5'], [19, 'boat5'], [15, 'piano5']].map(([x, k]) => ({ id: `${k}_block_${x}`, x, y: 10, w: 2, solid: true, shadow: false }));
 
 const crabs = [[1, 10], [6, 10], [10, 10]].map(([x, y], i) => ({
   id: `crab5_${i}`, x, y, solid: false, kind: 'object', lookKey: 'crabs5',
   sprite: { sheet: critters, frame: i % 2 ? 'crab_idle' : 'crab_walk' },
   behavior: { type: 'wander', area: [0, 10, 11, 1], pause: [1, 4] },
-  look: 'A crab. It moves sideways, which is more than the rest of Tessel can manage today.',
+  // Scenery: too small to click from six feet up.
 }));
 
 // ---------------------------------------------------------------------------
@@ -473,7 +486,7 @@ export function withBilge5(def) {
     triggers: (base.triggers || []).map(untilAct5),
     entities: [
       ...(base.entities || []).map(untilAct5),
-      ...[...objects, fishmongerNpc, boatman, kidMud, kidRelayBilge, ...movers, piano, ...boats, ...crabs].map((e) => ({ ...e, when: both(e.when, started) })),
+      ...[...objects, fishmongerNpc, boatman, boatBlock, kidMud, kidRelayBilge, ...movers, piano, ...boats, ...mudBlocks, ...crabs].map((e) => ({ ...e, when: both(e.when, started) })),
     ],
     onEnter: async (g) => {
       if (started(g)) return entering5(g);

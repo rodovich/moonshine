@@ -131,7 +131,8 @@ export const passageMap = composedMap(composePassage, {
   },
   entities: [
     {
-      id: 'bowdoor_in', x: 0, y: 3, h: 2, solid: true, kind: 'object',
+      // Down to (0, 5), beside the floor, so it can be clicked from inside (its doorway is the exit).
+      id: 'bowdoor_in', x: 0, y: 3, h: 3, solid: true, kind: 'object',
       look: "The door, from the inside. Evening light from the canal, falling in across the floor. That's the way back.",
       use: founderUse,
     },
@@ -140,7 +141,7 @@ export const passageMap = composedMap(composePassage, {
       looks: ['A moonglass lamp, awake. They lit themselves when the door opened. Like a house when you come in.', 'Lit, all the way along.'],
       use: { moonglass_disc: (g) => g.describe("They're awake already. They don't need me."), ...founderUse },
     })),
-    ...wallHotspots('passage', 2, 1, 16, LAMPS, RIBS),
+    ...wallHotspots('passage', 2, 2, 16, LAMPS, RIBS),
   ],
 });
 

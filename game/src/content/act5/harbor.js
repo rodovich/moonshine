@@ -23,7 +23,7 @@ import { mott } from '../../art/act4_sprites.js';
 import { sweaty_kid } from '../../art/opening_npcs.js';
 import { keeper } from '../../art/act5_sprites.js';
 import { fx } from '../../art/fx.js';
-import { pave } from '../act2/common.js';
+import { harborTopRows } from '../act2/harbor.js';
 import {
   started, after5, doorOpen, stage, WRONGNESS, LAUNDRY_AMBIENCE,
   layout, bump, cycle, cherylDeclines, firstMeet,
@@ -35,7 +35,6 @@ import { teethLook, showTeeth, SURF } from './teeth.js';
 
 const W = 32, H = 15;
 const V8 = (x) => 'abcdefgh'[x % 8];
-const cliff = (x, y) => `headland:cliff_${y % 2 ? 's' : 'n'}${x % 2 ? 'e' : 'w'}`;
 
 // Where the Goat stair leads, if Act 2 part 2's Goat Path is registered
 // (set by withAct5).
@@ -43,31 +42,10 @@ export const harborLinks = { goatPath: null };
 
 function compose() {
   const L = layout(W, H, blankGrid);
-  // The Prow's rock behind everything, the Goat stair cut up it.
-  for (let y = 0; y < 4; y++) for (let x = 0; x < W; x++) {
-    L.set('ground', x, y, y === 3 ? `headland:cliff_foot_${x % 2 ? 'b' : 'a'}` : cliff(x, y), true);
-  }
-  L.set('ground', 24, 1, 'headland:cliff_gull', true); L.set('ground', 0, 1, 'headland:cliff_gull', true);
-  for (let y = 0; y < 4; y++) for (let x = 0; x < 2; x++) L.set('ground', 2 + x, y, `headland:goatstair_x${x}y${y}`, false);
-  // The harbor-front houses.
-  for (const [x0, x1, pal] of [[5, 10, 'ochre'], [11, 16, 'rose'], [17, 22, 'sky']]) {
-    for (let x = x0; x <= x1; x++) {
-      const e = x === x0 ? '_l' : x === x1 ? '_r' : '';
-      L.set('ground', x, 0, `rooftiles:ridge${e}`, true);
-      L.set('ground', x, 1, `rooftiles:tiles${e}`, true);
-      L.set('overhead', x, 1, `rooftiles:over_eave${e}`);
-      L.set('ground', x, 2, `buildings:${(x - x0) % 2 ? 'window' : 'wall'}@${pal}`, true);
-      L.set('ground', x, 3, `buildings:${x === x0 + 1 ? 'door_bot' : 'wall_base'}@${pal}`, true);
-    }
-    L.set('ground', x0 + 1, 2, `buildings:door_top@${pal}`, true);
-  }
-  // The lighthouse's foot, its door (27-28, 3) the way up.
-  for (let ty = 0; ty < 4; ty++) for (let tx = 0; tx < 4; tx++) {
-    L.set('detail', 26 + tx, ty, `lighthouse:lighthouse_x${tx}y${ty}`, !(ty === 3 && (tx === 1 || tx === 2)));
-  }
-  L.set('ground', 27, 3, pave(27, 3, true), false); L.set('ground', 28, 3, pave(28, 3, true), false);
-  // The quay.
-  for (let y = 4; y <= 8; y++) for (let x = 0; x < W; x++) L.set('ground', x, y, pave(x, y), false);
+  // Rows 0-8 exactly as Act 2 draws the Harbor: the headland, the Goat stair,
+  // the harbor-front terrace, the lighthouse, the quay with its crates, nets,
+  // and bollards. (Mott stands beside his bollard at (13, 8) in Act 5.)
+  harborTopRows(L);
   // The old quay edge, the exposed hull, the Keyhole with the chain running out.
   for (let x = 0; x < W; x++) {
     L.set('ground', x, 9, `reveal:qwall_${V8(x)}`, true);
@@ -81,10 +59,8 @@ function compose() {
     L.set('ground', x, 13, `sea:far_${x % 2 ? 'b' : 'a'}`, true);
     L.set('ground', x, 14, `sea:haze_${x % 2 ? 'b' : 'a'}`, true);
   }
-  // Bollards with the ferry's ropes, crates, nets; the laundry streaming.
-  L.set('detail', 8, 8, 'harbor_props:bollard_rope', true); L.set('detail', 18, 8, 'harbor_props:bollard_rope', true);
-  L.set('detail', 5, 4, 'props:crate', true); L.set('detail', 6, 4, 'props:crate', true); L.set('detail', 20, 4, 'harbor_props:nets', true);
-  'abcdef'.split('').forEach((c, i) => L.set('overhead', 7 + i, 4, `cloth:over_wind_${c}`));
+  // The laundry streaming over the quay (clear of the crates at 7-8).
+  'abcdef'.split('').forEach((c, i) => L.set('overhead', 10 + i, 4, `cloth:over_wind_${c}`));
   return L.done();
 }
 
@@ -107,7 +83,7 @@ const mottTalk = async (g, self) => {
 };
 
 const mottNpc = {
-  id: 'mott5', name: 'Mott', x: 13, y: 8, facing: 'down',
+  id: 'mott5', name: 'Mott', x: 14, y: 8, facing: 'down',
   sprite: { sheet: mott },
   interact: mottTalk,
   use: {
@@ -122,31 +98,37 @@ const mottNpc = {
 // Objects
 
 const objects = [
-  ...[[0, 8], [16, 3], [19, 11]].map(([x, w]) => ({
-    id: `quay_teeth_${x}`, x, y: 9, w, lookKey: 'harbor_teeth', interact: teethLook,
-  })),
-  ...[[8, 2]].map(([x, w]) => ({
+  {
+    // Her hull and the quay edge beside her, so she can be reached from the quay.
+    id: 'ferry_look', x: 10, y: 9, w: 6, h: 3,
+    look: "The Persistence, hanging off her ropes, lower than the quay. Mott's not looking at her. He's looking at the Teeth.",
+    use: { bucket: (g) => g.describe("Six feet down. My arms aren't."), '*': cherylDeclines },
+  },
+  {
+    // The sea and the reef, with the quay edge in front of them (reached from the quay).
+    id: 'teeth_view', x: 8, y: 9, w: 11, h: 6, lookKey: 'harbor_teeth', interact: (g) => teethLook(g),
+    use: { bucket: (g) => g.describe("Six feet down. My arms aren't."), '*': cherylDeclines },
+  },
+  ...[[0, 8], [19, 11]].map(([x, w]) => ({
     id: `quay_edge_${x}`, x, y: 9, w, lookKey: 'quay_edge',
     look: "Six feet down to the water now. The sea didn't go anywhere. We came up out of it.",
     use: { bucket: (g) => g.describe("Six feet down. My arms aren't."), '*': cherylDeclines },
   })),
-  {
-    id: 'ferry_look', x: 10, y: 9, w: 6,
-    look: "The Persistence, hanging off her ropes, lower than the quay. Mott's not looking at her. He's looking at the Teeth.",
-    use: { bucket: (g) => g.describe("Six feet down. My arms aren't."), '*': cherylDeclines },
-  },
   { id: 'keyhole5', x: 30, y: 9, w: 2, look: 'The Keyhole. A chain runs out through it now, taut, down into the sea. It never did that before. Or it did, and the sea hid it.' },
   {
     id: 'harbor_office', x: 12, y: 3, look: 'A new note: GONE TO LOOK FOR THE LANDING. STILL.',
   },
-  ...[[5, 1], [7, 5], [13, 4], [17, 1], [19, 4]].map(([x, w]) => ({
+  ...[[5, 1], [7, 5], [13, 5], [19, 4]].map(([x, w]) => ({
     id: `fronts_${x}`, x, y: 2, w, h: 2, lookKey: 'harbor_laundry',
     look: 'Every line of washing in Tessel is pointing the same way. Out to sea.',
   })),
-  { id: 'lighthouse5', x: 26, y: 0, w: 4, h: 3, look: 'The lighthouse, lit in broad daylight. Somebody up there has seen what I\'ve seen.' },
+  // Either side of the door, reaching down to row 3, so they can be reached from the quay.
+  ...[26, 29].map((x) => ({ id: `lighthouse5_${x}`, x, y: 0, h: 4, lookKey: 'lighthouse5', look: 'The lighthouse, lit in broad daylight. Somebody up there has seen what I\'ve seen.' })),
   { id: 'nets5', x: 20, y: 4, look: 'Nets, drying. Everything in Tessel is drying today.' },
-  ...[5, 6].map((x) => ({ id: `crate5_${x}`, x, y: 4, lookKey: 'crates5', look: 'Crates. Stencilled MAINLAND, and waiting for a ferry that\'s six feet below them.' })),
+  ...[7, 8].map((x) => ({ id: `crate5_${x}`, x, y: 4, lookKey: 'crates5', look: 'Crates. Stencilled MAINLAND, and waiting for a ferry that\'s six feet below them.' })),
   ...[8, 18].map((x) => ({ id: `bollard5_${x}`, x, y: 8, lookKey: 'bollards5', look: "A bollard, with the ferry's rope round it, pulled as tight as a fiddle string." })),
+  { id: 'bollard5_13', x: 13, y: 8, look: "Mott's bollard. He's not sitting on it today. He's standing, and watching." },
+  ...[6, 18].map((x) => ({ id: `door5_${x}`, x, y: 2, h: 2, lookKey: 'harbor_doors5', look: 'Not my door. Fishing nets drying on the handle, flapping out to sea.' })),
 ].map((o) => ({ solid: false, use: { '*': cherylDeclines }, ...o }));
 
 const teethSprite = {
@@ -154,13 +136,11 @@ const teethSprite = {
   // were on row 13, and the ferry as if on row 14, so the ferry hangs in front.
   id: 'teeth', x: 8, y: 13, w: 11, kind: 'object', solid: false, offset: [0, 16],
   sprite: (g) => ({ sheet: teeth, frame: `stage${stage(g)}` }),
-  interact: teethLook,
 };
 
 const ferrySprite = {
   id: 'ferry5', x: 8, y: 14, w: 11, kind: 'object', solid: false, offset: [0, -32],
   sprite: { sheet: ferry, frame: 'persistence' },
-  look: "The Persistence, hanging off her ropes, lower than the quay. Mott's not looking at her. He's looking at the Teeth.",
 };
 
 // ---------------------------------------------------------------------------
