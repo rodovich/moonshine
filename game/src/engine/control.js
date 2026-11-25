@@ -143,6 +143,7 @@ export class Control {
       if (p.facing !== dir && ahead && !(ahead.x <= p.x && p.x < ahead.x + ahead.w && ahead.y <= p.y && p.y < ahead.y + ahead.h)) {
         p.facing = dir;
         this.turned = held ? { dir, t: 0 } : null;
+        this.turnedAt = this.world.game.ticks; // tests read this (stepKey)
         return;
       }
       if (held && this.turned && this.turned.dir === dir && ++this.turned.t < TURN_HOLD) return;
