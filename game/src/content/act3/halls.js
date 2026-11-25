@@ -24,7 +24,7 @@ import { composedMap } from '../opening/grid.js';
 import { act3Tiles } from './tiles.js';
 import { ds_rod, ds_rod_short, ds } from '../../art/downstairs.js';
 import {
-  UNDER, WRONGNESS, deck, wall, floor, ribs, hasDisc, valveTurned, wallHotspots, lampEntity, nicheTile,
+  UNDER, WRONGNESS, deck, wall, floor, hasDisc, valveTurned, wallHotspots, lampEntity, nicheTile,
   founderUse, getItem, cherylDeclines, ladderDeclines, discLight, keepLoops, bump, relight,
 } from './common.js';
 
@@ -36,7 +36,7 @@ const dropped = (g) => !!g.flag('halls.ladder');
 function composeHalls(g) {
   const L = deck(W, H);
   // The main deck.
-  wall(L, 1, 23, 4, []);
+  wall(L, 1, 23, 4, RIBS);
   floor(L, 1, 28, 6, 10);
   // The north passage's side walls, and the wall face east of it.
   for (let y = 1; y <= 3; y++) { L.set('ground', 24, y, 'hull:top_edge_e', true); L.set('ground', 27, y, 'hull:top_edge_w', true); }
@@ -73,7 +73,7 @@ function composeHalls(g) {
 
   // Pools of daylight under the light-pipes.
   for (const x of PIPES) L.set('ground', x, 8, 'hull:floor_glow', true);
-  ribs(L, RIBS, 6, 10);
+  // Ribs show as rib faces on the wall only: overhead ribs across the floor hid Cheryl.
   return L.done();
 }
 
@@ -188,7 +188,7 @@ const PIPE_LOOKS = [
 ];
 
 const hallObjects = [
-  ...wallHotspots('halls', 5, 1, 23, [3, 4, 8, 9, 13, 14, 18, 20, 22, 23]),
+  ...wallHotspots('halls', 5, 1, 23, [3, 4, 8, 9, 13, 14, 18, 20, 22, 23], RIBS),
   lampEntity('halls_w', 9, 5),
   lampEntity('halls_e', 18, 5),
   { id: 'chute_mouth', x: 3, y: 5, w: 2, look: "Where I came in. It's a long way up, and it's polished." },
@@ -357,7 +357,11 @@ export const bunkMap = composedMap(composeBunk, {
   tileset: act3Tiles,
   spawn: [4, 5],
   darkness: 0.97,
-  lights: [{ x: 4.5, y: 2.5, radius: 4.6, color: 'relic_cyan', when: lampLit }],
+  lights: [
+    { x: 4.5, y: 2.5, radius: 4.6, color: 'relic_cyan', when: lampLit },
+    // A faint glint on the dead lamp, so there's something to walk toward in the dark.
+    { x: 2, y: 1, radius: 0.7, color: 'relic_cyan', when: (g) => !lampLit(g) },
+  ],
   playerLight: discLight(2),
   exits: [{ x: 4, y: 6, w: 2, to: 'lamp_halls', at: [13, 6], facing: 'down', sfx: 'step_hullstone' }],
   onEnter: async (g) => {
