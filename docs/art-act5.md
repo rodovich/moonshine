@@ -13,7 +13,7 @@ Module `game/src/art/act5_surface.js`. Dev page: `/dev/art.html?only=scene:act5_
 | The sea against the hull (row 11) | `sea:wash_a` (even x) / `wash_b` (odd x), 4 frames: a wet black band at the hull's foot, foam lapping | ground |
 | The sea, lower (row 12) | `sea:sea_nw` (even x) / `sea_ne` (odd x), 4 frames: dark, slow swells (the 2×2 block `sea_<nw,ne,sw,se>` also tiles larger seas) | ground |
 | The far sea and haze (rows 13–14), where the Teeth sit | `sea:far_a/b` on row 13, `sea:haze_a/b` on row 14 (a/b by even/odd x), 4 frames: paler, calmer water fading into a pale sea haze at the bottom edge, so the band reads as far away | ground |
-| **The Teeth**, three stages | `teeth:stage1`, `stage2`, `stage3` (4 frames each; stage 3 at uneven timing). A 176×32 sprite drawn top-left at (8·16, 13·16), on the far-sea band and clear of the ferry. They're blue-grey and hazed over, low contrast against the sea, with only the surf bright, so they read as far off. Stage 1: barely there, a faint line of dots and surf. Stage 2: a little larger and darker. Stage 3: clearly bigger and darker, with surf breaking, but still hazy and still on the far band | overhead sprite |
+| **The Teeth**, three stages | `teeth:stage1`, `stage2`, `stage3` (4 frames each; stage 3 at uneven timing). A 176×48 sprite drawn top-left at (8·16, 12·16). Stages 1 and 2 sit on the far-sea band in the sprite's bottom 32 rows, blue-grey and hazed over, so they read as quiet, distant warnings: stage 1 a faint line of dots and surf, stage 2 a little larger and darker. Stage 3 is close and threatening: big jagged dark rocks rim-lit on the west, rising out of the far band into the near sea, with foam collars at their feet, white surf breaking up their faces and spray thrown high | overhead sprite, drawn behind the ferry |
 | The ferry *Persistence*, hanging low and tilted on taut ropes | `ferry:persistence`, a 176×80 sprite drawn top-left at (8·16, 8·16): the ropes run from the bollards at (8, 8) and (18, 8) down to her cleats; she lies over (10–15, 11–12), down by the stern | sprite |
 | Bollards (with the ferry's rope), nets | `harbor_props:bollard_rope` at (8, 8) and (18, 8) (`bollard` without the rope); `harbor_props:nets` at (20, 4); crates are `props:crate` | objects |
 | The Keyhole, with the anchor chain running out (30–31, 9–10) | `keyhole:keyhole_x<0-1>y<0-1>` | ground |
@@ -31,7 +31,7 @@ Module `game/src/art/act5_surface.js`. Dev page: `/dev/art.html?only=scene:act5_
 | Shop: the guidebook in pride of place (7–8, 5) | `shop5:display_guide_l/r` | objects |
 | Fountain Square: DRY CANAL DAY — TONIGHT — MOONRISE on two poles over the café (17–22, 11) | `banner:over_banner_<a-f>` (2 frames, a ripple), overhead in a row; the poles' feet `banner:pole_foot_l` / `pole_foot_r` on the objects layer in the row below, under the first and last banner tiles | overhead; objects |
 | Lamp room: the window ring (row 1), walls, floor | `lamproom:window`, `wall`, `floor` | ground |
-| The lamp, lit and turning (3–4, 2–3) | `lamproom:lamp_x<0-1>y<0-1>` (4 frames, the bright face of the lens moving round) | objects |
+| The lamp, lit and turning (3–4, 2–3) | `lamproom:lamp_x<0-1>y<0-1>` (4 frames): a lighthouse lens, a faceted glass beehive of prism rings bound in brass under a domed brass top, on a brass pedestal, with the blazing core showing through and the turning shine sweeping across the facets | objects |
 | The empty polish tin (2, 5) | `lamproom:polish_tin` | objects |
 | Laundry streaming | `cloth:over_wind_<a-f>` (from Act 4), overhead in a row | overhead |
 
@@ -41,9 +41,9 @@ The Windlass Room and the Bow Passage (module `game/src/art/act5_under.js`). Wal
 
 | Piece (position) | Frames | Layer |
 | --- | --- | --- |
-| The drum wound with chain (5–20, 4–7), 16×4 | `windlass_drum:drum_x<0-15>y<0-3>` (still); turning: `drum_x<c>y<r>_0..3` (180 ms; the chain pays out down the drum's face) | objects |
-| The chain off the drum's east end | part of the drum's east column (`drum_x15y0`) | objects |
-| The hawse (21, 3–4), the chain going out, the evening sea through it | `hawse:hawse_top_0/1`, `hawse_bot_0/1` (evening blue); `hawse_late_top/bot_0/1` (deep violet, as the evening goes) | ground |
+| The drum wound with chain (5–20, 4–7), 16×4 | `windlass_drum:drum_x<0-15>y<0-3>` (still); turning: `drum_x<c>y<r>_0..3` (180 ms). One horizontal bronze barrel, shaded round from a lit top to a dark underside, with heavy bolted end flanges on slate bearings. The chain is wound in horizontal turns of interlocking links that crowd together over the top and under the bottom; as it turns, the turns roll down over the front and the flange bolts travel round | objects |
+| The chain off the drum's east end | a thick run of big links rising off the top of the drum's east end (`drum_x13y0` to `drum_x15y0`) into the hawse; in the turning frames the links move toward the drum | objects |
+| The hawse (21, 3–4), the chain going out, the evening sea through it | `hawse:hawse_top_0/1`, `hawse_bot_0/1` (evening blue); `hawse_late_top/bot_0/1` (deep violet, as the evening goes). A big round opening filling both tiles, in deep shadow with a heavy bronze collar; the chain's big links enter it from the drum at its lower left | ground |
 | The Tooth socket (7–8, 8–9), 2×2: with the sheared stump / empty / the clapper seated | `windlass:socket_stump_<nw\|ne\|sw\|se>`, `socket_empty_*`, `socket_clapper_*` | ground |
 | The stump, levered out and lying loose | `windlass:stump_loose` | objects |
 | Coils of spare chain (3–4, 10) and (15–16, 10), 2×1 | `windlass:coil_a_l/r` (west, Cheryl sits here), `coil_b_l/r` | objects |

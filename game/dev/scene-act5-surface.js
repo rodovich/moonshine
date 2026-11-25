@@ -64,7 +64,7 @@ function harbor(stage) {
   'abcdef'.split('').forEach((c, i) => L.set('overhead', 7 + i, 4, `cloth:over_wind_${c}`));
   const sprites = [
     { sheet: 'ferry', frame: 'persistence', x: 8 * 16, y: 8 * 16, topLeft: true },
-    { sheet: 'teeth', frame: `stage${stage}`, x: 8 * 16, y: 13 * 16, topLeft: true },
+    { sheet: 'teeth', frame: `stage${stage}`, x: 8 * 16, y: 12 * 16, topLeft: true },
     { sheet: 'mott', frame: 'down_0', x: 13 * 16 + 8, y: 9 * 16 },
     { sheet: 'sweaty_kid', frame: 'right_1', x: 22 * 16 + 8, y: 7 * 16 },
   ];
