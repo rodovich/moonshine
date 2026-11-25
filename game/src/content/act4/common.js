@@ -145,7 +145,17 @@ export function overlayMap(base, o) {
     triggers: [...(o.triggers || []), ...(base.triggers || []).map((t) => (o.baseTriggers === false
       ? { ...t, when: (g) => !on(g) && (!t.when || t.when(g)) }
       : t))],
-    ambient: [...(base.ambient || []), ...(o.ambient || [])],
+    // The base map's timed events still run, but one that looks up a character
+    // this overlay has hidden (the Old Man's fidget, a basin trickle) skips quietly.
+    ambient: [...(base.ambient || []).map((ev) => ({
+      ...ev,
+      run: (g) => {
+        try { return ev.run(g); } catch (err) {
+          if (on(g) && /no entity/.test(err.message)) return undefined;
+          throw err;
+        }
+      },
+    })), ...(o.ambient || [])],
     onEnter: async (g) => {
       if (on(g) && o.onEnter) return o.onEnter(g);
       if (base.onEnter) return base.onEnter(g);

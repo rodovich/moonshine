@@ -212,9 +212,9 @@ export async function revealFromCellar(g) {
   g.tint('white_light', 0, 2.4);
   await g.fade('in', 2, 'white_light');
   // 3–4.
-  await g.wait(2);
+  await g.wait(1.2);
   g.sfx('gull');
-  await g.wait(1);
+  await g.wait(0.5);
   // 5. A slow pan east along the empty canal, then down to the foot of the Water Stairs.
   const slow = 16 / 24; // a tile per 0.4 s
   await g.panCamera(9, 8, slow);

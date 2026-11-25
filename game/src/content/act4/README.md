@@ -29,7 +29,7 @@ Every Act 4 state yields once `act5.started` or `epilogue` is set (`act4(g)` in 
 
 ## Jumping to a moment
 
-- The start: `?map=flat&x=8&y=4&flags=act1.moonrise,act2.started,act2.done,piano.slid,counter.left,step.open,act3.surfaced,halls.valve&items=moon_chart,guidebook,crowbar,ship_plan&run=act4_start`
+- The start: `?map=flat&x=8&y=4&flags=act1.moonrise,act2.started,act2.done,piano.slid,counter.left,step.open,act3.surfaced,act3.done,founders.unbolted,halls.valve,got.crowbar&items=moon_chart,guidebook,crowbar,ship_plan&run=act4_start`
 - The Crown, ready to ring: add `clockmaker.out,clock.lifted` and start at `?map=crown&x=6&y=8&facing=up`
 - The Pump Hall: `?map=pump_hall&x=2&y=3&flags=act4.started,bell.restored,mayor.atCrown,hatch.open&items=copper_throat`
 - The reveal: `?map=ice_cellar&x=6&y=2&flags=act4.started,pumps.burst,cellar.shut&run=act4_reveal`
@@ -50,4 +50,5 @@ Every Act 4 state yields once `act5.started` or `epilogue` is set (`act4(g)` in 
 - **The climb** shows Cheryl in her climbing pose the whole way. The slab opens on the step onto row 1.
 - **The reveal pan** runs east along the canal at one tile per 0.4 s, holds at the canal mouth, and settles on the bronze door before gliding back.
 - **The dry Bilge's top rows** (houses, the fish stalls) are composed here to match 02-city's Bilge layout, since the wet Bilge isn't built yet. The Kid runs the west reach of the mud (x1–10), so he doesn't pass through the Movers and the Boatman. Crabs patrol short beats.
+- **After the Act 3 builder's playtest:** the Tide Wheel's channel edges are walkable, so the wheel can be looked at, and the daylight grate to the sea cave is in the west wall at (0, 7), beside the archway, where it can be reached (the design puts it in the east wall, which the channel cuts off). The flood's front is ragged and keeps creeping east after the burst, never past x18. The Thin and Stout valves, before the throat, name the Middle Sister. Overlays skip a base map's timed event if its character has been swapped for an Act 4 one; the Old Man's fidget has an Act 4 version.
 - **Lines added** for states the design doesn't cover: the lever after pulling, the rope after the bell, the Clockmaker's declines, the tower door's states, the fish in the Square (dry and flowing), the crate in the cellar, the piano on the mud, the main pipe, the dry grates, the second tide-pool look.
