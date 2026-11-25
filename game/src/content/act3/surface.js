@@ -84,7 +84,7 @@ export async function throughFoundersDoor(g) {
   await g.say(o, "The Founders' Door. It's open. That door doesn't open. I have a monograph.");
   await g.say(o, "...You came in the front and went round behind. There's probably a gap. I'll find it. I'll write about it.");
   if (!g.hasItem('paper_charcoal') && !g.hasItem('ship_plan')) {
-    await g.say(o, "And if you're going to wander about behind my walls, take rubbings. Here.");
+    await g.say(o, "And if you're going to wander about behind my walls, take rubbings. Floors, Cheryl, where the light falls. Here.");
     g.sfx('give');
     await g.giveItem('paper_charcoal');
   }
