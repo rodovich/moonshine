@@ -237,8 +237,29 @@ test('using a held item on plain ground beside Cheryl says so and drops it', asy
   await page.evaluate(() => { window.moonshine.world.control.holding = 'letter'; });
   await clickTile(page, 13, 8);
   await waitFor(page, () => !!window.moonshine.snapshot().text);
-  expect((await snap(page)).text).toContain('nothing there');
+  expect((await snap(page)).text).toContain("isn't where that goes");
   expect((await snap(page)).holding).toBe(null);
+});
+
+test('using a held item on plain ground farther away: walks there, then says so and drops it', async ({ page }) => {
+  await boot(page, `${STREET}&x=12&y=8&items=letter`);
+  await waitIdle(page);
+  await page.evaluate(() => { window.moonshine.world.control.holding = 'letter'; });
+  await clickTile(page, 6, 8);
+  await waitFor(page, () => !!window.moonshine.snapshot().text, null, 10000);
+  const s = await snap(page);
+  expect(s.text).toContain("isn't where that goes");
+  expect([s.x, s.holding]).toEqual([6, null]);
+});
+
+test('the title marks a finished game', async ({ page }) => {
+  await page.goto('/');
+  await page.evaluate(() => localStorage.setItem('moonshine.save.v1', JSON.stringify({ version: 1, map: 'test_street', x: 12, y: 8, facing: 'down', flags: { 'game.complete': true }, inventory: [] })));
+  await page.goto('/');
+  await page.waitForFunction(() => window.moonshine && window.moonshine.scene);
+  expect(await page.evaluate(() => window.moonshine.scene.finished)).toBe(true);
+  await page.waitForTimeout(800);
+  await page.screenshot({ path: 'tests/screenshots/32-title-finished.png' });
 });
 
 test('start=continue saves (it is the player own game)', async ({ page }) => {

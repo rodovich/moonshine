@@ -12,6 +12,10 @@ import { drawText, measure } from './text.js';
 import { inArea, isInteractable, safeCall } from './world.js';
 import { sfx, step } from './sound.js';
 
+// What Cheryl says when an item is used on nothing in particular (content
+// overrides it with defaults.nothingToUseOn).
+const NOTHING_TO_USE_ON = "No. That isn't where that goes.";
+
 const BAG_BTN = { x: WIDTH - 26, y: 3, w: 22, h: 22 };
 // A little more forgiving than the drawn button, for fingers.
 const BAG_HIT = { x: BAG_BTN.x - 4, y: 0, w: BAG_BTN.w + 8, h: BAG_BTN.h + 8 };
@@ -41,7 +45,15 @@ export class Control {
     if (this.world) this.world.marker = null;
   }
 
+  // A held item used on nothing in particular.
+  useNowhere() {
+    const w = this.world;
+    this.holding = null;
+    w.run((g) => g.describe(w.content.defaults?.nothingToUseOn || NOTHING_TO_USE_ON));
+  }
+
   cancelMove() {
+    this.useOnGround = false;
     this.path = null;
     this.goal = null;
     this.pending = null;
@@ -194,6 +206,11 @@ export class Control {
     this.world.marker = null;
     const pend = this.pending;
     this.pending = null;
+    if (this.useOnGround && this.holding) {
+      this.useOnGround = false;
+      this.useNowhere();
+      return;
+    }
     if (!pend) return;
     const e = pend.entity;
     if (!this.world.entities.includes(e)) return;
@@ -304,17 +321,10 @@ export class Control {
     const tx = Math.floor((t.x + w.cam.x) / TILE);
     const ty = Math.floor((t.y + w.cam.y) / TILE);
     if (!w.map.inBounds(tx, ty)) return;
-    // Holding an item and tapping plain ground right by Cheryl means "use it
-    // here": say there's nothing to use it on. Farther away, she walks there
-    // still holding it.
-    const p = this.player;
-    if (this.holding && Math.abs(tx - p.x) + Math.abs(ty - p.y) <= 1) {
-      this.holding = null;
-      const line = w.content.defaults?.nothingToUseOn || "There's nothing there to use it on.";
-      w.run((g) => g.describe(line));
-      return;
-    }
+    // Holding an item and tapping plain ground (water, a tile) means "use it
+    // there": she walks over, says it doesn't go there, and puts it away.
     this.walkTo(tx, ty);
+    if (this.holding) this.useOnGround = true;
     this.dragging = true;
     this.dragT = 0;
   }
@@ -332,9 +342,7 @@ export class Control {
     if (e) {
       this.act(e, this.holding);
     } else if (this.holding) {
-      this.holding = null;
-      const line = w.content.defaults?.nothingToUseOn || "There's nothing there to use it on.";
-      w.run((g) => g.describe(line));
+      this.useNowhere();
     }
   }
 
