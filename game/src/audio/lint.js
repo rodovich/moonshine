@@ -129,7 +129,8 @@ export function lintSong(song) {
         const nextChord = next && harmony ? chordAt(next.step) : null;
         const approach = r === 'bass' && n.step % barSteps !== 0 && next?.midi !== undefined &&
           Math.abs(next.midi - n.midi) <= 2 && nextChord?.tones.has(next.midi % 12);
-        if (chord && long && !chord.tones.has(p) && !approach) {
+        const slashBass = r === 'bass' && chord && p === chord.bass; // a pedal under a slash chord
+        if (chord && long && !chord.tones.has(p) && !approach && !slashBass) {
           const tension = chord.tensions.has(p);
           if (r === 'melody' || r === 'counter') {
             if (!tension) add('warn', where, `${nameOf(n.midi)} (${n.len} steps) clashes with ${chord.sym}`);
@@ -207,8 +208,9 @@ export function lintSong(song) {
       melodyBars: bars.length,
       uniqueMelodyBars: unique,
     });
-    if (pitches.size < 6) add('warn', song.id, `melody uses only ${pitches.size} pitches`);
-    if (lengths.size < 3) add('warn', song.id, `melody uses only ${lengths.size} note lengths`);
+    // Monotony rules apply to pieces long enough to wear on the ear, not to short stings.
+    if (bars.length >= 4 && pitches.size < 6) add('warn', song.id, `melody uses only ${pitches.size} pitches`);
+    if (bars.length >= 4 && lengths.size < 3) add('warn', song.id, `melody uses only ${lengths.size} note lengths`);
     if (bars.length >= 8 && unique / bars.length < 0.35) add('warn', song.id, `only ${unique} of ${bars.length} melody bars are different`);
     if (hi - lo > 19) add('info', song.id, `melody spans ${hi - lo} semitones`);
   }

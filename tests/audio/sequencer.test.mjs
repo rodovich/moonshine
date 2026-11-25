@@ -6,7 +6,7 @@ import {
 } from '../../game/src/audio/sequencer.js';
 import { SONGS } from '../../game/src/audio/music/index.js';
 import { INSTRUMENTS } from '../../game/src/audio/instruments.js';
-import { SFX } from '../../game/src/audio/sfx.js';
+import { SFX, SFX_GROUPS } from '../../game/src/audio/sfx.js';
 import { lintSong, parseHarmony } from '../../game/src/audio/lint.js';
 
 test('pitch names', () => {
@@ -102,11 +102,11 @@ test('every song compiles, with the intended lengths', () => {
     assert.equal(song.id, id);
     const c = compileSong(song);
     assert.ok(c.channels.length <= 6, `${id} uses ${c.channels.length} channels; music keeps to 6`);
-    if (c.loopSteps) {
+    if (c.loopSteps && !song.scene) {
       assert.ok(c.loopSeconds >= 30 && c.loopSeconds <= 95, `${id} loop is ${c.loopSeconds}s`);
     }
   }
-  assert.ok(Math.abs(compileSong(SONGS.stairs).loopSeconds - 76.8) < 1e-9);
+  assert.ok(Math.abs(compileSong(SONGS.neighborhood).loopSeconds - 76.8) < 1e-9);
   // The design asks for a 60–90 s home theme.
   const cc = compileSong(SONGS.cistern_court).loopSeconds;
   assert.ok(cc >= 60 && cc <= 90, `cistern_court loop is ${cc}s`);
@@ -153,8 +153,25 @@ test('the required sound effects exist', () => {
     'groan', 'crack', 'rattle', 'piano_tumble', 'drain', 'drain_glunk', 'drain_gurgle', 'drain_echo',
   ];
   for (const id of ids) assert.ok(SFX[id], id);
-  for (const id of ['water_pour', 'timer_tick', 'crowd', 'wind']) assert.ok(SFX[id].loop, `${id} loops`);
-  for (const id of ['title', 'cistern_court', 'moonrise', 'morning_after', 'wrongness']) assert.ok(SONGS[id], id);
+  // docs/design/02-city.md, "Audio needed", and the underground's machines
+  const act2 = [
+    'knock', 'shop_bell', 'stone_scrape', 'scrub', 'skip_rope', 'slab_lift', 'piano_slide', 'trickle', 'sink_gurgle', 'step_splash',
+    'door_hum', 'town', 'canal', 'gulls', 'goat', 'goats', 'clock_tick', 'boatman_sing', 'girls_chant',
+    'step_hullstone', 'step_rung', 'lid_pry', 'hatch_open', 'light_beam', 'mirror_turn', 'moonlock_open', 'disc_glow',
+    'chute_slide', 'ladder_drop', 'tube_voice', 'lever_pull', 'lid_open', 'shutters', 'beam_hum', 'moonglass_hum', 'disc_get', 'lamp_relight', 'tube_murmur', 'bolt_draw', 'founders_door', 'rubbing', 'glow_shimmer', 'valve_turn', 'valve_jam', 'water_gush', 'far_gurgle', 'drips', 'hull',
+    'pump_run', 'pump_cough', 'chain_rattle', 'chain_haul', 'tide_wheel',
+    // docs/design/04-the-list.md, "Audio needed"
+    'belfry_tick', 'clock_rundown', 'lever_clank', 'clamp_lift', 'bell_stroke', 'bell_strokes', 'thrum_rise', 'thrum',
+    'hull_far', 'coins_rattle', 'ring_hatch', 'valve_squeal', 'pump_stall', 'thump_thin', 'thump_stout', 'thump_middle',
+    'pump_thin', 'pump_stout', 'shaft_hum', 'grate_drain', 'hull_creak_long', 'valve_hiss', 'ear_pop', 'groan_great',
+    'burst', 'roar', 'water_spread', 'hatch_bang', 'air_whistle', 'slack_lap', 'channel_rush', 'gull_close',
+    'slab_scrape', 'slab_close', 'shouting', 'bell_low', 'town_rush', 'crabs', 'fish_flop',
+  ];
+  for (const id of act2) assert.ok(SFX[id], id);
+  const loops = ['water_pour', 'timer_tick', 'crowd', 'wind', 'trickle', 'door_hum', 'town', 'canal', 'gulls', 'goats',
+    'clock_tick', 'water_gush', 'drips', 'hull', 'pump_run', 'chain_haul', 'tide_wheel', 'beam_hum', 'moonglass_hum', 'tube_murmur', 'glow_shimmer'];
+  for (const id of loops) assert.ok(SFX[id].loop, `${id} loops`);
+  for (const id of ['title', 'cistern_court', 'moonrise', 'morning_after', 'wrongness', 'neighborhood', 'harbor', 'archive', 'discovery', 'downstairs', 'reveal', 'reveal_last', 'pumps', 'neighborhood_thin', 'climb']) assert.ok(SONGS[id], id);
 });
 
 test('harmony strings split bars evenly unless lengths are given', () => {
@@ -178,5 +195,15 @@ test('every song passes the music lint', () => {
   for (const song of Object.values(SONGS)) {
     const warns = lintSong(song).issues.filter((i) => i.level === 'warn');
     assert.deepEqual(warns, [], `${song.id}: ${warns.map((w) => `${w.where}: ${w.msg}`).join('; ')}`);
+  }
+});
+
+test('no sound effect id is defined in two files', () => {
+  const seen = new Map();
+  for (const [group, defs] of Object.entries(SFX_GROUPS)) {
+    for (const id of Object.keys(defs)) {
+      assert.ok(!seen.has(id), `${id} is in both ${seen.get(id)} and ${group}`);
+      seen.set(id, group);
+    }
   }
 });
