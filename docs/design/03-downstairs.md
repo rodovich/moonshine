@@ -4,15 +4,15 @@ This is the build-ready design for Act 3 ([overview](overview.md), [story bible]
 
 ## The slice in brief
 
-Under the Hundred Steps is a place nobody in Tessel knows exists: straight, dark, fitted stone, ribbed like the inside of something, with dead glass lamps in the walls. Cheryl pries open a seized lever with the Movers' crowbar. A lid in the ceiling opens and daylight falls onto a bronze mirror. Turning the mirror sends the beam to three places: two wall inlays (three bars of different widths; the moon's phases) and a sealed hatch with a glass eye. The eye drinks the light and the hatch opens. Inside is a **moonglass disc**, glowing and warm: her light from now on. Behind it, a polished chute drops her, one-way, into the **Lamp Halls**.
+Under the Hundred Steps is a place nobody in Tessel knows exists: straight, dark, fitted stone, ribbed like the inside of something, with dead glass lamps in the walls. Cheryl forces a seized lever with the Movers' crowbar. It's the Keepers' master shutter: a lid in the ceiling opens and daylight falls onto a bronze mirror, and a long run of clunks goes away up the hill as every light-pipe shutter under every doorstep in Tessel opens for the first time since the Great Shake. Turning the mirror sends the beam to three places: two wall inlays (three bars of different widths; the moon's phases) and a sealed hatch with a glass eye. The eye drinks the light and the hatch opens. Inside is a **moonglass disc**, glowing and warm: her light from now on. Behind it, a polished chute drops her, one-way, into the **Lamp Halls**.
 
-The Lamp Halls are dark except for pools of daylight under the street's moon-eyes and whatever Cheryl's disc lights. There's a ladder she can drop to make a shortcut back up, a Keepers' bunk room, a speaking tube that carries the Mayor's voice down from Fountain Square, and a black flooded corridor sloping down that she won't touch. The way north, toward the Crown, is knee-deep in water gushing from a big pipe. A seized valve wheel stands beside it. With the crowbar through its spokes, the wheel turns; the passage drains; and down the speaking tube comes a tiny, outraged voice: "The FOUNTAIN!" The wheel jams and won't go back. She has stopped the Fountain of the Fish.
+The Lamp Halls are dark except for pools of daylight under the street's moon-eyes (which she has just opened) and whatever Cheryl's disc lights. There's a ladder she can drop to make a shortcut back up, a speaking tube that carries the Mayor's voice down from Fountain Square, and a black flooded corridor sloping down that she won't touch. The way north, toward the Crown, is knee-deep in water gushing from a big pipe. The valve wheel beside it has lost its handle: its spindle is square, and the crowbar slips off. In the pitch-dark Keepers' bunk room, once she relights its lamp with the disc, a tool rack holds a bronze valve key. With the key on the spindle, the wheel turns; the passage drains; and down the speaking tube comes a tiny, outraged voice: "The FOUNTAIN!" The wheel jams and won't go back. She has stopped the Fountain of the Fish.
 
-North is the **Chart Room**, under the Blue Dome, lit by a pool of light from the Eye in Ottilie's floor, with a teapot-shaped shadow in it. The last Keeper's chair, cup, and ledger are here (*Rang at the turn. All well.*). The floor is a great picture made of stone, and Cheryl reads it piece by piece: a hill with houses on it, hollow underneath; a chain from the Prow to an anchor; the hill sitting *on* the water. *Oh. Oh, we're a boat.* She takes a charcoal rubbing (the **Ship Plan**) if she has Ottilie's paper. She draws the Founders' Door's three-hundred-year-old bolt and walks into the crypt, where Ottilie decides she must have come in the front and gone round behind.
+North is the **Chart Room**, under the Blue Dome, lit by a pool of light from the Eye in Ottilie's floor, with a teapot-shaped shadow in it. The last Keeper's chair, cup, and ledger are here (*Rang at the turn. All well.*). The floor is a great picture made of stone: the Crown, the Steps, and the sea coming halfway up the hill. *Oh. Oh, we're a boat.* She takes a charcoal rubbing (the **Ship Plan**) if she has Ottilie's paper. She draws the Founders' Door's three-hundred-year-old bolt and walks into the crypt, where Ottilie decides she must have come in the front and gone round behind.
 
-Up in the Crown it's dusk, and every moon-eye in the plaza is glowing blue. So is every doorstep down the hill. Cheryl did that, and she did the Fountain too.
+Up in the Crown it's dusk, and every moon-eye in the plaza is glowing blue. So is every doorstep down the hill. The moonglass drank daylight all afternoon through the shutters she opened, and now it's giving it back. Cheryl did that, and she did the Fountain too.
 
-**Playtime:** 25–30 minutes. **Maps:** 5 new (Step Gallery, Cradle, Lamp Halls, Bunk Room, Chart Room), plus dusk versions of the Crypt and the Crown. **NPCs:** Ottilie, plus Ambrose, the Kid, and the Woman with Watering Can on the Crown at dusk. **New items:** moonglass disc, Ship Plan.
+**Playtime:** 18–25 minutes. **Maps:** 5 new (Step Gallery, Cradle, Lamp Halls, Bunk Room, Chart Room), plus dusk versions of the Crypt and the Crown. **NPCs:** Ottilie, plus Ambrose, the Kid, and the Woman with Watering Can on the Crown at dusk. **New items:** moonglass disc, valve key, Ship Plan.
 
 ### What the slice adds
 
@@ -24,7 +24,7 @@ Up in the Crown it's dusk, and every moon-eye in the plaza is glowing blue. So i
 | An action that visibly harms the city above | The valve and the Fountain |
 | Reading a place instead of being told | The Chart Room floor |
 
-This act is more linear than the others on purpose: it's a descent into an unknown place, and the player should feel led *down*. The side content (lamps, bunk room, speaking tube, ledger, inlays) keeps it from feeling like a corridor, and the two optional-order steps in the Lamp Halls (the shortcut ladder and the valve) give some choice.
+This act is more linear than the others on purpose: it's a descent into an unknown place, and the player should feel led *down*. Its one multi-step puzzle is the valve: the crowbar fails on the square spindle, the dark bunk room needs its lamp relit with the disc, and only then is the valve key on the tool rack visible. The side content (the speaking tube, the ledger, the inlays, the other lamps) keeps it from feeling like a corridor, and the shortcut ladder can be dropped at any point.
 
 ## The look and sound of Downstairs
 
@@ -85,7 +85,9 @@ A long, low deck under the Hundred Steps. The ladder from the hollow step comes 
 
 **Ceiling ribs** (overhead) cross at x5, x9, x13, x17, x21.
 
-**Exits:** ladder (3, 2), entered by walking up into it from (3, 3) → Hundred Steps (10, 18), facing down. Arriving from the Steps puts Cheryl at (3, 3). Hatch (15, 2), once open, entered from (15, 3) → Cradle (3–4, 4), facing up. Floor grate (6, 8), once the ladder is dropped → Lamp Halls (8, 7), facing down.
+**Exits:** ladder (3, 2), entered by walking up into it from (3, 3) → Hundred Steps (10, 18), facing down. Arriving from the Steps puts Cheryl at (3, 3). Hatch (15, 2), once open, entered from (15, 3) → Cradle (3–4, 4), facing up. Floor grate (6, 8), once the ladder is dropped → Lamp Halls (8, 6), facing down.
+
+**Ladders after the valve.** From `halls.valve` until the act ends, both ways back up (this ladder and the Lamp Halls' drop-ladder) decline: before the Chart Room, "Not now. I want to see where that passage goes."; after `founders.unbolted`, "Not that way. Ottilie's door is quicker." The act's only exit is then the Founders' Door, so the world is never seen in an unspecified state (a dry Fountain by daylight). Before the valve, going back up is fine: the surface is in its Act 2 daytime state.
 
 **Music:** `downstairs`.
 
@@ -117,10 +119,10 @@ The main deck: a long hall with light-pipes coming down from the street above, t
     1  XXXXXXXXXXXXXXXXXXXXXXXX#~~#XXXX   ~~ the flooded north passage (25-26, 1-6)
     2  XXXXXXXXXXXXXXXXXXXXXXXX#~~PXXXX   P the gushing pipe (27, 2)
     3  XXXXXXXXXXXXXXXXXXXXXXXX#~~#XXXX
-    4  X#######q################~~#XXXX   qQ the counterweighted ladder, on the wall face (8, 4-5)
-    5  X##CC###QL###DD###L###TW#~~#XXXX   CC chute mouth (3-4); L lamps (9, 18);
-    6  X........................~~..XXX   DD doorway to the bunk room (13-14); T speaking tube (22);
-    7  X............................XXX   W the valve wheel (23)
+    4  X#######q#############WW#~~#XXXX   qQ the counterweighted ladder, on the wall face (8, 4-5)
+    5  X##CC###QL###DD###L#T#WW#~~#XXXX   CC chute mouth (3-4); L lamps (9, 18);
+    6  X........................~~..XXX   DD doorway to the bunk room (13-14); T speaking tube (20);
+    7  X............................XXX   WW the valve wheel, 2x2 (22-23, 4-5), used from (22-23, 6)
     8  X............................XXX
     9  X............................XXX
    10  X............................XXX
@@ -136,7 +138,7 @@ The main deck: a long hall with light-pipes coming down from the street above, t
 
 **Ceiling ribs** at x4, x8, x12, x16, x20, x24.
 
-**Light:** `dark: 0.9`. Light-pipe pools; dead lamps at (9, 5) and (18, 5) until relit (radius 3 when lit); Cheryl's disc.
+**Light:** `dark: 0.9`. Light-pipe pools (lit, because the lever opened their shutters; the player never sees them shut); dead lamps at (9, 5) and (18, 5) until relit (radius 3 when lit); Cheryl's disc.
 
 **Exits:** north passage (25–26, 0), once drained → Chart Room (7–8, 12), facing up. Bunk room doorway (13–14, 5) → Bunk Room (4–5, 5), facing up. Drop-ladder (8, 5), once dropped, entered by walking up into it from (8, 6) → Step Gallery (6, 7), facing down. Coming down through the Step Gallery's grate arrives at (8, 6).
 
@@ -144,7 +146,7 @@ The main deck: a long hall with light-pipes coming down from the street above, t
 
 ### Bunk Room (10 × 7)
 
-Where the Keepers slept. Stone bunks, a tool rack, a table with a cup, and a wall inlay of a bell and a wave, alternating.
+Where the Keepers slept. Stone bunks, a tool rack, a table with a cup, and a wall inlay of a bell and a wave, alternating. It's pitch dark: no light-pipes reach it, and the disc alone lights only the doorway half of the room. The tool rack, with the **valve key** on it, is in the dark corner, and only shows once the lamp at (2, 1) is relit.
 
 ```
      x 0
@@ -158,7 +160,7 @@ Where the Keepers slept. Stone bunks, a tool rack, a table with a cup, and a wal
     6  XXXX..XXXX   exit south (4-5, 6) → Lamp Halls (13-14, 6)
 ```
 
-**Light:** `dark: 0.9`; one dead lamp.
+**Light:** `dark: 0.97`. The disc's radius here is 2 (the room swallows light). One dead lamp at (2, 1); once lit (radius 4) it shows the whole room, including the rack. Until then the rack's tiles are drawn but too dark to read, and interacting there gets "Too dark to see what's there. Something hangs on the wall."
 
 ### Chart Room (16 × 14)
 
@@ -185,7 +187,7 @@ An eight-sided room under the Blue Dome. A pool of light falls from the Eye in O
 
 The corners (`X` at the row ends) are chamfered walls; draw them as 45° wall pieces.
 
-**The floor inlay** (10×6 tiles): Tessel drawn as a ship, in the Founders' pattern language, but pictorial. Hotspots (each is a look target; see the dialog below). Positions follow the art task's drawing (`chart:inlay_x0y0`…`x9y5`), placed at x3–12, y5–10:
+**The floor inlay** (10×6 tiles): Tessel drawn as a ship, in the Founders' pattern language, but pictorial. Hotspots (each is a look target; see the dialog below). Positions follow the art task's drawing (`chart:inlay_x0y0`…`x9y5`), placed at x3–12, y5–10. Where hotspots overlap, the first one in this priority order wins: **Sisters > teapot > shaft > mast > chain > waterline > hull > town.**
 
 | Hotspot | Tiles | Shows |
 | --- | --- | --- |
@@ -195,7 +197,7 @@ The corners (`X` at the row ends) are chamfered walls; draw them as 45° wall pi
 | The shaft and bowl | (6, 6–9) | A straight cyan line from a house near the top down to a round bowl at the bottom |
 | The waterline | (3, 8–9) and (12, 8–9) | Little waves on either side, at the hill's shoulders: the sea comes up to there |
 | The hull | (4–11, 8–10) | Below the waves, the hill keeps going, curved underneath, hollow, ribbed |
-| The Sisters | (8–9, 9) | Three upright bars, thin, stout, and middle |
+| The Sisters | (8–9, 9) | Three upright bars of different widths |
 | The chain | (11–12, 8–10) | From the bow end, a chain down to an anchor |
 
 **Light:** `dark: 0.5`; the Eye's pool (radius 3, cool daylight) centered at (7–8, 7–8).
@@ -214,17 +216,18 @@ The corners (`X` at the row ends) are chamfered walls; draw them as 45° wall pi
 | Flag | Set when | Effect |
 | --- | --- | --- |
 | `act3.started` | Cheryl first climbs down from the hollow step | |
-| `gallery.lever` | Crowbar used on the lever | Shaft lid open; beam on the mirror |
+| `gallery.lever` | Crowbar used on the lever | Shaft lid open; beam on the mirror; every light-pipe shutter in Tessel open (the Lamp Halls' pipes lit; the moon-eyes charge all afternoon) |
 | `gallery.mirror` | 0 = flat along the floor, east (no target), 1 = up-left to the Sisters inlay, 2 = straight up to the moons inlay, 3 = up-right to the hatch | Which target is lit |
 | `gallery.hatch` | The beam reaches the moon-lock | Hatch open, for good |
 | `got.disc` | Disc taken | Cheryl carries light |
 | `halls.ladder` | Chain pulled | Drop-ladder down; Step Gallery grate open; two-way shortcut |
-| `halls.valve` | Crowbar used on the valve wheel | North passage drained; **the Fountain stops**; wheel jammed |
-| `lamp.<id>` | Disc used on a dead lamp | That lamp lit, permanently |
+| `lamp.<id>` | Disc used on a dead lamp | That lamp lit, permanently; the Bunk Room's lamp reveals the tool rack |
+| `got.valveKey` | Key taken from the tool rack | |
+| `halls.valve` | Valve key used on the valve wheel | North passage drained; **the Fountain stops**; wheel jammed; key stays on the spindle; both ladders up decline |
 | `chart.seen` | The inlay sequence plays | |
 | `got.shipPlan` | Paper and charcoal used on the inlay | Paper consumed; Ship Plan gained |
 | `founders.unbolted` | The bolt is drawn | Founders' Door two-way |
-| `act3.surfaced` | Cheryl first leaves the Archive after `founders.unbolted` | Crown at dusk; moon-eyes glow; act-end sequence |
+| `act3.surfaced` | Cheryl first leaves the Archive after `founders.unbolted` (the only way up by then) | Crown at dusk; moon-eyes glow; act-end sequence |
 | `moonEyes.glow` | Set with `act3.surfaced` | In later acts, moon-eyes glow on every surface map at dusk and night |
 
 ## The puzzle
@@ -238,9 +241,16 @@ The corners (`X` at the row ends) are chamfered walls; draw them as 45° wall pi
                                                                                       │
              ┌────────────────────────────────┬──────────────────────────────────────┤
              ▼                                ▼                                      ▼
-   pull the chain: drop-ladder       crowbar on the valve wheel:              (optional) relight lamps,
-   (shortcut to the Step Gallery)    north passage drains, the Fountain       bunk room, speaking tube
-                                     stops, the wheel jams
+   pull the chain: drop-ladder       crowbar on the valve wheel:              (optional) relight hall
+   (shortcut to the Step Gallery;    slips off the square spindle             lamps, speaking tube
+    declines after the valve)                 │
+                                     disc on the Bunk Room's dead lamp:
+                                     the room lights; the tool rack shows
+                                              │
+                                     take the VALVE KEY
+                                              │
+                                     valve key on the wheel: the passage
+                                     drains, the Fountain stops, it jams
                                                 │
                                                 ▼
                                      Chart Room: the inlay ─► "Oh, we're a boat."
@@ -257,16 +267,18 @@ The corners (`X` at the row ends) are chamfered walls; draw them as 45° wall pi
                                           END OF ACT 3
 ```
 
-- **The crowbar is the act's key.** The player can't reach Act 3 without it (it opened the hundredth step), so there's no softlock.
+- **The crowbar opens the act; the valve key finishes it.** The player can't reach Act 3 without the crowbar (it opened the hundredth step). The valve key is in the Bunk Room, which is always reachable from the Lamp Halls, so there's no softlock.
 - **The Ship Plan isn't required to end the act,** only to make progress in Act 4. A player without paper gets it from Ottilie in the crypt scene and can go straight back down through the Founders' Door.
-- **The mirror has no wrong state that blocks anything.** Every position lights something.
+- **The mirror is a toy, not a puzzle.** It cycles through three targets; every position lights something, and one of them opens the hatch. Its job is to teach that light opens Founder locks.
 
 ### Hints in the world
 
 | What the player needs | Who or what says so |
 | --- | --- |
 | The lever opens something above the mirror | Cheryl's look at the lever |
-| The crowbar works as a lever | "I need a lever, and I happen to have a crowbar." (look at the seized lever or wheel) |
+| The crowbar works as a lever | "I need a lever for my lever. I happen to have a crowbar." (the seized lever's second look) |
+| The wheel needs a proper key | The crowbar slipping off the square spindle: "Square. The crowbar's round. Nothing doing." / "Somebody had a key for this." |
+| The bunk room is worth lighting | Its doorway look: "Pitch dark in there. Darker than the hall. My disc barely gets past the door." The disc already relit a lamp in the Step Gallery or the hall |
 | The hatch wants light | The hatch's look: "A glass eye in the middle. It looks like it's waiting for something." Then the beam |
 | The north passage is the way on | Cheryl: "North. Toward the Crown. Knee-deep and running fast." The valve is right next to it |
 | The disc can relight lamps | The disc's description, and the first dead lamp's look while carrying it |
@@ -279,19 +291,19 @@ All Cheryl unless labeled. "First / then" follows the look counter.
 
 On first arriving in the Step Gallery (from the ladder), after a two-second pause with Cheryl standing in the daylight column:
 - *Under the Steps.*
-- *Somebody built this. Somebody built all this, and everybody forgot.*
+- *All this, under the Steps. All this time.*
 
 ### Step Gallery
 
-- **Walls**: First: "Stone, fitted so tight you couldn't get a hair between the blocks. No mortar." / "Nobody in Tessel builds like this. Nobody in Tessel builds *straight*." Then: "Straight lines, all the way along. It feels like being inside a ruler."
+- **Walls**: First: "Stone, fitted so tight you couldn't get a hair between the blocks. No mortar." / "Nobody in Tessel builds like this. Nobody in Tessel builds *straight*." Then: "Straight lines, all the way along."
 - **Ceiling ribs** (look from under one): "Ribs across the ceiling, every few paces. Like being inside something."
 - **The ladder** (3, 2): "The ladder back up. Daylight, and the Woman with Basin, pretending she can't see me." → climbing up is an exit.
 - **Lamps** (2, 2 and 22, 2): Without the disc: "A lamp of milky glass in a niche. Dead. Cold." With the disc, as a hint: "A dead lamp. It looks like the disc, only hungrier." Use the disc → lit: "It drinks from the disc and wakes up. So do I, a little." Lit: "Lit. Somebody's home."
 - **The lever** (19, 2): First: "A bronze lever, green and seized solid." / "There's a lid in the ceiling over the mirror. I think this opens it." Then: "Seized. I need a lever for my lever. I happen to have a crowbar."
-- **Crowbar on the lever** → `gallery.lever`: Cheryl heaves (two shakes, a grind). The ceiling lid scrapes open. Daylight drops onto the mirror (a light column, then a beam in its current direction). "Daylight. Straight down a shaft from somewhere above. Somewhere up there is a grate everybody thinks is a drain."
-- **Lever after**: "Open. It stays open. I'm not touching it again."
+- **Crowbar on the lever** → `gallery.lever`: Cheryl heaves (two shakes, a grind). The ceiling lid scrapes open. Daylight drops onto the mirror (a light column, then a beam in its current direction). Then, from the ceiling, a long run of clunks going away up the hill, one after another, fainter and fainter, for about four seconds. "Daylight. Straight down a shaft from somewhere above." / "And that clunking, all the way up the hill. I've opened more than one lid."
+- **Lever after**: "Open. It stays open. Whatever else it opened stays open too."
 - **The mirror** (11, 6): Before the lever: "A bronze mirror on a pivot. Tarnished, but true. It's pointing at nothing in particular." After the lever, each interaction turns it one step (a clunk), cycling 1 → 2 → 3 → 1, and the beam swings:
-  - **Position 1, up-left: the Sisters inlay** (6–7, 2): the inlay lights. "Three bars of different widths, side by side. A thin one, a stout one, and one in the middle." / "They mean something to somebody."
+  - **Position 1, up-left: the Sisters inlay** (6–7, 2): the inlay lights. "Three bars of different widths, side by side." / "They mean something to somebody."
   - **Position 2, straight up: the moons inlay** (10–11, 2): the inlay lights. "Moons, as squares filling up. New, quarter, half, full." / "Somebody watched the moon very carefully. I know the feeling."
   - **Position 3, up-right: the hatch** (15, 2): see "The hatch opens."
   - The mirror starts at position 0, throwing the beam flat along the floor to the east, where it pools on nothing. The first turn always produces something.
@@ -302,79 +314,78 @@ On first arriving in the Step Gallery (from the ladder), after a two-second paus
 
 ### Cradle
 
-- **The cradle** (5, 2), with the disc: "A disc of milky glass, in a bronze cradle. It's glowing." → take → `got.disc`: "It's warm. I wasn't expecting warm." / "It lights up the room. It lights up me." → *Got Moonglass Disc.* The disc's light now follows Cheryl.
-- **The empty cradle**: "An empty cradle. Mine now, I suppose. Finders keepers is the oldest law there is."
-- **The chute** (2–3, 2): "A smooth slot in the wall, sloping away into the dark. Polished. A slide, for grown-ups who knew what they were doing."
+- **The cradle** (5, 2), with the disc: "A disc of milky glass, in a bronze cradle. It's glowing." → take → `got.disc`: "It's warm. I wasn't expecting warm." → *Got Moonglass Disc.* The disc's light now follows Cheryl.
+- **The empty cradle**: "An empty cradle. I'll bring it back. I think I'll bring it back."
+- **The chute** (2–3, 2): "A smooth slot in the wall, sloping away into the dark. Polished smooth. People used this. Often."
   - Without the disc: "Not into the dark without a light."
   - With the disc: choice "Go down?" — **Yes** / **Not yet**. Yes → the chute sequence.
 
 ### The chute
 
-Cheryl sits at the mouth and lets go. Fade to black with a long sliding whoosh that drops in pitch, two bumps, a soft thump. Fade in on the Lamp Halls, dark, with Cheryl sitting at (3, 7) in her own pool of cyan light. She stands.
-- *Well.*
-- *I won't be going back up that.*
+Cheryl sits at the mouth and lets go. Fade to black with a long sliding whoosh that drops in pitch, two bumps, a soft thump. Fade in on the Lamp Halls, dark, with Cheryl sitting at (3, 7) in her own pool of cyan light. She stands. A description (not monologue): "Well. I won't be going back up that."
 
 ### Lamp Halls
 
 - **The hall** (first look anywhere on the floor, or automatically 3 seconds after landing): "A long hall going east, ribbed like the gallery. Pools of daylight here and there, coming down through the ceiling."
-- **Light-pipes**: First: "A glass rod coming down through the ceiling, full of daylight." / "That's the bottom of a moon-eye. Somebody's doorstep is up there." Then: "Somebody's doorstep. I wonder whose."
+- **Light-pipes**: First: "A glass rod coming down through the ceiling, full of daylight." / "That's the bottom of a moon-eye. Somebody's doorstep is up there." / "Daylight, coming down. Did I do that? I think I did that." Then: "Somebody's doorstep. I wonder whose."
 - **Lamps** (9, 5) and (18, 5): as in the Step Gallery.
 - **The hooked-up ladder** (8, 4–5): First: "A ladder, hooked up high on the wall, and a bronze chain hanging from its cleat. Up above it, a dark square." Pull the chain → `halls.ladder`: a rattle, a crash, and the ladder drops to the floor. "That'll save my knees." Then: "The ladder, down. A way back to the gallery and the Steps."
 - **The chute mouth** (3–4, 5): "Where I came in. It's a long way up, and it's polished."
-- **The speaking tube** (22, 5): a bronze horn in the wall. Before the valve, each listen plays one faint line in turn (speaker label FAR-OFF VOICE, small italic):
+- **The speaking tube** (20, 5): a bronze horn in the wall. Before the valve, each listen plays one faint line in turn (speaker label FAR-OFF VOICE, small italic):
   1. FAR-OFF VOICE: …Tessel: Forward!… …please disperse…
   2. *(only if `counter.left`)* FAR-OFF VOICE: …a HUNDRED, Duncan…
   3. FAR-OFF VOICE: …lemons, onions…
   Cheryl, after the first: "A speaking tube. Somebody up there is saying 'Tessel: Forward.' It's coming from the Square." After the valve: "Very quiet up there now. Very, very quiet."
-- **The valve wheel** (23, 5): First: "A big bronze wheel, beside the flooded passage. Seized." / "I need a lever, and I happen to have a crowbar." Then: "Seized. Crowbar."
+- **The valve wheel** (22–23, 4–5; art `machines:valve_spindle_*`, then `valve_key_*`, `valve_key_turned_*`, `valve_key_jammed_*`): First: "A big bronze wheel, beside the flooded passage. Its handle's gone; there's only a bare square spindle." Then: "A square spindle. It wants a key."
+- **Crowbar on the wheel**: "Square. The crowbar's round. Nothing doing." / "Somebody had a key for this."
 - **The north passage, flooded** (25–26, 1–6): First: "The passage north. Toward the Crown." / "Knee-deep and running fast. It'd have me off my feet and down the other corridor in a moment." Then: "Knee-deep and running. Not without a reason to."
 - **The gushing pipe** (27, 2): "Fresh water, gushing out of a cracked pipe. Not seawater. It smells like the Fountain on a hot day."
-- **Crowbar on the valve wheel** → `halls.valve`. See "The valve."
+- **Valve key on the valve wheel** → `halls.valve`. See "The valve."
+- **The bunk room doorway** (13–14, 5): "Pitch dark in there. Darker than the hall. My disc barely gets past the door."
 - **The drowned corridor** (17–18, 11–13): First: "The floor slopes down into black water. It doesn't ripple." / "It goes down a long way. I'm brave, not stupid." Then: "No."
 - **Walls, ribs**: as in the Step Gallery.
 
 ### The valve
 
-1. Cheryl sets the crowbar through the spokes and heaves. A groan; a 1 px shake; again; a 2 px shake. The wheel turns with a long grinding squeal.
+1. Cheryl fits the valve key onto the spindle and heaves. A groan; a 1 px shake; again; a 2 px shake. The wheel turns with a long grinding squeal.
 2. The gushing pipe slows and stops. Down the passage the water drains away over two seconds with a gurgle (tiles swap from flowing water to wet floor).
 3. Silence for one second.
-4. Down the speaking tube at (22, 5), small and far away: FAR-OFF VOICE: The FOUNTAIN! The Fountain's STOPPED!
+4. Down the speaking tube at (20, 5), small and far away: FAR-OFF VOICE: The FOUNTAIN! The Fountain's STOPPED!
 5. FAR-OFF VOICE: Five hundred YEARS!
-6. Cheryl tries the wheel back. It won't move. "It won't go back. It's jammed for good."
-7. Internal monologue: *I've stopped the Fountain.* / *Well. I'm committed now.*
+6. Cheryl tries the wheel back. It won't move. "It won't go back. It's jammed for good, key and all."
+7. "I've stopped the Fountain. Five hundred years, and I've stopped it."
 
-Afterward, the wheel: "Jammed. Whatever I've done, I've done it." The passage: "Drained. Wet, but walkable. North."
+The valve key stays jammed on the spindle (removed from the inventory). Afterward, the wheel: "Jammed. Whatever I've done, I've done it." The passage: "Drained. Wet, but walkable. North."
 
 ### Bunk Room
 
 - **Bunks**: First: "Stone bunks. Hard as a church pew, and narrower." / "People slept down here. Lived down here." Then: "Nobody's slept here for a very long time."
 - **The duty-roster inlay** (4–5, 1): First: "A bell, then a wave. A bell, then a wave. All along the wall." / "A timetable. For ringing a bell when the tide turns." Then: "Ambrose would like this wall."
-- **The tool rack** (7–8, 1): "Bronze tools, hung up neatly. Spanners as long as my arm. Somebody looked after these."
+- **The tool rack** (7–8, 1): Before the lamp is lit: "Too dark to see what's there. Something hangs on the wall." After: "Bronze tools, hung up neatly. Spanners as long as my arm. Somebody looked after these." / "And a key with a square socket. The same size as that spindle, I'd bet." → take → `got.valveKey`; *Got Valve Key.* Then: "Spanners. Somebody looked after these."
 - **The cup** (3, 4): "A cup. Left on the table as if someone meant to come back for it."
-- **The lamp** (2, 1): as elsewhere.
+- **The lamp** (2, 1): Dead: "A dead lamp. It looks like the disc, only hungrier." Disc on it → lit, and the whole room comes up out of the dark: "It drinks from the disc and wakes up, and so does the room."
 
 ### Chart Room
 
-**Entering** (first time): the music drops out. Cheryl walks to the inlay's edge at (7, 11) and stops (scripted). The camera pans slowly up across the inlay from bottom to top, then settles back on her. Then she reads it, one box per beat:
+**Entering** (first time): the music drops out. Cheryl walks to the inlay's edge at (7, 11) and stops (scripted). The camera pans slowly up across the inlay from bottom to top, then settles back on her. The pan does the work; Cheryl says only enough to point:
 1. "The floor's a picture. Stone, set in stone."
-2. "A hill, with houses on it. That's the Crown. Those are the Steps. That's us."
-3. "Under it, the hill keeps going. Down and down. It's hollow. It's full of rooms. Like this one."
-4. "A chain from the Prow end, down to something on the sea floor."
-5. "Little waves, either side, halfway up the hill. The sea comes to there. And under it, the hill curves round underneath."
-6. "The hill isn't standing in the sea. It's sitting *on* it."
-7. Internal monologue: *Oh.*
-8. Internal monologue: *Oh, we're a boat.*
-9. The **reveal** cue plays. `chart.seen`.
+2. "The Crown. The Steps. That's us."
+3. "And the sea comes up to… there. Halfway up the hill."
+4. Internal monologue: *Oh.*
+5. Internal monologue: *Oh, we're a boat.*
+6. The **reveal** cue plays. `chart.seen`.
+
+The hollow hull, the chain, and the bowl are left to the hotspots for players who look.
 
 **Hotspots** (looked at afterward):
 - **The town**: "Tessel, in little stone houses. Somebody got the Steps exactly right."
 - **The mast**: "The Bell Tower, drawn as a mast. A rope from the bell goes down inside the hull, to a wheel." / "Ambrose's bell is attached to something."
 - **The hull**: "Decks, ribs, rooms. Everything under our feet, all this time."
-- **The Sisters**: "The three bars again. Thin, stout, middle. Amidships, whatever that means. I'm learning the words."
+- **The Sisters**: "Three upright shapes, amidships. Different sizes. Ottilie would have a theory."
 - **The chain**: "A chain from the Prow to an anchor. The links are drawn like little eyes."
 - **The shaft and bowl**: First: "A straight shaft, from a narrow house near the top of town all the way down to a bowl at the bottom." / "There's a moon drawn in the bowl." / "That's my end of town. That's very nearly my house." Then: "A moon in a bowl. A narrow house. I'll think about that later."
 - **The waterline**: "Little waves at the hill's shoulders. I keep looking at them and they keep being true."
-- **The teapot shadow**: "And over the stern, the shadow of a teapot. Ottilie's mother, keeping an eye on things."
+- **The teapot shadow**: "And over the middle of the town, the shadow of a teapot. Ottilie's mother, keeping an eye on things."
 - **Paper and charcoal on the inlay** → `got.shipPlan`: "I kneel on the Founders' floor and rub charcoal over it like a schoolgirl doing a brass." / "Ottilie would faint. Then she'd want it framed." → paper and charcoal removed; *Got Ship Plan.*
 - **Anything else on the inlay**: "No. Not on this."
 
@@ -403,7 +414,7 @@ Afterward, the wheel: "Jammed. Whatever I've done, I've done it." The passage: "
 3. OTTILIE: The Founders' Door. It's open. That door doesn't open. I have a monograph.
 4. OTTILIE: …You came in the front and went round behind. There's probably a gap. I'll find it. I'll write about it.
 5. *If Cheryl doesn't have paper and charcoal:* OTTILIE: And if you're going to wander about behind my walls, take rubbings. Here. → *Got Paper and Charcoal.*
-6. *If Cheryl has the Ship Plan:* OTTILIE: Is that charcoal on your knees? Cheryl. Have you been doing RUBBINGS without me? → Cheryl says nothing. → OTTILIE: Show me tomorrow. I'm too upset tonight.
+6. *If Cheryl has the Ship Plan:* OTTILIE: Cheryl. Is that charcoal on your knees? What did you rub? Don't tell me. Yes, tell me. Tomorrow. I'm too upset.
 7. OTTILIE: It's nearly dark. Have you been in my crypt all afternoon? Go home. Have some soup.
 8. Ottilie goes back up the stair. Control returns. (The door stays open behind Cheryl; she can go back down for the rubbing.)
 
@@ -411,8 +422,7 @@ Afterward, the wheel: "Jammed. Whatever I've done, I've done it." The passage: "
 
 **The Crown at dusk** (`act3.surfaced`, the first time Cheryl leaves the Archive):
 1. The Crown, dusk tint. The moon-eye studs in the plaza glow cyan, each slowly brightening and dimming. A light, rising, glassy shimmer is in the air.
-2. Internal monologue: *The doorsteps.*
-3. Ambrose at his step, the Kid by the sundial, and the Woman with Watering Can by the stair (all new placements for this scene). Each can be talked to; the scene ends when Cheryl walks to the south parapet.
+2. Ambrose at his step, the Kid by the sundial, and the Woman with Watering Can by the stair (all new placements for this scene). Each can be talked to; the scene ends when Cheryl walks to the south parapet.
    - AMBROSE: THE STEPS ARE GLOWING. EVERY STEP IN TESSEL. NOBODY RANG FOR THAT.
    - AMBROSE (repeat): SOMETHING'S AWAKE THAT WASN'T. I CAN FEEL IT IN MY TEETH.
    - SWEATY KID: Miss! The steps are GLOWING! I ran down AND up and they glow ALL THE WAY!
@@ -421,17 +431,18 @@ Afterward, the wheel: "Jammed. Whatever I've done, I've done it." The passage: "
    - WOMAN WITH WATERING CAN: My husband says it's the Pelletier boys.
    - WOMAN WITH WATERING CAN: Who are on the mainland. Which is exactly what they'd want you to think.
    - WOMAN WITH WATERING CAN (repeat): The Mayor says it's thieves. Water thieves. With glowing paint.
-4. **At the south parapet** (trigger): Cheryl stops and looks out. Cut to the **vista**: Tessel from the Crown at dusk, stepping down to the Bowl, every doorstep and stair a point of cyan light, like a necklace spilled down a hill; the Bowl dark; the Rim and the Gate against a violet sky. Music: the **reveal** cue's last phrase, softly.
-5. Internal monologue over the vista: *That was me.* / *The Fountain was me, and the lights were me.* / *I wonder what else I'm going to turn on.*
-6. Fade to black. Card: **MOONSHINE** over **End of Act 3. Tessel continues soon.** Until Act 4 exists, back to the title. When it exists, Act 4 begins the next morning.
+3. **At the south parapet** (trigger): Cheryl stops and looks out. Cut to the **vista**: Tessel from the Crown at dusk, stepping down to the Bowl, every doorstep and stair a point of cyan light, like a necklace spilled down a hill; the Bowl dark; the Rim and the Gate against a violet sky. Music: the **reveal** cue's last phrase, softly.
+4. Internal monologue over the vista: *That was me.* / *The Fountain was me, and the lights were me.* / *I've been down there one afternoon.*
+5. Fade to black. Card: **MOONSHINE** over **End of Act 3. Tessel continues soon.** Until Act 4 exists, back to the title. When it exists, Act 4 begins the next morning.
 
-If the vista isn't ready when the slice is built, play step 5 over the Crown map with the camera on the parapet, and keep the vista for polish.
+If the vista isn't ready when the slice is built, play step 4 over the Crown map with the camera on the parapet, and keep the vista for polish.
 
 ## Items
 
 | Item | Icon idea | Inventory description |
 | --- | --- | --- |
 | Moonglass disc | A milky disc with a cyan glow and a thin bronze rim | "A disc of milky glass. It glows, and it's warm. Lamps down here like it." |
+| Valve key | A bronze T-handle with a square socket | "A Keepers' valve key. Bronze, heavy, with a square socket. Somebody hung it up neatly." |
 | Ship Plan | A folded sheet, charcoal-grey, with a curve drawn on it | "My rubbing of the Founders' floor. Tessel, drawn as a boat. I've folded it in quarters, which feels rude." |
 
 **Reading the Ship Plan** (examining it in the inventory) shows it full-screen: a 256×224 charcoal rubbing of the inlay on off-white paper, with smudges and Cheryl's thumbprint in one corner. Any key or tap closes it. This needs an item-examine hook in the engine (the same hook the guidebook uses to cycle its entries in Act 2).
@@ -441,8 +452,9 @@ If the vista isn't ready when the slice is built, play step 5 over the Crown map
 - Disc on any object without a specific line: "It glows at it. Nothing happens. The disc doesn't seem to mind."
 - Crowbar on Founder walls, inlays, or doors: "No seam. Whoever made this didn't make things for crowbars."
 - Paper and charcoal on the Step Gallery inlays: "Three bars. I'll remember three bars." (The rubbing worth taking is in the Chart Room.)
-- Guidebook anywhere Downstairs: "The guidebook doesn't cover this. I checked."
-- Anything on the drowned corridor: "I'm not throwing things into that. It might throw them back."
+- Guidebook anywhere Downstairs: the generic fallback.
+- Anything on the drowned corridor: "No. Not into that."
+- Valve key on anything but the valve wheel: "It's a key for something square. That isn't square."
 
 ## Art needed
 
@@ -464,8 +476,9 @@ Sent early to the art task (Kn_OwEk0wq). Everything is in the underground style 
 - Light-pipes: glass rods descending from the ceiling, glowing, with a pool of light below
 - The drop-ladder on the wall face: hooked up (with its chain and cleat), and down; the floor grate in the Step Gallery (closed, and open with a ladder top)
 - The speaking tube: a bronze horn
-- The valve wheel (seized, turned); the gushing pipe (animated) and its stopped state; flooded fast-water floor (animated); drained wet floor; still black deep water sloping away (animated very slowly)
-- Bunk Room: stone bunks, a tool rack, a stone table with a cup
+- The valve wheel with a bare square spindle (and with the valve key fitted, turned, jammed); the gushing pipe (animated) and its stopped state; flooded fast-water floor (animated); drained wet floor; still black deep water sloping away (animated very slowly)
+- Bunk Room: stone bunks, a tool rack (with the valve key hanging on it, and without), a stone table with a cup
+- Item icon: the valve key (a bronze T-handle with a square socket)
 - Chart Room: the floor inlay (10×6 tiles, pictorial; see the hotspot table), the Eye's pool of light with a teapot-shaped shadow (an overlay), the Keeper's stone chair, a table with a cup and a bronze-bound ledger, the inside of the Founders' Door with its bolt (shot and drawn) and the door open
 - Crypt: the Founders' Door open (a dark doorway with steps going down)
 - Crown: moon-eye studs set in the plaza paving and stair, plain (day) and glowing (dusk)
@@ -481,13 +494,15 @@ Sent early to the art task (Kn_OwEk0wq). Everything is in the underground style 
 
 ## Audio needed
 
+All of this is built (audio/foundation, e4adffd): `downstairs`, `reveal`, and `reveal_last` (the reveal's last phrase, softer, for the dusk vista), plus the sounds. The ids and a suggested order for the hundredth step, the valve, and the Chart Room are in [audio-direction.md](../audio-direction.md).
+
 **Music**
 - **`downstairs`** (new): the underground theme, following the audio direction: bells, choir, and bowed bass; no hand percussion; a slow pulse; a mode outside the surface's major keys; long, wet echo; a melody built from the surface motifs' intervals, rearranged. Quiet enough to hear the creaks.
 - **Reveal cue** (new, one-shot, about 15 seconds): plays after "Oh, we're a boat." The skipping-rhyme tune, slowly, on glass bells over a held D-flat chord: the first time the player hears the rhyme in the Founders' voice. Its last phrase is reused softly under the dusk vista.
 
 **Sound effects**
 - Ambience: the slow, deep hull creak (every 20 seconds or so, Downstairs only); dripping; a faint hum near moonglass
-- The lever: a seized grind, then a release; the ceiling lid scraping open
+- The lever: a seized grind, then a release; the ceiling lid scraping open; then a long run of shutter clunks going away up the hill, each fainter (about 4 seconds)
 - The beam: a soft, sustained glassy tone while a beam is lit; a clunk for each mirror turn
 - The moon-lock: a rising chime, then the hatch's stone grind
 - Taking the disc: a warm, glassy shimmer (a variant of `item_get`)
@@ -505,17 +520,23 @@ Sent early to the art task (Kn_OwEk0wq). Everything is in the underground style 
 - [ ] With the disc, the Lamp Halls feel dark but never frustrating; the player can always see the next exit or object within a few tiles.
 - [ ] Turning the valve reads clearly as the cause of the Fountain stopping.
 - [ ] A player without paper can still finish the act and come back for the rubbing through the Founders' Door.
-- [ ] The drop-ladder and the Founders' Door both work as two-way passages afterward.
-- [ ] The inlay sequence lands: the player should reach "on it, not in it" a beat before Cheryl says "Oh."
+- [ ] The drop-ladder works both ways before the valve; both ladders up decline after the valve; the Founders' Door works both ways after unbolting.
+- [ ] No route shows the surface in an unspecified state: test going up the ladders before the valve (Act 2 day, Fountain running), and trying them after the valve and after unbolting (both decline).
+- [ ] The clunks after the lever are noticeable, so the glowing doorsteps at dusk have a cause the player can name.
+- [ ] The valve chain is discoverable: the crowbar slips, the dark bunk room invites the disc, the key shows once the lamp is lit.
+- [ ] The inlay sequence lands: the player should see it's a boat a beat before Cheryl says "Oh."
 - [ ] Every line fits in its box.
-- [ ] First-time players finish in 25–30 minutes.
+- [ ] First-time players finish in 18–25 minutes.
 
 ## Decisions
 
 - **Act 3 is five underground maps, ending at dusk on the Crown.** It's the first descent; it ends on the first surface change caused by the player (the glowing doorsteps) and the first harm (the Fountain).
 - **Daylight, not moonlight, powers the Step Gallery puzzle.** Moonglass drinks any light (see the story bible). Using daylight keeps the act in the day, so the dusk surfacing feels like time has passed.
 - **The disc is a carried light,** which makes darkness a gentle mechanic rather than a maze. This needs an engine darkness layer with light sources.
-- **The crowbar is used three times** (the hundredth step, the lever, the valve). It's the Act 2 reward and the Act 3 key, and it returns in Act 6 for the Tooth.
+- **The crowbar works the hundredth step and the lever, and fails on the valve.** The failure points the player at the bunk room and the valve key, which turns three optional systems (lamps, the bunk room, the tools) into the act's one multi-step puzzle. The crowbar returns in Act 6 for the Tooth. (From review by xaKh8TS_PJ.)
+- **The lever is the Keepers' master shutter for every light-pipe in Tessel.** The clunks going up the hill give the glowing doorsteps a cause the player has seen. (From review.)
+- **After the valve, the act's only exit is the Founders' Door,** so the dry Fountain is first seen at dusk with the rest of the act's ending. (From review.)
+- **Internal monologue is kept to three moments:** arriving, the reveal, and the vista. (From review; see the story bible's voice rules.)
 - **The ledger plants "Past full: allow two fingers"** for the Act 6 trim, and gives the last Keeper a few lines of his own. Brannoc is the only Founder-era name in the game.
 - **The shaft-and-bowl hotspot stops at "very nearly my house."** Cheryl suspects but doesn't conclude, so the Act 6 discovery of her plug in the Basin is still a surprise.
 - **Ottilie's paper can be had in the crypt scene,** so missing her in Act 2 never blocks anything.
