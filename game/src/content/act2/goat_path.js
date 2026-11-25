@@ -1,78 +1,87 @@
-// The Goat Path (16 × 24): a switchback down the steep back of the island,
-// through terrace gardens and goats, past Mott's shack, to a sea cave and the
-// Harbor. From docs/design/02-city.md.
-// Art: game/src/art/act2b_goat.js (index in docs/art-act2b.md).
+// The Goat Path (16 × 42, three screens tall): a natural cliff path down the
+// Back, the steep west side of the island, from Lamp Street's west gate (top
+// right) to the west end of the Bilge's south quay (bottom right). Irregular
+// switchbacks over bare rock and gorse, rough steps where it's steep, Mott's
+// shack partway down, the sea cave mouth at the waterline near the bottom.
+// From docs/design/structure-pass.md, section 5, and docs/design/02-city.md.
+//
+// Terrain is built from existing art (the goat path's dirt, the headland's rock,
+// the sea with its cliff lips) until the art task's cliff-path tiles land.
 
 import { composedMap, blankGrid } from '../opening/grid.js';
 import { act2Tiles } from './tiles.js';
-import { layout, bump, firstMeet, cherylDeclines, actWrongness } from './common.js';
+import { layout, pave, lowRoof, bump, firstMeet, cherylDeclines, actWrongness } from './common.js';
 import { goat } from '../../art/act2b_goat.js';
 
-const W = 16, H = 24;
+const W = 16, H = 42;
 
-const GRID = [
-  '~~~~~~~~~~~~~::~', //  0 top: from Lamp Street (13-14)
-  '~gggggggggg=:::~', //  1
-  '~gggggggggg=:::~', //  2
-  '~gggggggggg=:::~', //  3
-  '~::::::::::::::~', //  4
-  '~::===========~~', //  5
-  '~::ggggggggggg~~', //  6
-  '~::ggggggggggg~~', //  7
-  '~::::::::::::::~', //  8
-  '~SSSS=====::::~~', //  9 Mott's shack (1-4, 9-12)
-  '~SSSS:::::::::~~', // 10
-  '~SSSS:::::::::~~', // 11 the shack window (2-3, 11)
-  '~SSSS:::::::::~~', // 12 the shack door (2, 12)
-  '~::::::::::::::~', // 13
-  '~::jj::::::::::~', // 14 jj empty square jugs (3-4, 14)
-  '~======::::====~', // 15
-  '~gggggg::::gggg~', // 16
-  '~gggggg::::gggg~', // 17
-  '~::::::::::::::~', // 18
-  '~::============~', // 19
-  '~::%%%%%%%%%%%%~', // 20 the cove
-  'O::%%%%%%%%%%%%~', // 21 O the sea cave mouth (0, 21)
-  '~::%%%%%%%%%%%%~', // 22
-  '~::~~~~~~~~~~~~~', // 23 bottom: down to the Harbor (1-2)
+// The path, as rectangles [x0, y0, x1, y1] (inclusive), top to bottom.
+const PATH = [
+  [11, 1, 15, 3],  // the top landing, in from Lamp Street's west gate (x15)
+  [2, 2, 15, 3],   // the first leg, west, two wide
+  [2, 4, 3, 7],    // rough steps down
+  [2, 8, 13, 8],   // east, along a ledge
+  [12, 9, 13, 9],  // round the outcrop
+  [10, 10, 14, 11], // a wider stretch (a goat grazes here)
+  [13, 12, 14, 14], // down
+  [6, 15, 14, 15], // west, half the width, to Mott's yard
+  [2, 16, 8, 17],  // Mott's yard, in front of his shack (2-5, 12-15)
+  [2, 18, 3, 21],  // rough steps down beside the drop
+  [2, 22, 14, 22], // the long leg east from the hairpin viewpoint
+  [13, 23, 14, 25], // down
+  [3, 26, 14, 26], // west
+  [3, 27, 4, 28],  // down
+  [3, 29, 12, 29], // east, round another outcrop
+  [11, 30, 12, 31], // down
+  [4, 32, 12, 32], // west
+  [4, 33, 5, 33],  // a short drop
+  [4, 34, 13, 34], // east again
+  [12, 35, 13, 35], // down
+  [2, 36, 13, 36], // west, to the waterline
+  [2, 37, 3, 38],  // rough steps down to the sea cave
+  [2, 39, 15, 41], // the last stretch east, onto the Bilge's quay (x15)
 ];
-
-const at = (x, y) => (GRID[y] || '')[x] || '~';
-const isLand = (c) => c !== '~' && c !== '%' && c !== 'O';
+const STEPS = [[2, 4, 3, 7], [2, 18, 3, 21], [2, 37, 3, 38], [13, 12, 14, 14], [13, 23, 14, 25], [3, 27, 4, 28], [11, 30, 12, 31]];
+const inRect = ([x0, y0, x1, y1], x, y) => x >= x0 && x <= x1 && y >= y0 && y <= y1;
+const isPath = (x, y) => PATH.some((r) => inRect(r, x, y));
+// The sea: the island's west face, wider toward the bottom, and a cove by the cave.
+const seaEdge = (y) => (y < 12 ? 1 : y < 30 ? 1 : 1);
+const isSea = (x, y) => !isPath(x, y) && (x <= seaEdge(y) || (y >= 39 && x <= 1));
+const SHACK = [2, 12]; // top-left of Mott's shack (4 × 4)
+const JUGS = [[7, 14], [8, 14]];
+const CAVE = [1, 37];
 
 function compose() {
   const L = layout(W, H, blankGrid);
-  GRID.forEach((row, y) => [...row].forEach((c, x) => {
-    if (c === ':' || c === 'j') {
-      const v = ['path_a', 'path_b', 'path_c'][(x * 7 + y * 13) % 3];
-      L.set('ground', x, y, `goatpath:${v}`, c === 'j');
-    } else if (c === 'g') {
-      L.set('ground', x, y, `goatpath:${(x + y) % 2 ? 'beans_b' : 'beans_a'}`, true);
-    } else if (c === '=') {
-      let f = 'wall';
-      if (y === 19) f = 'wall_cove';
-      else if (x === 11 && y <= 3) f = 'wall_v';
-      else if (at(x + 1, y) === ':') f = 'wall_end_r';
-      else if (at(x - 1, y) === ':') f = 'wall_end_l';
-      L.set('ground', x, y, `goatpath:${f}`, true);
-    } else if (c === '%') {
-      L.set('ground', x, y, `goatpath:${x === 3 ? 'cove_w' : 'cove'}`, true);
-    } else if (c === 'O') {
-      L.set('ground', x, y, 'goatpath:cave_mouth', true);
-    } else if (c === '~') {
-      // The sea far below; where it meets land, the tile with the cliff lip on that side.
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    if (isSea(x, y)) {
+      // The sea at the cliff foot; next to land, the tile with the cliff lip on that side.
       let f = 'sea';
-      if (isLand(at(x + 1, y))) f = 'cliff_e';
-      else if (isLand(at(x - 1, y))) f = 'cliff_w';
-      else if (isLand(at(x, y + 1))) f = 'cliff_s';
-      else if (isLand(at(x, y - 1))) f = 'cliff_n';
+      if (!isSea(x + 1, y) && x + 1 < W) f = 'cliff_e';
+      else if (x > 0 && !isSea(x - 1, y)) f = 'cliff_w';
+      else if (y + 1 < H && !isSea(x, y + 1)) f = 'cliff_s';
+      else if (y > 0 && !isSea(x, y - 1)) f = 'cliff_n';
       L.set('ground', x, y, `goatpath:${f}`, true);
+    } else if (isPath(x, y)) {
+      // The last stretch is the Bilge's own paving; the rest is goat-worn dirt.
+      const quay = y >= 39 && x >= 9;
+      L.set('ground', x, y, quay ? pave(x, y) : `goatpath:${['path_a', 'path_b', 'path_c'][(x * 7 + y * 13) % 3]}`, false);
+      if (STEPS.some((r) => inRect(r, x, y))) L.step[y][x] = 'step_stairs';
+    } else if (x >= 14 && y >= 28 && y <= 38) {
+      // The lower town's roofs, nearly at eye level by now.
+      L.set('ground', x, y, lowRoof(x, y), true);
+    } else {
+      // Bare rock and gorse; a gull on a ledge here and there.
+      const gull = (x * 5 + y * 3) % 23 === 0;
+      L.set('ground', x, y, `headland:${gull ? 'cliff_gull' : `cliff_${y % 2 ? 's' : 'n'}${x % 2 ? 'e' : 'w'}`}`, true);
     }
-  }));
-  // Mott's shack (1–4, 9–12): the still glints in its window; the door has his sign.
-  for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) L.set('ground', 1 + c, 9 + r, `mott_shack:shack_x${c}y${r}`, true);
-  // Empty square jugs, stacked.
-  L.set('detail', 3, 14, 'mott_jugs:jugs_l', true); L.set('detail', 4, 14, 'mott_jugs:jugs_r', true);
+  }
+  // Mott's shack: the still glints in its window; the door (3, 15) has his sign.
+  for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) L.set('ground', SHACK[0] + c, SHACK[1] + r, `mott_shack:shack_x${c}y${r}`, true);
+  // Empty square jugs, stacked by the yard.
+  L.set('detail', JUGS[0][0], JUGS[0][1], 'mott_jugs:jugs_l', true); L.set('detail', JUGS[1][0], JUGS[1][1], 'mott_jugs:jugs_r', true);
+  // The sea cave's mouth at the waterline.
+  L.set('ground', CAVE[0], CAVE[1], 'goatpath:cave_mouth', true);
   return L.done();
 }
 
@@ -80,37 +89,38 @@ function compose() {
 // Objects
 
 const objects = [
-  { id: 'shack_door', x: 2, y: 11, h: 2, look: "Mott's shack. A sign: GONE FERRYING. Underneath, in different ink: (NOT REALLY)." },
-  { id: 'shack_window', x: 3, y: 11, h: 2, look: "Through the window: a still. A copper coil, polished like a trophy. It's the only thing in there he dusts." },
-  { id: 'shack_wall', x: 1, y: 9, w: 4, h: 2, lookKey: 'shack_window', look: "Through the window: a still. A copper coil, polished like a trophy. It's the only thing in there he dusts." },
-  { id: 'jugs', x: 3, y: 14, w: 2, look: "Empty jugs. Lots of them. Square. Mott's." },
+  { id: 'shack_door', x: 3, y: 14, h: 2, look: "Mott's shack. A sign: GONE FERRYING. Underneath, in different ink: (NOT REALLY)." },
+  { id: 'shack_window', x: 4, y: 14, h: 2, look: "Through the window: a still. A copper coil, polished like a trophy. It's the only thing in there he dusts." },
+  { id: 'shack_side', x: 5, y: 14, h: 2, lookKey: 'shack_window', look: "Through the window: a still. A copper coil, polished like a trophy. It's the only thing in there he dusts." },
+  { id: 'jugs', x: JUGS[0][0], y: JUGS[0][1], w: 2, look: "Empty jugs. Lots of them. Square. Mott's." },
   {
-    id: 'sea_cave', x: 0, y: 21,
+    id: 'sea_cave', x: CAVE[0], y: CAVE[1],
     looks: [
       ["A sea cave under the cliff. The tide's in, and the water goes right to the back.", 'Something down there catches the light. Brass, maybe.'],
       "The tide's in. I'm not swimming. Not today.",
     ],
   },
-  ...[[3, 20, 12, 3], [15, 1, 1, 18]].map(([x, y, w, h], i) => ({
+  {
+    // The hairpin halfway down, looking west.
+    id: 'viewpoint', x: 1, y: 21, h: 2,
+    look: "From the hairpin: the whole open Bowl, all the way to the western Rim. You can't see the Gate from here. It's very restful.",
+  },
+  ...[[0, 1, 2, 20], [0, 23, 2, 14]].map(([x, y, w, h], i) => ({
     id: `view_${i}`, x, y, w, h, lookKey: 'goat_view',
-    look: "The back of the island. Cliff, goats, sea. You can't see the Gate from here. It's very restful.",
+    look: 'The back of the island. Cliff, goats, sea. Gulls wheeling below me, which is wrong, but there it is.',
   })),
-  ...[[1, 1, 10, 3], [3, 6, 11, 2], [1, 16, 6, 2], [11, 16, 4, 2]].map(([x, y, w, h], i) => ({
-    id: `beds_${i}`, x, y, w, h, lookKey: 'beds', look: 'Beans, mostly. The goats have opinions about the beans.',
-  })),
+  { id: 'roofs', x: 14, y: 28, w: 2, h: 11, look: "The lower town's roofs, nearly at eye level now. Somebody's basin is still out, still full." },
 ].map((o) => ({ solid: false, use: { '*': cherylDeclines }, ...o }));
 
 // The sea cave takes the crowbar and the rest with the same shrug.
 objects.find((o) => o.id === 'sea_cave').use = { '*': (g) => g.describe("The tide's in. I'm not swimming. Not today.") };
 
 // ---------------------------------------------------------------------------
-// Goats.
+// Goats: they wander where the path is wide enough to walk round them.
 
 const goats = [
-  // They wander only where the path is wide enough to walk round them:
-  // the yard by Mott's shack, and the four-wide stretch between the lower beds.
-  { id: 'goat_1', x: 8, y: 11, area: [5, 10, 9, 3], sprite: { sheet: goat } },
-  { id: 'goat_2', x: 8, y: 16, area: [7, 16, 4, 2], sprite: { sheet: goat, palette: 'brown' } },
+  { id: 'goat_1', x: 12, y: 10, area: [10, 10, 5, 2], sprite: { sheet: goat } },
+  { id: 'goat_2', x: 6, y: 17, area: [2, 16, 7, 2], sprite: { sheet: goat, palette: 'brown' } },
 ].map((d) => ({
   id: d.id, name: 'Goat', x: d.x, y: d.y,
   sprite: d.sprite, kind: 'npc',
@@ -139,14 +149,16 @@ export const goatPathMap = composedMap(compose, {
   lighting: 'day',
   ambience: ['wind', 'goats'],
   step: 'step_stone',
-  spawn: [13, 1],
+  spawn: [14, 2],
   exits: [
-    { x: 13, y: 0, w: 2, to: 'lamp_street', at: [1, 10], facing: 'right', sfx: 'step_stone' },
-    { x: 1, y: 23, w: 2, to: 'harbor', at: [2, 4], facing: 'down', sfx: 'step_stairs' },
+    // Top right: back up to Lamp Street's west gate (0, 9–11).
+    { x: 15, y: 1, h: 3, to: 'lamp_street', at: [1, 9], facing: 'right', sfx: 'step_stone' },
+    // Bottom right: onto the west end of the Bilge's south quay (0, 11–13).
+    { x: 15, y: 39, h: 3, to: 'bilge', at: [1, 11], facing: 'right', sfx: 'step_stone' },
   ],
   onEnter: async (g) => { actWrongness(g); },
   ambient: [
-    // Now and then a goat stops to eat (the beans, mostly).
+    // Now and then a goat stops to eat.
     {
       every: [4, 8],
       run: (g) => {
@@ -162,3 +174,6 @@ export const goatPathMap = composedMap(compose, {
   ],
   entities: [...objects, ...goats],
 });
+
+// For tests: the path's rectangles.
+export const GOAT_PATH = { PATH, W, H };

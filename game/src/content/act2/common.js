@@ -3,6 +3,7 @@
 
 import { shopkeeper } from '../../art/npcs.js';
 import { items_act2, piano } from '../../art/act2_objects.js';
+import { items, items2 } from '../../art/items.js';
 import { counting_woman, mover, tourist, mayor, ambrose, basin_woman, girl, rope, watering_woman, bench_man } from '../../art/act2_npcs.js';
 import { bump, cycle, getItem, talking, cherylDeclines } from '../opening/common.js';
 
@@ -31,6 +32,26 @@ export const act2Items = {
     ],
     looksRepeat: 'cycle',
     useOn: { object: 'The guidebook has an opinion about this. It\'s wrong.' },
+  },
+  // The structure pass's guidebook and Tide-Sheet threads. Icons are STAND-INS
+  // (existing icons) until the art task's land.
+  telescope: {
+    name: 'Telescope',
+    icon: { sheet: items_act2, frame: 'crowbar' },
+    description: "The Lighthouse Keeper's telescope. Brass, never used. Every time she turns her back, it points at the sea.",
+    useOn: { npc: 'Brass wants looking at, she said. Somewhere it will be looked at.' },
+  },
+  shop_hat: {
+    name: 'Straw Hat',
+    icon: { sheet: items2, frame: 'hat' },
+    description: 'A wide straw hat, out of the Shop window. Display stock, retired.',
+    useOn: { npc: "It's for the Tourist. She's peeling." },
+  },
+  tide_sheet: {
+    name: 'Tide-Sheet',
+    icon: { sheet: items, frame: 'letter' },
+    description: 'The Tide-Sheet. Tide times, weather, and a letter from a visitor who has counted the Steps.',
+    looks: ["'Sir: I have counted your Hundred Steps. There are ninety-nine. Also, there is no shade. A Visitor.'"],
   },
   crowbar: {
     name: 'Crowbar',
@@ -159,4 +180,27 @@ export function firstMeet(g, id) {
 // sets it on entry while Act 2 is the current act; later acts set their own.
 export function actWrongness(g) {
   if (!g.flag('act2.done')) g.setWrongness(0.1);
+}
+
+// Paper and charcoal on an old surface thing (structure pass, section 4).
+export async function notFounderOld(g) {
+  await g.describe('Old, but not Founder-old. And Ottilie said floors.');
+}
+
+// Old saves after the structure pass (structure-pass.md, "Retiring Cheryl's
+// hat"): Cheryl's own hat goes back to the wardrobe unless she already traded it
+// to the Tourist; a save past that trade gets the Keeper's telescope put straight
+// into the Shop window, so Act 5's chain (the telescope back to the Keeper) works.
+export function migrateAct2(state) {
+  const f = state.flags || (state.flags = {});
+  const inv = state.inventory || (state.inventory = []);
+  if (inv.includes('hat') && !f['tourist.hasHat']) {
+    state.inventory = inv.filter((id) => id !== 'hat');
+    delete f['got.hat'];
+  }
+  if (f['tourist.hasHat'] && !f['window.telescope'] && !f['got.telescope']) {
+    f['window.telescope'] = true;
+    f['telescope.migrated'] = true;
+  }
+  return state;
 }

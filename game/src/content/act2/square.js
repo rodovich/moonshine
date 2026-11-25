@@ -14,7 +14,7 @@
 
 import { composedMap, blankGrid } from '../opening/grid.js';
 import { act2Tiles } from './tiles.js';
-import { layout, house, pave, lowRoof, LOOKS, pianoSprite, bump, cycle, firstMeet, getItem, cherylDeclines, actWrongness } from './common.js';
+import { layout, house, pave, lowRoof, LOOKS, pianoSprite, bump, cycle, firstMeet, getItem, cherylDeclines, actWrongness, notFounderOld } from './common.js';
 import { fish } from '../../art/landmarks.js';
 
 const W = 24, H = 18;
@@ -106,15 +106,32 @@ const objects = [
   ...[[0, 11], [13, 11]].map(([x, w]) => ({ id: `south_${x}`, x, y: 16, w, lookKey: 'south_view', look: 'The lower town, roofs and laundry all the way down to the canals.' })),
 ].map((o) => ({ solid: false, use: { '*': cherylDeclines }, ...o }));
 
-// The hat in the Shop window (from the Square or inside the Shop).
+// Old, but not Founder-old (Ottilie's rubbing instruction: floors, where the light falls).
+for (const o of objects) if (['fountain'].includes(o.id.replace(/_\d+.*$/, ''))) o.use = { ...o.use, paper_charcoal: notFounderOld };
+
+// The Shop window (from the Square or inside the Shop): the straw hat until
+// Cheryl swaps the Keeper's telescope in for it (structure pass, section 3).
+export const swapped = (g) => !!g.flag('window.telescope');
+
 export async function hatWindow(g) {
+  if (swapped(g)) return g.describe("The Keeper's telescope, in pride of place. Looked at, not looked through. She'd approve.");
   if (!g.flag('tourist.met')) {
     return g.describe('A wide straw hat, in the window. Display stock. It\'s been in that window since before I went grey.');
   }
   if (bump(g, 'hat.window') === 0) return g.describe("Display stock. She'll be peeling by lunchtime.");
-  if (g.flag('tourist.hasHat')) return g.describe("Display stock. Mine's on a tourist now, and it suits her better.");
-  if (g.hasItem('hat')) return g.describe('Display stock. I have a perfectly good hat right here.');
-  return g.describe('Display stock. I have a perfectly good hat at home, in the wardrobe.');
+  return g.describe("Display stock. He'd let it go if something filled the gap. That's how he talks, anyway.");
+}
+
+// Cheryl puts the telescope in the window herself; the Shopkeeper won't touch it.
+async function swapTelescope(g) {
+  const keeper = g.npc('shopkeeper');
+  g.takeItem('telescope');
+  g.sfx('give');
+  g.setFlag('window.telescope');
+  await g.describe('In goes the telescope. Out comes the hat. The window is still complete.');
+  await g.say(keeper, "...Display for display. That isn't selling. That's curating. I've never curated before.");
+  await g.say(keeper, 'I feel quite light-headed. Take the hat, Miss, before I come to my senses.');
+  await getItem(g, 'shop_hat');
 }
 
 const fishStatue = {
@@ -183,12 +200,15 @@ const mayor = {
         g.setFlag('met.mayor');
         return g.talk([
           ['Counting Woman', "A HUNDRED, Duncan! It's in the NAME!"],
-          ['Mayor', 'Madam, a guidebook is not an official document--'],
+          ['Mayor', 'Madam, a guidebook and a letter are not official documents--'],
           ['Counting Woman', 'Then make it OFFICIAL! Count them! Get a committee!'],
-          ['Mayor', '...Miss, did you show her a guidebook? Why would you show her a guidebook?'],
+          ['Mayor', '...Miss, did you show her those? Why would you show her those?'],
         ]);
       }
-      return g.say(self, 'There will be a committee. There is always a committee.');
+      return g.say(self, cycle(g, 'mayor.after', [
+        'There will be a committee. There is always a committee.',
+        'Miss, if you want it settled, go and count them yourself. Leave me out of it.',
+      ]));
     }
     if (firstMeet(g, 'mayor')) {
       await g.describe('The Mayor. Duncan, when he was seven. I taught him long division. Twice.');
@@ -212,10 +232,14 @@ const countingWoman = {
   when: counted,
   interact: async (g, self) => {
     if (firstMeet(g, 'counting_square')) return g.say(self, "A HUNDRED, Duncan! It's in the NAME!");
-    return g.say(self, "I'm not leaving until there's a committee.");
+    return g.say(self, cycle(g, 'counting_square.repeat', [
+      "I'm not leaving until there's a committee.",
+      'And nobody\'s minding my step. The wet one, at the top of the third flight.',
+    ]));
   },
   use: {
     guidebook: (g, self) => g.say(self, "I've READ it, thank you. I've read it four times. It doesn't get any more right."),
+    tide_sheet: (g, self) => g.say(self, "I've got my own copy. As EVIDENCE."),
     '*': (g, self) => g.say(self, "Don't hand me things. I lose count."),
   },
 };
@@ -226,7 +250,7 @@ const tourist = {
   turnToTalk: false,
   interact: async (g, self) => {
     if (g.flag('tourist.hasHat')) {
-      return g.say(self, cycle(g, 'tourist.after', ['Shade. Portable shade. I could weep.', "I'm going to sit right here until the ferry comes or I turn into a raisin."]));
+      return g.say(self, cycle(g, 'tourist.after', ['Shade. Portable shade. I could weep.', "I'm keeping this hat. I'm going to sit right here until the ferry comes or I turn into a raisin."]));
     }
     if (!g.flag('tourist.met')) {
       g.setFlag('tourist.met');
@@ -236,18 +260,23 @@ const tourist = {
         'My guidebook promised "gentle sea breezes and abundant shade." I have found neither.',
         "I'd give anything for a hat. There's one in the shop window and he won't SELL it. \"Display stock.\"");
     }
-    return g.say(self, cycle(g, 'tourist.repeat', ["A hat. Any hat. I'm peeling like an onion.", "According to this map your lighthouse is on the wrong end of the island. I've stopped asking."]));
+    return g.say(self, cycle(g, 'tourist.repeat', [
+      "A hat. Any hat. I'm peeling like an onion.",
+      'The ferry captain says there\'s no ferry. The lighthouse woman says there\'s no sea.',
+      "According to this map your lighthouse is on the wrong end of the island. I've stopped asking.",
+    ]));
   },
   use: {
-    hat: async (g, self) => {
-      g.takeItem('hat');
+    shop_hat: async (g, self) => {
+      g.takeItem('shop_hat');
       g.sfx('give');
       g.setFlag('tourist.met');
-      await g.say(self, "A hat! A real, wearable -- you're GIVING it to me?");
+      await g.say(self, 'A hat! A real, wearable -- you got it out of the WINDOW?');
       await g.say(self, "Take this. It's been wrong about everything else. Maybe it'll be right for you.");
       g.setFlag('tourist.hasHat');
       await getItem(g, 'guidebook');
     },
+    tide_sheet: (g, self) => g.say(self, "They printed my letter! ...Don't tell the woman with the sash it was me."),
     moon_chart: (g, self) => g.say(self, "The guidebook has a chart too. It's also wrong."),
     soap: (g, self) => g.say(self, "I've been washing in seawater. Don't ask."),
     '*': (g, self) => g.say(self, "Unless it's a hat or a ferry, I don't want it."),
@@ -279,7 +308,7 @@ export const squareMap = composedMap(compose, {
 
 const SW = 10, SH = 8;
 
-function composeShop() {
+function composeShop(g) {
   const L = layout(SW, SH, blankGrid);
   for (let y = 2; y < SH - 1; y++) for (let x = 1; x < SW - 1; x++) {
     L.set('ground', x, y, 'shop:floor', false);
@@ -302,16 +331,28 @@ function composeShop() {
     L.set('detail', x, 3, `shop:counter_${x === 2 ? 'l' : x === 6 ? 'r' : 'm'}`, true);
     L.counter[3][x] = true;
   }
-  // The marble jar and the window display with the straw hat.
+  // The marble jar and the window display: the straw hat, then (STAND-IN until
+  // the art lands) the bare display table once the telescope is in.
   L.set('detail', 1, 5, 'shop:marble_jar', true);
-  L.set('detail', 7, 5, 'shop:display_l', true); L.set('detail', 8, 5, 'shop:display_r', true);
+  if (g.flag('window.telescope')) {
+    L.set('detail', 7, 5, 'furniture:table_l', true); L.set('detail', 8, 5, 'furniture:table_r', true);
+  } else {
+    L.set('detail', 7, 5, 'shop:display_l', true); L.set('detail', 8, 5, 'shop:display_r', true);
+  }
   // The door.
   L.set('ground', 4, SH - 1, 'interior:door', false); L.set('ground', 5, SH - 1, 'interior:door', false);
   return L.done();
 }
 
 const shopObjects = [
-  { id: 'hat_display', x: 7, y: 5, w: 2, interact: (g) => hatWindow(g), use: { hat: (g) => g.describe("Mine's better. Don't tell him."), '*': cherylDeclines } },
+  {
+    id: 'hat_display', x: 7, y: 5, w: 2, interact: (g) => hatWindow(g),
+    use: {
+      telescope: (g) => swapTelescope(g),
+      shop_hat: (g) => g.describe('It\'s out now. Putting it back would only confuse him.'),
+      '*': cherylDeclines,
+    },
+  },
   {
     id: 'marble_jar', x: 1, y: 5,
     looks: [
@@ -336,13 +377,21 @@ const shopkeeper = {
         'The hat in the window? Display. The lanterns? Display. The marbles? Display. They all rolled into one corner overnight.',
         "I'd sell you something from the back, if I had a back. I don't. It's all front.");
     }
-    return g.say(self, cycle(g, 'shopkeeper.repeat', [
+    if (g.flag('window.telescope')) {
+      return g.say(self, cycle(g, 'shopkeeper.after', [
+        "Display for display. I've been thinking about it all morning.",
+        'Customers stop and look at it. Nobody buys it. Perfect.',
+      ]));
+    }
+    return g.say(self, ...[].concat(cycle(g, 'shopkeeper.repeat', [
+      ["If I sell the hat, the window has a gap. A shop with a gap in the window is a shop that's given up.",
+        'Now, if I had something to put in its place. Something brass. Something nautical. Never used.'],
       "Display stock. It's a principle.",
-      "If I sell the hat, the window has a gap. A shop with a gap in the window is a shop that's given up.",
-    ]));
+    ])));
   },
   use: {
-    hat: (g, self) => g.say(self, "That's YOUR hat, Miss. I don't take hats in. Where would I display it?"),
+    telescope: (g, self) => g.say(self, "Oh, that's lovely. But I don't touch the window, Miss. Curating is hands-off."),
+    shop_hat: (g, self) => g.say(self, "No returns, Miss. The window's complete."),
     guidebook: (g, self) => g.say(self, 'A genuine local guidebook! Lovely. But my window is complete.'),
     moon_chart: (g, self) => g.say(self, 'I could frame that. For display.'),
     '*': (g, self) => g.say(self, 'My window is complete, Miss.'),

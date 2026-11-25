@@ -133,7 +133,7 @@ const PRY_STEPS = "These steps are older than the Mayor's great-grandmother. I'm
 
 async function hollowLook(g) {
   if (!counted(g)) return g.describe('The edge of the landing, where she\'s sitting. Water has pooled along it, just there, by her feet.', "There's just room to get past her, if I mind her feet.");
-  if (!g.flag('step.found')) {
+  if (bump(g, 'hollow.free') === 0) {
     g.setFlag('step.found');
     return g.describe(
       "It's paved like the landing, but it's a step. Thirty-one years and I never noticed.",
@@ -298,6 +298,8 @@ async function countingTalk(g, self) {
       'And every morning somebody tips their Moonshine water down the Steps, and my feet get wet. Right here.');
     return g.describe("She's planted on the edge of the landing like a bollard. There's just room to squeeze past her.");
   }
+  if (g.flag('counter.sawBook')) return g.say(self, "One book. One mainlander. Show me it in the Tide-Sheet and we'll talk.");
+  if (g.flag('counter.sawPaper')) return g.say(self, "A letter's a letter. Show me it in a proper book, with a crest on.");
   return g.say(self, cycle(g, 'counter.repeat', [
     "Fourteen. Fifteen. Don't talk to me, I'm counting. ...Fifteen? Sixteen.",
     "There are a hundred. I'm just bad at it. I've been bad at it for twenty years.",
@@ -305,10 +307,31 @@ async function countingTalk(g, self) {
 }
 
 async function showGuidebook(g, self) {
+  if (g.flag('counter.sawBook')) return g.say(self, "One book. One mainlander. Show me it in the Tide-Sheet and we'll talk.");
+  await g.say(self, 'What\'s this? "The Hundred Steps (there are, in fact, ninety-nine)."');
+  if (!g.flag('counter.sawPaper')) {
+    g.setFlag('counter.sawBook');
+    return g.say(self,
+      "A BOOK. By a mainlander. They can't count over there. They've got machines for it.",
+      "If the Tide-Sheet printed it, now. THAT would be news. Then I'd go to the Mayor.");
+  }
+  return stormOff(g, self);
+}
+
+async function showTideSheet(g, self) {
+  await g.say(self, '"Sir: I have counted your Hundred Steps. There are ninety-nine." A LETTER.');
+  g.takeItem('tide_sheet');
+  if (!g.flag('counter.sawBook')) {
+    g.setFlag('counter.sawPaper');
+    return g.say(self, "Anyone can write a letter. I'm keeping this. As EVIDENCE. If it was in a proper BOOK...");
+  }
+  return stormOff(g, self);
+}
+
+async function stormOff(g, self) {
   await g.say(self,
-    'What\'s this? "The Hundred Steps (there are, in fact, ninety-nine)."',
-    'In FACT? In PRINT? Some mainlander has COUNTED MY STEPS and PRINTED it?',
-    "There are a HUNDRED. I'm going to the Mayor. I'm going to the Mayor RIGHT NOW.");
+    "TWICE? In PRINT? That's not a mistake. That's a CAMPAIGN.",
+    "I'm going to the Mayor. I'm going to the Mayor RIGHT NOW.");
   // Clear her path down the flight if Cheryl is standing in it.
   const p = g.player;
   if (p.x === 9 && p.y > 19 && p.y <= 25) { await g.movePlayer([10, p.y]); g.facePlayer('left'); }
@@ -337,10 +360,14 @@ async function showGuidebook(g, self) {
   g.hide(self);
   g.setFlag('counter.left');
   kidLap(g);
-  if (pianoThere) {
-    await g.wait(0.4);
-    await g.followPlayer(3);
-  }
+  await g.wait(0.4);
+  // Back up to her step: the Woman with Basin tips, and the water runs into the joint and is gone.
+  await g.panCamera(9, 18, 3);
+  if (g.npc('basin_woman')) trickle(g);
+  await g.wait(3.6);
+  await g.describe("Steps don't drink.");
+  g.setFlag('step.found');
+  await g.followPlayer(3);
 }
 
 const countingWoman = {
@@ -351,8 +378,8 @@ const countingWoman = {
   interact: countingTalk,
   use: {
     guidebook: showGuidebook,
+    tide_sheet: showTideSheet,
     moon_chart: (g, self) => g.say(self, 'Ticks. Counting ticks. At least you can count, Cheryl.'),
-    hat: (g, self) => g.say(self, "I don't need a hat. I need a hundredth step."),
     '*': (g, self) => g.say(self, "Don't hand me things. I lose count."),
   },
 };
@@ -424,7 +451,7 @@ async function kidTalk(g, self) {
   }
   const lines = [];
   if (slid(g)) lines.push('The piano WENT! It went faster than me! ...I need to train harder.');
-  if (counted(g)) lines.push("Mrs. Count's gone! I can do the whole flight now! ...Except the piano.");
+  if (counted(g)) lines.push("Mrs. Count's gone! ...That's the BONK one, Miss. Where she was sitting.");
   if (!lines.length) lines.push('BONK. Not tap. BONK.', "I can't get past the piano. It's in my way AND it's in my race.");
   return g.say(self, cycle(g, 'kid.steps', lines));
 }
@@ -439,7 +466,6 @@ const kidBase = {
   talkPose: 'jog',
   interact: kidTalk,
   use: {
-    hat: (g, self) => g.say(self, 'No hats! Hats are drag!'),
     soap: (g, self) => g.say(self, 'I had a bath last WEEK.'),
     '*': (g, self) => g.say(self, "Can't carry it! Aerodynamics!"),
   },
@@ -541,6 +567,19 @@ export const stepsMap = composedMap(compose, {
     { x: 10, y: 19, when: open, confirm: 'Go down?', choices: ['Yes', 'Not yet'], run: (g) => goDown(g) },
   ],
   triggers: [
+    {
+      // Walking onto the hollow step once she's gone: it goes bonk. The first time, Cheryl says so.
+      x: 9, y: 19, w: 2, stop: false, when: (g) => counted(g) && !open(g) && !g.flag('n.bonk'),
+      run: async (g) => {
+        g.setFlag('n.bonk', 1);
+        g.sfx('step_bonk');
+        await g.describe('Bonk.', 'The Kid was right.');
+      },
+    },
+    {
+      x: 9, y: 19, w: 2, stop: false, when: (g) => counted(g) && !open(g) && !!g.flag('n.bonk'),
+      run: async (g) => { g.sfx('step_bonk'); },
+    },
     {
       // Walking down into the piano.
       x: 6, y: 39, w: 2,

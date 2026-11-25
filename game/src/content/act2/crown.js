@@ -12,7 +12,7 @@
 
 import { composedMap, blankGrid } from '../opening/grid.js';
 import { act2Tiles } from './tiles.js';
-import { layout, house, pave, LOOKS, bump, firstMeet, cherylDeclines, actWrongness } from './common.js';
+import { layout, house, pave, LOOKS, bump, firstMeet, cherylDeclines, actWrongness, notFounderOld } from './common.js';
 import { props } from '../../art/props.js';
 
 const W = 24, H = 16;
@@ -144,8 +144,11 @@ const objects = [
   ...[[1, 7], [22, 7], [1, 13], [22, 13]].map(([x, y]) => ({ id: `pot_${x}_${y}`, x, y, lookKey: 'geraniums', look: 'Geraniums. Nobody remembers planting them.' })),
 ].map((o) => ({ solid: false, use: { '*': cherylDeclines }, ...o }));
 
+// Old, but not Founder-old (Ottilie's rubbing instruction: floors, where the light falls).
+for (const o of objects) if (['sundial', 'clock', 'tower_door'].includes(o.id.replace(/_\d+.*$/, ''))) o.use = { ...o.use, paper_charcoal: notFounderOld };
+
 // Crowbar on the tower door: no.
-objects[0].use = { crowbar: (g) => g.describe("It's bolted, not stuck. And he's in there. And I was raised properly."), '*': cherylDeclines };
+objects[0].use = { ...objects[0].use, crowbar: (g) => g.describe("It's bolted, not stuck. And he's in there. And I was raised properly.") };
 
 // ---------------------------------------------------------------------------
 // Characters
