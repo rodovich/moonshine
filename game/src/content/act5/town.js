@@ -459,8 +459,8 @@ export function withCourt5(def) {
     entities = act5Talk(entities, id, (g) => g.say('Neighbor', "My whites have never been whiter. Not since the house lifted in the night. I don't trust it."));
   }
   // Her sheets, in Act 5's wind: she says whiter than ever; they look grey to Cheryl.
-  entities = act5Talk(entities, 'back_line', (g) => g.describe("Still grey to me. She says whiter than ever. I'm not arguing with a woman about her sheets."));
-  entities = act5Talk(entities, 'nb_door', (g) => g.describe("Shut. She's round the back, guarding her sheets from the wind."));
+  entities = act5Talk(entities, 'back_line', (g) => g.describe("Still grey to me. She says whiter than ever. I'm not arguing with her about her sheets. Nobody wins that."));
+  entities = act5Talk(entities, 'nb_door', (g) => g.describe("Shut. She'll be up on her roof, guarding her sheets."));
   return { ...base, entities, onEnter: windOnEnter(base, LAUNDRY_AMBIENCE) };
 }
 
