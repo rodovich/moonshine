@@ -21,6 +21,7 @@ These apply to every slice.
 8. **Time of day is scripted.** Each act sets dusk, day, or night; nothing changes on a timer. The engine needs a global map tint (day, dusk, night) and must switch it during a scene.
 9. **Two jobs.** Every Founder object has a forgotten second job (see the story bible). Puzzle solutions come from discovering it.
 10. **Text fits the box.** One script line is one text box: it must wrap to three lines or fewer at the real box width (224 px). Aim for about 90 characters.
+11. **When someone asks for something abstract that Cheryl already has, she thinks one line toward it.** "Written down," "what time Tessel keeps," "something that says Tessel": the first time such a request is heard while the item is in her bag, a short description follows that points at the item, so the player still makes the connection. (First-time playtest, dbcLYG8CWB: the longest stall was Mott's "written down" with the moon chart in the bag.)
 
 ## World map
 
@@ -235,7 +236,7 @@ flowchart TD
 
 **Act 5**
 - *Boatman.* Beached at the foot of the Water Stairs, blocking the last broken flight. The Fishmonger lends a **bucket**; the refilled Fountain fills it; he pours it into his boat ("AFLOAT!") and hands over his **rope**, which lets Cheryl down the broken flight.
-- *Charging the disc.* The Water Stairs door's moon-lock needs a full charge, and only the lighthouse lamp is bright enough. The Keeper has turned round at last and wants her **telescope** back to watch the reef; for it, she'll let Cheryl have the lamp. The Shopkeeper, whose window display fell over in the rise, swaps the telescope back for the guidebook ("Twice in one week. I'm practically a merchant."). He declines the guidebook in Acts 2 and 4, because the Clockmaker needs it. Charged, the disc fades in under a minute, and the door is the length of the town away: it needs someone to run it flat out and jump off the quay. She gives it to the Kid, who still has her egg timer from Act 1 and winds it himself. The run is a fully scripted scene that always succeeds.
+- *Charging the disc.* The Water Stairs door's moon-lock needs a full charge, and only the lighthouse lamp is bright enough. The Keeper has turned round at last and wants her **telescope** back to watch the reef; for it, she'll let Cheryl have the lamp. The Shopkeeper's display fell over in the rise and the telescope rolled under his counter, out of reach; Cheryl hooks it out with the crowbar. (The guidebook can then fill his window, optionally; he declines it in Acts 2 and 4, because the Clockmaker needs it.) Charged, the disc fades in under a minute, and the door is the length of the town away: it needs someone to run it flat out and jump off the quay. She gives it to the Kid, who still has her egg timer from Act 1 and winds it himself. The run is a fully scripted scene that always succeeds.
 - *Clapper.* The Clockmaker's doorstop is the bell's old clapper. He swaps it for Mott's square jug.
 - *Escalation.* The Teeth grow on the risen Harbor's horizon and in the lighthouse window (three art stages).
 - *Windlass.* Through the bronze door and the Bow Passage: lever out the sheared Tooth's stump with the crowbar and seat the **clapper**. Then wait for moonrise. (Build-ready in [05-high-and-dry.md](05-high-and-dry.md).)
