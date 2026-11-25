@@ -203,7 +203,7 @@ Lines are Cheryl's descriptions unless labeled otherwise. Each line is one text 
 - No plug, player doesn't have the plug:
   - First: "My tub. Cast iron, clawfooted, and twice as stubborn as me." / "It took four men and a song to get it up here. The song was the hard part." / "No plug, though. I lent it to him downstairs. A 'chess emergency.'"
   - Then: "No plug. He's got it downstairs, playing chess with it."
-  - Third and later looks (the privacy beat; also the first look if the plug thread is already done): "In full view of Her Next Door's roof. On Moonshine Night nobody looks at anybody else's roof. That's the rule." / "We've both kept it for thirty-one years. She's very good at not looking. So am I."
+  - The privacy beat, played once, after that look's own line, on the third look (or the first, if the plug thread is already done), so the tub's state hints keep showing: "In full view of Her Next Door's roof. On Moonshine Night nobody looks at anybody else's roof. That's the rule." / "We've both kept it for thirty-one years. She's very good at not looking. So am I."
 - Player has the plug but hasn't used it: "The plug's in my bag. It would do more good in the tub."
 - Use **bath plug** on tub: "In it goes. Brass, with a little chain to pull it out by. A good plug." → remove plug; `tub.plugged`.
 - Plugged, empty: "Plugged. Now the water."
