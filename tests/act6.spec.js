@@ -586,3 +586,51 @@ test('keyboard: the climax, from the Moonrise card to the Long Keel', async ({ p
   await kbExit(page, 7, 3, 'up', 'long_keel');
   expect(errors).toEqual([]);
 });
+
+// Long scenes save right after their decisive change, so a reload partway through keeps the step.
+test('a reload mid-scene keeps the step: the Basin filling, the bath', async ({ page }) => {
+  test.setTimeout(180000);
+  const SIGHT = 'act1.moonrise,act2.started,act6.started,bell.final,brake.thrown,chain.home,hatch.open,keel.lamps=8,keel.doorOpen,n.sightEntered=1,got.plug';
+  await page.goto('/');
+  await page.evaluate(() => localStorage.clear());
+  const errors = await start(page, `?map=sighting_room&x=8&y=7&facing=up&flags=${SIGHT}&items=moonglass_disc,found_plug&save=1`);
+  const adv = kbAdvance(page);
+
+  // The plug goes in; mid-fill, the tab is reloaded.
+  await kbInteract(page, 'basin', 'found_plug');
+  await readUntil(page, adv, 'Plugs are plugs.');
+  await adv();
+  await waitFor(page, () => window.moonshine.snapshot().flags['fx.basinFill'] != null, null, 8000);
+  await page.goto('/?start=continue');
+  await page.waitForFunction(() => window.moonshine && window.moonshine.snapshot().scene === 'world', null, { timeout: 10000 });
+  let s = await snap(page);
+  expect(s.map).toBe('sighting_room');
+  expect(s.flags['basin.plugged']).toBeTruthy();
+  expect(s.items).not.toContain('found_plug');
+  // The Basin is full: looking into it shows the moon, off to the right of the Gate.
+  await page.waitForTimeout(600);
+  await kbInteract(page, 'basin');
+  expect(joined(await readThrough(page, adv))).toContain('off to the right of the Gate');
+
+  // The bath, reloaded after its last thought.
+  await page.goto(`/?map=sighting_room&x=7&y=7&facing=up&flags=${SIGHT},basin.plugged,trim=3,moon.true,sisters.asleep&items=moonglass_disc&save=1`);
+  await page.waitForFunction(() => window.moonshine && window.moonshine.snapshot().scene === 'world', null, { timeout: 10000 });
+  await page.waitForTimeout(400);
+  await kbInteract(page, 'basin');
+  await readUntil(page, adv, 'Most of the best things, nobody ever knows.');
+  await adv();
+  await page.waitForTimeout(600);
+  await page.goto('/?start=continue');
+  await page.waitForFunction(() => window.moonshine && window.moonshine.snapshot().scene === 'world', null, { timeout: 10000 });
+  s = await snap(page);
+  expect(s.map).toBe('sighting_room');
+  expect(s.flags.bathed).toBeTruthy();
+  expect(s.flags['fx.shoes']).toBeFalsy();
+  expect([s.x, s.y]).toEqual([7, 7]);
+  // The lift works now.
+  await page.waitForTimeout(400);
+  await kbInteract(page, 'lift');
+  await readThrough(page, adv);
+  expect((await snap(page)).choice).toBeTruthy();
+  expect(errors).toEqual([]);
+});
