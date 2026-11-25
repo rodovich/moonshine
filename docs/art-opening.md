@@ -132,3 +132,5 @@ The Gate goes cold: as the moon clears the ridge off to the side, draw `vista_ga
 The picture looks east, opposite the sunset (see [art-direction.md](art-direction.md), Skies): the Earth's shadow on the horizon, the pink Belt of Venus above it, then blue and indigo. The Rim's cliffs catch rose alpenglow, and the glow before the moon is cool silver. The moon itself is pale and faintly peach-gold as it clears the Rim, whitening as it climbs. The dev scene switches at 7 s and 8 s.
 
 `game/dev/scene-vista.js` plays the sequence in a loop, with the moon's height as `content/opening/moonrise.js` has it; `?still` holds the moment the moon is half up, and `?still=<ms>` any moment of the loop.
+
+The QA description sweep added or changed art for this act: see [art-sweep.md](art-sweep.md).
