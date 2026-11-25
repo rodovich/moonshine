@@ -11,6 +11,16 @@ import { loadSheet, frameIndexAt, glowMask } from './art.js';
 export const TILE = 16;
 export const LAYERS = ['ground', 'detail', 'overhead'];
 
+// The middle layer is called `detail` in the engine docs and `objects` in
+// docs/decisions.md; maps and scripts may use either name.
+export function layerName(name) {
+  return name === 'objects' ? 'detail' : name;
+}
+
+export function layerRows(def, name) {
+  return name === 'detail' ? def.detail || def.objects : def[name];
+}
+
 const warned = new Set();
 function warnOnce(msg) {
   if (warned.has(msg)) return;
@@ -100,8 +110,7 @@ export class TileMap {
     this.tileset = tilesetFor(def.tileset);
     this.layers = {};
     for (const name of LAYERS) {
-      const rows = def[name];
-      this.layers[name] = this.parseLayer(name, rows);
+      this.layers[name] = this.parseLayer(name, layerRows(def, name));
     }
     this.collision = this.parseCollision(def.collision);
   }
@@ -152,6 +161,7 @@ export class TileMap {
   }
 
   tile(layer, x, y) {
+    layer = layerName(layer);
     if (!this.inBounds(x, y)) return null;
     return this.layers[layer][y * this.w + x];
   }
@@ -159,6 +169,7 @@ export class TileMap {
   // Replace one tile at run time. `value` is anything a legend value can be,
   // or null to clear.
   setTile(layer, x, y, value) {
+    layer = layerName(layer);
     if (!this.inBounds(x, y) || !this.layers[layer]) return;
     this.layers[layer][y * this.w + x] = value == null ? null : this.checked(layer, this.tileset.resolve(value));
   }

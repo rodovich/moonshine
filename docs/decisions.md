@@ -47,6 +47,8 @@ The engine's own decisions (grid-stepped movement, display scaling, text style, 
 - **Text style**: NPC dialog in a navy box with a speaker tab; Cheryl's descriptions in a warm brown box with no label; her thoughts in the warm box, italic, with a dashed frame. The bitmap font is in `game/src/art/font.js`.
 - **The audio boundary** is `game/src/engine/sound.js`, a bridge to the audio module that maps engine sound ids to audio ids and ignores unknown ids. Scripts reach it through `g.playMusic`, `g.stopMusic`, `g.playCue`, `g.sfx`, and `g.setWrongness`.
 - **Walk animation follows distance walked** (one frame per 8 px), not the sheet's `walk_*` durations, so feet stay planted; the `walk_*` durations are ignored. Cheryl walks a tile per 12 frames (80 px/s, about 100 ms per walk frame), NPCs a tile per 16. Idles and other animations use `durations`. Scene lighting tints characters at half strength.
+- **Authoring aids:** `npm run check` validates all content (maps, exits, art references, ids used by scripts); `/dev/map.html` renders any map in any story state with collision, exits, triggers, and entities overlaid. Run the check before pushing content.
+- **People who move between maps are defined once** in `content.characters` with an `at(g)` placement, rather than duplicated per map.
 - **Lighting (dusk, night, day) is an engine layer**, declared per map and changeable mid-scene, separate from the Wrongness's screen effects.
 - **UI colors** are the `ui_*` entries in `game/src/art/palette.js`. The `ph_*` entries are placeholder art for the engine test maps and go away with them.
 
