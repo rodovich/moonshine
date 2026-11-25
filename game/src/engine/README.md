@@ -266,11 +266,12 @@ Time, camera, and screen effects (all resolve when done; durations in seconds):
 | `wait(seconds)` | Pause. |
 | `fade('out' \| 'in' \| alpha, seconds, color)` | Fade to/from a color (default black), in 8 brightness steps. |
 | `shake(pixels, seconds)` | Screen shake. |
+| `tilt(dx, dy, seconds)` | Eases the whole screen to a steady offset of a pixel or two and holds it (a hull over-tilting), unlike a jittery shake; `tilt(0, 0, seconds)` eases back. Shakes add on top. |
 | `tint(color, amount, seconds, mode)` | Color wash over the world. `mode` is a canvas blend: `'source-over'` (default), `'multiply'`, `'screen'`, `'color'`, `'hue'`, `'saturation'`, `'difference'`. Amount 0 removes it. |
 | `hueShift(degrees, seconds)` | Rotates every color's hue (palette-shift look), snapped to 15-bit color. 0 restores. |
 | `distort(pixels, seconds, { freq, speed })` | Per-scanline wobble. 0 removes it. |
 | `flicker(seconds, { color, rate })` | Rapid inverted flashes. |
-| `clearEffects(seconds)` | Removes tint, hue shift, and distortion. |
+| `clearEffects(seconds)` | Removes tint, hue shift, distortion, and tilt. |
 | `panCamera(x, y, speed)` / `followPlayer(speed)` | Glide the camera to a tile and back to Cheryl. |
 | `setLighting(name, seconds)`, `lighting` | Crossfade the scene lighting to `'day'`, `'dusk'`, `'night'`, a preset from `content.lighting`, or `null`; 0 seconds is a hard cut. Lasts until the next map load, which applies that map's own `lighting`. |
 | `showPicture(spec, { fade })` / `hidePicture({ fade })` | Replace the map with a full-screen 256×224 picture (a vista): `{ sheet, frame, palette }` or a function `(ctx, ms)` that draws it, `ms` since it appeared. Text boxes, shake, and effects still work over it. `fade` is in seconds; 0 is a hard cut. |
@@ -298,7 +299,7 @@ Maps, audio, misc:
 |---|---|
 | `changeMap(id, x, y, facing, { fade, seconds })` | Fades out, loads, fades in, then runs the map's `onEnter`, all before it resolves: `await g.changeMap('b'); await g.say(...)` shows the say after b's intro. |
 | `map` | Current map id. |
-| `playMusic(id)`, `stopMusic(fadeMs)`, `sfx(id)`, `playCue(id, { resume })`, `windDownMusic(ms)`, `startLoop(id)`, `stopLoop(id, fadeMs)`, `setWrongness(0..1)` | Audio (see below and `src/audio/README.md`). |
+| `playMusic(id)`, `stopMusic(fadeMs)`, `sfx(id)`, `playCue(id, { resume })`, `windDownMusic(ms)`, `muffleMusic(on)`, `bendMusic(cents, ms)`, `setLoopVolume(id, v, fadeMs)`, `startLoop(id)`, `stopLoop(id, fadeMs)`, `setWrongness(0..1)` | Audio (see below and `src/audio/README.md`). |
 | `save()` | Save now (saving also happens automatically). |
 | `toTitle()` | Save and return to the title screen (end of a slice). |
 | `random(min, max)` | Integer from the game's RNG (seedable with `?seed=`). |
@@ -359,6 +360,11 @@ node tests/shot.js "?map=test_street" out.png 800 ArrowRight z   # one screensho
 - **Display scaling.** The 256×224 frame is scaled by a whole number of *device* pixels when that uses at least 80% of the possible size; otherwise (very small screens) by the exact fit, with nearest-neighbor sampling. On a typical phone in portrait this gives a crisp 4× in device pixels. On tall portrait screens the frame sits near the top, leaving room below for thumbs.
 - **Text** is a variable-width bitmap font (`src/art/font.js`, 7 px caps, 9 px cell, 12 px lines), revealed at about 42 characters per second with short pauses after punctuation. Any key or tap reveals the rest; the next press advances. The box sits at the bottom, or the top when Cheryl is in the lower part of the screen. NPC lines have a navy box and a speaker tab; Cheryl's descriptions a warm brown box; her thoughts the warm box in italics with a dashed frame.
 - **One script at a time**, queued; the world pauses player control while scripts run. Autosave after each script and map change.
+
+- **Text boxes unfold** over 4 frames when they open, like SNES windows, but not between back-to-back boxes in a conversation. A key or tap during the unfold isn't lost; it reveals the text as soon as the box is open.
+- **Feel targets** (checked against SNES-era adventures): walking 80 px/s; text about 42 characters a second with punctuation pauses; door fades a quarter second each way in 8 brightness steps; click-to-walk starts on the next frame, and a new click mid-walk re-routes from the tile being entered.
+- **Browsers.** The suite runs in Chromium and WebKit, plus Pixel 7 and iPhone 13 touch profiles (`npx playwright test --project=webkit`, `--project=iphone`). Audio unlocking is retried on every key and pointer gesture (down and up) until it succeeds, since iOS Safari only honors some gestures. Known limit: on iPhones with the ringer switch on silent, Web Audio is muted by the system.
+- **Performance.** `tests/perf.spec.js` walks the 64×48 stress map (`?map=test_big`, 40 wandering people, night lighting with lamps) and measures our CPU time per frame: about 1 ms in Chromium and 0.3 ms in WebKit; 2-2.5 ms with darkness, a hue shift, and the wobble all on; and 6 ms walking (9 ms with effects) with Chromium's CPU throttled 6× (roughly a low-end phone), against a 16.7 ms budget. `?debug=1` shows live update and draw times.
 
 ## Module map
 

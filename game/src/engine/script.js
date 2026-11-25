@@ -7,7 +7,7 @@
 
 import { DIR_VEC, dirBetween } from './entity.js';
 import { pathToDirs } from './world.js';
-import { playMusic, stopMusic, sfx, playCue, windDownMusic, startLoop, stopLoop, setWrongness } from './sound.js';
+import { playMusic, stopMusic, sfx, playCue, windDownMusic, startLoop, stopLoop, setWrongness, muffleMusic, bendMusic, setLoopVolume } from './sound.js';
 import { loadSheet } from './art.js';
 import { TILE } from './tilemap.js';
 
@@ -256,6 +256,11 @@ export function makeApi(world) {
     shake(amount = 3, seconds = 0.4) {
       return fx.shake(amount, seconds);
     },
+    // A slow, held screen offset (not a jitter): eases to (dx, dy) pixels
+    // over `seconds` and stays until tilt(0, 0, seconds) eases it back.
+    tilt(dx, dy, seconds = 1) {
+      return fx.tilt(dx, dy, seconds);
+    },
     // Color wash. mode: 'source-over' (default), 'multiply', 'screen',
     // 'color', 'hue', 'saturation', 'difference'. Amount 0 removes it.
     tint(color, amount = 0.5, seconds = 0.5, mode) {
@@ -401,6 +406,15 @@ export function makeApi(world) {
     },
     windDownMusic(ms) {
       windDownMusic(ms);
+    },
+    muffleMusic(on, opts) {
+      muffleMusic(on, opts);
+    },
+    bendMusic(cents, ms) {
+      bendMusic(cents, ms);
+    },
+    setLoopVolume(id, v, fadeMs) {
+      setLoopVolume(id, v, fadeMs);
     },
     startLoop(id, opts) {
       startLoop(id, opts);

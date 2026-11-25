@@ -55,7 +55,8 @@ test('item use precedence: target, item useOn, decline, default', async ({ page 
   expect(await said("await g.npc('old_man'); return window.moonshine.world.useItemOn(g.npc('old_man'), 'brass_key');")).toContain('My key');
   expect(await said("return window.moonshine.world.useItemOn(g.npc('old_man'), 'letter');")).toContain('everything I need');
   expect(await said("return window.moonshine.world.useItemOn(g.npc('kid'), 'brass_key');")).toContain('strangers');
-  expect(await said("return window.moonshine.world.useItemOn(g.npc('cat'), 'letter');")).toContain('going to help');
+  // The content's default: Cheryl's fallback lines, in turn (docs/design/01-opening.md).
+  expect(await said("return window.moonshine.world.useItemOn(g.npc('cat'), 'letter');")).toMatch(/^No\.$|not where that goes|somehow|explain it later/);
 });
 
 test('barks and emotes don\'t stop the player', async ({ page }) => {
@@ -194,4 +195,22 @@ test('waitForInput resolves on a key', async ({ page }) => {
   await page.waitForTimeout(300);
   await press(page, 'z');
   expect(await pending).toBe('ok');
+});
+
+test('Act 4 scene tools: held tilt, white fade, timed tile swaps, chained pans', async ({ page }) => {
+  await boot(page, `${STREET}&x=12&y=8`);
+  await waitIdle(page);
+  const r = await runScript(page, `
+    await g.tilt(2, 0, 0.3);
+    const held = window.moonshine.effects.shakeOffset()[0];
+    await g.tilt(0, 0, 0.2);
+    await g.fade('out', 0.2, 'white_light');
+    await g.fade('in', 0.2);
+    for (let x = 6; x < 10; x++) { g.setTile('ground', x, 12, 'canal:water'); await g.wait(0.05); }
+    await g.panCamera(20, 8, 1.5);
+    await g.panCamera(20, 14, 1.5);
+    await g.followPlayer(3);
+    return held;
+  `, 20000);
+  expect(r).toEqual({ done: true, v: 2 });
 });

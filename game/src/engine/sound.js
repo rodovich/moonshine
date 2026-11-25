@@ -22,8 +22,13 @@ function warnOnce(kind, id, err) {
   console.warn(`[sound] ${kind} "${id}" unavailable:`, err?.message ?? err);
 }
 
+// Call from user gestures until it returns true. initAudio() is safe to call
+// repeatedly; Safari may ignore the first attempt (a pointerdown) and accept a
+// later one (the pointerup), so the engine keeps trying until audio runs.
 export function unlockAudio() {
+  if (audio.audioReady && audio.audioReady()) return true;
   audio.initAudio().catch((err) => warnOnce('init', '', err));
+  return !!(audio.audioReady && audio.audioReady());
 }
 
 export function playMusic(id, opts) {
@@ -43,6 +48,21 @@ export function playCue(id, opts) {
 /** The current music runs down like a music box over `ms` and stops (the moonrise). */
 export function windDownMusic(ms) {
   try { audio.windDownMusic(ms); } catch (err) { warnOnce('wind', '', err); }
+}
+
+/** Bend the current music's pitch to `cents` over `ms` (notes from now on). */
+export function bendMusic(cents, ms) {
+  try { audio.bendMusic(cents, ms); } catch (err) { warnOnce('bend', '', err); }
+}
+
+/** Change a running loop's level (0..1 of normal) over `fadeMs`. */
+export function setLoopVolume(id, v, fadeMs) {
+  try { audio.setLoopVolume(id, v, fadeMs); } catch (err) { warnOnce('loopvol', id, err); }
+}
+
+/** Muffle the music as if heard from outside (the Shop); muffleMusic(false) to undo. */
+export function muffleMusic(on, opts) {
+  try { audio.muffleMusic(on, opts); } catch (err) { warnOnce('muffle', '', err); }
 }
 
 export function sfx(id) {

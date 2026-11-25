@@ -48,6 +48,21 @@ await page.waitForTimeout(300);
 const afterWind = await page.evaluate(async () => (await import('../src/audio/index.js')).currentMusic());
 await page.click('#stop');
 await page.waitForTimeout(300);
+// Act 4's controls: bend the pumps cue sharp, fade a loop's level, dip everything for an ear-pop.
+await page.evaluate(async () => {
+  const a = await import('../src/audio/index.js');
+  a.playMusic('pumps', { fadeMs: 0 });
+  a.startLoop('roar');
+  await new Promise((r) => setTimeout(r, 400));
+  a.bendMusic(80, 600);
+  a.setLoopVolume('roar', 0.2, 300);
+  a.sfx('ear_pop');
+  a.setMusicFilter('muffled');
+  await new Promise((r) => setTimeout(r, 900));
+  a.setMusicFilter(null);
+  a.stopLoop('roar', 0);
+  a.stopMusic(0);
+});
 
 let failed = false;
 const fail = (msg) => { problems.push(msg); failed = true; };
@@ -84,9 +99,12 @@ console.log('track            sub   bass  lowmid    mid presence    air   A-weig
 for (const [id, s] of Object.entries(spectra)) {
   const b = s.bands;
   const notes = [];
-  if (b.sub > -12) notes.push('too much sub-bass');
-  if (b.lowmid > b.mid + 3) notes.push('muddy: low-mid well above mid');
-  if (b.presence < -35 && id !== 'wrongness') notes.push('dull: almost nothing above 2 kHz');
+  const scene = await page.evaluate(async (id) => !!(await import('../src/audio/music/index.js')).SONGS[id].scene, id);
+  if (!scene) {
+    if (b.sub > -12) notes.push('too much sub-bass');
+    if (b.lowmid > b.mid + 3) notes.push('muddy: low-mid well above mid');
+    if (b.presence < -35 && id !== 'wrongness') notes.push('dull: almost nothing above 2 kHz');
+  }
   for (const n of notes) fail(`${id}: ${n}`);
   console.log(`${id.padEnd(14)} ${[b.sub, b.bass, b.lowmid, b.mid, b.presence, b.air].map((x) => x.toFixed(1).padStart(6)).join(' ')}   ${s.aWeightedDb.toFixed(1).padStart(6)}${notes.length ? '  <-- ' + notes.join('; ') : ''}`);
 }

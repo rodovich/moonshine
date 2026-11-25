@@ -211,6 +211,11 @@ export const COLORS = {
   charcoal: '#686068',
   charcoal_deep: '#302830',
 
+  // Act 4 (art): the canal bed laid bare.
+  mud_light: '#988870',
+  mud: '#685848',
+  mud_deep: '#403028',
+
   // UI (engine)
   ui_ink: '#201828',
   ui_box: '#182048',

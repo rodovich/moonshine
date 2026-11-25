@@ -29,6 +29,9 @@ export class Input {
     this.pointer = { down: false, x: 0, y: 0, id: null };
     this.repeat = { dir: null, t: 0 };
     this.onFirstInput = null;
+    // Called on every key and pointer gesture until it returns true (audio
+    // unlocking; iOS Safari only honors some gestures, e.g. touchend).
+    this.onGesture = null;
     this.lastScheme = 'keyboard';
 
     window.addEventListener('keydown', (e) => this.keydown(e));
@@ -42,11 +45,19 @@ export class Input {
     c.addEventListener('contextmenu', (e) => e.preventDefault());
   }
 
+  gesture() {
+    if (this.onGesture && this.onGesture()) this.onGesture = null;
+  }
+
   first() {
+    this.gesture();
     this.anyInput = true;
     if (this.onFirstInput) {
       const f = this.onFirstInput;
       this.onFirstInput = null;
+    // Called on every key and pointer gesture until it returns true (audio
+    // unlocking; iOS Safari only honors some gestures, e.g. touchend).
+    this.onGesture = null;
       f();
     }
   }
@@ -67,6 +78,7 @@ export class Input {
   }
 
   keyup(e) {
+    this.gesture();
     const action = KEYMAP[e.code] || KEYMAP[e.key];
     if (!action) return;
     this.held.delete(action);
@@ -107,6 +119,7 @@ export class Input {
   }
 
   pup(e) {
+    this.gesture();
     if (e.pointerId !== this.pointer.id) return;
     const p = this.display.toGame(e.clientX, e.clientY);
     this.pointer.down = false;

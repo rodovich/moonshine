@@ -63,6 +63,34 @@ export const INSTRUMENTS = {
     noise: { gain: 0.07, decay: 0.015, filter: { type: 'bandpass', freq: 1800, q: 0.8 } },
     gain: 0.3,
   },
+  // Moonglass: a glass harmonica, soft attack and a cool shimmer. The Founders' melody voice.
+  glass: {
+    osc: [
+      { wave: 'sine' },
+      { wave: 'sine', ratio: 2, detune: 3, gain: 0.18 },
+      { wave: 'sine', ratio: 3, gain: 0.06 },
+      { wave: 'sine', ratio: 1, detune: 9, gain: 0.35 },
+    ],
+    env: { a: 0.18, d: 1.2, s: 0.75, r: 0.9 },
+    vibrato: { rate: 3.8, depth: 7, delay: 0.3, fade: 0.8 },
+    gain: 0.36,
+  },
+  // A child's singing voice, for the Skipping Girls' chant (bright, a little nasal).
+  voice: {
+    osc: [{ wave: 'pulse25' }, { wave: 'ocarina', gain: 0.6 }],
+    env: { a: 0.02, d: 0.2, s: 0.8, r: 0.06 },
+    filter: { type: 'bandpass', freq: 1300, q: 1.4, track: 0.4 },
+    vibrato: { rate: 6, depth: 18, delay: 0.1, fade: 0.15 },
+    gain: 0.5,
+  },
+  // The Boatman: a reedy, wobbling voice that never quite finds the note.
+  boatman: {
+    osc: [{ wave: 'reed' }, { wave: 'reed', detune: 23, gain: 0.5 }],
+    env: { a: 0.06, d: 0.3, s: 0.85, r: 0.12 },
+    filter: { type: 'bandpass', freq: 800, q: 1.2, track: 0.5 },
+    vibrato: { rate: 4.2, depth: 45, delay: 0.05, fade: 0.2 },
+    gain: 0.4,
+  },
   // Wooden mallet: marimba-like, short and warm.
   marimba: {
     osc: [{ wave: 'marimba' }],
@@ -173,6 +201,31 @@ export const INSTRUMENTS = {
       // Clock tick and tock (Morning After).
       tick: [{ type: 'tone', wave: 'triangle', freq: 2600, dur: 0.012, gain: 0.16 }, { type: 'noise', dur: 0.008, gain: 0.05, filter: { type: 'bandpass', freq: 4000, q: 3 } }],
       tock: [{ type: 'tone', wave: 'triangle', freq: 1900, dur: 0.014, gain: 0.16 }, { type: 'noise', dur: 0.008, gain: 0.05, filter: { type: 'bandpass', freq: 3000, q: 3 } }],
+      // A slow, deep pulse: the machinery's heartbeat underground (no hand percussion there).
+      pulse: [{ type: 'tone', wave: 'sine', freq: [78, 44], sweep: 0.25, dur: 0.5, gain: 0.7, env: { a: 0.01, d: 0.45, s: 0, r: 0.1 } }],
+      // The Three Sisters' working thumps (the pumps cue, and the sister_* sounds): the stout one
+      // heavy and low, the thin one light and quick, the middle one in between with a greedy gasp.
+      stout: [
+        { type: 'tone', wave: 'sine', freq: [88, 50], sweep: 0.3, dur: 0.38, gain: 0.9, env: { a: 0.004, d: 0.35, s: 0, r: 0.06 } },
+        { type: 'noise', dur: 0.1, gain: 0.2, filter: { type: 'lowpass', freq: 300 } },
+        { type: 'tone', wave: 'triangle', at: 0.02, freq: 410, dur: 0.03, gain: 0.05 },
+      ],
+      thin: [
+        { type: 'tone', wave: 'sine', freq: [150, 90], sweep: 0.1, dur: 0.13, gain: 0.5 },
+        { type: 'noise', dur: 0.03, gain: 0.08, filter: { type: 'bandpass', freq: 1500, q: 1.5 } },
+        { type: 'tone', wave: 'triangle', freq: 900, dur: 0.015, gain: 0.04 },
+      ],
+      middle: [
+        { type: 'tone', wave: 'sine', freq: [100, 55], sweep: 0.2, dur: 0.24, gain: 0.7 },
+        { type: 'noise', at: 0.04, dur: 0.22, gain: 0.09, filter: { type: 'bandpass', freq: [500, 1000], q: 1.5, time: 0.2 }, env: { a: 0.04, d: 0.18, s: 0.3, r: 0.05 } },
+      ],
+      // A heartbeat, lub-dub's "lub" (the climb); the ghost mark makes the softer "dub".
+      heart: [
+        { type: 'tone', wave: 'sine', freq: [62, 40], sweep: 0.15, dur: 0.2, gain: 0.85, env: { a: 0.006, d: 0.18, s: 0, r: 0.05 } },
+        { type: 'noise', dur: 0.06, gain: 0.08, filter: { type: 'lowpass', freq: 220 } },
+      ],
+      // Water lapping against a quay, as part of the harbor music's texture.
+      wave: [{ type: 'noise', dur: 1.4, gain: 0.12, filter: { type: 'bandpass', freq: [700, 350], q: 0.8, time: 1.4 }, env: { a: 0.45, d: 0.8, s: 0.2, r: 0.4 } }],
       // Low tom for fills and the title's swells.
       tom: [{ type: 'tone', wave: 'sine', freq: [190, 110], sweep: 0.2, dur: 0.3, gain: 0.55, env: { a: 0.002, d: 0.28, s: 0, r: 0.05 } }],
       // Soft cymbal swell (long noise with slow attack).

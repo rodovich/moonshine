@@ -10,7 +10,7 @@ The first playable slice: Moonshine Night in Cistern Court. The design is [docs/
 | `court.js` | Cistern Court (20 × 26): tiles, objects, the Old Man, Her Next Door, the Sweaty Kid, the cat, the end of the slice. |
 | `flat.js` | Cheryl's flat (12 × 9). |
 | `moonrise.js` | The moonrise sequence, steps numbered as in the design. |
-| `common.js` | Items, the item hint, saved counters, Cheryl's fallback lines, and two adapters (below). |
+| `common.js` | Items, the item hint, saved counters, and Cheryl's fallback lines. |
 | `grid.js` | Turns a map's `compose(g)` function into the engine's legend, layers, and patches. |
 | `tiles.js` | The tileset (the sheets the maps reference). |
 
@@ -22,7 +22,7 @@ Set pieces drive the art with short-lived flags that `compose` reads: `fx.tap`, 
 
 ## Story flags
 
-`oldMan.wantsKing`, `oldMan.hasPepperKing`, `kid.wantsTimer`, `kid.hasTimer`, `neighbor.wantsProp`, `neighbor.sheetsMoved`, `tub.plugged`, `tub.full`, `act1.moonrise` (the morning), `act1.done` (left by the Squeeze). Taken things are `got.<item>`. `n.<name>` flags are counters for lines that change with repeat looks or alternate (`bump` and `cycle` in `common.js`). `hint.bag` marks the one-time item hint.
+`oldMan.wantsKing`, `oldMan.hasPepperKing`, `kid.wantsTimer`, `kid.hasTimer`, `neighbor.wantsProp`, `neighbor.sheetsMoved`, `tub.plugged`, `tub.full`, `act1.moonrise` (the morning), `act1.done` (left by the Squeeze). `act2.started` (set by Act 2 on first entering Lamp Street) takes the Kid out of the court and gives the Old Man and the Neighbor new repeat lines. The Squeeze leads to Lamp Street once `src/content/index.js` finds that map; until then it shows the end card. Taken things are `got.<item>`. `n.<name>` flags are counters for lines that change with repeat looks or alternate (`bump` and `cycle` in `common.js`). `hint.bag` marks the one-time item hint.
 
 ## Jumping to a moment
 
@@ -34,6 +34,10 @@ Set pieces drive the art with short-lived flags that `compose` reads: `fx.tap`, 
 ## Tests
 
 `tests/opening.spec.js` plays the whole opening twice, by keyboard alone (the plug thread first) and by pointer alone (the view thread first), and saves screenshots of key moments as `tests/screenshots/opening-*.png`. `node tests/play.mjs "<query>" step …` is a small dev tool for poking at a scene and taking screenshots (see its header).
+
+## Sound
+
+Maps play their music in `onEnter` (`cistern_court` at dusk, `morning_after` in the morning). Footsteps follow the surface: plaster on the roofs, stone in the court, stairs on the outside stair and the Squeeze, tile and rug in the flat. The tap runs the `water_pour` loop while the tub fills; the egg timer ticks (`timer_tick` loop) while the Kid admires it. The moonrise uses the `crowd` and `wind` loops and the drain in its three parts, timed to the tub's animation.
 
 ## Build decisions
 
@@ -48,11 +52,6 @@ Where the design left something open or didn't work in play, this is what the bu
 - **The Kid's hop:** extra waypoints at (13,16) and (13,18) bracket the hurdle; he holds the hop pose between them. Sweat flies off at the four corners. After the timer, every third lap ends with a ding and both arms up. When he shows off ("Watch!") he runs to the hurdle, hops it, and comes back.
 - **Walking down into the piano** (onto (15–16,22) facing down) gives the design's "not climbing over a piano" line. Clicking past it lands there too.
 - **The Squeeze in the morning:** the first step onto the stair top (15–16,24) gives its line; the exit is the row below (15–16,25).
-- **Moonrise staging:** Cheryl sits at (3,5) facing east (design step 2). The dip to the vista goes through black (the engine's picture fade). Until the audio task supplies a "music box runs down" cue, the music box detunes by ramping `setWrongness` over two seconds and then stops. For step 16, the Neighbor walks to the low wall at (10,4) and says her lines over it.
-- **Idles:** the Neighbor smooths her sheet three times, then steps back to admire it for two seconds. The well's breath is the mist rising, then three seconds of nothing. In the morning the Kid jogs in place facing south.
+- **Moonrise staging:** Cheryl sits at (3,5) facing east (design step 2). The dip to the vista goes through black (the engine's picture fade). When the moon appears the crowd loop stops dead and the music box winds down (`g.windDownMusic`). For step 16, the Neighbor walks to the low wall at (10,4) and says her lines over it.
+- **Idles:** the Neighbor smooths her sheet three times, then steps back to admire it for two seconds. Every 6–11 seconds the Old Man reaches out, moves a piece (tap), and moves it back (tap). In the morning the well breathes every 5–8 seconds (mist and a cold whoosh), and the Kid jogs in place, facing Cheryl when she's near.
 - **The end card** shows the title in the title screen's style over "End of the opening. / Tessel continues soon.", then returns to the title screen. Cheryl is saved standing at the top of the Squeeze, so Continue doesn't drop her on the exit.
-
-## Adapters to remove later
-
-- `characterSheet()` in `common.js` aliases the art's character frames (`<dir>_N`) to the names the engine reads today (`walk_<dir>_N`, `idle_<dir>_N`). Requested from the engine task; drop it once the engine reads the art's names.
-- The Kid's jog-in-place pose is always `jog_down`, until poses can follow facing.
