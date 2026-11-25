@@ -1,12 +1,13 @@
 // Act 4 surface maps (docs/design/04-the-list.md), laid out roughly as the design's maps, for
-// judging the art in place. ?state=belfry (default) | square | bilge1 | bilge2 | dry | cellar
+// judging the art in place. ?state=belfry (default) | square | bilge1 | bilge2 | dry | dry_lit | cellar
 
 export function SCENE(state) {
   switch (state) {
     case 'square': return square();
     case 'bilge1': return bilge(1);
     case 'bilge2': return bilge(2);
-    case 'dry': return bilge(0);
+    case 'dry': return dry(false);
+    case 'dry_lit': return dry(true);
     case 'cellar': return cellar();
     default: return belfry();
   }
@@ -42,39 +43,7 @@ function bilge(stage) {
   }
   for (const x of [1, 4, 7, 16, 19, 22, 25, 28]) { L.set('ground', x, 2, 'buildings:door_top@ochre'); L.set('ground', x, 3, 'buildings:door_bot@ochre'); }
   const sprites = [];
-  if (stage === 0) {
-    // the canal rows become a deep, dry trench
-    for (let x = 0; x < 32; x++) {
-      if (x === 12 || x === 13) continue;
-      L.set('ground', x, 7, `act4_reveal:${pick(['qwall_a', 'qwall_b', 'qwall_c'], x, 7)}`.replace('act4_reveal', 'reveal'));
-      L.set('ground', x, 8, `reveal:${pick(['hull_a', 'hull_b', 'hull_c', 'hull_d'], x, 8)}`);
-      L.set('ground', x, 9, `reveal:${pick(['mud_a', 'mud_b', 'mud_c', 'mud_d', 'mud_a', 'mud_puddle_a', 'mud_b', 'mud_puddle_b'], x, 9)}`);
-      L.set('ground', x, 10, `reveal:${pick(['lip_a', 'lip_b'], x, 10)}`);
-    }
-    // the bridge stays, casting its shadow on the trench to the east
-    ['n', 'down', 'up', 's'].forEach((p, i) => { L.set('ground', 12, 7 + i, `canal:bridge_${p}_l`); L.set('ground', 13, 7 + i, `canal:bridge_${p}_r`); });
-    L.set('ground', 14, 7, 'reveal:qwall_bridge_shadow'); L.set('ground', 14, 8, 'reveal:hull_bridge_shadow'); L.set('ground', 14, 9, 'reveal:mud_bridge_shadow');
-    // the Water Stairs, extended down to a broken last flight
-    [22, 23, 24, 25].forEach((x, i) => {
-      const k = i === 0 ? 'l' : i === 3 ? 'r' : 'm';
-      L.set('ground', x, 6, `reveal:wstairs_top_${k}`);
-      L.set('ground', x, 7, `reveal:wstairs_${k}`);
-      L.set('ground', x, 8, `reveal:wstairs_broken_${k}`);
-    });
-    // the bronze door in the canal wall at the foot of the stairs
-    for (let dy = 0; dy < 2; dy++) for (let dx = 0; dx < 2; dx++) L.set('ground', 26 + dx, 7 + dy, `reveal_door:bronze_door_x${dx}y${dy}`);
-    // taut mooring ropes from the north quay's posts down to the boats
-    L.set('objects', 4, 7, 'reveal:rope_taut_v'); L.set('objects', 4, 8, 'reveal:rope_taut_v');
-    L.set('objects', 17, 7, 'reveal:rope_taut_se'); L.set('objects', 18, 8, 'reveal:rope_taut_se');
-    // wet quays with stranded fish
-    for (let x = 0; x < 32; x++) for (const y of [4, 5, 6, 11, 12, 13]) if (hash(x, y) % 5 === 0) L.set('ground', x, y, `bilge_flood:wet_${y % 2 ? 's' : 'n'}${x % 2 ? 'e' : 'w'}`);
-    L.set('objects', 10, 5, 'bilge_flood:fish_stranded_a'); L.set('objects', 6, 12, 'bilge_flood:fish_stranded_b'); L.set('objects', 27, 11, 'bilge_flood:fish_stranded_a');
-    sprites.push({ sheet: 'bilge_boats', frame: 'boat_side_a', x: 4 * 16, y: 10 * 16 });
-    sprites.push({ sheet: 'bilge_boats', frame: 'boat_side_b', x: 9 * 16, y: 10 * 16 });
-    sprites.push({ sheet: 'bilge_boats', frame: 'boat_side_a', x: 20 * 16, y: 10 * 16 });
-    sprites.push({ sheet: 'bilge_boats', frame: 'boat_upright', x: 23 * 16, y: 10 * 16 });
-    sprites.push({ sheet: 'bilge_piano', frame: 'piano_mud', x: 16 * 16, y: 10 * 16 });
-  } else {
+  {
     // the canal (rows 7-10) with the bridge and the Water Stairs going under
     for (let x = 0; x < 32; x++) {
       L.set('ground', x, 7, 'canal:bank_n'); L.set('ground', x, 8, 'canal:water'); L.set('ground', x, 9, 'canal:water'); L.set('ground', x, 10, 'canal:bank_s');
@@ -105,7 +74,73 @@ function bilge(stage) {
   // fish stalls and mooring posts on the north quay
   for (const x of [2, 5, 8]) L.set('objects', x, 5, 'props:crate');
   for (const x of [4, 17, 28]) L.add('objects', x, 6, 'canal:mooring_post');
-  return done(L, stage === 0 ? 'The Bilge, dry: the reveal' : `The Bilge, flood stage ${stage}`, sprites, { tint: null });
+  return done(L, `The Bilge, flood stage ${stage}`, sprites, { tint: null });
+}
+
+// ------------------------------------------------------------------------------------
+// bilge_dry (32 x 17): the reveal. Rows 0-6 as the wet Bilge; the canal is a trench five rows
+// deep (7 quay wall, 8-9 Founder hull, 10 mud, 11 near lip); the south quay is rows 12-14.
+// Trench tiles come from two 64-px strips: variant a..h by x % 8.
+// ------------------------------------------------------------------------------------
+function dry(lit) {
+  const L = grid(32, 17, pave);
+  for (let x = 0; x < 32; x++) {
+    if (x !== 11 && x !== 12) {
+      L.set('ground', x, 0, `rooftiles:${x % 5 === 0 ? 'ridge' : 'tiles'}`);
+      L.set('ground', x, 1, `rooftiles:${x % 7 === 3 ? 'tiles_moss' : 'tiles'}`);
+      L.set('ground', x, 2, `buildings:${x % 3 === 1 ? 'window' : 'wall'}@ochre`);
+      L.set('ground', x, 3, `buildings:${x % 3 === 1 ? 'door_bot' : 'wall_base'}@ochre`);
+    }
+    L.set('ground', x, 15, `rooftiles:${x % 6 === 2 ? 'ridge' : 'tiles'}`);
+    L.set('ground', x, 16, 'rooftiles:tiles');
+  }
+  for (const x of [1, 4, 7, 16, 19, 22, 25, 28]) { L.set('ground', x, 2, 'buildings:door_top@ochre'); L.set('ground', x, 3, 'buildings:door_bot@ochre'); }
+  const v = x => 'abcdefgh'[x % 8];
+  for (let x = 0; x < 32; x++) {
+    L.set('ground', x, 7, `reveal:qwall_${v(x)}`);
+    L.set('ground', x, 8, `reveal:hull_n_${v(x)}`);
+    L.set('ground', x, 9, `reveal:hull_s_${v(x)}`);
+    L.set('ground', x, 10, `reveal:mud_${v(x)}`);
+    L.set('ground', x, 11, `reveal:lip_${v(x)}`);
+  }
+  // the bridge (12-13, 7-11) spans the ditch; its piers go down to the mud on either side
+  ['n', 'down', 'n', 'up', 's'].forEach((p, i) => { L.set('ground', 12, 7 + i, `canal:bridge_${p}_l`); L.set('ground', 13, 7 + i, `canal:bridge_${p}_r`); });
+  [['hull_n', 8], ['hull_s', 9], ['mud', 10]].forEach(([r, y]) => L.set('ground', 11, y, `reveal:${r}_pier_w`));
+  [['qwall', 7], ['hull_n', 8], ['hull_s', 9], ['mud', 10]].forEach(([r, y]) => L.set('ground', 14, y, `reveal:${r}_pier_e`));
+  // the Water Stairs (22-25): top step, limestone flight, slate flight, broken last flight
+  [22, 23, 24, 25].forEach((x, i) => {
+    const k = i === 0 ? 'l' : i === 3 ? 'r' : 'm';
+    L.set('ground', x, 6, `reveal:wstairs_top_${k}`);
+    L.set('ground', x, 7, `reveal:wstairs_${k}`);
+    L.set('ground', x, 8, `reveal:wstairs_slate_${k}`);
+    L.set('ground', x, 9, `reveal:wstairs_broken_${k}`);
+  });
+  // the bronze door (26-27, 8-9), set into the hull
+  for (let dy = 0; dy < 2; dy++) for (let dx = 0; dx < 2; dx++) L.set('ground', 26 + dx, 8 + dy, `reveal_door:bronze_door_x${dx}y${dy}${lit ? '_lit' : ''}`);
+  // taut mooring ropes from the north quay's posts down to the boats
+  for (const y of [7, 8, 9]) L.set('objects', 4, y, 'reveal:rope_taut_v');
+  L.set('objects', 17, 7, 'reveal:rope_taut_se'); L.set('objects', 18, 8, 'reveal:rope_taut_se'); L.set('objects', 19, 9, 'reveal:rope_taut_se');
+  // the quays, wet, with stranded fish
+  for (let x = 0; x < 32; x++) for (const y of [4, 5, 6, 12, 13, 14]) if (hash(x, y) % 5 === 0) L.set('ground', x, y, `bilge_flood:wet_${y % 2 ? 's' : 'n'}${x % 2 ? 'e' : 'w'}`);
+  L.set('objects', 6, 13, 'bilge_flood:fish_stranded_b'); L.set('objects', 27, 12, 'bilge_flood:fish_stranded_a');
+  L.set('objects', 6, 10, 'bilge_flood:fish_stranded_a');
+  for (const x of [2, 5, 8]) L.set('objects', x, 5, 'props:crate');
+  for (const x of [4, 17, 28]) L.add('objects', x, 6, 'canal:mooring_post');
+  const at = (x, y) => ({ x: x * 16 + 8, y: (y + 1) * 16 });
+  const sprites = [
+    { sheet: 'bilge_boats', frame: 'boat_side_a', x: 4 * 16, y: 11 * 16 },
+    { sheet: 'bilge_boats', frame: 'boat_side_b', x: 9 * 16, y: 11 * 16 },
+    { sheet: 'bilge_boats', frame: 'boat_side_c', x: 20 * 16, y: 11 * 16 },
+    { sheet: 'bilge_boats', frame: 'boat_upright', x: 23 * 16, y: 11 * 16 },
+    { sheet: 'bilge_piano', frame: 'piano_mud', x: 16 * 16, y: 11 * 16 },
+    { sheet: 'mover', frame: 'lookup_down', alt: 'big', ...at(14, 10) },
+    { sheet: 'mover', frame: 'lookup_down', alt: 'other', ...at(17, 10) },
+    { sheet: 'clockmaker', frame: 'look_down', alt: 'bridge', ...at(13, 9) },
+    { sheet: 'critters', frame: 'crab_walk', ...at(6, 10) },
+    { sheet: 'critters', frame: 'crab_idle', ...at(29, 10) },
+    { sheet: 'critters', frame: 'fish_flop', ...at(10, 5) },
+  ];
+  return done(L, lit ? 'bilge_dry: the reveal (moon-lock charged)' : 'bilge_dry: the reveal', sprites, { tint: null });
 }
 
 // ------------------------------------------------------------------------------------

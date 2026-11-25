@@ -4,7 +4,7 @@ Where to find the art for the "Art needed" list in [design/04-the-list.md](desig
 
 ## Surface
 
-Module `game/src/art/act4_surface.js`. Composed on the dev page: `/dev/art.html?only=scene:act4_surface&state=belfry|square|bilge1|bilge2|dry|cellar`.
+Module `game/src/art/act4_surface.js`. Composed on the dev page: `/dev/art.html?only=scene:act4_surface&state=belfry|square|bilge1|bilge2|dry|dry_lit|cellar` (`dry` is the `bilge_dry` map; `dry_lit` shows the moon-lock charged).
 
 ### Belfry (10 × 10)
 
@@ -44,17 +44,14 @@ Module `game/src/art/act4_surface.js`. Composed on the dev page: `/dev/art.html?
 | The flight going under water (22–25, 7), flood stages | `bilge_flood:wstairs_wet_l/m/r` | ground |
 | The piano half-sunk, lid up (6–7, 8–9), stage 1 | `bilge_piano:piano_halfsunk` (32×32) | sprite |
 | Just its lid showing, stage 2 | `bilge_piano:piano_lid` | sprite |
-| **Dry:** the old quay wall face (row 7) | `reveal:qwall_a`, `qwall_b`, `qwall_c` (pick by a hash) | ground |
-| **Dry:** the exposed hull: Founder slate, weed, a tide line, barnacles (row 8) | `reveal:hull_a`, `hull_b`, `hull_c`, `hull_d` (`d` has no weed) | ground |
-| **Dry:** the mud bed (row 9) | `reveal:mud_a` … `mud_d`, with puddles `mud_puddle_a`, `mud_puddle_b` | ground |
-| **Dry:** the near quay's lip (row 10) | `reveal:lip_a`, `lip_b` | ground |
-| **Dry:** the bridge's shadow on the trench (x14) | `reveal:qwall_bridge_shadow`, `hull_bridge_shadow`, `mud_bridge_shadow` (the bridge itself stays `canal:bridge_*`) | ground |
-| **Dry:** the Water Stairs through the quay wall (22–25, 7), and the broken last flight (22–25, 8) | `reveal:wstairs_l/m/r` and `wstairs_broken_l/m/r` (Founder slate, ending in a jagged drop) | ground |
-| **Dry:** the bronze door with its moon-lock eye, crusted with barnacles (26–27, 7–8) | `reveal_door:bronze_door_x<0-1>y<0-1>` | ground |
+| **Dry (`bilge_dry`, 32 × 17):** the trench rows. Every trench row is cut from two continuous 64-px strips, so blocks, weed, and barnacle crusts run across tile seams: **use variant `a`…`h` by `x % 8`** in every row | row 7 the old limestone quay wall, ending in a crisp lime tide line: `reveal:qwall_<v>`; rows 8–9 the Founder hull (dark fitted slate, chamfered blocks, weed hanging from the tide line, barnacle crusts thickest at the foot): `hull_n_<v>` (row 8), `hull_s_<v>` (row 9); row 10 the mud bed (puddles holding the sky, shells): `mud_<v>`; row 11 the near quay's lip: `lip_<v>` | ground |
+| **Dry:** the bridge (12–13, 7–11) spanning the ditch, its piers going down to the mud | deck `canal:bridge_n_l/r` (7), `bridge_down_*` (8), `bridge_n_*` (9), `bridge_up_*` (10), `bridge_s_*` (11); west pier on x11: `reveal:hull_n_pier_w` (8), `hull_s_pier_w` (9), `mud_pier_w` (10) (row 7 stays `qwall_d`); east pier and the bridge's shadow on x14: `qwall_pier_e` (7), `hull_n_pier_e` (8), `hull_s_pier_e` (9), `mud_pier_e` (10). The pier tiles are built on the variants at those columns (`d` at x11, `g` at x14) | ground |
+| **Dry:** the Water Stairs (22–25, 6–9), four wide (`l`, `m`, `m`, `r`) | top step (6) `reveal:wstairs_top_<k>`; limestone flight through the quay wall (7) `wstairs_<k>`; slate flight through the hull, barnacled, the tide line across it (8) `wstairs_slate_<k>`; the broken last flight ending in a jagged drop to the mud (9) `wstairs_broken_<k>` | ground |
+| **Dry:** the bronze door (26–27, 8–9), set into the hull rows: Founder work, square with chamfered corners, bronze gone green under barnacle crusts, a moon-lock eye in the middle | `reveal_door:bronze_door_x<0-1>y<0-1>` (eye dark); charged: `bronze_door_x<0-1>y<0-1>_lit` (the eye in `relic_cyan`, which the engine keeps bright under tints) | ground |
 | **Dry:** taut mooring ropes from the quay down to the boats | `reveal:rope_taut_v`, `rope_taut_se`, `rope_taut_sw` | objects |
 | **Dry:** wet quay paving and stranded fish | `bilge_flood:wet_<q>`; `fish_stranded_a`, `fish_stranded_b` (the flopping fish is a sprite in "Sprites and icons") | ground; objects |
-| **Dry:** boats on their sides in the mud (3–4, 9), (8–9, 9), (19–20, 9); the Boatman's boat upright (22–23, 9) | `bilge_boats:boat_side_a`, `boat_side_b`, `boat_upright` (32×16) | sprite |
-| **Dry:** the piano on the mud, upright, lid open (15–16, 9) | `bilge_piano:piano_mud` | sprite |
+| **Dry:** boats on their sides in the mud, keels toward the camera, oars spilled, at (3–4, 10), (8–9, 10), (19–20, 10); the Boatman's boat upright at (22–23, 10) | `bilge_boats:boat_side_a` (blue), `boat_side_b` (coral, mirrored), `boat_side_c` (white); `boat_upright` (32×16, anchored bottom-centre on the boat's two tiles) | sprite |
+| **Dry:** the piano on the mud, upright, lid open (15–16, 10) | `bilge_piano:piano_mud` | sprite |
 
 ### Ice Cellar (10 × 8)
 
