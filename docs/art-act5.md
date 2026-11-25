@@ -33,6 +33,7 @@ Module `game/src/art/act5_surface.js`. Dev page: `/dev/art.html?only=scene:act5_
 | Lamp room: the window ring (row 1), walls, floor | `lamproom:window`, `wall`, `floor` | ground |
 | The lamp, lit and turning (3–4, 2–3) | `lamproom:lamp_x<0-1>y<0-1>` (4 frames): a lighthouse lens, a faceted glass beehive of prism rings bound in brass under a domed brass top, on a brass pedestal, with the blazing core showing through and the turning shine sweeping across the facets | objects |
 | The empty polish tin (2, 5) | `lamproom:polish_tin` | objects |
+| The way out (3–4, 7): the head of the lighthouse stair going down through the floor, treads falling into the dark, iron rails capped in brass (not a house door) | `lamproom:stair_down_l`, `stair_down_r` | ground |
 | Laundry streaming | `cloth:over_wind_<a-f>` (from Act 4), overhead in a row | overhead |
 
 ## Underground

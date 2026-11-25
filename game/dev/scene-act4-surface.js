@@ -9,6 +9,8 @@ export function SCENE(state) {
     case 'dry': return dry(false);
     case 'dry_lit': return dry(true);
     case 'cellar': return cellar();
+    case 'belfry_old': return belfry([4, 3]);
+    case 'belfry_ring': return belfry([4, 6]);
     default: return belfry();
   }
 }
@@ -159,7 +161,7 @@ function dry(lit) {
 // ------------------------------------------------------------------------------------
 // Belfry (10 x 10), inside the Bell Tower.
 // ------------------------------------------------------------------------------------
-function belfry() {
+function belfry(amb) {
   const L = grid(10, 10, (x, y) => `belfry:floor_${'abc'[hash(x, y) % 3]}`);
   for (let x = 0; x < 10; x++) {
     L.set('ground', x, 0, 'belfry:wall_upper');
@@ -176,6 +178,8 @@ function belfry() {
   L.set('objects', 8, 4, 'belfry_props:lever_up');
   L.set('objects', 1, 6, 'belfry_props:bench_l'); L.set('objects', 2, 6, 'belfry_props:bench_r');
   const sprites = [{ sheet: 'belfry_rope', frame: 'rope_still', x: 4 * 16 + 8, y: 6 * 16 }];
+  // ?state=belfry_ring: Ambrose ringing, standing on (4, 6) south of the rope hole, facing up, hands on the rope
+  if (amb) sprites.push({ sheet: 'ambrose', frame: 'ring_up_0', x: amb[0] * 16 + 8, y: (amb[1] + 1) * 16 });
   return done(L, 'Belfry', sprites, { hero: [5 * 16 + 8, 8 * 16, 'up'], scale: 3 });
 }
 

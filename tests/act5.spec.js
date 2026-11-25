@@ -493,8 +493,7 @@ test('keyboard: Act 5', async ({ page }) => {
   await read();
   await kbWalk(page, 25, 7);
   await page.keyboard.press('ArrowDown');
-  await read();
-  await kbInteract(page, 'kid_mud');
+  // The Kid, waiting on the mud with the disc, gives it back as she lands.
   log = await read();
   expect(joined(log)).toContain('spat this out');
   expect((await snap(page)).items).toContain('moonglass_disc');

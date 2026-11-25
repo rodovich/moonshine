@@ -80,7 +80,7 @@ export const LURCH_CUTS = [
     g.panCamera(13, 12, 20); // down to the horizon: Mott at the quay edge, the Teeth beyond
     await g.wait(0.9);
     g.setFlag('fx.mottToast', 1);
-    await g.wait(1.6);
+    await g.wait(2.4); // the Teeth's slide away runs about three seconds
   }),
   // 5. The belfry: Ambrose still holding the rope, eyes shut.
   async (g) => cut(g, 'lurch', act6.ids.belfry, act6.pos.belfry[0], act6.pos.belfry[1], async () => {
@@ -106,14 +106,25 @@ export async function lurchMontage(g) {
 export async function refillMontage(g) {
   let any = false;
   // 1. The dry Bilge at night: water rushing back along the trench, rising; the boat lifts with the piano.
-  any = (await cut(g, 'refill', act6.ids.bilgeDry, 18, 12, async () => {
+  any = (await cut(g, 'refill', act6.ids.bilgeDry, 24, 12, async () => {
     g.sfx('canal_rush');
-    // The canals rise in three stages, and the boat lifts off the mud with them.
-    for (const stage of [1, 2, 3]) {
-      g.setFlag('fx.refill', stage);
-      g.tween('act6_boat', { offset: [0, -16 * (stage - 1)], seconds: 0.5 });
-      await g.wait(0.8);
+    // The water comes in at the canal mouth (east) and rushes west along the trench, the camera running with it...
+    g.setFlag('fx.refill', 1);
+    const pan = g.panCamera(12, 12, 2.4);
+    for (let front = 31; front >= 0; front -= 1) {
+      g.setFlag('fx.refillFront', front);
+      await g.wait(0.06);
     }
+    g.setFlag('fx.refillFront', null);
+    await pan;
+    // ...then rises, and the boat lifts off the mud with it.
+    g.panCamera(19, 12, 3);
+    for (const stage of [2, 3]) {
+      await g.wait(0.5);
+      g.setFlag('fx.refill', stage);
+      g.tween('act6_boat', { offset: [0, -16 * (stage - 1)], seconds: 0.6 });
+    }
+    await g.wait(0.7);
     await g.say('Boatman', "I'M AFLOAT! I'M AFLOAT AND I'VE GOT A PIANO!", auto(1.6));
   })) || any;
   // 2-3. The wet Bilge: the crowd on the quays, soaked, cheering; the Mayor.

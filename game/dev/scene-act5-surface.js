@@ -131,7 +131,7 @@ function lamproom() {
   for (let x = 0; x < W; x++) {
     L.set('ground', x, 0, 'lamproom:wall');
     L.set('ground', x, 1, x === 0 || x === W - 1 ? 'lamproom:wall' : 'lamproom:window');
-    L.set('ground', x, 7, x === 3 || x === 4 ? 'lamproom:floor' : 'lamproom:wall');
+    L.set('ground', x, 7, x === 3 ? 'lamproom:stair_down_l' : x === 4 ? 'lamproom:stair_down_r' : 'lamproom:wall');
   }
   for (let y = 2; y < 7; y++) { L.set('ground', 0, y, 'lamproom:wall'); L.set('ground', 7, y, 'lamproom:wall'); }
   for (let ty = 0; ty < 2; ty++) for (let tx = 0; tx < 2; tx++) L.set('objects', 3 + tx, 2 + ty, `lamproom:lamp_x${tx}y${ty}`);
