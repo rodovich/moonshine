@@ -241,15 +241,18 @@ test('using a held item on plain ground beside Cheryl says so and drops it', asy
   expect((await snap(page)).holding).toBe(null);
 });
 
-test('using a held item on plain ground farther away: walks there, then says so and drops it', async ({ page }) => {
+test('a held item on water walks to it, says so, drops it; open floor farther off just walks', async ({ page }) => {
   await boot(page, `${STREET}&x=12&y=8&items=letter`);
   await waitIdle(page);
   await page.evaluate(() => { window.moonshine.world.control.holding = 'letter'; });
-  await clickTile(page, 6, 8);
+  await clickTile(page, 6, 8); // open floor, far: walk, still holding
+  await waitIdle(page);
+  expect([(await snap(page)).x, (await snap(page)).holding]).toEqual([6, 'letter']);
+  await clickTile(page, 8, 13); // the canal's bank: terrain
   await waitFor(page, () => !!window.moonshine.snapshot().text, null, 10000);
   const s = await snap(page);
   expect(s.text).toContain("isn't where that goes");
-  expect([s.x, s.holding]).toEqual([6, null]);
+  expect(s.holding).toBe(null);
 });
 
 test('the title marks a finished game', async ({ page }) => {
