@@ -786,6 +786,16 @@ All of this is built (audio/foundation, e4adffd). The ids and a step-by-step sug
 - [ ] Every line fits in its box.
 - [ ] First-time players finish in 35–50 minutes.
 
+## As built
+
+The Act 4 builder (WCVWR8hxu8) built this act on `content/act4`. This document follows its choices:
+
+- **Wake-valves before the throat:** the Thin and Stout ones say "She shudders, and stops. Nothing will run with the middle one's throat gaping."; the Middle's own valve keeps "She shivers and goes still. She needs her throat."
+- **The ice in the cellar:** "Ice, sweating in its sawdust. There's a wet line round the walls at knee height. The water's gone down. Somewhere." (Cheryl doesn't yet know the city rose; the reveal says it first.)
+- **The Hundred Steps in Act 4:** the open step is a hole in one tile of the flight, so she can pass. Look: "The hundredth step, open. Downstairs is down there, waiting. I've got the Fountain to see to first." First time passing: "I step over the open step, the way you step over a sleeping dog."
+- **Staging:** the Tide Wheel's sea grate is in the west wall at (0, 7) (the channel cuts off the east wall); the Boatman in the dry Bilge is talked to from the foot of the Water Stairs; the Kid's jump line plays on first talk with him.
+- **Lines the builder added, adopted as written:** the belfry lever after pulling ("Pulled. DO NOT TOUCH. I touched it.") and the rope after the bell ("Ambrose's rope. I'm not touching it now. It's his."); the open tower door; the Square's bronze fish dry and flowing; the running Middle Sister; the main pipe weeping, then split ("All that water, with nowhere to go but up the Fountain."); the dry grates; the sea cave mouth; the piano on the mud ("It got to the sea after all. The sea had left."); and the cellar crate ("A crate of fish, packed in ice. The only wet thing for a street in any direction.").
+
 ## Decisions
 
 - **Act 4 runs from the morning after Act 3 to the reveal,** with three parallel threads. The bell thread opens the way down; the other two are free in order.
