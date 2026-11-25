@@ -801,11 +801,14 @@ test("the Keepers' ladder: up by keyboard, down by pointer", async ({ page }) =>
   const read = (opts) => readThrough(page, () => page.keyboard.press('z'), opts);
   let log;
   await read();
-  // The first look finds the rungs and offers the climb straight away.
+  // The tube's first look notices the rungs; the rungs offer the climb.
   await kbInteract(page, 'speaking_tube');
-  log = await read({ stop: (st) => !!st.choice });
+  log = await read();
   expect(joined(log)).toContain('rungs beside it, going up into the dark');
-  await kbChoose(page, 0);
+  // Walking up into the rungs climbs.
+  await kbWalk(page, 16, 3);
+  await kbFace(page, 'up');
+  if ((await snap(page)).y === 3) await page.keyboard.press('ArrowUp');
   log = await read();
   expect(joined(log)).toContain('YOU CAME UP THROUGH MY FLOOR');
   expect(joined(log)).toContain("The Keepers didn't take the Steps");
@@ -821,9 +824,11 @@ test("the Keepers' ladder: up by keyboard, down by pointer", async ({ page }) =>
   await readThrough(page, ptrAdvance(page));
   s = await snap(page);
   expect([s.x, s.y]).toEqual([16, 3]);
-  // The second time up is a quick climb, by walking up into the rungs.
-  await kbFace(page, 'up');
-  await page.keyboard.press('ArrowUp');
+  // The second time up, by clicking the rungs: they offer the climb, and it's quick.
+  await ptrInteract(page, 'keepers_rungs');
+  log = await readThrough(page, ptrAdvance(page), { stop: (st) => !!st.choice });
+  expect(joined(log)).toMatch(/rungs/i);
+  await ptrChoose(page, 0);
   await waitFor(page, () => window.moonshine.snapshot().map === 'belfry', null, 5000);
   expect(errors).toEqual([]);
 });
