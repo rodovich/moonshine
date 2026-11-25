@@ -100,6 +100,21 @@ export class Game {
     this.world = new World(this, state);
     this.scene = this.world;
     if (runNewGame && this.content.onNewGame) this.world.run(this.content.onNewGame);
+    // A loaded game (Continue, or a debug start) runs content.onLoad first:
+    // old-save fixes that need the script API. Each runs once, in order, and
+    // one that throws is logged and skipped so the game still loads.
+    const onLoad = [this.content.onLoad || []].flat();
+    if (!runNewGame && onLoad.length) {
+      this.world.run(async (g) => {
+        for (const fn of onLoad) {
+          try {
+            await fn(g);
+          } catch (err) {
+            console.error('[save] an onLoad function failed; skipping it', err);
+          }
+        }
+      });
+    }
     if (this.world.mapDef.onEnter) this.world.run(this.world.mapDef.onEnter);
   }
 
