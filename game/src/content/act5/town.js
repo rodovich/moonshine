@@ -14,6 +14,7 @@ import {
   morePatches, untilAct5, openTiles, valueOf,
 } from './common.js';
 import { act5Loops } from './loops.js';
+import { belfryHatch, belfryHatchPatch } from './ladder.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -78,6 +79,7 @@ async function fillBucket(g) {
 const fountainUse = {
   bucket: fillBucket,
   bucket_water: (g) => g.describe("It's full. Any fuller and it'd be a fountain."),
+  square_jug: (g) => g.describe("In Mott's jug it'd come out moonshine. I want something that smells of fish, not of Mott."),
 };
 
 async function mayorTalk(g, self) {
@@ -272,12 +274,30 @@ const ambrose5 = {
   use: ambroseUse5,
 };
 
+// The tower door in Act 5: open, with Ambrose up in the belfry. (Act 2's
+// bolted door, with the Clockmaker calibrating behind it, steps aside.)
+// Looking at it, or clicking it, goes up, as Act 4's open door does.
+const towerDoor5 = {
+  // Down over the doorway (row 6), so it can be clicked from the plaza.
+  id: 'tower_door5', x: 4, y: 4, w: 2, h: 3, solid: false,
+  when: started,
+  interact: async (g) => {
+    if (!g.flag('n.towerDoor5')) {
+      g.setFlag('n.towerDoor5', 1);
+      await g.describe('The tower door, wide open. Ambrose is up there, waiting for moonrise.');
+    }
+    g.sfx('step_stairs');
+    await g.changeMap('belfry', 1, 7, 'up');
+  },
+  use: { '*': cherylDeclines },
+};
+
 // Act 3's dusk state of the Crown (keyed on `act3.surfaced`, so it would
 // otherwise last forever) steps aside for Act 5's afternoon: daylight, the
 // moon-eye studs plain, Act 3's people and its ending on the stair gone.
 export function withCrown5(def) {
   const base = withSheets(def);
-  const entities = hide(base.entities, ['shop_door', 'ambrose', 'ambrose_dusk', 'kid_dusk', 'watering_dusk']);
+  const entities = hide(base.entities, ['shop_door', 'tower_door', 'ambrose', 'ambrose_dusk', 'kid_dusk', 'watering_dusk']);
   return {
     ...base,
     lighting: (g) => (started(g) ? 'day' : valueOf(base.lighting, g)),
@@ -307,7 +327,7 @@ export function withCrown5(def) {
       },
     ],
     triggers: (base.triggers || []).map(untilAct5),
-    entities: [...entities, ambrose5, { id: 'clockshop_door_shut', x: 12, y: 6, solid: true, shadow: false, when: (g) => !started(g) }],
+    entities: [...entities, ambrose5, ...(crownLinks.belfry ? [towerDoor5] : []), { id: 'clockshop_door_shut', x: 12, y: 6, solid: true, shadow: false, when: (g) => !started(g) }],
     onEnter: async (g) => {
       if (!started(g)) {
         if (after5(g)) act5Loops(g, []);
@@ -322,10 +342,16 @@ export function withCrown5(def) {
 
 // The belfry (Act 4's map), if it's registered: Ambrose there instead.
 export function withBelfry5(def) {
-  // Ambrose stands under the bell (4, 3), inside its hotspot; listed first, he's the one who answers.
+  // Ambrose stands at the foot of the rope; listed first, he's the one who answers there.
   const entities = act5Talk(def.entities, 'ambrose_belfry', ambroseTalk, ambroseUse5);
   const first = entities.filter((e) => e.id === 'ambrose_belfry');
-  return { ...def, entities: [...first, ...entities.filter((e) => e.id !== 'ambrose_belfry')] };
+  const base = withSheets(def);
+  return {
+    ...base,
+    // The Keepers' ladder comes up through a floor hatch beside him (ladder.js).
+    patches: morePatches(base.patches, (g) => (started(g) ? belfryHatchPatch(g) : [])),
+    entities: [...first, ...entities.filter((e) => e.id !== 'ambrose_belfry'), { ...belfryHatch, when: started }],
+  };
 }
 
 // ---------------------------------------------------------------------------

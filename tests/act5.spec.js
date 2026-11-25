@@ -493,8 +493,7 @@ test('keyboard: Act 5', async ({ page }) => {
   await read();
   await kbWalk(page, 25, 7);
   await page.keyboard.press('ArrowDown');
-  await read();
-  await kbInteract(page, 'kid_mud');
+  // The Kid, waiting on the mud with the disc, gives it back as she lands.
   log = await read();
   expect(joined(log)).toContain('spat this out');
   expect((await snap(page)).items).toContain('moonglass_disc');
@@ -771,3 +770,43 @@ for (const r of REACH) {
     expect(errors).toEqual([]);
   });
 }
+
+// ---- the Keepers' ladder ---------------------------------------------------
+// Up from the Windlass Room beside the speaking tube to the belfry's floor
+// hatch, by keyboard; back down by pointer; and the quick climb after that.
+
+test("the Keepers' ladder: up by keyboard, down by pointer", async ({ page }) => {
+  test.setTimeout(120000);
+  const errors = await start(page, `?map=windlass_room&x=12&y=3&facing=right&flags=${PRIOR},act5.started,door.open,passage.lit,windlass.seen&items=${ITEMS}`);
+  const read = (opts) => readThrough(page, () => page.keyboard.press('z'), opts);
+  let log;
+  await read();
+  // The first look finds the rungs; after that the tube offers the climb.
+  await kbInteract(page, 'speaking_tube');
+  log = await read();
+  expect(joined(log)).toContain('rungs beside it, going up into the dark');
+  await kbInteract(page, 'speaking_tube');
+  await read({ stop: (st) => !!st.choice });
+  await kbChoose(page, 0);
+  log = await read();
+  expect(joined(log)).toContain('YOU CAME UP THROUGH MY FLOOR');
+  expect(joined(log)).toContain("The Keepers didn't take the Steps");
+  let s = await snap(page);
+  expect(s.map).toBe('belfry');
+  expect(s.flags['keepers.ladder']).toBeTruthy();
+  await shot(page, 'act5-30-belfry-hatch');
+  // Back down by pointer.
+  await ptrInteract(page, 'keepers_hatch');
+  await readThrough(page, ptrAdvance(page), { stop: (st) => !!st.choice });
+  await ptrChoose(page, 0);
+  await waitFor(page, () => window.moonshine.snapshot().map === 'windlass_room', null, 10000);
+  await readThrough(page, ptrAdvance(page));
+  s = await snap(page);
+  expect([s.x, s.y]).toEqual([16, 3]);
+  // The second time up is a quick climb.
+  await kbInteract(page, 'speaking_tube');
+  await readThrough(page, () => page.keyboard.press('z'), { stop: (st) => !!st.choice });
+  await kbChoose(page, 0);
+  await waitFor(page, () => window.moonshine.snapshot().map === 'belfry', null, 5000);
+  expect(errors).toEqual([]);
+});

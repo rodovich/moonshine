@@ -5,6 +5,7 @@
 // brake (16x32 sprite): brake_locked, brake_thrown.  hawse: hawse[_late]_top/bot_0/1 (ground, east wall).
 // keel_hatch: keel_<sealed|open>_<nw..se> (2x2 north wall); lamp_dead, lamp_flicker_0/1, lamp_warming,
 //   lamp_lit, lamp_wake_0..4 (upper wall row).  bowdoor: bowdoor_<shut|open>_<nw..se> (2x2).
+// keepers_rungs: rungs_top, rungs_bot (ground, the Windlass Room north wall at (16, 1-2), beside the tube).
 
 export const windlass_drum = {
   palette: {
@@ -6885,6 +6886,59 @@ export const bowdoor = {
       'dddddddddddddddk',
       'dddddddddddddddk',
       'kkkkkkkkkkkkkkkk',
+      'kkkkkkkkkkkkkkkk',
+      'kkkkkkkkkkkkkkkk',
+    ],
+  },
+};
+
+export const keepers_rungs = {
+  palette: {
+    k: 'void',
+    d: 'slate_deep',
+    s: 'slate_shade',
+    m: 'slate',
+    L: 'slate_light',
+    b: 'bronze',
+    B: 'bronze_shade',
+    l: 'bronze_light',
+    v: 'verdigris',
+  },
+  size: [16, 16],
+  frames: {
+    rungs_top: [
+      'LLLdkkkkkkkkdLLL',
+      'mmmddBBBBBBddmmm',
+      'mmmdkkkkkkkkdmmm',
+      'ddddkkkkkkkkdddd',
+      'sssmssssssssmssd',
+      'sssssssssssssssd',
+      'ssssBbbbbbbBsssd',
+      'sssssdddddddsssd',
+      'sssssssssssssssd',
+      'sssssssssssssssd',
+      'ddddBllbbbbBdddd',
+      'sssssddddddvssss',
+      'sssssssdsssvssss',
+      'sssssssdssssssss',
+      'ssssBllbbbbBssss',
+      'sssssdddddddssss',
+    ],
+    rungs_bot: [
+      'sssssssdssssssss',
+      'sssssssdssssssss',
+      'ssssBllbbbbBssss',
+      'sssssdddddddssss',
+      'sssssssdssssssss',
+      'dddddddddddddddd',
+      'ssssBllbbbbBsssd',
+      'ssssvdddddddsssd',
+      'sssssssssssssssd',
+      'sssssssssssssssd',
+      'ssssBllbbbbBsssd',
+      'sssssdddddddsssd',
+      'sssssssssssssssd',
+      'dddddddddddddddd',
       'kkkkkkkkkkkkkkkk',
       'kkkkkkkkkkkkkkkk',
     ],
