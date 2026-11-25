@@ -49,7 +49,7 @@ Act 4 begins the morning after Act 3's dusk, with the card **Morning.** and Cher
 **The Ship Plan, first look in Act 4** (after the picture closes, once only; descriptions, not monologue):
 - "Three bars, low in the hull, down where the water is. They're pumps. They must be pumps."
 - "And a rope from the bell, down to a wheel. If the bell turns the wheel, and the wheel drives the pumps…"
-- "Ambrose. I need Ambrose's bell."
+- Second Act 4 look only (giving the player a beat to join the rope to Ambrose first): "Ambrose. I need Ambrose's bell."
 
 **Internal monologue in this act** is kept to three moments (story bible budget): the flyleaf ("It's instructions"), the escape ("Up, then"), and the reveal. Everything else is description.
 
@@ -106,9 +106,9 @@ The Act 2 map, in three flood stages, then the dry reveal state.
        01234567890123456789012345678901
     6  ......................WWWW......   the Water Stairs' top step (22-25, 6), walkable
     7  nnnnnnnnnnnnBBnnnnnnnnWWWWnnnnnn   n the old quay wall face (stone); stairs continue down (22-25, 7)
-    8  hhhhhhhhhhhhBBhhhhhhhhWWWWDDhhhh   h the exposed hull: Founder slate, barnacles, weed; stairs (22-25, 8)
-    9  hhhhhhhhhhhhBBhhhhhhhhbbbbDDhhhh   tide line along the top of row 8; bbbb the broken last flight
-   10  mmmmmmmmmmmmBBmmmmmmmmmmmmmmmmmm   m the mud bed
+    8  hhhhhhhhhhhhBBhhhhhhhhbbbbDDhhhh   h the exposed hull: Founder slate, barnacles, weed; bbbb the broken flight
+    9  hhhhhhhhhhhhBBhhhhhhhhhhhhDDhhhh   tide line along the top of row 8; under the break, bare hull down to the mud
+   10  mmmmmmmmmmmmBBmmmmmmmmmmmmmm~~~~   m the mud bed; ~~~~ the last trickle running out east (28-31, 10)
    11  ssssssssssssBBssssssssssssssssss   s the near quay lip
    12  ................................   SOUTH QUAY (y12-14); east edge (x31, y12-14) → Harbor
    13  ................................
@@ -118,8 +118,10 @@ The Act 2 map, in three flood stages, then the dry reveal state.
 ```
 
 - **The trench reads as deep:** the old stone quay wall (row 7) gives way, at a crisp tide line, to two full rows of exposed Founder hull (rows 8–9): dark fitted slate, barnacles thickest at the bottom, hanging weed. The bridge (12–13, 7–11) now visibly spans a ditch, with its supports going down to the mud.
-- `WWWW` (22–25, 6–8): the Water Stairs, walkable down to row 8. `bbbb` (22–25, 9): the last flight, broken: the steps end in a jagged drop to the mud. Solid. (Act 5 crosses it with the Boatman's rope.)
-- `DD` (26–27, 8–9): **the bronze door**, set in the hull rows beside the foot of the stairs. Founder work, not a house door: square with chamfered corners, bronze gone green under the barnacles, a moon-lock eye in its middle. About the size of a cart.
+- `WWWW` (22–25, 6–7): the Water Stairs, walkable down to row 7 only. `bbbb` (22–25, 8): the last flight, broken: the steps end in a jagged edge, and below them (row 9) there's nothing but bare hull and a six-foot drop to the mud. Solid. (Act 5 crosses it with the Boatman's rope.)
+- `DD` (26–27, 8–9): **the bronze door**, set in the hull rows beside the foot of the stairs, opening onto the mud. Founder work, not a house door: square with chamfered corners, bronze gone green under the barnacles, a moon-lock eye in its middle. About the size of a cart. **It can only be reached from the mud** (26–27, 10): the stairs stop at row 7, and the quay wall above the door is solid, so it's visible but unreachable until Act 5.
+- `~~~~` (28–31, 10): the last of the canal water, a thin animated trickle running east along the mud and spilling out of the canal mouth at the east edge, where the Bowl's water shows, lower down. It's the one image that shows the sea is still there and the city has risen out of it.
+- **Laundry** strung across the north quay (overhead, 14–19, 4) streams out hard to one side in the wind: Tessel, riding high, catches more of it (Act 5's danger).
 - `m`: mud. Not reachable from the quays in Act 4 (the drop is six feet, and Cheryl won't jump). Walkable for NPCs placed there.
 - `h` and the door are the first time the city's Founder hull is visible from the surface.
 - The flooded quay tiles are dry again (wet-looking, with stranded fish here and there).
@@ -127,7 +129,7 @@ The Act 2 map, in three flood stages, then the dry reveal state.
 
 **Dry-state entities:** boats on their sides in the mud at (3–4, 10), (8–9, 10), (19–20, 10), keels toward the camera, hulls tilted, oars spilled. The Boatman sitting upright in his boat at (22–23, 10), at the foot of the broken stairs. The piano at (15–16, 10) on the mud, upright, lid open. The Piano Movers at (14, 10) and (17, 10), on the mud beside it. Two or three crabs wandering the mud. The Sweaty Kid running laps along the mud (x2–30, y10). The Fishmonger at (5, 4), behind her stall. A **Man on Bridge** at (13, 9), on the bridge, looking down. A stranded fish flopping on the north quay at (10, 5).
 
-**Exits on `bilge_dry`:** north (11–12, 0) → Fountain Square, as before; east (31, 12–14) → Harbor (1, 6–8). The Harbor's west edge leads to `bilge_dry` (30, 12–14) once `act4.risen`. The Fishmonger's door (4, 3) is where the reveal begins.
+**Exits on `bilge_dry`:** north (11–12, 0) → Fountain Square; east (31, 12–14) → Harbor (1, 6–8). **Until the act ends, both decline**, and so does the Fishmonger's door: "Not yet. That door." The act ends in the Bilge. (Act 5 opens these exits and specifies the risen Harbor.) The Harbor's west edge leads to `bilge_dry` (30, 12–14) once `act4.risen`. The Fishmonger's door (4, 3) is where the reveal begins.
 
 ### Pump Hall (26 × 12), under Fountain Square
 
@@ -325,11 +327,14 @@ Each line is one box; every line has been measured against the real box. "→" m
 9. AMBROSE: HERE. YOU'VE EARNED A LOOK. MY GRANDMOTHER'S HAND. → he holds out the ledger, open at the flyleaf → `read.flyleaf`.
 10. The flyleaf, in Cheryl's description style, one couplet per box:
     - "'Moonshine, moonshine, catch it in a cup, ring the bell when the tide turns up.'"
-    - "'Thin sister, Stout sister, Middle sister three, wake them one by one and they'll drink up the sea.'"
+    - "'…sister, …sister, Middle sister three, wake them one by one and they'll drink up the sea.'" / "The first two names are under a tea stain."
+    - AMBROSE: TEA. MY GRANDFATHER. THE WINTER OF THE BIG FREEZE. WE DON'T TALK ABOUT IT.
     - "'Middle sister's greedy, put her back to bed, or up jumps Tessel and bumps her head.'"
     - "'Pull the old tooth when the bell says when, wind her in slowly, and home again.'"
     - "'Moon in the Gate and moon in the bowl, Tessel's asleep and Tessel is whole.'"
 11. Internal monologue: *It's the skipping rhyme. All of it. It's instructions.*
+
+The tea stain is deliberate: the flyleaf confirms the greedy-sister warning and gives the Act 5–6 verses, but the waking order still has to come from the Skipping Girls and Ottilie (with free retries as the safety valve). (From review by xaKh8TS_PJ.)
 
 **Ambrose afterward** (in the belfry for the rest of the act, at the rope)
 - AMBROSE: I'LL BE HERE. EVERY TURN. TELL THE MAYOR. NO. DON'T. I'LL TELL HIM MYSELF.
@@ -391,14 +396,16 @@ He sits on the crates by his door at (3, 13), sober, shaking a little. The jug a
 - MOTT: Cheryl. I haven't had a drop since the doorsteps lit up. Didn't seem right, drinking, with the steps looking at me.
 - MOTT: The Bilge is going under. A hand to the left, and now a foot down. She's tipping, Cheryl. The whole island's tipping.
 - MOTT: And nobody'll listen. Because it's me. Because of the moonshine.
+- MOTT: If anyone else had seen it. Anyone. Written down, so they'd have to believe it.
 
 **Repeat** (alternate)
+- MOTT: If anyone had it written down. Just one other person.
 - MOTT: Tipping. A foot down on the Bilge side, and more every tide.
 - MOTT: Grandad's copper's in the still. Hums when the tide turns. Always has. Never knew why.
 
 **Show moon chart** → `got.throat`; give **copper throat** and **square jug**
 - MOTT: What's this? …Moons. Thirty-one years of moons, all in the Gate.
-- MOTT: And it creeps right. The last few. And last week's, out in the cold. You see it too.
+- MOTT: And it creeps right. The last few. And last week's, out in the cold.
 - MOTT: You see it too. Thirty-one years, written down. You're not drunk. You've never been drunk in your life.
 - MOTT: I've been drinking to forget I'm right. I can stop now.
 - → He goes into the shack (door opens and closes), and comes back with the copper coil.
@@ -413,6 +420,10 @@ He sits on the crates by his door at (3, 13), sober, shaking a little. The jug a
 - MOTT: I'll stay off the moonshine. I'll want to remember this.
 
 **Items:** Ship Plan: MOTT: A boat. That's a boat. …That's US. I KNEW it. Don't tell anyone I knew it.
+
+**Finding him.** Mott's Act 2 spot at the Harbor is empty in Act 4. **Mott's bollard** (Harbor, 13, 8): "Mott's bollard. No Mott, no jug. He'll be at his shack, up the Goat Path." The Boatman says it too (repeat, stages 1–2): BOATMAN: Mott's up at his shack, Miss. Sober. Gave me a fright.
+
+**The moon chart.** If the player never took it in Act 1, it's still on the flat's table. Its Act 4 look there: "Thirty-one ticks, and the last one outside. Somebody else says the moon's wrong." → take.
 
 ### Ottilie Brask (Archive)
 
@@ -479,7 +490,7 @@ Each Girl now sings her whole version when talked to individually (`girls.heard`
 ### The Fishmonger (the Bilge)
 
 **Stage 1**
-- FISHMONGER: Miss! It's in my CELLAR now! My ice is FLOATING! My fish are swimming again and they're DEAD!
+- FISHMONGER: Miss! It's in my CELLAR now! My ice is FLOATING!
 - FISHMONGER: My fish are escaping! They're DEAD and they're ESCAPING!
 - Repeat: FISHMONGER: The Fountain stopped and the sea came for me. That's not a coincidence. That's PERSONAL.
 
@@ -574,7 +585,7 @@ On first arriving (after 2 seconds), a description: "Down where the water is. Th
 
 ### Tide Wheel
 
-- **The wheel** (still, before the bell): "A wheel taller than a house, standing in a channel of seawater. Bronze rim, slate paddles. Still." / "The rope from the bell comes down to here. I'd bet my plug on it."
+- **The wheel** (still, before the bell): "A wheel taller than a house, standing in a channel of seawater. Bronze rim, slate paddles. Still." / "The rope from the bell comes down to here. I'd bet my plug on it, if I still had my plug."
 - **The wheel** (turning): "Turning. Slowly, enormously, with the sea pouring through it. The whole room hums." / "Ambrose did this. With a rope and his knees."
 - **The grate**: "Daylight, through a grate. The back of a cave. Mott's sea cave, I'd guess."
 
@@ -618,11 +629,11 @@ Input is locked until step 12, except where noted. All shakes are 1 px unless no
 6. "Middle sister's greedy. Put her back to bed."
 7. Control returns briefly: Cheryl must walk to the Middle Sister's valve (16, 5) and use it (the only interaction that does anything; others get "Not now."). → She hauls on it. It won't turn. A hiss, and a sweet, sharp smell.
 8. "It won't close. It smells like Mott's shack." / "The coil's stuck open. Forty years of making moonshine. It's forgotten how to stop."
-9. The creak again, longer, and this time the screen tilts the *other* way and keeps going (a slow drifting shake, 2 px, for three seconds). The cell grates are now dry. The Sisters keep thumping. The music's pitch begins to rise very slightly.
+9. The creak again, longer, and this time the screen tilts the *other* way and keeps going (`g.tilt`, 2 px, held three seconds). Cheryl staggers east with the tilt to (20, 6) (scripted, three steps). The cell grates are now dry. The Sisters keep thumping. The music's pitch begins to rise very slightly.
 10. Cheryl's ears pop: a short, high, muffled tone, and all sound dips for half a second. "My ears just popped. Underground. That's not right."
-11. A tremendous groan through the hull; a 3 px shake. Then a crack and a roar from the west: the westmost cell grate (4–5, 9) bursts, and water surges up out of it and spreads across the floor toward the ladder to the Fountain, covering the west end tile by tile over six seconds. The ladder to the Fountain goes under. At the same moment, with a bang, the emergency hatch above the rungs at (22, 1) flies open, and cold air whistles down.
-12. Internal monologue: *Up, then.* / *Up is good.*
-13. Control returns. The water keeps spreading east and stops at x18, two tiles short of the emergency ladder. It never reaches Cheryl. If she walks into it: "Not that way." The way out is the rungs at (22, 1–2).
+11. A tremendous groan through the hull; a 3 px shake. Then a crack and a roar from the west: **the big main along the west wall splits.** The Sisters push the ballast water out through that main, and its usual outlet, the Fountain's feed, is the one Cheryl jammed shut in Act 3. With three pumps running and nowhere to go, the pressure bursts the pipe. Water sprays from the split and spreads across the floor toward the ladder to the Fountain, covering the west end tile by tile over six seconds, and is forced up the Fountain's shaft (which is how the Fountain refills over its hatch). The ladder to the Fountain goes under. At the same moment, with a bang, the emergency hatch above the rungs at (22, 1) flies open, and cold air whistles down.
+12. Internal monologue: *Up, then.*
+13. Control returns. The water keeps spreading east and stops at x18, two tiles west of Cheryl at (20, 6) and four short of the emergency ladder. It never reaches her. If she walks into it: "Not that way." The way out is the rungs at (22, 1–2).
 
 ## The climb
 
@@ -648,19 +659,19 @@ At the top (row 0), the map changes to the Ice Cellar.
 
 **Trigger:** walking up the cellar stair (6–7, 1). Input is locked until step 13.
 
-1. Fade to white over half a second (the door opening into sunlight).
-2. The Bilge, **dry state**, day tint, slightly over-bright for one second. Cheryl stands in the Fishmonger's doorway at (4, 4). **No music.** No ambience but wind.
+1. Fade to a light color over half a second (the door opening into sunlight), and **hold the glare for a full second**.
+2. The Bilge, **dry state**, resolves out of the glare over about two seconds, like eyes adjusting (fade in from the light color, with a brightness wash easing off). Cheryl stands in the Fishmonger's doorway at (4, 4). **No music.** No ambience but wind. The canal lapping that has played in the Bilge in every act until now is *missing*; the ear should notice before the eye does.
 3. Hold two seconds on Cheryl.
 4. A gull cries.
-5. The camera pans slowly east (about one tile per 0.4 seconds) along the canal: the empty trench; the old quay walls and below them the dark Founder slate, barnacled, with a clear tide line; a boat lying on its side; crabs; the bridge spanning nothing; the piano upright on the mud with its lid open; the Movers standing beside it, looking up; the Boatman sitting very upright in his beached boat at the foot of the Water Stairs.
-6. The camera tilts down the Water Stairs and holds on the **bronze door** at (26–27, 8–9): huge, barnacled, a moon-lock eye in its middle. Hold three seconds. A single low bell tone (the discovery sting's root note, very soft).
+5. The camera pans slowly east (about one tile per 0.4 seconds) along the canal: the empty trench; the old quay walls and below them the dark Founder slate, barnacled, with a clear tide line; a boat lying on its side; crabs; the bridge spanning nothing; the piano upright on the mud with its lid open; the Movers standing beside it, looking up; the Boatman sitting very upright in his beached boat at the foot of the Water Stairs; and beyond, at the canal mouth, the last trickle spilling out to the Bowl, whose water lies visibly *lower*.
+6. The camera settles back on the foot of the Water Stairs and holds on the **bronze door** at (26–27, 8–9): huge, barnacled, a moon-lock eye in its middle. Hold three seconds. A single low bell tone (the discovery sting's root note, very soft).
 7. Music: `neighborhood` begins, played thin and strange: the arrangement stripped to a single flute, at Wrongness 0.5, notes sagging.
 8. The camera glides back to Cheryl.
 9. Internal monologue: *…Ah.*
 10. Auto boxes (1.2 s each), overlapping the town's noise coming back:
     - FISHMONGER: The SEA! The SEA'S GONE OUT!
     - MAN ON BRIDGE: The sea doesn't go OUT, Brenda. It's the SEA.
-    - FISHMONGER: Then where IS it, Kevin?
+    - FISHMONGER: Then where IS it, Albert?
 11. The Sweaty Kid races across the mud below, arms out: SWEATY KID: IT'S A ROAD! (auto box)
 12. Internal monologue:
     - *The sea didn't go anywhere.*
@@ -675,7 +686,8 @@ At the top (row 0), the map changes to the Ice Cellar.
 - MAN ON BRIDGE: Spring tide. That's all it is. A very, very low spring tide. It'll be back by teatime.
 - MAN ON BRIDGE (repeat): It'll be back by teatime.
 - BOATMAN: ♪ The boat is a boat, and the man is a man ♪ …and the water is somewhere else.
-- BOATMAN: I'm still in the boat, Miss. I'm still a boatman. Technically. Don't take that from me.
+- BOATMAN: She's never been out of the water, Miss. Forty years. You can hear her planks drying.
+- BOATMAN (repeat): I'm still in the boat, Miss. I'm still a boatman. Technically. Don't take that from me.
 - BIG MOVER (from the mud): It's DRY, Miss. We just walked down to it. We jumped, he jumped, we walked.
 - OTHER MOVER: Hnn.
 - BIG MOVER: He says now it's dry, we don't know how to get it back UP.
@@ -684,6 +696,9 @@ At the top (row 0), the map changes to the Ice Cellar.
 - **The boats**: "Boats, lying on their sides like dogs asleep in the sun."
 - **The stranded fish**: "A fish, on the quay. It's looking at me. I look away first."
 - **The Kid jumping down**: "He jumped. I am not jumping."
+- **The trickle at the canal mouth**: "The last of the canal, running out to the Bowl. And the Bowl's down there. Lower. Of course it's lower."
+- **The laundry**: "Every line of washing on the quay is streaming out sideways, hard. The wind's got more of us to push now."
+- **The exits** (north, east, the Fishmonger's door): "Not yet. That door."
 
 **Ending the act:** looking at the bronze door from anywhere on the north quay, or at the Water Stairs:
 1. "At the bottom of the Water Stairs, where the sea used to be: a door." / "Bronze, barnacled, as big as a cart. A glass eye in the middle." / "The last flight of stairs is broken. Of course it is."
@@ -693,7 +708,7 @@ At the top (row 0), the map changes to the Ice Cellar.
 ### The Fountain, after the reveal
 
 When Cheryl next visits Fountain Square: the Fountain is full and flowing again, over its hatch (P2 closed for good). The Mayor is back on his crate.
-- **The Fountain**: "Flowing again. Fuller than before. The Pump Hall's water had to go somewhere." / "There's no getting to that hatch now."
+- **The Fountain**: "Flowing again. Fuller than before. I shut its feed down there, and the pumps found it anyway." / "There's no getting to that hatch now."
 - MAYOR: The Fountain has been restored by the inquiry! Tessel: Forward! …The canals are a separate inquiry.
 
 ## Items
@@ -779,4 +794,5 @@ All of this is built (audio/foundation, e4adffd). The ids and a step-by-step sug
 - **The dry Bilge exposes the city's Founder hull** (slate below the old waterline): the first time the hidden city is visible from the street, and the clearest proof yet that Tessel floats.
 - **The Water Stairs' last flight is broken,** so the bronze door is visible but unreachable until Act 5.
 - **The Counting Woman counts one hundred in Act 4,** as soon as the step is open, rather than waiting for the epilogue. The epilogue can still give her a final moment.
-- **"Brenda" and "Kevin" are named once each, in passing,** by each other. Their labels stay descriptive (FISHMONGER, MAN ON BRIDGE).
+- **Revised after review (xaKh8TS_PJ):** the flood stops west of Cheryl (she staggers east with the tilt); the bronze door is reachable only from the mud, since the stairs stop above a broken flight; the burst is the main pipe, overpressured because Cheryl jammed the Fountain's feed in Act 3, which also refills the Fountain; the free roam after the reveal stays in the Bilge; the flyleaf's pump names are under a tea stain, so the order thread still matters; Mott can be found and asks for written proof; one sincere beat (the Boatman's drying planks); the glare reveal and the missing lapping; the trickle to the lower Bowl and the streaming laundry.
+- **"Brenda" and "Albert" are named once each, in passing,** by each other. Their labels stay descriptive (FISHMONGER, MAN ON BRIDGE).
