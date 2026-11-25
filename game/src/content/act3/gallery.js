@@ -23,8 +23,8 @@ import { composedMap } from '../opening/grid.js';
 import { act3Tiles } from './tiles.js';
 import { ds_mirror } from '../../art/downstairs.js';
 import {
-  UNDER, WRONGNESS, deck, wall, floor, lever, hatchOpen, hasDisc, valveTurned,
-  wallHotspots, lampEntity, nicheTile, founderUse, RUB_WALLS, getItem, cherylDeclines, ladderDeclines,
+  UNDER, WRONGNESS, deck, wall, floor, lever, hatchOpen, hasDisc,
+  wallHotspots, lampEntity, nicheTile, founderUse, RUB_WALLS, getItem, cherylDeclines,
   discLight, keepLoops, bump,
 } from './common.js';
 
@@ -202,7 +202,6 @@ const galleryObjects = [
   {
     id: 'ladder_up', x: 3, y: 2,
     interact: async (g) => {
-      if (valveTurned(g)) return ladderDeclines(g);
       await g.describe("The ladder back up. Daylight, and the Woman with Basin, pretending she can't see me.");
       if ((await g.choose('Climb up?', ['Yes', 'Not yet'])) === 0) await climbUp(g);
     },
@@ -237,7 +236,6 @@ const galleryObjects = [
     interact: async (g) => {
       if (!g.flag('halls.ladder')) return g.describe('A grate in the floor. Underneath, a darker kind of dark.');
       await g.describe('The top of the ladder I dropped. My way back, if I want one.');
-      if (valveTurned(g)) return ladderDeclines(g);
       if ((await g.choose('Climb down?', ['Yes', 'Not yet'])) === 0) await climbDown(g);
     },
     use: { crowbar: (g) => g.describe("It's bolted from underneath. Somebody liked their grates where they were."), '*': cherylDeclines },
@@ -256,7 +254,7 @@ const mirror = {
   use: {
     moonglass_disc: (g) => g.describe("It shows me the disc, and the disc shows it back. Nothing happens. They seem to get on."),
     // Under the open shaft: floor and light, the near miss (structure pass, section 4).
-    paper_charcoal: (g) => (lever(g) ? g.describe('Floor, and light, but nothing written on it. Not this one.') : g.describe('A rubbing of a mirror. No.')),
+    paper_charcoal: (g) => (lever(g) ? g.describe("Light falling on it, just as Ottilie said. But it's a mirror, not a floor. Not this one.") : g.describe('A rubbing of a mirror. No.')),
     crowbar: (g) => g.describe("It turns. I don't need to bully it."),
     '*': cherylDeclines,
   },
@@ -273,14 +271,13 @@ export const galleryMap = composedMap(composeGallery, {
   lights: galleryLights,
   playerLight: discLight(3),
   exits: [
-    // The ladder up to the Steps: walk up into it. Declines after the valve.
-    { x: 3, y: 2, to: 'hundred_steps', when: (g) => !valveTurned(g), run: climbUp },
-    { x: 3, y: 2, when: valveTurned, run: async (g) => { await ladderDeclines(g); await g.movePlayer([3, 3]); } },
+    // The ladder up to the Steps: walk up into it. (After the valve the Lamp
+    // Halls' west end is flooded, so the gallery can't be reached from below.)
+    { x: 3, y: 2, to: 'hundred_steps', run: climbUp },
     // The hatch, once open: into the Cradle.
     { x: 15, y: 2, to: 'cradle', at: [3, 4], facing: 'up', when: hatchOpen, sfx: 'step_hullstone' },
     // The grate, once the Lamp Halls' ladder is down.
-    { x: 6, y: 8, when: (g) => !!g.flag('halls.ladder') && !valveTurned(g), run: climbDown },
-    { x: 6, y: 8, when: (g) => !!g.flag('halls.ladder') && valveTurned(g), run: async (g) => { await ladderDeclines(g); await g.movePlayer([6, 7]); } },
+    { x: 6, y: 8, when: (g) => !!g.flag('halls.ladder'), run: climbDown },
   ],
   onEnter: async (g) => {
     g.setWrongness(WRONGNESS);

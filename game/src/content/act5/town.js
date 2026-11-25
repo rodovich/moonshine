@@ -106,7 +106,7 @@ async function touristTalk(g, self) {
       "The ferry's six feet DOWN now. I looked over the edge. It's hanging off its ropes like washing.",
       "My guidebook said nothing about the sea leaving. Then again, you've got my guidebook.");
   }
-  return g.say(self, "Dry Canal Day. I'm going. I've nothing else to do. I'm wearing your hat.");
+  return g.say(self, "Dry Canal Day. I'm going. I've nothing else to do. I'm wearing this hat.");
 }
 
 const crowd = [
@@ -159,19 +159,24 @@ export function withSquare5(def) {
 }
 
 // ---------------------------------------------------------------------------
-// The Shop: the window display fallen over in the rise, and his first swap.
+// The Shop: the window display fallen over in the rise, with the Keeper's
+// telescope lying in it. He swaps it for the guidebook, whether or not the
+// Keeper has asked for it yet (docs/design/structure-pass.md, section 6; the
+// "only once she's asked" gate is dropped, since it only lengthened the route).
 
-const swapped = (g) => g.flag('got.polish');
+const swapped = (g) => !!g.flag('telescope.back');
+const asked = (g) => !!g.flag('keeper.asked');
 
 async function shopkeeperTalk(g, self) {
-  if (swapped(g)) return g.say(self, "My first swap in thirty years. I'm going to have a sit down.");
+  if (swapped(g)) return g.say(self, "Two swaps in one week. I'm going to have a sit down.");
   if (firstMeet(g, 'shopkeeper5')) {
-    return g.say(self,
-      'Miss. Look. The window. It went over in the night. When the whole shop lifted. The hat\'s on the floor.',
-      "There's a GAP, Miss. In the window. A shop with a gap in the window is a shop that's given up.",
-      'I need something to display. Something local. Something that says Tessel.');
+    await g.say(self,
+      'Miss. Look. The window. It went over in the night. When the whole shop lifted.',
+      'The telescope\'s lying in it like a fallen soldier. Best thing I\'ve ever displayed.');
   }
-  return g.say(self, 'A gap. People will talk. They\'ll say, "Did you see his window?"');
+  if (asked(g)) return g.say(self, 'Give it BACK? Then there\'s a GAP, Miss. I need something local. Something that says Tessel.');
+  // Before the Keeper has asked, he still names his price, so the swap can come first.
+  return g.say(self, 'If it goes, there\'s a GAP, Miss. I\'d need something local. Something that says Tessel.');
 }
 
 async function giveGuidebook(g, self) {
@@ -179,25 +184,19 @@ async function giveGuidebook(g, self) {
   g.takeItem('guidebook');
   g.sfx('give');
   await g.say(self, 'A guidebook! "Tessel: A Pocket Companion." Genuinely local. Confidently wrong. PERFECT.');
-  // In it goes.
+  // In it goes; out comes the telescope.
   await g.moveNpc(self, [7, 4]);
   g.faceNpc(self, 'down');
   await g.wait(0.3);
   g.sfx('stone_scrape');
   g.setFlag('shop.guide');
+  g.setFlag('window.telescope', false);
   await g.wait(0.6);
   g.faceNpc(self, 'player');
-  await g.say(self,
-    'In it goes. There. The window is complete. Thank you, Miss. What can I-- no, I don\'t sell things.',
-    '...Oh, go on. A swap. Display for display. What do you want?');
-  g.facePlayer('up');
-  await g.wait(0.8);
-  await g.say(self, "The polish? That's lighthouse polish. Nobody needs lighthouse polish except--");
-  g.facePlayer(self);
-  await g.say(self, "Take it. Before I change my mind. I've never done this before. I feel quite light-headed.");
-  g.sfx('tin_lid');
-  g.setFlag('got.polish');
-  await getItem(g, 'brass_polish');
+  await g.say(self, 'In it goes. Out comes the telescope. Display for display. Twice in one week. I\'m practically a merchant.');
+  g.sfx('give');
+  g.setFlag('telescope.back');
+  await getItem(g, 'telescope');
 }
 
 function shopPatches(g) {
@@ -213,7 +212,6 @@ const shopkeeper5 = {
   interact: shopkeeperTalk,
   use: {
     guidebook: giveGuidebook,
-    hat: (g, self) => g.say(self, "Your hat? It's been in the window once already. People would think I'd gone backwards."),
     '*': (g, self) => g.say(self, "Is it local? It's not local, Miss. I need local."),
   },
 };
@@ -222,7 +220,7 @@ const display5 = {
   id: 'display5', x: 7, y: 5, w: 2, solid: false, when: started,
   interact: (g) => (g.flag('shop.guide')
     ? g.describe('The guidebook, open in pride of place, on a little stand. "Tessel: A Pocket Companion." Somebody will buy it. He won\'t sell it.')
-    : g.describe('The window display, flat on its back. The straw hat on the floor, the stand on its side. Like a crime scene, but for a hat.')),
+    : g.describe("The window display, flat on its back, and the Keeper's telescope lying in it. Like a crime scene, but for a telescope.")),
   use: { guidebook: (g) => g.describe("It's his window. He should be the one to fill it."), '*': cherylDeclines },
 };
 
@@ -274,6 +272,25 @@ const ambrose5 = {
   use: ambroseUse5,
 };
 
+// The Clockmaker's door in Act 5: propped open with the bell's old clapper
+// (then shut, with the jug inside). Down over the doorway (12, 6), so it can be
+// clicked from the plaza; looking at it goes in.
+const clockshopDoor5 = {
+  id: 'clockshop_door5', x: 12, y: 5, h: 2, solid: false,
+  when: started,
+  interact: async (g) => {
+    if (!g.flag('n.clockshopDoor5')) {
+      g.setFlag('n.clockshopDoor5', 1);
+      await g.describe(g.flag('got.clapper')
+        ? "The Clockmaker's door, shut. Something square is holding it from the inside."
+        : "The Clockmaker's door, propped open with something heavy. Clocks ticking inside, all at once.");
+    }
+    g.sfx('door');
+    await g.changeMap('clockmaker_shop', 4, 6, 'up');
+  },
+  use: { '*': cherylDeclines },
+};
+
 // The tower door in Act 5: open, with Ambrose up in the belfry. (Act 2's
 // bolted door, with the Clockmaker calibrating behind it, steps aside.)
 // Looking at it, or clicking it, goes up, as Act 4's open door does.
@@ -284,7 +301,7 @@ const towerDoor5 = {
   interact: async (g) => {
     if (!g.flag('n.towerDoor5')) {
       g.setFlag('n.towerDoor5', 1);
-      await g.describe('The tower door, wide open. Ambrose is up there, waiting for moonrise.');
+      await g.describe('The tower door, unbolted at last. Ambrose is up there, waiting for moonrise.');
     }
     g.sfx('step_stairs');
     await g.changeMap('belfry', 1, 7, 'up');
@@ -307,7 +324,13 @@ export function withCrown5(def) {
       const list = base.patches ? base.patches(g) : [];
       if (!started(g)) return list;
       // The tower doorway (4-5, 6), walkable: the way up to the belfry.
-      if (crownLinks.belfry) for (const x of [4, 5]) list.push(['ground', x, 6, tileAt(base, x, 6)]);
+      // The tower door standing open (4-5, 5-6), and its doorway walkable: the way up to the belfry.
+      if (crownLinks.belfry) {
+        for (let y = 0; y < 2; y++) for (let x = 0; x < 2; x++) {
+          const tile = `tower_open:tower_open_x${x}y${y}`;
+          list.push(['ground', 4 + x, 5 + y, y === 0 ? { tile, solid: true } : tile]);
+        }
+      }
       return list.map(([layer, x, y, v, ...r]) => {
         const name = typeof v === 'object' && v ? v.tile : v;
         if (!name || !name.endsWith('_eye_glow')) return [layer, x, y, v, ...r];
@@ -327,7 +350,7 @@ export function withCrown5(def) {
       },
     ],
     triggers: (base.triggers || []).map(untilAct5),
-    entities: [...entities, ambrose5, ...(crownLinks.belfry ? [towerDoor5] : []), { id: 'clockshop_door_shut', x: 12, y: 6, solid: true, shadow: false, when: (g) => !started(g) }],
+    entities: [...entities, ambrose5, clockshopDoor5, ...(crownLinks.belfry ? [towerDoor5] : []), { id: 'clockshop_door_shut', x: 12, y: 6, solid: true, shadow: false, when: (g) => !started(g) }],
     onEnter: async (g) => {
       if (!started(g)) {
         if (after5(g)) act5Loops(g, []);
@@ -400,6 +423,7 @@ export function withSteps5(def) {
   const base = withSheets(def);
   return {
     ...base,
+    // (The hundredth step is boarded over by Act 4's layer, from Act 4 on.)
     entities: [...hide(base.entities, ['kid', 'kid_after']), countingWoman5],
     onEnter: windOnEnter(base),
   };
@@ -433,8 +457,11 @@ export function withCourt5(def) {
   const base = withSheets(def);
   let entities = act5Talk(base.entities, 'old_man', (g, self) => g.say(self, "The whole house lifted in the night. Gerald says we've risen in the world. Gerald thinks he's funny."));
   for (const id of ['neighbor', 'neighbor_after', 'neighbor_morning']) {
-    entities = act5Talk(entities, id, (g) => g.say('Neighbor', "The wind! My sheets are out on the line flat as flags. Whiter than ever. I don't trust it."));
+    entities = act5Talk(entities, id, (g) => g.say('Neighbor', "My whites have never been whiter. Not since the house lifted in the night. I don't trust it."));
   }
+  // Her sheets, in Act 5's wind: she says whiter than ever; they look grey to Cheryl.
+  entities = act5Talk(entities, 'back_line', (g) => g.describe("Still grey to me. She says whiter than ever. I'm not arguing with her about her sheets. Nobody wins that."));
+  entities = act5Talk(entities, 'nb_door', (g) => g.describe("Shut. She'll be up on her roof, guarding her sheets."));
   return { ...base, entities, onEnter: windOnEnter(base, LAUNDRY_AMBIENCE) };
 }
 
