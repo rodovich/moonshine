@@ -396,8 +396,8 @@ export function makeApi(world) {
     stopMusic(fadeMs) {
       stopMusic(fadeMs);
     },
-    sfx(id) {
-      sfx(id);
+    sfx(id, opts) {
+      sfx(id, opts); // opts: { volume, pitch }
     },
     // A one-shot music cue over the current track (which dips and returns,
     // unless { resume: false }).

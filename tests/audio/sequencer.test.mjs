@@ -164,7 +164,7 @@ test('the required sound effects exist', () => {
     'belfry_tick', 'clock_rundown', 'lever_clank', 'clamp_lift', 'bell_stroke', 'bell_strokes', 'thrum_rise', 'thrum',
     'hull_far', 'coins_rattle', 'ring_hatch', 'valve_squeal', 'pump_stall', 'thump_thin', 'thump_stout', 'thump_middle',
     'pump_thin', 'pump_stout', 'shaft_hum', 'grate_drain', 'hull_creak_long', 'valve_hiss', 'ear_pop', 'groan_great',
-    'burst', 'roar', 'water_spread', 'hatch_bang', 'air_whistle', 'slack_lap', 'channel_rush', 'gull_close',
+    'burst', 'spray', 'roar', 'runoff', 'water_spread', 'hatch_bang', 'air_whistle', 'slack_lap', 'channel_rush', 'gull_close',
     'slab_scrape', 'slab_close', 'shouting', 'bell_low', 'town_rush', 'crabs', 'fish_flop',
   ];
   for (const id of act2) assert.ok(SFX[id], id);
