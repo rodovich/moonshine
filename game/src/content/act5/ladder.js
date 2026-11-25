@@ -55,7 +55,8 @@ function shaftClimb(g) {
 }
 
 export async function climbToBelfry(g) {
-  if (!(g.player.x === 16 && g.player.y === 3)) await g.movePlayer([16, 3]);
+  // From below the rungs (16, 3), or on them, having walked up into them (16, 2).
+  if (!(g.player.x === 16 && (g.player.y === 3 || g.player.y === 2))) await g.movePlayer([16, 3]);
   g.facePlayer('up');
   g.pose('player', 'climb_up');
   g.sfx('step_rung');
@@ -88,9 +89,11 @@ export async function climbToBelfry(g) {
   g.sfx('hatch_open');
   await g.fade('in', 0.5);
   await g.wait(0.4);
-  const a = g.npc('ambrose_belfry');
-  if (a) g.faceNpc(a, 'player');
-  await g.say(a || 'Ambrose', 'CHERYL. YOU CAME UP THROUGH MY FLOOR.', "THAT HATCH HAS BEEN THERE FIFTY-TWO YEARS. I THOUGHT IT WAS FOR MICE.");
+  // Ambrose, if he's up here (he always is once Act 4 has rung the bell).
+  if (g.flag('ambrose.inBelfry')) {
+    g.faceNpc('ambrose_belfry', 'player');
+    await g.say('ambrose_belfry', 'CHERYL. YOU CAME UP THROUGH MY FLOOR.', "THAT HATCH HAS BEEN THERE FIFTY-TWO YEARS. I THOUGHT IT WAS FOR MICE.");
+  }
   await g.describe('The bell to the bow, in one ladder.', "The Keepers didn't take the Steps.");
 }
 

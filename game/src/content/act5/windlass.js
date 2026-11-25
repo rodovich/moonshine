@@ -170,7 +170,7 @@ function composeWindlass(g) {
   L.set('ground', 2, 3, 'hull:floor_glow', false); L.set('ground', 19, 3, 'hull:floor_glow', false);
   L.set('ground', 15, 1, 'ds:horn', true);
   // The Keepers' ladder: bronze rungs beside the tube, going up into the dark.
-  L.set('ground', 16, 1, 'keepers_rungs:rungs_top', true); L.set('ground', 16, 2, 'keepers_rungs:rungs_bot', true);
+  L.set('ground', 16, 1, 'keepers_rungs:rungs_top', true); L.set('ground', 16, 2, 'keepers_rungs:rungs_bot', false); // walked into: the climb
   for (const [n, x, y] of [['nw', 7, 1], ['ne', 8, 1], ['sw', 7, 2], ['se', 8, 2]]) L.set('ground', x, y, `keel_hatch:keel_sealed_${n}`, true);
   // The drum, wound with chain: it strains and gives until the Tooth is set.
   for (let r = 0; r < 4; r++) for (let c = 0; c < 16; c++) {
@@ -372,8 +372,9 @@ const windlassObjects = [
     interact: async (g) => {
       if (night(g)) return g.describe("Not tonight. Ambrose has the top end. I've got this one.");
       const tube = toothSet(g) ? 'Wind. Gulls. Nothing yet.' : 'A tube from somewhere far above. I can hear wind in it, and gulls. And, very faintly, the Mayor.';
-      if (bump(g, 'tube') === 0) return g.describe(tube, 'And rungs beside it, going up into the dark. Somebody had to climb up and clean it.');
-      await g.describe(tube);
+      // The first look finds the rungs, and asks straight away.
+      if (bump(g, 'tube') === 0) await g.describe(tube, 'And rungs beside it, going up into the dark. Somebody had to climb up and clean it.');
+      else await g.describe(tube);
       const i = await g.choose('Climb up?', ['Yes', 'Not now']);
       if (i === 0) await climbToBelfry(g);
     },
@@ -406,6 +407,11 @@ export const windlassMap = composedMap(composeWindlass, {
   playerLight: discLight,
   exits: [
     { x: 0, y: 6, h: 2, to: 'bow_passage', at: [16, 3], facing: 'left', sfx: 'step_hullstone', when: (g) => !sat(g) },
+    // Walking up into the rungs climbs, like Act 3's ladders.
+    {
+      x: 16, y: 2, to: 'belfry', at: [5, 7], facing: 'up', run: climbToBelfry,
+      when: (g) => !night(g) && !sat(g), blocked: "Not tonight. Ambrose has the top end. I've got this one.",
+    },
   ],
   ambient: [
     // The drum creaks and gives with each gust, until the Tooth is set.

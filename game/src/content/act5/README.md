@@ -11,6 +11,7 @@ The afternoon after the reveal: the rope, the door, and the Tooth, ending at dus
 | `bilge.js` | Act 5 on the dry Bilge: the Fishmonger's bucket, the Boatman from the broken edge, the ring, the rope climb, the bronze door, the Kid on the mud with the disc, the Movers, boats, crabs. |
 | `harbor.js` | The risen Harbor (32 × 15, a new map): the Teeth in three stages, the ferry, Mott, the Kid's laps. The lamp room in Act 5: the Keeper at the window, the polish. |
 | `relay.js` | The disc in the lamp, and the Kid's run to the door (a cutscene across the Harbor and the Bilge). |
+| `ladder.js` | The Keepers' ladder: the climb, the belfry hatch. |
 | `teeth.js` | The Teeth's looks by stage, the surf's volume, and the camera's trip out to them. |
 | `clockshop.js` | The Clockmaker's Shop (10 × 8, a new map), the doorstop, and the swap for Mott's jug. |
 | `windlass.js` | The Bow Passage (18 × 8) and the Windlass Room (22 × 14), the Tooth, and the end of the act. Exports the `act5.next` hook for Act 6. |
@@ -61,6 +62,7 @@ Where the design left something open, or didn't work in play, this is what the b
 - **Ambrose is up in Act 4's belfry** (`ambrose_belfry`), with Act 5's talk. Act 4 shuts the tower door once Act 5 starts, so Act 5 opens it again (4-5, 6) as the way up. He stands inside the bell's hotspot, so the layer lists him first. (Without the belfry he'd be on the Crown at his step.)
 - **The DRY CANAL DAY banner hangs over x16–21** (the design's 17–22 would put its east pole on a café chair).
 - **The Windlass Room:** the first look pans east to the hawse and back; the drum creaks and shakes the screen a pixel every 7–12 s until the clapper seats. The ending walks Cheryl to the west coil and sits her on it (`sitcoil_down`, drawn up and right onto the coil).
+- **The Keepers' ladder** (the writer's spec, added after the playtest): rungs beside the speaking tube (16, 1-2) up to a floor hatch in Act 4's belfry at (5, 6), beside Ambrose. Walking up into the rungs climbs, like Act 3's ladders, and the tube's first look finds the rungs and offers the climb; the first climb is a four-second climb in the dark, later ones a quick fade. The belfry hatch is bolted until Cheryl has come up through it. During Act 6's night neither end climbs. The Ship Plan's Act 5 look points at the tooth at the bow.
 - **Lines added for states the design doesn't cover:** the act's opening ("That afternoon." and two lines on the quay), Cheryl after the relay ("He did it. I heard him from here..."), the crowd residents in the Square, the Kid with the disc and egg timer, Mott with the jug and disc, the Clockmaker's yelp when the door swings shut, the Shop's display before and after, the lamp after the relay, the open step, the passage's lamps and door, the Windlass Room's lamps, the empty and seated socket, and declines for Act 5's items on the new people.
 
 ## Stand-ins
