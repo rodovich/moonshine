@@ -198,7 +198,7 @@ The machine that holds Tessel to its anchor. A bronze drum the size of a chapel 
 | The lighthouse lamp is bright enough | Cheryl at the door ("Brighter. The brightest light in Tessel."); the Keeper ("Brightest lamp on any coast"); the lamp's own shine |
 | The Keeper needs polish; the Shop has it | The Keeper's lines; the Shop's shelves (Act 2: "Brass polish, lamp oil… Everything a lighthouse could want") |
 | The guidebook fills the Shopkeeper's gap | The Shopkeeper's new lines; the Act 2 decline ("My window is complete") |
-| The disc fades too fast for Cheryl | Holding it after the charge: "It's fading already. I'll never get it to the canal in time. Not at my age." Then the Kid in the harbor |
+| The disc fades too fast to walk it to the door | Holding it after the charge: "Nobody could walk that in a minute. Somebody would have to run it flat out and jump off the quay." Then the Kid in the harbor |
 | The Clockmaker's Shop is worth visiting | Ambrose: "MY BELL'S OLD BRONZE TONGUE IS PROPPING HIS SHOP DOOR OPEN." |
 | The clapper is the spare Tooth | The doorstop's look ("That notch is made to catch something."); the stump's look in the Windlass Room |
 | The door wants more light (without the rope) | The disc used on the eye from the stairs |
@@ -411,7 +411,7 @@ At his bench, repairing the clock drive she unclamped. Calm now, in a brittle wa
 - **Disc on the door's eye** (uncharged). It works from the stair tiles (22–25, 7) as well as from the mud, so this clue doesn't wait on the rope. From the stairs: "I hold the disc out over the edge. The eye glints, and goes dark again." / "It wants more than I've got. It wants the brightest light in Tessel." From the mud: "The eye stays dark. It wants more than my disc has in it." / "Brighter. It wants the brightest light in Tessel."
 - **Other water, for the bucket:** the trickle at the canal mouth, from the quay: "It's on the mud. So is the Boatman. That's the problem." The sea, from the risen Harbor's quay edge: "Six feet down. My arms aren't." The ice in the Fishmonger's cellar: "I'd be here till Tuesday waiting for it to melt."
 - **The stair ring** (25, 7): "A bronze mooring ring, set in the last good step." With the rope: use → `rope.tied`: "A round turn and two half hitches. My father taught me that, on a lake a long way from here." Then: "Tied. I'm not proud. I'm not not proud."
-- **The rope climb** (first time down): "Fifty-eight years old, going down a rope into a canal." / "Never again. I said that at nineteen, too."
+- **The rope climb** (first time down): "Down a rope into a canal, on a weekday." / "I've done worse. I've taken thirty children on a nature walk."
 - **The bucket on the Fountain** (Fountain Square) → `bucket.full`: "A bucket of the Fountain. Five hundred years of water from nowhere, and I'm carrying it to a boat."
 
 ### Risen Harbor
@@ -479,8 +479,8 @@ At his bench, repairing the clock drive she unclamped. Calm now, in a brittle wa
 
 1. Cheryl holds the disc into the lamp's focus. The lamp's beam swings through it; the disc flares white, then a deep, brilliant cyan. A rising glassy chime. The Keeper shades her eyes.
 2. "It's drinking the lamp." / "It's full. It's never been this full."
-3. Two seconds later the glow dims a step. "And it's fading already. The canal's the length of the town away." / "I'll never get it there in time. Not at fifty-eight."
-4. LIGHTHOUSE KEEPER: Then GIVE it to someone who can! There's a boy outside doing laps. He's done forty.
+3. Two seconds later the glow dims a step. "And it's fading already. The canal's the length of the town away." / "Nobody could walk that in a minute. Somebody would have to run it flat out and jump off the quay."
+4. LIGHTHOUSE KEEPER: Then give it to someone who runs everywhere! There's a boy outside doing laps. He's done forty.
 5. Cut to the Harbor: Cheryl comes out of the lighthouse door; the Kid skids to a stop in front of her (he's always within earshot of a challenge).
 6. SWEATY KID: Miss? Is that GLOWING? What is it? Where's it going? Can I take it?
 7. Cheryl holds out the disc, shows him the Ship Plan, and points (a pointing pose) west, toward the Bilge. She keeps the Ship Plan.
@@ -571,6 +571,17 @@ All of this is built (audio/foundation, 0518c2a); ids and a suggested order are 
 - [ ] The clapper seating feels like a payoff (the clunk and the silence).
 - [ ] Every line fits in its box.
 - [ ] First-time players finish in 30–40 minutes.
+
+## As built
+
+The Act 5 builder (b_30JU3Nrc) built this act on `content/act5`; its full list is in `game/src/content/act5/README.md`. This document follows it:
+
+- **The disc after the relay:** the Kid keeps it on the mud by the open door and hands it back when Cheryl talks to him there, or throws it up to her ("CATCH!") if she talks to him from the broken edge before she has the rope. It doesn't sit in the eye.
+- **The Fishmonger's door is a look** ("The Fishmonger's door, down to her cellar. Ice. Fish. A hatch I'm not opening."), not a way back in.
+- **The Kid's route:** west along the Harbor quay (MOTT: Mind the edge, boy!), into the Bilge on the south quay, over the bridge, east along the north quay, off the quay onto the mud by the Movers (OTHER MOVER: Hnn!), hurdling a beached boat and the Boatman's (BOATMAN: Go on, lad!).
+- **Placements:** the Clockmaker at (2, 4), back to us at his bench; the Counting Woman at (12, 17); the banner over x16–21. The open hundredth step is a hole Cheryl walks round ("The hundredth step, open, and the ladder down. Not today. My business is at the bottom of the canal.").
+- **The act opens** with the card "That afternoon." and: "The wind's getting up. Every line of washing on the quay is pointing out to sea." / "A door at the bottom of the canal, and stairs that don't reach it. Well. One thing at a time."
+- **Lines the builder added, adopted as written:** after the relay ("He did it. I heard him from here. Half of Tessel heard him from here."); the Clockmaker as the door swings shut ("Ah! …It's fine! The jug's fine! It's the DOOR that moved!"); the Square's crowd; Mott's declines ("Keep it. I'm off it. I'm off all of it till she's tied up again." / "Grandad had a bit of glass like that. Said it came off a door. I thought he meant a pub door."); the Shop's display; the lamp after the relay; the passage and Windlass lamps; and the socket with the clapper in the bag ("I know exactly what goes in there. It's in my bag.").
 
 ## Decisions
 
