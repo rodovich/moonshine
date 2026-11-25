@@ -191,6 +191,18 @@ export const COLORS = {
   lilac_light: '#d8b8e8',
   lilac: '#a888c8',
 
+  // Underground (art): Founder bronze gone to verdigris, moonglass glow, amber warning light,
+  // and the hullstone's honeycomb where a block is broken.
+  bronze_light: '#d8a870',
+  bronze: '#a87848',
+  bronze_shade: '#704830',
+  bronze_deep: '#402828',
+  moonglass_light: '#c8f8f0',
+  moonglass_dim: '#308890',
+  amber_dim: '#a06020',
+  hull_cell: '#586878',
+  hull_water: '#183848',
+
   // UI (engine)
   ui_ink: '#080810',
   ui_box: '#182048',

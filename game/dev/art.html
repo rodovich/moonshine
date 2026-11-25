@@ -52,8 +52,8 @@
 import { COLORS } from '../src/art/palette.js';
 
 const MODULES = ['street', 'buildings', 'rooftiles', 'canal', 'props', 'cloth', 'roof', 'court', 'interior',
-  'cheryl', 'npcs', 'opening_npcs', 'items', 'fx', 'vista'];
-const SCENE_MODULES = [['court', './scene-court.js'], ['flat', './scene-flat.js'], ['vista', './scene-vista.js'], ['street', './art-scene.js']];
+  'cheryl', 'npcs', 'opening_npcs', 'items', 'fx', 'vista', 'underground', 'machines', 'city', 'landmarks'];
+const SCENE_MODULES = [['underground', './scene-underground.js'], ['city', './scene-city.js'], ['court', './scene-court.js'], ['flat', './scene-flat.js'], ['vista', './scene-vista.js'], ['street', './art-scene.js']];
 const params = new URLSearchParams(location.search);
 const only = params.get('only');
 const errors = [];
