@@ -145,10 +145,10 @@ export const cellarMap = composedMap(composeCellar, {
     await g.wait(1.2);
   },
   entities: [
-    { id: 'ice', x: 1, y: 3, w: 2, h: 2, lookKey: 'ice', look: "Ice, sweating in its sawdust. There's a wet line round the walls at knee height. The water's gone down. Or I've come up." },
-    { id: 'ice_b', x: 6, y: 3, w: 2, h: 2, lookKey: 'ice', look: "Ice, sweating in its sawdust. There's a wet line round the walls at knee height. The water's gone down. Or I've come up." },
+    { id: 'ice', x: 1, y: 3, w: 2, h: 2, lookKey: 'ice', look: "Ice, sweating in its sawdust. There's a wet line round the walls at knee height. The water's gone down. Somewhere." },
+    { id: 'ice_b', x: 6, y: 3, w: 2, h: 2, lookKey: 'ice', look: "Ice, sweating in its sawdust. There's a wet line round the walls at knee height. The water's gone down. Somewhere." },
     ...[1, 2, 3, 8].map((x) => ({ id: `fish_${x}`, x, y: 1, lookKey: 'fish', look: 'Fish, hanging up, looking as surprised as I feel.' })),
-    { id: 'crate', x: 8, y: 4, look: 'A crate of fish, packed in ice. Dry ice. Dry crate. Dry everything, suddenly.' },
+    { id: 'crate', x: 8, y: 4, look: 'A crate of fish, packed in ice. The only wet thing for a street in any direction.' },
     { id: 'hatch', x: 2, y: 6, look: "Closed. And the slab's back over it. That way's shut for good." },
     { id: 'stair', x: 6, y: 0, w: 2, look: 'Daylight under the door at the top. And shouting.' },
   ].map((o) => ({ solid: false, use: { '*': cherylDeclines }, ...o })),
