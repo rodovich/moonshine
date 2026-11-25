@@ -244,7 +244,7 @@ On entering, the nearest lamps wake one by one ahead of Cheryl (a chime each). A
 ## The dawn
 
 1. Cheryl steps into the cage; the gate closes. A clank, the long rumble of the counterweight going down as she goes up, and darkness with a slow upward scroll of shaft wall lit by her disc (about four seconds).
-2. Cut to **Cistern Court at dawn**: pale pink and gold. The iron grate on the well lifts, and Cheryl climbs out (a climbing-out sprite) and stands at (9, 18).
+2. Cut to **Cistern Court at dawn**: pale pink and gold. The iron grate on the well lifts, and Cheryl climbs out (a climbing-out sprite) and stands at (9, 18). "Cistern Court. My own front door, from underneath." (Added after a blind playtest found the return too quiet.)
 3. The Old Man at his chess table looks up.
 4. OLD MAN: Morning.
 5. Hold one second.
