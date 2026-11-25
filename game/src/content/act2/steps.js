@@ -192,6 +192,17 @@ const objects = [
     interact: (g) => askDown(g),
     use: { '*': (g) => g.describe("I'm not dropping anything down there. I'd only want it back.") },
   },
+  {
+    // The boarded step (Act 4 on): a look, and an answer for the crowbar that opened it (playtest).
+    id: 'boarded_step', x: 9, y: 19, w: 2, when: boarded,
+    interact: (g) => (g.flag('epilogue')
+      ? g.describe("Boarded over, and somebody's chalked 100 on it. Twice.")
+      : g.describe('MIND THE STEP. BY ORDER.', "The Mayor's handwriting. He's never forgiven a step.")),
+    use: {
+      crowbar: (g) => g.describe("I opened it with this. The Mayor nailed it shut again. That's fair. It's his step too."),
+      '*': cherylDeclines,
+    },
+  },
   { id: 'view', x: 15, y: 26, h: 3, look: 'Halfway down Tessel. Halfway up, if you\'re the Kid.' },
   { id: 'bench', x: 2, y: 27, w: 2, look: 'A bench for the halfway point. Nobody has ever sat on it going down.' },
   ...[[1, 8], [15, 8], [1, 17], [14, 17]].map(([x, y]) => ({ id: `pot_${x}_${y}`, x, y, lookKey: 'geraniums', look: 'Geraniums.' })),

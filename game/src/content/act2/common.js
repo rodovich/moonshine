@@ -15,7 +15,7 @@ export const act2Items = {
   paper_charcoal: {
     name: 'Paper and Charcoal',
     icon: { sheet: items_act2, frame: 'paper_charcoal' },
-    description: "Ottilie's paper and a stub of charcoal. For rubbings. Primary sources, Cheryl.",
+    description: 'Ottilie\'s paper and a stub of charcoal. "Founder work, Cheryl. Floors, where the light falls."',
   },
   guidebook: {
     name: 'Guidebook',
