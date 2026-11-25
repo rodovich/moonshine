@@ -184,7 +184,7 @@ const dusk = (g) => surfaced(g) && !g.flag('act4.started') && !g.flag('epilogue'
 
 const duskPeople = [
   {
-    id: 'ambrose_dusk', name: 'Ambrose', x: 6, y: 7, facing: 'down', sprite: LOOKS.ambrose, behavior: 'face',
+    id: 'ambrose_dusk', name: 'Ambrose', x: 6, y: 7, facing: 'down', sprite: LOOKS.ambrose, turnToTalk: false,
     when: dusk,
     talks: [
       'THE STEPS ARE GLOWING. EVERY STEP IN TESSEL. NOBODY RANG FOR THAT.',
@@ -202,7 +202,7 @@ const duskPeople = [
     use: { '*': (g, self) => g.say(self, "Can't carry it! I'm running in the DARK!") },
   },
   {
-    id: 'watering_dusk', name: 'Woman with Watering Can', x: 14, y: 12, facing: 'left', sprite: LOOKS.watering_woman, behavior: 'face',
+    id: 'watering_dusk', name: 'Woman with Watering Can', x: 14, y: 12, facing: 'down', sprite: { sheet: LOOKS.watering_woman.sheet, frame: 'down_0' }, turnToTalk: false,
     when: dusk,
     talks: [
       [

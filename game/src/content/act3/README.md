@@ -69,7 +69,3 @@ Where the design left something open, or didn't work in play, this is what the b
 - **The vista starts when Cheryl steps onto row 13**, anywhere along the parapet (the stair at x11–12 is beyond it). After the end card Cheryl is saved at (11, 12) on the plaza; on Continue, the way down the stair shows the end card again, until Act 4 exists.
 - **The moon-eye studs on the Crown** are Act 2's (`CROWN_MOON_EYES`); Act 3 swaps them for their glowing frames at dusk.
 - **Lines added for states the design doesn't cover:** a lit lamp used again ("It's already lit. It doesn't want seconds."), the moons inlay with paper ("Four moons. I'll remember four moons."), the mirror with the disc, paper, or crowbar, the grate and the jammed valve with the crowbar, the passage and the drowned corridor with anything, the light-pipes and ledger with paper, the duty roster with paper, the Ship Plan on the inlay, Ottilie in the crypt if talked to mid-scene, and the dusk residents' "not now" answers to items.
-
-## Stand-ins (until the art lands)
-
-- **Ambrose and the Woman with Watering Can** wear Act 2's stand-in looks (`LOOKS` in `../act2/common.js`).
