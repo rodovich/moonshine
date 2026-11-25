@@ -224,6 +224,19 @@ export const INSTRUMENTS = {
         { type: 'tone', wave: 'sine', freq: [62, 40], sweep: 0.15, dur: 0.2, gain: 0.85, env: { a: 0.006, d: 0.18, s: 0, r: 0.05 } },
         { type: 'noise', dur: 0.06, gain: 0.08, filter: { type: 'lowpass', freq: 220 } },
       ],
+      // A chain link arriving through the hawse: a deep metal BOOM (the hauling cue's beat).
+      boom: [
+        { type: 'tone', wave: 'sine', freq: [70, 34], sweep: 0.9, dur: 1.4, gain: 0.85, env: { a: 0.003, d: 1.3, s: 0, r: 0.1 } },
+        { type: 'tone', wave: 'sine', freq: 131, dur: 1.6, gain: 0.16, env: { a: 0.002, d: 1.5, s: 0, r: 0.1 } },
+        { type: 'tone', wave: 'sine', freq: 131 * 2.32, dur: 0.8, gain: 0.08, env: { a: 0.002, d: 0.7, s: 0, r: 0.1 } },
+        { type: 'noise', dur: 0.12, gain: 0.25, filter: { type: 'lowpass', freq: 900 } },
+      ],
+      // The clapper's ratchet clacking into the drum's teeth after each link.
+      clack: [
+        { type: 'tone', wave: 'triangle', freq: 1500, dur: 0.03, gain: 0.18 },
+        { type: 'tone', wave: 'sine', freq: [260, 150], dur: 0.06, gain: 0.2 },
+        { type: 'noise', dur: 0.02, gain: 0.08, filter: { type: 'bandpass', freq: 3000, q: 2 } },
+      ],
       // The egg timer's bell, as a note: pitched at D7 (the third of B-flat) so it can end the
       // relay as its final note. The sound effect `timer_ding` is the same bell at E7.
       ding: [
