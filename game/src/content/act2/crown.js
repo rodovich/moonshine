@@ -12,7 +12,7 @@
 
 import { composedMap, blankGrid } from '../opening/grid.js';
 import { act2Tiles } from './tiles.js';
-import { layout, house, pave, LOOKS, bump, firstMeet, cherylDeclines } from './common.js';
+import { layout, house, pave, LOOKS, bump, firstMeet, cherylDeclines, actWrongness } from './common.js';
 import { props } from '../../art/props.js';
 
 const W = 24, H = 16;
@@ -105,9 +105,9 @@ async function towerDoor(g) {
 }
 
 const objects = [
-  { id: 'tower_door', x: 4, y: 4, w: 2, h: 3, interact: towerDoor },
+  { id: 'tower_door', x: 4, y: 0, w: 2, h: 7, interact: towerDoor },
   // The tower's clock face and its flanks (so it can be looked at from the plaza by keyboard).
-  ...[[4, 0, 2, 4], [2, 0, 2, 7], [6, 0, 2, 7]].map(([x, y, w, h]) => ({
+  ...[[2, 0, 2, 7], [6, 0, 2, 7]].map(([x, y, w, h]) => ({
     id: `clock_${x}`, x, y, w, h, lookKey: 'clock',
     looks: [
       ['The Mayor\'s clock. The plaque says TESSEL ENTERS THE MODERN AGE.', "It's eleven minutes ahead of the sundial and very pleased about it."],
@@ -128,7 +128,7 @@ const objects = [
       "He was the boy who asked 'is it time yet?' every four minutes. Now it's his job.",
     ],
   },
-  ...[[15, 0, 3, 7], [18, 0, 2, 5], [20, 0, 3, 7]].map(([x, y, w, h]) => ({
+  ...[[15, 0, 3, 7], [20, 0, 3, 7]].map(([x, y, w, h]) => ({
     id: `dome_${x}`, x, y, w, h, lookKey: 'dome',
     look: "The Blue Dome. The Archive's inside it, and Ottilie is inside the Archive, and that's where she'll stay.",
   })),
@@ -198,5 +198,6 @@ export const crownMap = composedMap(compose, {
     { x: 11, y: 15, w: 2, to: 'lamp_street', at: [22, 5], facing: 'down' },
     { x: 18, y: 6, w: 2, to: 'archive', at: [7, 12], facing: 'up' },
   ],
+  onEnter: async (g) => { actWrongness(g); },
   entities: [...objects, ambrose, cat],
 });
