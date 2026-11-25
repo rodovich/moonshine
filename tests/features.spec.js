@@ -431,15 +431,38 @@ test('a tap on the top half of a door goes through the door', async ({ page }) =
   await waitFor(page, () => window.moonshine.snapshot().map === 'flat', null, 10000);
 });
 
-test('a tap past a trigger marked avoid routes around it (the Act 4 cordon)', async ({ page }) => {
-  // Act 4, the Mayor guarding the roped-off Fountain; the four rope triggers
-  // step Cheryl back. Marked avoid, a tap beyond the Fountain goes around them.
-  await boot(page, '?map=fountain_square&x=11&y=13&flags=act1.moonrise,act2.done,act3.started,act3.done,act4.started,halls.valve,clockmaker.atDoor&seed=3');
+test('a tap past a trigger marked avoid routes around it', async ({ page }) => {
+  // A trigger that turns Cheryl back, on open floor between her and the tap.
+  await boot(page, `${STREET}&x=3&y=8&facing=right`);
   await waitIdle(page);
-  await page.evaluate(() => { for (const t of window.moonshine.world.mapDef.triggers.slice(0, 4)) t.avoid = true; });
-  await clickTile(page, 11, 4);
-  await waitFor(page, () => { const s = window.moonshine.snapshot(); return (s.x === 11 && s.y === 4) || !!s.text; }, null, 20000);
-  const s = await snap(page);
-  expect(s.text || '').not.toContain('Behind the rope');
-  expect([s.x, s.y]).toEqual([11, 4]);
+  await page.evaluate(() => {
+    window.moonshine.world.mapDef.triggers.push({
+      id: 'bouncer', x: 6, y: 8,
+      run: async (g) => { await g.say('Guard', 'Back you go.'); await g.movePlayer([5, 8]); },
+    });
+  });
+  const tapPast = async () => {
+    await clickTile(page, 9, 8);
+    await waitFor(page, () => { const s = window.moonshine.snapshot(); return (s.x === 9 && s.y === 8) || !!s.text; }, null, 10000);
+    return snap(page);
+  };
+  // Unmarked, the straight route walks into it and gets sent back.
+  let s = await tapPast();
+  expect(s.text || '').toContain('Back you go');
+  await readAll(page);
+  await waitIdle(page);
+  // Marked avoid, the route goes around it.
+  await page.evaluate(() => {
+    const w = window.moonshine.world;
+    w.mapDef.triggers.find((t) => t.id === 'bouncer').avoid = (g) => !g.flag('guard.gone');
+  });
+  await runScript(page, "g.place('player', 3, 8, 'right');");
+  s = await tapPast();
+  expect(s.text).toBeFalsy();
+  expect([s.x, s.y]).toEqual([9, 8]);
+  // A tap on the trigger itself still walks in.
+  await runScript(page, "g.place('player', 3, 8, 'right');");
+  await clickTile(page, 6, 8);
+  await waitText(page);
+  expect((await snap(page)).text).toContain('Back you go');
 });
