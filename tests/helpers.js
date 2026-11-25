@@ -71,6 +71,20 @@ export async function press(page, key, times = 1) {
   }
 }
 
+// Press an arrow meaning "step one tile". A press toward something
+// interactable on an open tile, while Cheryl faces another way, only turns
+// her (turn-in-place); then a second press steps. Use plain presses where a
+// test means only to face something.
+const ARROWS = { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' };
+export async function stepKey(page, dir) {
+  const key = ARROWS[dir] || dir;
+  const t0 = await page.evaluate(() => window.moonshine.ticks);
+  await page.keyboard.press(key);
+  await page.waitForFunction((t0) => window.moonshine.ticks >= t0 + 3, t0, { timeout: 3000 }).catch(() => {});
+  const turned = await page.evaluate((t0) => (window.moonshine.world?.control.turnedAt ?? -1) >= t0, t0);
+  if (turned) await page.keyboard.press(key);
+}
+
 // Hold a key for roughly `ms`.
 export async function hold(page, key, ms) {
   await page.keyboard.down(key);

@@ -1,7 +1,7 @@
 // Plays the whole opening, start to finish: once by keyboard alone, once by
 // pointer alone. Screenshots of key moments go to tests/screenshots/opening-*.
 import { test, expect } from '@playwright/test';
-import { boot, snap, waitFor, shot } from './helpers.js';
+import { boot, snap, waitFor, shot, stepKey } from './helpers.js';
 import { settle, newGame, readThrough, pageTexts, kbAdvance, kbWalk, kbFace, kbInteract, kbHold, clickTileAt, ptrAdvance, ptrWalk, ptrInteract, ptrUse } from './playthrough.js';
 
 // ---- the playthroughs -------------------------------------------------------
@@ -31,7 +31,7 @@ test('keyboard: the whole opening', async ({ page }) => {
 
   // Down the stair and into the flat.
   await kbWalk(page, 3, 12);
-  await page.keyboard.press('ArrowUp');
+  await stepKey(page, 'ArrowUp');
   await waitFor(page, () => window.moonshine.snapshot().map === 'flat', null, 5000);
   await waitFor(page, () => window.moonshine.snapshot().idle);
   await shot(page, 'opening-03-flat');
@@ -45,7 +45,7 @@ test('keyboard: the whole opening', async ({ page }) => {
   await read();
   expect((await snap(page)).items).toEqual(['pepper_mill', 'egg_timer', 'soap']);
   await kbWalk(page, 5, 7);
-  await page.keyboard.press('ArrowDown');
+  await stepKey(page, 'ArrowDown');
   await waitFor(page, () => window.moonshine.snapshot().map === 'cistern_court', null, 5000);
 
   // The plug thread: the Old Man.
@@ -99,7 +99,7 @@ test('keyboard: the whole opening', async ({ page }) => {
   expect((await snap(page)).items).toContain('moon_chart');
   expect((await snap(page)).items).not.toContain('hat'); // the hat stays in the wardrobe (structure pass)
   await kbWalk(page, 5, 7);
-  await page.keyboard.press('ArrowDown');
+  await stepKey(page, 'ArrowDown');
   await waitFor(page, () => window.moonshine.snapshot().map === 'cistern_court', null, 5000);
   await waitFor(page, () => window.moonshine.snapshot().idle);
   await kbInteract(page, 'well');
@@ -109,7 +109,7 @@ test('keyboard: the whole opening', async ({ page }) => {
   await shot(page, 'opening-14-morning-court');
   await kbWalk(page, 15, 24);
   await read();
-  await page.keyboard.press('ArrowDown');
+  await stepKey(page, 'ArrowDown');
   await waitFor(page, () => (window.moonshine.snapshot().text || '').includes('Down, then.'), null, 5000);
   // Act 2 picks up on Lamp Street.
   await read({ stop: (s) => s.map === 'lamp_street' });
@@ -222,7 +222,7 @@ test('without Act 2, the Squeeze shows the end card and returns to the title', a
   const errors = await boot(page, '?map=cistern_court&x=15&y=24&facing=down&flags=act1.moonrise,n.squeezeSeen');
   await page.evaluate(async () => { (await import('/src/content/opening/court.js')).opening.squeezeTo = null; });
   await waitFor(page, () => window.moonshine.snapshot().idle);
-  await page.keyboard.press('ArrowDown');
+  await stepKey(page, 'ArrowDown');
   await waitFor(page, () => (window.moonshine.snapshot().text || '').includes('Down, then.'), null, 5000);
   await readThrough(page, kbAdvance(page), { stop: (s) => s.flags['act1.done'] });
   await page.waitForTimeout(1800);

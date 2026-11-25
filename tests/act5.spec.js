@@ -10,7 +10,7 @@
 // clapper first, does the relay before the rope (so the Kid throws the disc
 // up from the mud), then the rope, and goes down once.
 import { test, expect } from '@playwright/test';
-import { snap, waitFor, shot } from './helpers.js';
+import { snap, waitFor, shot, stepKey } from './helpers.js';
 
 const DIRKEY = { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' };
 const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
@@ -138,7 +138,7 @@ async function kbWalk(page, x, y) {
     }, [x, y]);
     if (!next) { await page.waitForTimeout(200); continue; }
     const dir = next[0] > s.x ? 'right' : next[0] < s.x ? 'left' : next[1] > s.y ? 'down' : 'up';
-    await page.keyboard.press(DIRKEY[dir]);
+    await stepKey(page, dir);
     await waitFor(page, ([nx, ny]) => {
       const p = window.moonshine.snapshot();
       return (p.x === nx && p.y === ny && !p.moving) || !!p.text || p.busy;
@@ -167,7 +167,7 @@ async function kbGo(page, to) {
     // A line on the way (a trigger): read it and carry on.
     await readThrough(page, () => page.keyboard.press('z'));
   }
-  await page.keyboard.press(DIRKEY[a.dir]);
+  await stepKey(page, a.dir);
   await waitFor(page, (m) => window.moonshine.snapshot().map === m, to, 10000);
   await waitFor(page, () => { const s = window.moonshine.snapshot(); return s.idle || !!s.text || !!s.choice; }, null, 20000);
 }
@@ -213,7 +213,7 @@ async function kbInteract(page, id, item = null) {
     const s = await snap(page);
     const [nx, ny] = spot.next;
     const dir = nx > s.x ? 'right' : nx < s.x ? 'left' : ny > s.y ? 'down' : 'up';
-    await page.keyboard.press(DIRKEY[dir]);
+    await stepKey(page, dir);
     await page.waitForTimeout(60);
     await waitFor(page, () => !window.moonshine.snapshot().moving, null, 4000);
   }
@@ -462,7 +462,7 @@ test('keyboard: Act 5', async ({ page }) => {
   // Down the rope and back up again (two-way).
   await kbWalk(page, 25, 7);
   await kbFace(page, 'down');
-  await page.keyboard.press('ArrowDown');
+  await stepKey(page, 'ArrowDown');
   log = await read();
   expect(joined(log)).toContain('Down a rope into a canal, on a weekday');
   s = await snap(page);
@@ -471,7 +471,7 @@ test('keyboard: Act 5', async ({ page }) => {
   log = await read();
   expect(joined(log)).toContain('brightest light in Tessel');
   await kbWalk(page, 25, 10);
-  await page.keyboard.press('ArrowUp');
+  await stepKey(page, 'ArrowUp');
   await read();
   s = await snap(page);
   expect([s.x, s.y]).toEqual([25, 7]);
@@ -510,7 +510,7 @@ test('keyboard: Act 5', async ({ page }) => {
   await kbGo(page, 'bilge_dry');
   await read();
   await kbWalk(page, 25, 7);
-  await page.keyboard.press('ArrowDown');
+  await stepKey(page, 'ArrowDown');
   // The Kid, waiting on the mud with the disc, gives it back as she lands.
   log = await read();
   expect(joined(log)).toContain('spat this out');
@@ -541,7 +541,7 @@ test('keyboard: Act 5', async ({ page }) => {
   await kbGo(page, 'bilge_dry');
   await read();
   await kbWalk(page, 25, 10);
-  await page.keyboard.press('ArrowUp');
+  await stepKey(page, 'ArrowUp');
   await read();
   expect((await snap(page)).y).toBe(7);
   await kbGo(page, 'fountain_square');
@@ -592,7 +592,7 @@ test('keyboard: Act 5', async ({ page }) => {
   await kbGo(page, 'bilge_dry');
   await read();
   await kbWalk(page, 25, 7);
-  await page.keyboard.press('ArrowDown');
+  await stepKey(page, 'ArrowDown');
   await read();
   await kbGo(page, 'bow_passage');
   await read();
@@ -810,7 +810,7 @@ test("the Keepers' ladder: up by keyboard, down by pointer", async ({ page }) =>
   // Walking up into the rungs climbs.
   await kbWalk(page, 16, 3);
   await kbFace(page, 'up');
-  if ((await snap(page)).y === 3) await page.keyboard.press('ArrowUp');
+  if ((await snap(page)).y === 3) await stepKey(page, 'ArrowUp');
   log = await read();
   expect(joined(log)).toContain('YOU CAME UP THROUGH MY FLOOR');
   expect(joined(log)).toContain("The Keepers didn't take the Steps");

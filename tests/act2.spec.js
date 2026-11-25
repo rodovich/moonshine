@@ -9,7 +9,7 @@
 // usually has from the opening (soap, moon chart). Cheryl's own hat is retired
 // (structure pass): the straw hat comes out of the Shop window.
 import { test, expect } from '@playwright/test';
-import { snap, waitFor, shot } from './helpers.js';
+import { snap, waitFor, shot, stepKey } from './helpers.js';
 
 const DIRKEY = { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' };
 const START = '?map=lamp_street&x=3&y=1&facing=down&flags=act1.moonrise,act1.done,got.soap,got.moon_chart&items=moon_chart,soap';
@@ -87,7 +87,7 @@ async function kbWalk(page, x, y) {
       continue;
     }
     const dir = next[0] > s.x ? 'right' : next[0] < s.x ? 'left' : next[1] > s.y ? 'down' : 'up';
-    await page.keyboard.press(DIRKEY[dir]);
+    await stepKey(page, dir);
     // Arrived, or something took over; if someone stepped into the way, try again.
     await waitFor(page, ([nx, ny]) => {
       const p = window.moonshine.snapshot();
@@ -109,7 +109,7 @@ async function kbExit(page, x, y, dir, map) {
     if (s.x === x && s.y === y && !s.text && !s.busy) break;
     await readThrough(page, () => page.keyboard.press('z'));
   }
-  await page.keyboard.press(DIRKEY[dir]);
+  await stepKey(page, dir);
   await waitFor(page, (m) => window.moonshine.snapshot().map === m, map, 6000);
   await waitFor(page, () => { const s = window.moonshine.snapshot(); return s.idle || !!s.text; }, null, 6000);
 }
@@ -180,7 +180,7 @@ async function kbInteract(page, id, item = null) {
     const s = await snap(page);
     const [nx, ny] = spot.next;
     const dir = nx > s.x ? 'right' : nx < s.x ? 'left' : ny > s.y ? 'down' : 'up';
-    await page.keyboard.press(DIRKEY[dir]);
+    await stepKey(page, dir);
     await page.waitForTimeout(60);
     await waitFor(page, () => !window.moonshine.snapshot().moving, null, 4000);
   }
@@ -581,7 +581,7 @@ test('keyboard: Act 2, the piano first', async ({ page }) => {
 
   // The free step goes bonk.
   await kbWalk(page, 9, 18);
-  await page.keyboard.press('ArrowDown');
+  await stepKey(page, 'ArrowDown');
   log = await read();
   expect(joined(log)).toContain('The Kid was right.');
   await kbWalk(page, 9, 17);
@@ -601,7 +601,7 @@ test('keyboard: Act 2, the piano first', async ({ page }) => {
 
   // Down the ladder: "Go down?" -- Not yet, then Yes.
   await kbWalk(page, 10, 18);
-  await page.keyboard.press('ArrowDown'); // stepping onto the open step asks
+  await stepKey(page, 'ArrowDown'); // stepping onto the open step asks
   await waitFor(page, () => !!window.moonshine.snapshot().choice, null, 4000);
   await settle(page);
   await shot(page, 'act2-17-go-down');
@@ -610,7 +610,7 @@ test('keyboard: Act 2, the piano first', async ({ page }) => {
   await waitFor(page, () => window.moonshine.snapshot().idle, null, 4000);
   expect((await snap(page)).flags['act2.done']).toBeFalsy();
   await kbWalk(page, 10, 18);
-  await page.keyboard.press('ArrowDown');
+  await stepKey(page, 'ArrowDown');
   await waitFor(page, () => !!window.moonshine.snapshot().choice, null, 4000);
   await settle(page);
   await page.keyboard.press('z');
@@ -789,7 +789,7 @@ test('keyboard: the long way round, the Count thread first', async ({ page }) =>
 
   // The Goat Path, from Lamp Street's west gate, down the Back to the Bilge.
   await kbWalk(page, 1, 10);
-  await page.keyboard.press('ArrowLeft');
+  await stepKey(page, 'ArrowLeft');
   let log = await read();
   expect(joined(log)).toContain('The Steps and then some, plus goats.');
   await waitFor(page, () => window.moonshine.snapshot().map === 'goat_path', null, 6000);
@@ -876,7 +876,7 @@ test('keyboard: the long way round, the Count thread first', async ({ page }) =>
   log = await read();
   expect(joined(log)).toContain('And the hundredth step goes down.');
   await kbWalk(page, 10, 18);
-  await page.keyboard.press('ArrowDown'); // stepping onto the open step asks
+  await stepKey(page, 'ArrowDown'); // stepping onto the open step asks
   await waitFor(page, () => !!window.moonshine.snapshot().choice, null, 4000);
   await settle(page);
   await page.keyboard.press('z');

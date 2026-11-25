@@ -14,6 +14,9 @@ import { sfx, step } from './sound.js';
 
 // What Cheryl says when an item is used on nothing in particular (content
 // overrides it with defaults.nothingToUseOn).
+// Ticks a held direction waits after turning Cheryl toward something on an
+// open tile before she walks onto it (a tap is shorter than this).
+const TURN_HOLD = 10;
 const NOTHING_TO_USE_ON = "No. That isn't where that goes.";
 
 const BAG_BTN = { x: WIDTH - 26, y: 3, w: 22, h: 22 };
@@ -108,6 +111,7 @@ export class Control {
     const held = input.dir();
     const dir = held || this.bufferedDir;
     this.bufferedDir = null;
+    if (!held) this.turned = null;
     if (dir) {
       this.cancelMove();
       this.bufferedConfirm = false;
@@ -131,6 +135,19 @@ export class Control {
     const p = this.player;
     const [dx, dy] = DIR_VEC[dir];
     if (this.world.canEnter(p, p.x + dx, p.y + dy)) {
+      // Something to look at on the open tile ahead (a bucket, a floor eye):
+      // a tap turns Cheryl to face it without stepping on, so Z reaches it.
+      // Holding the key walks on after a moment; a second tap walks at once.
+      // (Not within one big thing she's already standing on, like a rug.)
+      const ahead = this.world.interactableAt(p.x + dx, p.y + dy);
+      if (p.facing !== dir && ahead && !(ahead.x <= p.x && p.x < ahead.x + ahead.w && ahead.y <= p.y && p.y < ahead.y + ahead.h)) {
+        p.facing = dir;
+        this.turned = held ? { dir, t: 0 } : null;
+        this.turnedAt = this.world.game.ticks; // tests read this (stepKey)
+        return;
+      }
+      if (held && this.turned && this.turned.dir === dir && ++this.turned.t < TURN_HOLD) return;
+      this.turned = null;
       p.startStep(dir);
       this.footstep();
       this.pushing = null;

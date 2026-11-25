@@ -6,7 +6,7 @@
 // The climax in the Windlass Room (the bell, the hauling, the montage) needs
 // Act 5's Windlass Room, so these runs start just after it, in the Long Keel.
 import { test, expect } from '@playwright/test';
-import { snap, waitFor, shot } from './helpers.js';
+import { snap, waitFor, shot, stepKey } from './helpers.js';
 
 const DIRKEY = { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' };
 const BEFORE = 'act1.moonrise,act1.done,n.squeezeSeen=1,n.stepsArrived=1,act2.started,piano.slid,counter.left,step.open,basin.inside,got.crowbar,act6.started,bell.final,brake.thrown,chain.home,hatch.open';
@@ -82,7 +82,7 @@ async function kbWalk(page, x, y) {
     }, [x, y]);
     if (!next) { await page.waitForTimeout(200); continue; }
     const dir = next[0] > s.x ? 'right' : next[0] < s.x ? 'left' : next[1] > s.y ? 'down' : 'up';
-    await page.keyboard.press(DIRKEY[dir]);
+    await stepKey(page, dir);
     await waitFor(page, ([nx, ny]) => {
       const p = window.moonshine.snapshot();
       return (p.x === nx && p.y === ny && !p.moving) || !!p.text || p.busy;
@@ -107,7 +107,7 @@ async function kbWalkThrough(page, x, y) {
 
 async function kbExit(page, x, y, dir, map) {
   await kbWalkThrough(page, x, y);
-  await page.keyboard.press(DIRKEY[dir]);
+  await stepKey(page, dir);
   await waitFor(page, (m) => window.moonshine.snapshot().map === m, map, 10000);
   await waitFor(page, () => { const s = window.moonshine.snapshot(); return s.idle || !!s.text || !!s.choice; }, null, 20000);
 }
@@ -162,7 +162,7 @@ async function kbInteract(page, id, item = null) {
     const s = await snap(page);
     const [nx, ny] = spot.next;
     const dir = nx > s.x ? 'right' : nx < s.x ? 'left' : ny > s.y ? 'down' : 'up';
-    await page.keyboard.press(DIRKEY[dir]);
+    await stepKey(page, dir);
     await page.waitForTimeout(60);
     await waitFor(page, () => !window.moonshine.snapshot().moving, null, 4000);
     const after = await snap(page);
@@ -405,7 +405,7 @@ test('keyboard: Act 6, the Long Keel to the title screen', async ({ page }) => {
 
   // The door home: not yet.
   await kbWalkThrough(page, 3, 12);
-  await page.keyboard.press('ArrowUp');
+  await stepKey(page, 'ArrowUp');
   log = await read();
   expect(joined(log)).toContain('I want to see the town first.');
   expect((await snap(page)).map).toBe('cistern_court');
@@ -424,7 +424,7 @@ test('keyboard: Act 6, the Long Keel to the title screen', async ({ page }) => {
 
   // Home: the tick on the chart, the vista, the credits.
   await kbWalkThrough(page, 3, 12);
-  await page.keyboard.press('ArrowUp');
+  await stepKey(page, 'ArrowUp');
   await waitFor(page, () => window.moonshine.snapshot().map === 'flat', null, 10000);
   log = await readUntil(page, adv, 'Two fingers past');
   await shot(page, 'act6-09-the-tick');
