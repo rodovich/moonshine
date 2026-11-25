@@ -8,14 +8,14 @@
 //     4  #D#^^#D#####DD######D#^^#D##D##D
 //     5  #......=,,,,,,,,,,=.............   , the school yard (girls skipping at x10-12, y6)
 //     8  #......====g=====...............   g the yard gate (open)
-//    10  G..ssssssssssssssssssssssssss...   G the Goat Path gate (shut in part 1); s the scrape
+//    10  G..ssssssssssssssssssssssssss...   G the way to the Goat Path (x0, y9-11); s the scrape
 //    12  #...................bb.......ss.   bb the bench; the scrape turns down to the Steps
 //    13  ===========================^^===   x27-28 down to the Hundred Steps
 //    15  rrrrrrrrrrrrrrrrrrrrrrrrrrr^^rrr
 
 import { composedMap, blankGrid } from '../opening/grid.js';
 import { act2Tiles } from './tiles.js';
-import { layout, house, pave, lowRoof, LOOKS, bump, cycle, firstMeet, cherylDeclines } from './common.js';
+import { layout, house, pave, lowRoof, LOOKS, bump, cycle, firstMeet, cherylDeclines, actWrongness } from './common.js';
 import { props } from '../../art/props.js';
 
 const W = 32, H = 16;
@@ -54,11 +54,9 @@ function compose(g) {
   L.set('detail', 11, 8, 'schoolyard:yardwall_end_r', true); L.set('detail', 14, 8, 'schoolyard:yardwall_end_l', true);
   L.set('detail', 12, 8, 'schoolyard:yard_gate_open', false); L.set('detail', 13, 8, null, false);
 
-  // ---- The west edge: walls, and the Goat Path gate (shut until part 2) ----
+  // ---- The west edge: walls, and the open way to the Goat Path (0, 9–11) ----
   for (let y = 5; y <= 12; y++) L.set('ground', 0, y, 'court:court_wall_w', true);
-  for (let y = 9; y <= 11; y++) L.set('ground', 0, y, pave(0, y), true);
-  L.set('detail', 0, 10, 'act2_props:goat_gate', true);
-  L.set('ground', 0, 9, 'court:court_wall_w', true); L.set('ground', 0, 11, 'court:court_wall_w', true);
+  for (let y = 9; y <= 11; y++) L.set('ground', 0, y, pave(0, y), false);
 
   // ---- The south edge: the parapet over the lower town, and the Steps ----
   for (let x = 0; x < W; x++) {
@@ -79,7 +77,7 @@ function compose(g) {
   // ---- Props ----
   L.lamp(5, 9); L.lamp(16, 9); L.lamp(25, 9);
   L.bench(20, 11); // the Man on Bench sits on it from (20, 12)
-  L.pot(24, 5); L.pot(26, 5); L.pot(1, 5, 'pot_bay');
+  L.pot(24, 5); L.pot(26, 5); L.pot(2, 5, 'pot_bay');
   return L.done();
 }
 
@@ -89,7 +87,7 @@ function compose(g) {
 const HOUSE_DOORS = [[1, 4], [6, 4], [20, 4], [25, 4], [28, 4], [31, 4]];
 
 const objects = [
-  ...[[7, 5, 4], [12, 2, 3], [14, 5, 4]].map(([x, w, h]) => ({
+  ...[[7, 5, 4], [14, 5, 4]].map(([x, w, h]) => ({
     id: `school_${x}`, x, y: 1, w, h, lookKey: 'school',
     looks: [
       'The Little School. Twenty-nine years. I could find my old desk in the dark, and twice I had to.',
@@ -102,13 +100,6 @@ const objects = [
     interact: (g) => g.describe(cycle(g, 'lamp.doors', ['Not my door.', "The Venns'. They'll be asleep. They're always asleep. It's a gift."])),
   })),
   {
-    id: 'goat_gate', x: 0, y: 9, h: 3,
-    looks: [
-      ['The Goat Path. Down the back of the island the long way, past the goats and Mott\'s shack.', 'The gate\'s shut. A note on the latch: GOATS ON THE PATH TODAY.'],
-      'The goats have the path today. The goats have it most days, if you ask the goats.',
-    ],
-  },
-  {
     // Only near the Squeeze: a look hotspot on a walkable row catches clicks meant for walking.
     id: 'scrape', x: 3, y: 10, w: 3, lookKey: 'scrape',
     look: 'The piano\'s trail. It knew where it was going, which is more than I do.',
@@ -120,7 +111,7 @@ const objects = [
   { id: 'yard_wall', x: 7, y: 8, w: 5, lookKey: 'yard', look: 'The school yard. Hopscotch squares I painted in my second year. Somebody keeps repainting them.' },
   { id: 'yard_wall_e', x: 14, y: 8, w: 5, lookKey: 'yard', look: 'The school yard. Hopscotch squares I painted in my second year. Somebody keeps repainting them.' },
   ...[[24, 5], [26, 5]].map(([x, y]) => ({ id: `geranium_${x}`, x, y, lookKey: 'geraniums', look: 'Geraniums. Nobody remembers planting them.' })),
-  { id: 'bay', x: 1, y: 5, look: 'A bay tree in a pot, trimmed into a ball. Somebody on this street has a great deal of free time.' },
+  { id: 'bay', x: 2, y: 5, look: 'A bay tree in a pot, trimmed into a ball. Somebody on this street has a great deal of free time.' },
   ...[5, 16, 25].map((x) => ({ id: `lamp_${x}`, x, y: 9, lookKey: 'lamps', look: 'Lamp Street\'s lamps. Lit at dusk by hand. The lamplighter is eighty-one and refuses help.' })),
 ].map((o) => ({ solid: false, use: { '*': cherylDeclines }, ...o }));
 
@@ -171,7 +162,7 @@ const rope = {
 };
 
 const wateringWoman = {
-  id: 'watering_woman', name: 'Woman with Watering Can', x: 25, y: 5, facing: 'down',
+  id: 'watering_woman', name: 'Woman with Watering Can', x: 24, y: 6, facing: 'down',
   sprite: LOOKS.watering_woman,
   turnToTalk: false,
   interact: async (g, self) => {
@@ -226,8 +217,21 @@ export const lampStreetMap = composedMap(compose, {
     { x: 3, y: 0, w: 2, to: 'cistern_court', at: [15, 22], facing: 'up' },
     { x: 22, y: 0, w: 2, to: 'crown', at: [11, 13], facing: 'up' },
     { x: 27, y: 15, w: 2, to: 'hundred_steps', at: [6, 1], facing: 'down' },
+    {
+      // The west edge: the Goat Path. The first time, Cheryl says where it goes.
+      x: 0, y: 9, h: 3, sfx: 'step_stone',
+      run: async (g) => {
+        const y = 1 + (g.player.y - 9);
+        if (!g.flag('n.goatGate')) {
+          g.setFlag('n.goatGate', 1);
+          await g.describe("The Goat Path. Down the back of the island the long way, past the goats and Mott's shack.");
+        }
+        await g.changeMap('goat_path', 13, y, 'down');
+      },
+    },
   ],
   onEnter: async (g) => {
+    actWrongness(g);
     if (g.flag('act2.started')) return;
     g.setFlag('act2.started');
     await g.describe(

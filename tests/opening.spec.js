@@ -51,6 +51,15 @@ async function readThrough(page, advance, { stop = null, timeout = 90000, log = 
 
 const pageTexts = (log) => log.join('\n').replace(/\s+/g, ' ');
 
+// The Squeeze ends the opening: on to Lamp Street when Act 2 is in the game,
+// or the end card and the title screen when it isn't.
+async function waitForOpeningEnd(page) {
+  await waitFor(page, () => {
+    const s = window.moonshine.snapshot();
+    return s.scene === 'title' || s.map === 'lamp_street';
+  }, null, 15000);
+}
+
 // ---- keyboard -------------------------------------------------------------
 
 const kbAdvance = (page) => () => page.keyboard.press('z');
@@ -342,7 +351,7 @@ test('keyboard: the whole opening', async ({ page }) => {
   await read({ stop: (s) => s.flags['act1.done'] });
   await page.waitForTimeout(1800);
   await shot(page, 'opening-15-end-card');
-  await waitFor(page, () => window.moonshine.snapshot().scene === 'title', null, 15000);
+  await waitForOpeningEnd(page);
   expect(errors).toEqual([]);
 });
 
@@ -437,7 +446,7 @@ test('pointer: the whole opening', async ({ page }) => {
   expect(pageTexts(log)).toContain('BREATHED');
   await ptrWalk(page, 16, 25);
   await read({ stop: (s) => s.flags['act1.done'] });
-  await waitFor(page, () => window.moonshine.snapshot().scene === 'title', null, 15000);
+  await waitForOpeningEnd(page);
   expect(errors).toEqual([]);
 });
 
