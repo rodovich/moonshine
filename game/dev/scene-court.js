@@ -6,6 +6,7 @@ const W = 20, H = 26;
 
 export function SCENE(state = 'dusk') {
   const morning = state === 'morning';
+  const moonrise = state === 'moonrise';   // Cheryl seated on the full tub's edge, under the night tint
   const blank = () => Array.from({ length: H }, () => Array(W).fill(null));
   const ground = blank(), objects = blank(), overhead = blank();
   const set = (layer, x, y, ref) => { layer[y][x] = ref; };
@@ -35,7 +36,7 @@ export function SCENE(state = 'dusk') {
   set(overhead, 7, 1, 'roof:over_chimney_l'); set(overhead, 8, 1, 'roof:over_chimney_r');
   // herbs, tub, tap, chairs
   set(objects, 1, 2, 'roof_props:herb_basil'); set(objects, 2, 2, 'roof_props:herb_rosemary');
-  const tub = morning ? 'tub_empty' : 'tub_empty';
+  const tub = moonrise ? 'tub_full' : 'tub_empty';
   set(objects, 3, 4, `tub:${tub}_l`); set(objects, 4, 4, `tub:${tub}_r`);
   set(objects, 2, 4, 'tub:tap');
   set(objects, 2, 7, 'roof_props:chair_fold'); set(objects, 3, 7, 'roof_props:chair_fold');
@@ -138,14 +139,18 @@ export function SCENE(state = 'dusk') {
     at('neighbor', 'smooth_left', px(17, 5));
     at('sweaty_kid', 'jog_down', px(13, 15));
   }
+  // the moonrise: Cheryl sits on the tub's front rim. She stands on (3,5) and the content draws
+  // her sit_right frame 17 px up (offset [0, -17]), so her seat lands on the rim and her shins
+  // hang down the tub's front.
+  if (moonrise) at('cheryl', 'sit_right', [3 * 16 + 8, 5 * 16 + 16 - 17]);
   // the Pelletiers' cat, sitting: by their gate side of the court at dusk, by the bench in the morning
   at('props', 'cat', morning ? px(12, 12) : px(17, 19));
 
   return {
     title: `Cistern Court — ${morning ? 'morning' : 'dusk'}`,
     ground, objects, overhead, sprites,
-    tint: morning ? 'day' : 'dusk',
-    hero: [3 * 16 + 8, 6 * 16 + 16, 'right'],
+    tint: morning ? 'day' : moonrise ? 'night' : 'dusk',
+    hero: moonrise ? null : [3 * 16 + 8, 6 * 16 + 16, 'right'],
     scale: 2,
   };
 }

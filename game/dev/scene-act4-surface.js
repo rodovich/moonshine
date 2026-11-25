@@ -118,11 +118,12 @@ function dry(lit) {
     L.set('ground', x, 7, `reveal:wstairs_${k}`);
     L.set('ground', x, 8, `reveal:wstairs_broken_${k}`);
   });
-  // the last of the canal running out east along the mud (28-31, 10), over the trench's broken
-  // end into the Bowl, lower down
-  ['a', 'b', 'c'].forEach((c, i) => L.set('ground', 28 + i, 10, `reveal_mouth:trickle_${c}`));
-  L.set('ground', 31, 10, 'reveal_mouth:mouth_mud');
-  L.set('ground', 31, 9, 'reveal_mouth:mouth_hull');
+  // the last of the canal running east along the mud (27-29, 10), then the canal mouth (30-31, 9-10):
+  // the floor ends and the hull goes on down to the Bowl's water, far lower
+  ['a', 'b', 'c'].forEach((c, i) => L.set('ground', 27 + i, 10, `reveal_mouth:trickle_${c}`));
+  for (const [q, x, y] of [['x0y0', 30, 9], ['x1y0', 31, 9], ['x0y1', 30, 10], ['x1y1', 31, 10]]) {
+    L.set('ground', x, y, `reveal_mouth:mouth_${q}`);
+  }
   // laundry across the north quay, streaming hard east in the wind (overhead, 14-19, 4)
   'abcdef'.split('').forEach((c, i) => L.set('overhead', 14 + i, 4, `cloth:over_wind_${c}`));
   // the bronze door (26-27, 8-9), set into the hull

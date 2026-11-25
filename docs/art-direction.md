@@ -123,9 +123,9 @@ Her sheet also has interaction poses: `reach_up`, `reach_down`, `reach_left`, `r
 
 The tiles are painted in neutral late-morning light. Dusk, night, and day are global washes from `game/src/art/tints.js`, applied with the engine's `tint()`:
 
-- **Dusk** is two multiply passes: a rose-amber at 50% and a faint violet at 18%. Whitewash turns rose and shadows cool, so it reads as the last light of the day rather than late afternoon (it was a single 42% apricot until the opening ran in the engine and dusk looked too much like day).
+- **Dusk** is two multiply passes: a deep rose-amber at 62% and a violet at 30%. Whitewash goes rose and dim and shadows cool, so it reads as sunset with the moon on its way. (It was 42% apricot, then 50% rose-amber; both read as afternoon in play.)
 - **Night** multiplies by a moonlit blue at 70%: dark and cool, but every shape still readable.
-- **Day** is the art as painted.
+- **Day** multiplies by a light warm grey at 35%, so whitewash in full sun isn't blown out (playtesters found the untinted morning bleached).
 
 Check new tiles under `?tint=dusk` and `?tint=night` on the dev page. Tints compress hue, so never rely on hue alone for contrast (a coral cardigan against terracotta pots, a pale blue door on white): separate important shapes by value too. Shapes that depend on a small hue difference (a pale blue door on white) can vanish at night; separate them by value too. Colors listed in `EMISSIVE` (in `tints.js`: lamp glow, lit window glass, relic amber and cyan) skip the tint, so lit windows and lamps glow at dusk and night; anything meant to give off light should use one of them. Light some windows at dusk and night with the buildings sheet's `_lit` swaps (warm glass): a few, not all, so the town looks lived in.
 
