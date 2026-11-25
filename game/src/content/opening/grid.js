@@ -3,11 +3,11 @@
 // sheet, a piano gone in the morning), so each map module writes one function
 // that lays out every tile for a given game state:
 //
-//   compose(g) -> { ground, detail, overhead, solid, counter? }   (2-D arrays, [y][x])
+//   compose(g) -> { ground, detail, overhead, solid, counter?, step? }   (2-D arrays, [y][x])
 //
 // where a tile is an art reference ('sheet:frame' or 'sheet:frame@palette')
-// or null, `solid` marks blocked tiles, and `counter` marks tiles the player
-// can reach across. `buildLayers` turns the layout for
+// or null, `solid` marks blocked tiles, `counter` marks tiles the player can
+// reach across, and `step` names a tile's footstep sound (else the map's). `buildLayers` turns the layout for
 // the starting state into the engine's legend and strings, and `patchesFor`
 // turns any later state into the engine's `patches` (the tiles that differ).
 // Solidity rides on the ground tile, so a tile that stops blocking (the piano's
@@ -20,15 +20,19 @@ export function blankGrid(w, h, fill = null) {
 // The legend value for one cell of one layer.
 function cellValue(layout, layer, x, y) {
   const ref = layout[layer][y][x];
-  if (layer !== 'ground') return ref || null;
+  const step = layout.step?.[y][x] || null;
+  if (layer !== 'ground') {
+    if (!ref) return null;
+    return step && layer === 'detail' ? { tile: ref, step } : ref;
+  }
   const solid = !!layout.solid[y][x];
   const counter = !!layout.counter?.[y][x];
   if (!ref) {
     if (solid) console.warn(`[opening] solid tile at ${x},${y} has no ground art`);
     return null;
   }
-  if (!solid && !counter) return ref;
-  return { tile: ref, ...(solid && { solid: true }), ...(counter && { counter: true }) };
+  if (!solid && !counter && !step) return ref;
+  return { tile: ref, ...(solid && { solid: true }), ...(counter && { counter: true }), ...(step && { step }) };
 }
 
 const key = (v) => (v == null ? '' : typeof v === 'string' ? v : JSON.stringify(v));

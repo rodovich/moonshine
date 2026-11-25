@@ -42,25 +42,6 @@ export const openingItems = {
 
 export const morning = (g) => !!g.flag('act1.moonrise');
 
-// Adapter, until the engine reads the art's character frame names (requested
-// from the engine task): the art names frames <dir>_0 (standing), <dir>_1,
-// <dir>_2 (steps, walked 1, 0, 2, 0) and idle_<dir>_N (blinks); the engine
-// looks for walk_<dir>_N and idle_<dir>_N. `cycle` lists the art's frame
-// numbers for one walk cycle (the Sweaty Kid runs 1, 2, 3, 4).
-const adapted = new WeakMap();
-export function characterSheet(sheet, cycle = [1, 0, 2, 0]) {
-  if (adapted.has(sheet)) return adapted.get(sheet);
-  const frames = { ...sheet.frames };
-  for (const dir of ['down', 'up', 'left', 'right']) {
-    if (!frames[`${dir}_0`] || frames[`walk_${dir}_0`]) continue;
-    cycle.forEach((n, i) => { frames[`walk_${dir}_${i}`] = sheet.frames[`${dir}_${n}`]; });
-    if (!frames[`idle_${dir}_0`]) frames[`idle_${dir}_0`] = sheet.frames[`${dir}_0`];
-  }
-  const out = { ...sheet, frames };
-  adapted.set(sheet, out);
-  return out;
-}
-
 // Give an item; the first time anything goes into the satchel, show the
 // one-time hint about using items (it stays until the bag is opened).
 export async function getItem(g, id) {

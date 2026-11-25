@@ -31,17 +31,6 @@ function makeVista(g) {
   return scene;
 }
 
-// The music box runs down: drifts flat, then stops mid-phrase.
-async function musicBoxFails(g) {
-  for (let i = 1; i <= 8; i++) {
-    g.setWrongness(i * 0.09);
-    await g.wait(0.25);
-  }
-  g.stopMusic(120);
-  await g.wait(0.3);
-  g.setWrongness(0);
-}
-
 export async function moonrise(g) {
   // 1.
   await g.think('Plug in. Water in. Sheets out of the way.', 'Now, the moon.');
@@ -55,14 +44,13 @@ export async function moonrise(g) {
   g.pose('player', 'sit_right');
   await g.wait(0.6);
 
-  // 3. The court's music fades; the festival below; the Crown clock strikes.
+  // 3. The court's music fades; the festival below; the Crown clock strikes
+  // the hour (three strokes, fading).
   g.stopMusic(2000);
-  g.sfx('murmur');
-  await g.wait(1.4);
-  for (let i = 0; i < 3; i++) {
-    g.sfx('clock_strike');
-    await g.wait(1.1);
-  }
+  g.startLoop('crowd', { fadeMs: 2000 });
+  await g.wait(1.2);
+  g.sfx('clock_strike');
+  await g.wait(4);
 
   // 4–5. To the vista.
   const scene = makeVista(g);
@@ -77,12 +65,11 @@ export async function moonrise(g) {
   // 7. The moon's rim comes up over the cliff. The murmur stops dead.
   scene.moonAt = scene.now;
   await g.wait(0.9);
-  g.sfx('murmur_stop');
-  await g.wait(1.3);
+  g.stopLoop('crowd', 0);
+  g.windDownMusic(4500);
+  await g.wait(0.7);
   g.sfx('dog_bark');
-  await g.wait(0.6);
-  await musicBoxFails(g);
-  await g.wait(2.2);
+  await g.wait(4.5);
 
   // 8.
   await g.think('No.', 'It comes up in the Gate.', 'It has come up in the Gate every year of my life.');
@@ -97,9 +84,9 @@ export async function moonrise(g) {
   g.sfx('groan');
   const groan = g.shake(1, 3);
   g.setFlag('fx.tub', 'slosh');
+  await g.wait(0.6);
   g.setFlag('fx.chimney', 'rattle');
-  g.sfx('chimney_rattle');
-  await g.wait(0.4);
+  g.sfx('rattle');
   g.setFlag('fx.backline', 'swung');
   await g.say('Sweaty Kid', 'WHOA!', { auto: 0.8 });
   await g.say('Neighbor', 'My SHEETS!', { auto: 0.9 });
@@ -120,16 +107,15 @@ export async function moonrise(g) {
   g.sfx('drain_gurgle');
   await g.wait(1.5);
   g.setFlag('fx.tub', 'empty');
-  g.sfx('drain_echo');
-  await g.wait(2.5);
-  g.sfx('splash');
+  g.sfx('drain_echo'); // falls away, then a tiny, faraway splash
+  await g.wait(2.6);
 
   // 14. Silence. A gull. Wind.
   await g.wait(1.5);
   g.sfx('gull');
   await g.wait(0.6);
-  g.sfx('wind');
-  await g.wait(0.8);
+  g.startLoop('wind', { fadeMs: 1500 });
+  await g.wait(1.2);
 
   // 15. Cheryl stands.
   g.pose('player', 'rise_right');
@@ -149,6 +135,7 @@ export async function moonrise(g) {
   await g.think("Something's wrong.", 'Not wrong like a dropped stitch. Wrong like a step that isn\'t there.');
 
   // 18. Morning.
+  g.stopLoop('wind', 2500);
   await g.fade('out', 2);
   await g.card('Morning.', 2);
 

@@ -205,13 +205,39 @@ export function makeApi(world) {
     },
     // Play a named animation on an entity instead of its idle/walk frames
     // (e.g. 'sit_right'); null returns to normal.
-    pose(id, anim) {
-      resolveEntity(id).setPose(anim);
+    // A base like 'jog' follows facing (jog_<dir>); { offset: [dx, dy] }
+    // shifts the drawing while posed.
+    pose(id, anim, { offset } = {}) {
+      resolveEntity(id).setPose(anim, offset);
     },
     // How many times the player has looked at / talked to this entity before
     // (0 the first time). Also passed to `interact` as its third argument.
     looks(id) {
       return world.looks(resolveEntity(id));
+    },
+    // Move an entity's drawing offset to [dx, dy] over `seconds` (a piano
+    // shooting through an arch, Cheryl lowering into a hole). With
+    // clipBelow: true, the part below its footprint is hidden.
+    tween(id, { offset = [0, 0], seconds = 0.5, clipBelow } = {}) {
+      const e = resolveEntity(id);
+      if (clipBelow !== undefined) e.clipBelow = clipBelow;
+      const [x0, y0] = e.offset;
+      const ticks = Math.max(1, secs(seconds));
+      let t = 0;
+      return world.until(() => {
+        t++;
+        const k = Math.min(1, t / ticks);
+        e.offset = [Math.round(x0 + (offset[0] - x0) * k), Math.round(y0 + (offset[1] - y0) * k)];
+        return k >= 1;
+      });
+    },
+    // Step a flag through a list of values (a mirror with three positions, a
+    // valve): sets it to the value after its current one and returns it.
+    cycle(flagName, values) {
+      const i = values.indexOf(world.state.flags[flagName]);
+      const next = values[(i + 1) % values.length];
+      g.setFlag(flagName, next);
+      return next;
     },
     // Change a tile until the map reloads. For changes that should last, use
     // the map's `patches`. `value` is a legend value (tile name or
@@ -273,12 +299,50 @@ export function makeApi(world) {
       world.picture = null;
       if (fade) await fx.fade('in', fade / 2);
     },
+    // Resolves on the next key (Z/X and friends) or tap: for a full-screen
+    // picture the player dismisses (the Ship Plan).
+    waitForInput() {
+      return new Promise((resolve) => {
+        world.inputWaiters = world.inputWaiters || [];
+        world.inputWaiters.push(resolve);
+      });
+    },
     // Centered text over a black screen for `seconds` (e.g. "Cheryl did not
     // sleep well."). Draws above fades, so fade out first if you like.
     async card(text, seconds = 2.5) {
       world.game.card = { text };
       await world.waitTicks(secs(seconds));
       world.game.card = null;
+    },
+    // One line of speech at the top of the screen that doesn't stop anything
+    // (a chant, a voice from a window). Replaces any bark already showing.
+    bark(speaker, text, opts) {
+      world.ambient.bark(speakerName(speaker), text, opts);
+    },
+    // An icon over a character's head: 'note', 'exclaim', 'question', or a
+    // frame from { sheet } in opts. { seconds } defaults to 1.2.
+    emote(id, frame = 'note', opts) {
+      world.ambient.emote(resolveEntity(id), frame, opts);
+    },
+    // A short-lived sprite: { sprite: { sheet, frame }, path: [[x, y], ...]
+    // (tiles) or at: [x, y], speed (px/tick), seconds, offset, layer }.
+    // Resolves when it's gone; don't await it if the scene shouldn't wait.
+    spawnEffect(opts) {
+      return world.ambient.spawnEffect(opts);
+    },
+    // Swap one item for another (hat for guidebook). Shows "Got X." unless silent.
+    async trade(takeId, giveId, opts) {
+      g.takeItem(takeId);
+      await g.giveItem(giveId, opts);
+    },
+    // Several speakers in one conversation: g.talk([['Mover 1', 'Lift!'], ['Mover 2', 'I am lifting!']]).
+    // A line without a speaker ([null, '...'] or a plain string) is Cheryl's description.
+    async talk(lines) {
+      for (const l of lines) {
+        if (typeof l === 'string') await g.describe(l);
+        else if (l[0] == null) await g.describe(...l.slice(1));
+        else await g.say(l[0], ...l.slice(1));
+      }
     },
     // A small hint at the bottom of the screen for `seconds` (time spent in
     // dialog or the bag doesn't count). Doesn't block the player or the

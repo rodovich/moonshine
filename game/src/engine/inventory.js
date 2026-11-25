@@ -2,9 +2,11 @@
 // the selected item's name and description (in Cheryl's voice), and Use /
 // Close buttons.
 //
-// Keyboard: arrows select (and scroll), Z uses, X closes.
+// Keyboard: arrows select (and scroll), Z uses, X closes. Down from the last
+// row moves to the buttons (Look, Use, Close); Z presses the one selected.
 // Pointer: tap an item to select it, tap it again or tap Use to use it, tap
-// the arrows to scroll, tap Close or outside the panel to close.
+// Look to examine it, tap the arrows to scroll, tap Close or outside the
+// panel to close.
 
 import { WIDTH, HEIGHT } from './display.js';
 import { drawText, drawTextCentered, measure, wrap, LINE_HEIGHT } from './text.js';
@@ -24,6 +26,8 @@ const DESC_LINES = 4;
 const BTN_Y = PANEL.y + PANEL.h - 24;
 const CLOSE_BTN = { x: PANEL.x + PANEL.w - 10 - 48, y: BTN_Y, w: 48, h: 17 };
 const USE_BTN = { x: CLOSE_BTN.x - 4 - 44, y: BTN_Y, w: 44, h: 17 };
+const LOOK_BTN = { x: USE_BTN.x - 4 - 44, y: BTN_Y, w: 44, h: 17 };
+const BUTTONS = [['look', LOOK_BTN, 'Look'], ['use', USE_BTN, 'Use'], ['close', CLOSE_BTN, 'Close']];
 const UP_BTN = { x: PANEL.x + 10, y: BTN_Y, w: 18, h: 17 };
 const DOWN_BTN = { x: PANEL.x + 30, y: BTN_Y, w: 18, h: 17 };
 const warnedLong = new Set();
@@ -40,12 +44,12 @@ export class Inventory {
     return !!this.openState;
   }
 
-  // Opens the screen; resolves to { use: itemId } or null when closed.
+  // Opens the screen; resolves to { use: itemId }, { look: itemId }, or null.
   show(owned, selectId = null) {
     sfx('select');
     return new Promise((resolve) => {
       const index = Math.max(0, owned.indexOf(selectId));
-      this.openState = { owned: [...owned], index, scroll: 0, resolve };
+      this.openState = { owned: [...owned], index, scroll: 0, resolve, button: -1 };
       this.keepVisible();
     });
   }
@@ -94,7 +98,19 @@ export class Inventory {
     if (!s) return;
     const n = s.owned.length;
     const d = input.menuDir();
-    if (d && n) {
+    if (s.button >= 0) {
+      // Keyboard focus on the button row.
+      if (d === 'left' || d === 'right') {
+        s.button = (s.button + (d === 'left' ? BUTTONS.length - 1 : 1)) % BUTTONS.length;
+        sfx('cursor');
+      }
+      if (d === 'up') { s.button = -1; sfx('cursor'); }
+      if (input.pressed('confirm')) return this.press(BUTTONS[s.button][0]);
+      if (input.pressed('cancel')) return this.close(null);
+    } else if (d === 'down' && (!n || s.index + COLS >= n)) {
+      s.button = n ? 1 : 2;
+      sfx('cursor');
+    } else if (d && n) {
       let i = s.index;
       if (d === 'left') i = (i + n - 1) % n;
       if (d === 'right') i = (i + 1) % n;
@@ -102,11 +118,10 @@ export class Inventory {
       if (d === 'down' && i + COLS < n) i += COLS;
       if (i !== s.index) { s.index = i; this.keepVisible(); sfx('cursor'); }
     }
-    if (input.pressed('confirm') && n) return this.close({ use: s.owned[s.index] });
+    if (s.button < 0 && input.pressed('confirm') && n) return this.close({ use: s.owned[s.index] });
     if (input.pressed('cancel')) return this.close(null);
     for (const t of input.taps()) {
-      if (inRect(t, CLOSE_BTN)) return this.close(null);
-      if (n && inRect(t, USE_BTN)) return this.close({ use: s.owned[s.index] });
+      for (const [action, rect] of BUTTONS) if (inRect(t, rect)) return this.press(action);
       if (this.rowCount() > ROWS && inRect(t, UP_BTN)) return this.scrollBy(-1);
       if (this.rowCount() > ROWS && inRect(t, DOWN_BTN)) return this.scrollBy(1);
       for (let i = 0; i < n; i++) {
@@ -121,6 +136,14 @@ export class Inventory {
       const inPanel = inRect(t, PANEL) || inRect(t, DESC);
       if (!inPanel) return this.close(null);
     }
+  }
+
+  press(action) {
+    const s = this.openState;
+    const id = s.owned[s.index];
+    if (action === 'close') return this.close(null);
+    if (!id) return undefined;
+    return this.close(action === 'look' ? { look: id } : { use: id });
   }
 
   close(result) {
@@ -151,15 +174,16 @@ export class Inventory {
       const img = this.icon(id);
       if (img) ctx.drawImage(img, r.x + 3, r.y + 3);
       else drawTextCentered(ctx, '?', r.x + r.w / 2, r.y + 7);
-      if (i === s.index) this.drawSelection(ctx, r);
+      if (i === s.index && s.button < 0) this.drawSelection(ctx, r);
     });
     // Buttons, inside the panel's bottom edge
     if (this.rowCount() > ROWS) {
       this.drawButton(ctx, UP_BTN, '<', s.scroll > 0);
       this.drawButton(ctx, DOWN_BTN, '>', s.scroll < this.rowCount() - ROWS);
     }
-    this.drawButton(ctx, USE_BTN, 'Use', s.owned.length > 0);
-    this.drawButton(ctx, CLOSE_BTN, 'Close', true);
+    BUTTONS.forEach(([action, rect, label], i) => {
+      this.drawButton(ctx, rect, label, action === 'close' || s.owned.length > 0, i === s.button);
+    });
     // Description
     drawBox(ctx, DESC.x, DESC.y, DESC.w, DESC.h, STYLES.cheryl);
     if (!s.owned.length) {
@@ -186,9 +210,10 @@ export class Inventory {
     ctx.fillRect(r.x + r.w - 1, r.y, 1, r.h);
   }
 
-  drawButton(ctx, r, label, enabled) {
+  drawButton(ctx, r, label, enabled, selected = false) {
     drawBox(ctx, r.x, r.y, r.w, r.h, STYLES.npc);
     const w = measure(label);
-    drawText(ctx, label, r.x + Math.round((r.w - w) / 2), r.y + 4, { color: enabled ? 'ui_text' : 'ui_dim' });
+    drawText(ctx, label, r.x + Math.round((r.w - w) / 2), r.y + 4, { color: selected ? 'ui_select' : enabled ? 'ui_text' : 'ui_dim' });
+    if (selected) ctx.drawImage(this.small.frame('cursor'), r.x - 2, r.y + 5);
   }
 }

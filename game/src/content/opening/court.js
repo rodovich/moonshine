@@ -4,16 +4,14 @@
 
 import { composedMap, blankGrid } from './grid.js';
 import { openingTiles } from './tiles.js';
-import { morning, getItem, bump, cycle, talking, cherylDeclines, characterSheet } from './common.js';
+import { morning, getItem, bump, cycle, talking, cherylDeclines } from './common.js';
 import { moonrise } from './moonrise.js';
-import { old_man_seated, neighbor as neighborArt, sweaty_kid } from '../../art/opening_npcs.js';
+import { old_man_seated, neighbor, sweaty_kid } from '../../art/opening_npcs.js';
 import { props } from '../../art/props.js';
 import { fx, fx_mist } from '../../art/fx.js';
 import { drawText, drawTextCentered, measure } from '../../engine/text.js';
 
 const W = 20, H = 26;
-const neighbor = characterSheet(neighborArt);
-const kidSheet = characterSheet(sweaty_kid, [1, 2, 3, 4]);
 
 // ---------------------------------------------------------------------------
 // Tiles
@@ -26,6 +24,10 @@ function compose(g) {
   const am = !!f('act1.moonrise');
   const ground = blankGrid(W, H), detail = blankGrid(W, H), overhead = blankGrid(W, H);
   const solid = blankGrid(W, H, false);
+  const step = blankGrid(W, H); // footstep sounds; the map's own is stone
+  for (let y = 2; y <= 8; y++) for (let x = 1; x <= 18; x++) step[y][x] = 'step_plaster';
+  for (let y = 8; y <= 12; y++) step[y][7] = 'step_stairs';
+  step[24][15] = step[24][16] = step[25][15] = step[25][16] = 'step_stairs';
   const set = (layer, x, y, ref) => { layer[y][x] = ref; };
   const block = (x, y, s = true) => { solid[y][x] = s; };
 
@@ -166,7 +168,7 @@ function compose(g) {
     for (const [x, y] of [[15, 23], [16, 23], [15, 24], [16, 24], [15, 25], [16, 25]]) block(x, y);
   }
 
-  return { ground, detail, overhead, solid };
+  return { ground, detail, overhead, solid, step };
 }
 
 // ---------------------------------------------------------------------------
@@ -208,9 +210,10 @@ async function fillTub(g) {
   g.sfx('tap_squeak');
   g.setFlag('fx.tap', 'on');
   await g.wait(0.25);
-  g.sfx('water_pour');
+  g.startLoop('water_pour');
   g.setFlag('fx.tub', 'filling');
   await g.wait(2);
+  g.stopLoop('water_pour', 250);
   g.setFlag('fx.tap', null);
   g.setFlag('fx.tub', null);
   g.setFlag('tub.full');
@@ -386,7 +389,7 @@ const objects = [
       if (n === 0) return g.describe('Someone has tried to bring a piano up the Squeeze. The Squeeze has won.');
       if (n === 1) return g.describe("There's a label. 'No. 9, Cistern Court.' That's me. I didn't order a piano.");
       if (n === 2) return g.describe('A note on the lid: BACK AFTER MOON. DO NOT TOUCH PIANO.');
-      g.sfx('piano_note');
+      g.sfx('piano_flat');
       await g.wait(0.6);
       return g.describe("Middle C. A little flat. I'd know.");
     },
@@ -419,17 +422,9 @@ const neighborIdle = {
   durations: { ...neighbor.durations, tend: [450, 450, 450, 450, 450, 450, 2200] },
 };
 
-// The well's breath: the mist rises, then a few seconds of nothing.
-const blank32 = Array(32).fill('.'.repeat(32));
-const wellBreath = {
-  ...fx_mist,
-  frames: { ...fx_mist.frames, breath_0: fx_mist.frames.mist_0, breath_1: fx_mist.frames.mist_1, breath_2: fx_mist.frames.mist_2, breath_3: blank32 },
-  durations: { breath: [500, 600, 700, 3200] },
-};
-
 const oldMan = {
   id: 'old_man', name: 'Old Man', x: 2, y: 16, facing: 'right',
-  sprite: { sheet: old_man_seated, frame: 'think_right' },
+  sprite: { sheet: old_man_seated, frame: 'think_right_0' },
   talkPose: 'talk_right',
   turnToTalk: false,
   interact: async (g, self) => {
@@ -459,6 +454,7 @@ const oldMan = {
   use: {
     pepper_mill: async (g, self) => {
       g.takeItem('pepper_mill');
+      g.sfx('give');
       g.pose(self, 'mill_right');
       g.sfx('pepper_grind');
       await g.wait(1.2);
@@ -491,7 +487,7 @@ async function moveSheets(g, self) {
   await g.moveNpc(self, [16, 4]);
   g.faceNpc(self, 'left');
   g.pose(self, 'smooth_left');
-  g.sfx('sheet_flap');
+  g.sfx('sheets_flap');
   await g.wait(0.5);
   g.setFlag('neighbor.stage', 1);
   await g.wait(0.3);
@@ -499,7 +495,7 @@ async function moveSheets(g, self) {
   await g.moveNpc(self, [13, 4]);
   g.faceNpc(self, 'left');
   g.pose(self, 'smooth_left');
-  g.sfx('sheet_flap');
+  g.sfx('sheets_flap');
   await g.wait(0.5);
   g.setFlag('neighbor.stage', 2);
   await g.wait(0.3);
@@ -512,11 +508,11 @@ async function moveSheets(g, self) {
   g.sfx('chess_tap');
   for (const stage of [4, 5]) {
     await g.wait(0.6);
-    g.sfx('sheet_flap');
+    g.sfx('sheets_flap');
     g.setFlag('neighbor.stage', stage);
   }
   await g.wait(0.6);
-  g.sfx('sheet_flap');
+  g.sfx('sheets_flap');
   g.setFlag('neighbor.stage', 6);
   await g.wait(0.5);
   g.pose(self, null);
@@ -560,6 +556,7 @@ const neighborTalk = async (g, self) => {
 const neighborUse = {
   clothes_prop: async (g, self) => {
     g.takeItem('clothes_prop');
+    g.sfx('give');
     await moveSheets(g, self);
   },
   pepper_mill: (g, self) => g.say(self, "Pepper? On Moonshine Night? I've no idea what you're getting at."),
@@ -590,12 +587,8 @@ let laps = 0;
 
 // Sweat flies off him at the corners.
 function sweat(g, self) {
-  const drop = g.npc('sweat');
-  g.place(drop, self.x, self.y);
-  drop.offset = [self.facing === 'left' ? -7 : 7, -17];
-  drop.animMs = 0;
-  drop.visible = true;
-  setTimeout(() => { drop.visible = false; }, 240);
+  const side = self.facing === 'left' ? 0.35 : -0.35;
+  g.spawnEffect({ sprite: { sheet: fx, frame: 'sweat_drop' }, path: [[self.x, self.y - 1.1], [self.x + side, self.y - 1.3]], speed: 0.35, layer: 'top' });
 }
 
 function onKidWaypoint(g, self, next) {
@@ -603,10 +596,10 @@ function onKidWaypoint(g, self, next) {
   const reached = (next + LAP.length - 1) % LAP.length;
   if ([0, 1, 4, 5].includes(reached)) sweat(g, self);
   if (reached === 2 && !g.flag('kid.hasTimer')) {
-    g.pose(self, 'hop_down');
+    g.pose(self, 'hop');
     g.sfx('kid_hop');
   } else if (reached === 3) {
-    if (self.pose === 'hop_down') g.pose(self, null);
+    if (self.pose === 'hop') g.pose(self, null);
   } else if (reached === 0 && g.flag('kid.hasTimer')) {
     laps++;
     if (laps % 3 === 0) {
@@ -620,11 +613,11 @@ function onKidWaypoint(g, self, next) {
 
 const kidNpc = {
   id: 'kid', name: 'Sweaty Kid', x: 7, y: 14, facing: 'right',
-  sprite: { sheet: kidSheet },
+  sprite: { sheet: sweaty_kid, walk: [1, 2, 3, 4] },
   stepTicks: 13,
   when: (g) => !morning(g),
-  behavior: { type: 'patrol', route: LAP, ghost: true, stopNear: 2, nearPose: 'jog_down', onWaypoint: onKidWaypoint },
-  talkPose: 'jog_down',
+  behavior: { type: 'patrol', route: LAP, ghost: true, stopNear: 2, nearPose: 'jog', onWaypoint: onKidWaypoint },
+  talkPose: 'jog',
   interact: async (g, self) => {
     if (g.flag('kid.hasTimer')) {
       return g.say(self, cycle(g, 'kid.after', ['I set it to five minutes and ran till it dinged. I won! Against the EGG!', 'Three minutes forty! ...Is that good? It feels good.']));
@@ -644,8 +637,12 @@ const kidNpc = {
   use: {
     egg_timer: async (g, self) => {
       g.takeItem('egg_timer');
-      g.sfx('timer_tick');
-      await g.say(self, "Whoa. Is that a TIMER? It ticks! It's got a BELL!", "Okay. Okay okay okay. You can have the hurdle. Hurdles are for babies. I'm doing pure speed now.");
+      g.sfx('give');
+      g.startLoop('timer_tick');
+      await g.say(self, "Whoa. Is that a TIMER? It ticks! It's got a BELL!");
+      g.stopLoop('timer_tick', 200);
+      g.sfx('timer_ding');
+      await g.say(self, "Okay. Okay okay okay. You can have the hurdle. Hurdles are for babies. I'm doing pure speed now.");
       await kidFetchesProp(g, self);
       await getItem(g, 'clothes_prop');
     },
@@ -674,13 +671,13 @@ async function kidShowsOff(g, self) {
   g.faceNpc(self, 'down');
   await g.wait(0.2);
   await g.moveNpc(self, 'd', { speed: 10 });
-  g.pose(self, 'hop_down');
+  g.pose(self, 'hop');
   g.sfx('kid_hop');
   await g.moveNpc(self, 'd d', { speed: 10, ghost: true });
   g.pose(self, null);
   await g.moveNpc(self, home, { speed: 12 });
   g.faceNpc(self, 'player');
-  g.pose(self, 'jog_down');
+  g.pose(self, 'jog');
   self.patrolIdx = rejoinLap(g, self);
 }
 
@@ -689,27 +686,22 @@ async function kidFetchesProp(g, self) {
   g.pose(self, null);
   await g.moveNpc(self, [13, 16], { speed: 12 });
   g.faceNpc(self, 'down');
-  g.pose(self, 'jog_down');
+  g.pose(self, 'jog');
   await g.wait(0.3);
   g.setFlag('kid.hasTimer'); // the hurdle comes apart
   await g.wait(0.2);
   g.pose(self, null);
   await g.moveNpc(self, home, { speed: 12 });
   g.faceNpc(self, 'player');
-  g.pose(self, 'jog_down');
+  g.pose(self, 'jog');
   self.patrolIdx = rejoinLap(g, self);
 }
-
-const sweatDrop = {
-  id: 'sweat', x: 7, y: 14, solid: false, shadow: false, visible: false,
-  sprite: { sheet: fx, frame: 'sweat_drop' },
-  when: (g) => !morning(g),
-};
 
 // In the morning he jogs in place by the Squeeze, waiting to run it.
 const kidMorning = {
   id: 'kid_morning', name: 'Sweaty Kid', x: 15, y: 22, facing: 'down',
-  sprite: { sheet: kidSheet, frame: 'jog_down' },
+  sprite: { sheet: sweaty_kid, walk: [1, 2, 3, 4] },
+  behavior: { type: 'face', range: 3 },
   when: morning,
   interact: async (g, self) => {
     if (bump(g, 'kid.morning') === 0) {
@@ -741,12 +733,6 @@ const catMorning = {
     if (bump(g, 'cat.morning') === 0) return g.describe("She's moved to the uphill side of the court, staring at the well.", "I didn't know the court had an uphill side.");
     return g.describe('Still staring at the well. So am I, now.');
   },
-};
-
-const mist = {
-  id: 'mist', x: 9, y: 16, w: 2, h: 2, solid: false, shadow: false,
-  sprite: { sheet: wellBreath, frame: 'breath' },
-  when: morning,
 };
 
 const swifts = [0, 1].map((i) => ({
@@ -784,11 +770,37 @@ export const courtMap = composedMap(compose, {
       },
     },
   ],
+  step: 'step_stone',
   onEnter: async (g) => {
     g.playMusic(morning(g) ? 'morning_after' : 'cistern_court');
+    if (morning(g)) g.pose('kid_morning', 'jog');
   },
-  entities: [...objects.map(hotspot), oldMan, ...neighborDefs, kidNpc, sweatDrop, kidMorning, cat, catMorning, mist, ...swifts],
+  ambient: [
+    // The Old Man reaches out, moves a piece, thinks better of it, and moves it back.
+    { every: [6, 11], run: oldManFidgets },
+    // In the morning the well breathes: a cold mist every few seconds.
+    {
+      every: [5, 8], when: morning,
+      run: (g) => {
+        g.sfx('well_breath');
+        g.spawnEffect({ sprite: { sheet: fx_mist, frame: 'mist' }, at: [9.5, 16.5], seconds: 1.8, layer: 'top' });
+      },
+    },
+  ],
+  entities: [...objects.map(hotspot), oldMan, ...neighborDefs, kidNpc, kidMorning, cat, catMorning, ...swifts],
 });
+
+function oldManFidgets(g) {
+  const old = g.npc('old_man');
+  if (old.pose) return;
+  g.pose(old, 'think_right_1');
+  g.sfx('chess_tap');
+  setTimeout(() => {
+    if (old.pose !== 'think_right_1') return;
+    old.setPose(null);
+    g.sfx('chess_tap');
+  }, 900);
+}
 
 export async function flySwifts(g) {
   const run = async (id, y, delay) => {

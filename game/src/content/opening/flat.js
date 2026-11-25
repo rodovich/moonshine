@@ -22,6 +22,8 @@ function compose(g) {
   const f = (n) => g.flag(n);
   const ground = blankGrid(W, H), detail = blankGrid(W, H), overhead = blankGrid(W, H);
   const solid = blankGrid(W, H, false);
+  const step = blankGrid(W, H); // the map's own footstep is tile
+  for (let y = 5; y <= 6; y++) for (let x = 4; x <= 6; x++) step[y][x] = 'step_rug';
   const counter = blankGrid(W, H, false);
   counter[2][1] = counter[2][2] = true; // reach the shelf across the counter
   const block = (x, y) => { solid[y][x] = true; };
@@ -72,7 +74,7 @@ function compose(g) {
   put(10, 5, 'furniture:wardrobe_top'); put(10, 6, 'furniture:wardrobe_bot');
   put(1, 6, f('got.soap') ? 'fittings:washstand' : 'fittings:washstand_soap');
 
-  return { ground, detail, overhead, solid, counter };
+  return { ground, detail, overhead, solid, counter, step };
 }
 
 // Taking something from the room: look, take, and remember it's gone.
@@ -157,6 +159,7 @@ export const flatMap = composedMap(compose, {
   tileset: openingTiles,
   lighting: (g) => (morning(g) ? 'day' : 'dusk'),
   background: 'ink',
+  step: 'step_tile',
   spawn: [5, 7],
   exits: [{ x: 5, y: 8, to: 'cistern_court', at: [3, 12], facing: 'down' }],
   onEnter: async (g) => {
