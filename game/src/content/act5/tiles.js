@@ -9,12 +9,13 @@ import { harbor_quay, headland, fish_stall, bilge_west, signpost, harbor_culvert
 import { reveal, reveal_mouth, reveal_door, bilge_flood, keepers_hatch } from '../../art/act4_surface.js';
 import { harbor_hull, sea, harbor_props, keyhole, lighthouse, bilge_door5, stair_rope, clockshop, shop5, banner, lamproom } from '../../art/act5_surface.js';
 import { windlass_drum, windlass, hawse, keel_hatch, bowdoor, keepers_rungs } from '../../art/act5_under.js';
+import { steps_lid } from '../../art/hundredth.js';
 
 export const act5Sheets = {
   canal, harbor_quay, headland, fish_stall, bilge_west, signpost, harbor_culvert,
   reveal, reveal_mouth, reveal_door, bilge_flood, keepers_hatch,
   harbor_hull, sea, harbor_props, keyhole, lighthouse, bilge_door5, stair_rope, clockshop, shop5, banner, lamproom,
-  windlass_drum, windlass, hawse, keel_hatch, bowdoor, keepers_rungs,
+  windlass_drum, windlass, hawse, keel_hatch, bowdoor, keepers_rungs, steps_lid,
 };
 
 export const act5Tiles = {
