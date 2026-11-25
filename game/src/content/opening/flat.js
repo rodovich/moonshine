@@ -95,7 +95,8 @@ const entities = [
     id: 'egg_timer', x: 2, y: 2, when: (g) => !g.flag('got.egg_timer'),
     interact: (g) => take(g, 'egg_timer', "My egg timer. It ticks like it's furious about something. Then it dings, and it's over it."),
   },
-  { id: 'shelf', x: 1, y: 1, w: 2, look: "Tins, a jar of capers I've been meaning to open since spring, and a teapot that drips." },
+  // Behind the mill and the timer on the counter: reachable across the counter once either is taken.
+  { id: 'shelf', x: 1, y: 1, w: 2, unreachable: (g) => !g.flag('got.pepper_mill') && !g.flag('got.egg_timer') && 'behind the pepper mill and the egg timer', look: "Tins, a jar of capers I've been meaning to open since spring, and a teapot that drips." },
   { id: 'stove', x: 3, y: 2, look: "The stove. No kettle tonight. Cold baths only on Moonshine Night. That's the rule." },
   {
     id: 'clock', x: 4, y: 1,
