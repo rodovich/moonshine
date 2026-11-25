@@ -492,6 +492,8 @@ Lines follow the conventions in the story bible and the opening. Each line is on
 
 ### Returning: the Sweaty Kid (Hundred Steps, landing 3)
 
+As in the opening, he stops and jogs in place whenever Cheryl is within two tiles, or when he's clicked or tapped.
+
 **First talk**
 - SWEATY KID: Can't stop! Stair training! Real stairs! …They're SO much harder than the well.
 - SWEATY KID: I tripped on a step up there that went BONK. Steps go "tap." That one went BONK.
@@ -923,6 +925,30 @@ Cheryl's descriptions unless labeled. "First / then" follows the look counter.
 - **Sea cave**: First: "A sea cave under the cliff. The tide's in, and the water goes right to the back." / "Something down there catches the light. Brass, maybe." Then: "The tide's in. I'm not swimming. Not today."
 - **View** (any `~` edge on the seaward side): "The back of the island. Cliff, goats, sea. You can't see the Gate from here. It's very restful."
 - **Terrace beds**: "Beans, mostly. The goats have opinions about the beans."
+
+### Declines: wrong items given to NPCs
+
+Every NPC answers an item they have no line for in their own voice, never with Cheryl's generic fallback.
+
+| NPC | Decline |
+| --- | --- |
+| Sweaty Kid | SWEATY KID: Can't carry it! Aerodynamics! |
+| Skipping Girls | FIRST GIRL: We're BUSY, Miss. |
+| Woman with Watering Can | WOMAN WITH WATERING CAN: Lovely, dear. I've got my hands full of can. |
+| Man on Bench | MAN ON BENCH: Not now. I'm being right. |
+| Ambrose | AMBROSE: I DON'T WANT THAT. I WANT MY BELL. |
+| Ottilie | OTTILIE: Is it old? It isn't old. Bring me something old. |
+| Counting Woman | COUNTING WOMAN: Don't hand me things. I lose count. |
+| Woman with Basin | WOMAN WITH BASIN: Not unless it's lucky. |
+| Piano Movers | BIG MOVER: Very nice, Miss. Not grease, though. |
+| Mayor | MAYOR: Very nice, Miss. Gold star. Please disperse. |
+| Stranded Tourist | STRANDED TOURIST: Unless it's a hat or a ferry, I don't want it. |
+| Shopkeeper | SHOPKEEPER: My window is complete, Miss. |
+| Fishmonger | FISHMONGER: Can it stop the sea? Then I don't want it. |
+| Boatman | BOATMAN: It won't fit in the boat. Nothing fits in the boat but me. |
+| Mott | MOTT: Not unless it holds the island still. |
+| Lighthouse Keeper | LIGHTHOUSE KEEPER: Don't bring that near the lamp. |
+| Goat | GOAT: Meh. → it tries to eat the item; Cheryl pulls it back: "No." |
 
 ### Wrong combinations (new)
 

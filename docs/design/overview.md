@@ -4,7 +4,7 @@ This document sets the game's structure: the areas, how they connect, what is ga
 
 ## Target
 
-- **Length:** 2½–3½ hours for a first-time player (Act 1: 15–20 min, Act 2: 30–40, Act 3: 25–35, Act 4: 35–50, Act 5: 30–45, Act 6: 10–15).
+- **Length:** 2½–3½ hours for a first-time player (Act 1: 8–12 min, Act 2: 30–40, Act 3: 25–35, Act 4: 35–50, Act 5: 30–45, Act 6: 10–15).
 - **Size:** about 35 surface screens and 17 underground screens (one screen is 16×14 tiles), 17 NPCs, about 25 inventory items.
 
 ## Design rules
@@ -20,7 +20,7 @@ These apply to every slice.
 7. **No pixel hunts.** Interactable objects read clearly as objects in the art. With a pointer, hovering over one shows an interact cursor.
 8. **Time of day is scripted.** Each act sets dusk, day, or night; nothing changes on a timer. The engine needs a global map tint (day, dusk, night) and must switch it during a scene.
 9. **Two jobs.** Every Founder object has a forgotten second job (see the story bible). Puzzle solutions come from discovering it.
-10. **Text fits the box.** One script line is one text box, about 90 characters at most.
+10. **Text fits the box.** One script line is one text box: it must wrap to three lines or fewer at the real box width (224 px). Aim for about 90 characters.
 
 ## World map
 
@@ -101,13 +101,13 @@ North is uphill (the Crown); south is downhill (the harbor). The Prow points sou
 | # | Passage | Direction | Opens | Closes / changes |
 | --- | --- | --- | --- | --- |
 | P1 | The hundredth step (Hundred Steps) ↔ Step Gallery | Two-way | End of Act 2 | Never. But the chute from A to B is one-way until the ladder is kicked down. |
+| P2 | Fountain basin hatch ↔ Pump Hall | Two-way | Act 4: the Fountain is drained (the required valve in B, Act 3) and the Mayor has left (bell thread) | **Closed for good at the reveal:** the flooded Pump Hall backs up through the Fountain's feed, and the Fountain refills over the hatch. |
 | P3 | Founders' Door (Archive crypt) ↔ Chart Room | One-way up at first (bolted from below) | Act 3, when Cheryl unbolts it | Two-way from then on. |
-| P2 | Fountain basin hatch ↔ Pump Hall | Two-way | Act 4: the Fountain is drained (valve in B, Act 3) and the Mayor has left (bell thread) | **Closed for good at the reveal:** the Fountain refills. |
 | P4 | Pump Hall → Fishmonger's ice cellar | **One-way up** (the hatch can't be lifted from above) | The escape at the end of Act 4 | Pump Hall unreachable afterward (flooded). |
 | P5 | Water Stairs door ↔ Bow Decks | Two-way | Act 5: only exists once the canals are dry; opened with a charged moon-lock | Stays open. |
-| P6 | Sighting Room → the well in Cistern Court (the Keepers' lift) | **One-way up** | End of Act 6 | The game ends. |
+| P6 | Sighting Room → the well in Cistern Court (the Keepers' lift, in a side shaft beside the Sighting Shaft that rises inside No. 9) | **One-way up** | End of Act 6 | The game ends. |
 
-Five crossings are required (P1 down, P3 up, P2 down, P4 up, P5 down), plus the final P6. P1 and P3 can be used freely from Act 3 on for return trips (to take the rubbing, to turn the valve if the player missed it).
+Passages are numbered by where they are, not by when they're used. Five crossings are required (P1 down, P3 up, P2 down, P4 up, P5 down), plus the final P6. P1 and P3 can be used freely from Act 3 on for return trips (for example, to take the rubbing after getting paper from Ottilie).
 
 ### Areas that change
 
@@ -153,8 +153,8 @@ flowchart TD
     a3lid[Pry open shaft lid] --> a3mirror[Aim mirror at moon-lock → disc]
     a3mirror --> a3chute[Chute to Lamp Halls]
     a3chute --> a3ladder[Kick down ladder: shortcut]
-    a3chute --> a3valve[Turn valve: Fountain stops]
-    a3chute --> a3chart[Chart Room: the mosaic]
+    a3chute --> a3valve[Turn valve: passage drains, Fountain stops]
+    a3valve --> a3chart[Chart Room: the mosaic]
     a3chart --> a3door[Unbolt Founders' Door → Archive]
     a3chart --> a3rub[Take rubbing → Ship Plan]
   end
@@ -185,8 +185,9 @@ flowchart TD
     a6tooth[Lever out broken Tooth, set clapper] --> a6brake[Bell rings at the turn → release brake]
     a6brake --> a6keel[Long Keel → Sighting Room]
     a6keel --> a6plug[Find plug, plug the Basin]
-    a6plug --> a6trim[Trim until the moon is centered]
-    a6trim --> a6bath[The bath] --> a6lift[Lift up the well → epilogue]
+    a6plug --> a6trim[Trim until the moon sits true]
+    a6trim --> a6stop[Master stop: put the Middle Sister to bed]
+    a6stop --> a6bath[The bath] --> a6lift[Lift up the well → epilogue]
   end
 
   a1morn --> a2hat
@@ -224,24 +225,24 @@ flowchart TD
 **Act 3**
 - *Step Gallery.* A jammed bronze lid over a light shaft (opened with the **crowbar**) lets a beam of daylight in. A pivoting bronze mirror (two positions are wrong, one is right, and the wrong ones light up wall inlays) puts the beam on a moon-lock. A sealed hatch opens onto the **moonglass disc** (a light source and, later, a key).
 - *Chute.* A smooth hullstone slide behind the hatch drops Cheryl one-way into the Lamp Halls. Internal monologue on landing.
-- *Lamp Halls.* Dark except near light-pipes; the disc lights a radius around Cheryl. Contents: the ladder up to the Step Gallery (kick it down to make a shortcut), the fountain valve wheel (turning it causes a faraway gurgle and, through a speaking tube, a distant voice shouting "The FOUNTAIN!"), and the flooded corridor ("I'm brave, not stupid.").
+- *Lamp Halls.* Dark except near light-pipes; the disc lights a radius around Cheryl. Contents: the ladder up to the Step Gallery (kick it down to make a shortcut), the flooded corridor downhill ("I'm brave, not stupid."), and, required, the passage north to the Chart Room, flooded knee-deep by a gushing pipe. A big valve wheel beside it diverts the flow: turning it drains the passage, causes a faraway gurgle, and brings a distant voice down a speaking tube shouting "The FOUNTAIN!" The wheel then jams and can't be turned back.
 - *Chart Room.* The Keeper's chair, cup, and ledger; the mosaic, lit through the Dome's floor-eye. With paper and charcoal, Cheryl takes a rubbing: the **Ship Plan**, which works as the underground map. The Founders' Door is bolted from this side.
 
 **Act 4** (starts when Cheryl first surfaces after seeing the mosaic)
 - *Bell thread.* The Clockmaker never leaves the belfry. The guidebook claims "Tessel keeps its own time, eleven minutes behind the mainland." Showing it to him sends him running to the sundial to prove it wrong. In the belfry, a lever marked DO NOT TOUCH (in his handwriting) lifts the clock's drive off the old bell linkage. Ambrose climbs up and waits for the turn, then rings. The Tide Wheel starts turning (visible through the sea-cave grate). The Mayor, mid-speech in front of the roped-off Fountain, storms up to the Crown about the clock ringing "at TWENTY PAST."
 - *Mott thread.* He's at his shack on the Back, drinking at the problem. Showing him the **moon chart** convinces him; he gives the **copper throat** (his still coil) and his square **jug**.
 - *Order thread.* Three Skipping Girls, three versions (see the story bible). Ottilie reads the glyphs on the Ship Plan's three pumps as "Thin, Stout, and Middle — types of eel, obviously." Together these give the order. Once Ambrose is back on the rope, his ledger's flyleaf gives the true rhyme as confirmation and supplies the later verses.
-- *Pump Hall.* Fit the throat to the Middle Sister; open the three wake-valves in order (the wrong order makes the pumps cough and stop, and you can try again freely); pull the great lever. The floor levels, then keeps rising. The Middle Sister's stop-valve won't close. Water fills the way back; the only exit is the emergency ladder (P4). The reveal is staged in the story bible, Act 4.
+- *Pump Hall.* Fit the throat to the Middle Sister; open the three wake-valves in order (the wrong order makes the pumps cough and stop, and you can try again freely). With only six possible orders, a determined player can brute-force this; that's a deliberate safety valve, since the rhyme hunt is the intended route and the act already has two other gates; pull the great lever. The floor levels, then keeps rising. The Middle Sister's stop-valve won't close. Water fills the way back; the only exit is the emergency ladder (P4). The reveal is staged in the story bible, Act 4.
 
 **Act 5**
 - *Boatman.* Beached at the foot of the Water Stairs, blocking the last broken flight. The Fishmonger lends a **bucket**; the refilled Fountain fills it; he pours it into his boat ("AFLOAT!") and hands over his **rope**, which lets Cheryl down the broken flight.
-- *Charging the disc.* The Water Stairs door's moon-lock needs a full charge, and only the lighthouse lamp is bright enough. The Keeper has polished in a frenzy since she saw the reef and run out of polish; she won't let anyone near the lamp without it. The Shopkeeper, whose window display fell over in the rise ("there's a GAP"), swaps **brass polish** for the guidebook. Charged, the disc fades in under a minute: too fast for Cheryl. She gives it to the Kid, who still has the egg timer. A short scripted run follows; if he's too slow (only if the player dawdles in the trigger dialog), he tries again.
+- *Charging the disc.* The Water Stairs door's moon-lock needs a full charge, and only the lighthouse lamp is bright enough. The Keeper has polished in a frenzy since she saw the reef and run out of polish; she won't let anyone near the lamp without it. The Shopkeeper, whose window display fell over in the rise ("there's a GAP"), swaps **brass polish** for the guidebook. Charged, the disc fades in under a minute: too fast for Cheryl. She gives it to the Kid, who still has her egg timer from Act 1 and winds it himself. The run is a fully scripted scene that always succeeds.
 - *Clapper.* The Clockmaker's doorstop is the bell's old clapper. He swaps it for Mott's square jug.
 - *Escalation.* Each visit to the lighthouse gallery shows the Teeth larger (three art stages).
 
 **Act 6**
 - *Windlass.* Lever out the sheared Tooth's stub with the crowbar; seat the **clapper**. A speaking tube carries the bell; when it rings at the turn, throw the brake. A cutaway montage shows the surface. The chain comes home.
-- *Sighting Room.* The **plug** lies in the dry Basin. Plug it; it fills; turn the trim wheel until the moon is centered (two or three turns; each turn shows the reflection moving).
+- *Sighting Room.* The **plug** lies in the dry Basin. Plug it; it fills; turn the trim wheel until the moon sits true (two or three turns; each turn shows the reflection moving). The Keeper's ledger beside the Basin notes "Past full: allow two fingers," because the climax is a few nights after full moon. Once the moon sits true, the Keepers' master stop (a bronze rod with the Middle Sister's emblem) comes free; pulling it puts her back to bed and the city settles.
 - *Ending.* Bath, lift, epilogue, final image (story bible, Act 6).
 
 ## Nonlinearity check
