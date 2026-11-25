@@ -48,6 +48,8 @@ The engine supports this (engine/core, 156a0cc): `dark: 0.6` on the map; fixed s
 
 ## Maps
 
+North walls are two tiles tall. Wall features marked on the lower wall row (lamp niches, inlays, the speaking horn, the tool rack) are drawn on the upper row by the art; the interaction tile stays where the map marks it. The art index for every piece, with positions, is `docs/art-downstairs.md` (art/foundation). The Chart Room inlay's tiles are `chart:inlay_x<col>y<row>` with col = map x − 3 and row = map y − 5.
+
 Shared underground legend:
 
 | Glyph | Meaning | Walkable |
@@ -130,7 +132,7 @@ The main deck: a long hall with light-pipes coming down from the street above, t
 - `~` in the north passage (25–26, 1–6) is fast, knee-deep water: solid until the valve turns, then drained floor (walkable, wet-looking).
 - `~` in the south corridor (17–18, 11–13) is still, black, deep water sloping away: always solid.
 
-**Entities:** light-pipes at (5, 8), (12, 8), (20, 8): glass rods from the ceiling with a pool of daylight under each (radius 2). The drop-ladder is on the north wall at (8, 4–5), hooked up high with its chain and cleat, until pulled down. Cheryl lands from the chute at (3, 7).
+**Entities:** light-pipes at (6, 8), (14, 8), (22, 8), placed between the ceiling ribs so the overhead layer never hides them: glass rods from the ceiling with a pool of daylight under each (radius 2). The drop-ladder is on the north wall at (8, 4–5), hooked up high with its chain and cleat, until pulled down. Cheryl lands from the chute at (3, 7).
 
 **Ceiling ribs** at x4, x8, x12, x16, x20, x24.
 
