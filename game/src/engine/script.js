@@ -466,6 +466,7 @@ export function makeApi(world) {
     stopMusic(fadeMs) {
       stopMusic(fadeMs);
     },
+<<<<<<< HEAD
     // g.sfx(id) plays at full volume. g.sfx(id, { at: [x, y] or an entity id,
     // range: 12 }) fades with Cheryl's distance (in tiles) from the source,
     // silent beyond `range`: the chess tap is clear beside the table and
@@ -488,6 +489,10 @@ export function makeApi(world) {
         if (volume < 0.03) return;
       }
       sfx(id, { volume, pitch: opts.pitch });
+=======
+    sfx(id, opts) {
+      sfx(id, opts); // opts: { volume, pitch, pan }
+>>>>>>> origin/audio/foundation
     },
     // A one-shot music cue over the current track (which dips and returns,
     // unless { resume: false }).

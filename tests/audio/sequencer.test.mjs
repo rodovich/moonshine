@@ -171,12 +171,18 @@ test('the required sound effects exist', () => {
     'lamp_hum', 'disc_drink', 'disc_fade', 'timer_wind', 'leap', 'mud_splat', 'barnacles_crack', 'door_grind',
     'light_spill', 'bronze_door', 'lamp_wake', 'lamps_wake', 'chain_creak', 'hawse_wind', 'drum_creak', 'drum_strain',
     'stump_lever', 'clapper_seat', 'tube_wind',
+    // docs/design/06-moon-in-the-bowl.md, "Audio needed"
+    'bell_tube', 'brake_clack', 'brake_throw', 'wheel_bite', 'drum_turn', 'link_boom', 'lurch', 'crowd_oof',
+    'piano_boat', 'chess_scatter', 'sheets_crack', 'emblem_hatch', 'door_slide_up', 'plug_glint', 'basin_fill',
+    'moon_settle', 'trim_turn', 'rim_light', 'lamps_blaze', 'master_stop', 'sisters_sleep', 'canal_rush',
+    'crowd_cheer', 'bath_enter', 'ripples', 'lift_gate', 'lift_ride', 'dawn_birds', 'well_grate', 'race_feet',
+    'pen_scratch', 'piano_c', 'piano_rhyme',
   ];
   for (const id of act2) assert.ok(SFX[id], id);
   const loops = ['water_pour', 'timer_tick', 'crowd', 'wind', 'trickle', 'door_hum', 'town', 'canal', 'gulls', 'goats',
     'clock_tick', 'water_gush', 'drips', 'hull', 'pump_run', 'chain_haul', 'tide_wheel', 'beam_hum', 'moonglass_hum', 'tube_murmur', 'glow_shimmer'];
   for (const id of loops) assert.ok(SFX[id].loop, `${id} loops`);
-  for (const id of ['title', 'cistern_court', 'moonrise', 'morning_after', 'wrongness', 'neighborhood', 'harbor', 'archive', 'discovery', 'downstairs', 'reveal', 'reveal_last', 'pumps', 'neighborhood_thin', 'climb', 'relay']) assert.ok(SONGS[id], id);
+  for (const id of ['title', 'cistern_court', 'moonrise', 'morning_after', 'wrongness', 'neighborhood', 'harbor', 'archive', 'discovery', 'downstairs', 'reveal', 'reveal_last', 'pumps', 'neighborhood_thin', 'climb', 'relay', 'hauling', 'keel', 'moon_true', 'bath', 'ending']) assert.ok(SONGS[id], id);
 });
 
 test('harmony strings split bars evenly unless lengths are given', () => {

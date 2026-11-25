@@ -17,7 +17,7 @@ The engine calls these through its bridge, `src/engine/sound.js`, which also for
 | `setMusicFilter(name)` | The same, by name, for a map's `musicFilter` field: `'muffled'` or `null`. |
 | `windDownMusic(ms = 4000)` | The current music runs down like a music box: it slows, sags flat, and stops wherever it has got to, with its last notes left to ring. For the moonrise. |
 | `playCue(id, { resume = true })` | Interrupts with a one-shot cue (`'wrongness'`): the music dips out, the cue plays, and the music fades back (or stays stopped with `resume: false`). |
-| `sfx(id, { pitch, volume })` | Plays a sound effect. `pitch` is in semitones. Does nothing before `initAudio()`. |
+| `sfx(id, { pitch, volume, pan })` | Plays a sound effect. `pitch` is in semitones. Does nothing before `initAudio()`. |
 | `startLoop(id, { fadeMs = 300 })` | Starts a looping sound (`crowd`, `wind`, `water_pour`, `timer_tick`). Starting one that's already running does nothing. |
 | `stopLoop(id, fadeMs = 300)`, `stopAllLoops(fadeMs)` | Stops it; `0` is a dead stop. Loops keep going across map changes until stopped. |
 | `setVolume(kind, v)`, `getVolume(kind)` | `kind` is `'master'`, `'music'`, or `'sfx'`; `v` is 0..1. Saved to `localStorage`. |
@@ -26,7 +26,7 @@ The engine calls these through its bridge, `src/engine/sound.js`, which also for
 | `currentMusic()` | Id of the playing (or requested) track, or `null`. |
 | `MUSIC_IDS`, `SFX_IDS`, `LOOP_IDS` | All ids. |
 
-**Music:** scene loops `pumps` and `climb`, `neighborhood_thin` (Act 4's reveal), `relay` (Act 5's run, one-shot); `title`, `cistern_court` (Cheryl's home theme; the opening at dusk), `moonrise` (the music box at the vista), `morning_after`, `neighborhood` (the upper town), `harbor` (the Bilge, Harbor, Goat Path), `archive` (the Archive and crypt), `downstairs` (the underground). Cues (use `playCue`): `wrongness`, `discovery` (the hundredth step), `reveal` (the Chart Room), `reveal_last` (the dusk vista).
+**Music:** scene loops `pumps` and `climb`, `neighborhood_thin` (Act 4's reveal), `relay` (Act 5's run, one-shot), Act 6's `hauling` (one-shot; link times in `HAULING_LINKS`), `keel`, `moon_true` (cue), `bath`, `ending`; `title`, `cistern_court` (Cheryl's home theme; the opening at dusk), `moonrise` (the music box at the vista), `morning_after`, `neighborhood` (the upper town), `harbor` (the Bilge, Harbor, Goat Path), `archive` (the Archive and crypt), `downstairs` (the underground). Cues (use `playCue`): `wrongness`, `discovery` (the hundredth step), `reveal` (the Chart Room), `reveal_last` (the dusk vista).
 
 **Sound effects** (grouped and described in docs/audio-direction.md):
 - interface: `blip`, `blip_cheryl`, `cursor`, `confirm`, `cancel`, `menu_open`, `menu_close`, `item_get`, `give`
@@ -39,10 +39,11 @@ The engine calls these through its bridge, `src/engine/sound.js`, which also for
 - the wider city: `knock`, `shop_bell`, `stone_scrape`, `scrub`, `skip_rope`, `slab_lift`, `piano_slide`, `sink_gurgle`, `step_splash`, `goat`, `boatman_sing`, `girls_chant`
 - downstairs: `step_hullstone`, `step_rung`, `lever_pull`, `lid_open`, `shutters`, `lid_pry`, `mirror_turn`, `light_beam`, `moonlock_open`, `hatch_open`, `disc_get`, `disc_glow`, `lamp_relight`, `chute_slide`, `ladder_drop`, `tube_voice`, `bolt_draw`, `founders_door`, `rubbing`
 - machines and water: `valve_turn`, `valve_jam`, `far_gurgle`, `chain_rattle`
+- Act 6: `bell_tube`, `brake_clack`, `brake_throw`, `wheel_bite`, `link_boom`, `lurch`, `crowd_oof`, `piano_boat`, `chess_scatter`, `sheets_crack`, `emblem_hatch`, `door_slide_up`, `plug_glint`, `basin_fill`, `moon_settle`, `trim_turn`, `rim_light`, `lamps_blaze`, `master_stop`, `sisters_sleep`, `canal_rush`, `crowd_cheer`, `bath_enter`, `ripples`, `lift_gate`, `lift_ride`, `well_grate`, `race_feet`, `pen_scratch`, `piano_c`, `piano_rhyme`
 - Act 5: `bucket_fill`, `bucket_lower`, `pour`, `splash_small`, `rope_throw`, `rope_creak`, `tin_lid`, `disc_drink`, `disc_fade`, `timer_wind`, `leap`, `mud_splat`, `barnacles_crack`, `door_grind`, `light_spill`, `bronze_door`, `lamp_wake`, `lamps_wake`, `drum_creak`, `stump_lever`, `clapper_seat`
 - Act 4: `clock_rundown`, `lever_clank`, `clamp_lift`, `bell_stroke`, `bell_strokes`, `thrum_rise`, `coins_rattle`, `ring_hatch`, `valve_squeal`, `pump_cough`, `pump_stall`, `thump_thin`, `thump_stout`, `thump_middle`, `grate_drain`, `hull_creak_long`, `ear_pop`, `groan_great`, `burst`, `hatch_bang`, `gull_close`, `slab_scrape`, `slab_close`, `bell_low`, `town_rush`, `fish_flop`
 
-**Loops:** `crowd`, `wind`, `water_pour`, `timer_tick`; the city's `town`, `canal`, `gulls`, `goats`, `clock_tick`, `trickle`, `door_hum`, `glow_shimmer`; downstairs `hull`, `drips`, `moonglass_hum`, `beam_hum`, `tube_murmur`, `water_gush`, `pump_run`, `chain_haul`, `tide_wheel`; Act 4 `belfry_tick`, `thrum`, `hull_far`, `pump_thin`, `pump_stout`, `shaft_hum`, `valve_hiss`, `spray`, `roar`, `water_spread`, `air_whistle`, `slack_lap`, `channel_rush`, `shouting`, `crabs`, `runoff`; Act 5 `laundry`, `surf`, `lamp_hum`, `chain_creak`, `hawse_wind`, `drum_strain`, `tube_wind`. All are listed and described in docs/audio-direction.md.
+**Loops:** `crowd`, `wind`, `water_pour`, `timer_tick`; the city's `town`, `canal`, `gulls`, `goats`, `clock_tick`, `trickle`, `door_hum`, `glow_shimmer`; downstairs `hull`, `drips`, `moonglass_hum`, `beam_hum`, `tube_murmur`, `water_gush`, `pump_run`, `chain_haul`, `tide_wheel`; Act 4 `belfry_tick`, `thrum`, `hull_far`, `pump_thin`, `pump_stout`, `shaft_hum`, `valve_hiss`, `spray`, `roar`, `water_spread`, `air_whistle`, `slack_lap`, `channel_rush`, `shouting`, `crabs`, `runoff`; Act 5 `laundry`, `surf`, `lamp_hum`, `chain_creak`, `hawse_wind`, `drum_strain`, `tube_wind`; Act 6 `drum_turn`, `dawn_birds`. All are listed and described in docs/audio-direction.md.
 
 Suggested use:
 
@@ -62,7 +63,7 @@ Suggested use:
 | `player.js` | plays one compiled song: channels, fades, ducking, winding down |
 | `synth.js` | voices: waveforms, envelopes, filters, one-shot layers, continuous beds, echo |
 | `instruments.js` | the instrument palette and drum kit |
-| `sfx.js`, `sfx-world.js`, `sfx-city.js`, `sfx-under.js`, `sfx-rise.js`, `sfx-high.js` | sound effects: interface; the opening; the wider city; the underground and its machines; Act 4; Act 5 |
+| `sfx.js`, `sfx-world.js`, `sfx-city.js`, `sfx-under.js`, `sfx-rise.js`, `sfx-high.js`, `sfx-home.js` | sound effects: interface; the opening; the wider city; the underground and its machines; Acts 4, 5, and 6 |
 | `music/` | songs, one module each, registered in `music/index.js` |
 | `lint.js` | music lint: notes against declared chords, clashes, leaps, monotony (pure) |
 | `offline.js` | offline rendering, levels, spectrum, and voice balance for tools and tests |
