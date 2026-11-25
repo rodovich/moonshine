@@ -6,24 +6,36 @@ import { testMaps, testItemDefs, testScripts, testCharacters } from './test/inde
 import { openingMaps, openingItems, openingScripts, openingIntro, opening } from './opening/index.js';
 import { cherylDeclines } from './opening/common.js';
 import { act2Maps, act2Items, act2Scripts, act2 } from './act2/index.js';
-import { act3Maps, act3Items, act3Scripts, withAct3 } from './act3/index.js';
-import { act5Maps, act5Items, act5Scripts, withAct5, standInItems } from './act5/index.js';
+import { act3Maps, act3Items, act3Scripts, withAct3, act3 } from './act3/index.js';
+import { act4Maps, act4Items, act4Scripts, shipPlanAct4, seaCave, withAct4, startAct4, act4End } from './act4/index.js';
+import { act5Maps, act5Items, act5Scripts, withAct5, standInItems, startAct5 } from './act5/index.js';
 import { cheryl } from '../art/cheryl.js';
 
-// Act 3 layers its states onto Act 2's maps (the crypt, the Archive, the Crown at dusk).
-// Act 5 layers its states onto the earlier acts' maps (the dry Bilge, the Square, the Shop, the Crown, ...)
-// and stands in for maps whose acts aren't merged yet.
-const maps = withAct5(withAct3({ ...openingMaps, ...act2Maps, ...act3Maps, ...act5Maps, ...testMaps }));
+// Each act layers its states onto earlier acts' maps, in order: Act 3 (the crypt,
+// the Archive, the Crown at dusk), then Act 4 (its states of the town), then
+// Act 5 (the dry Bilge, the lamp room, the town; and stand-ins for maps whose
+// acts aren't merged yet).
+const maps = withAct5(withAct4(withAct3({ ...openingMaps, ...act2Maps, ...act3Maps, ...act4Maps, ...act5Maps, ...testMaps })));
 // The Squeeze leads on to Lamp Street once Act 2 registers it; until then it ends the slice.
 opening.squeezeTo = maps.lamp_street ? 'lamp_street' : null;
 // The ladder under the hundredth step leads into Act 3 once it registers the Step Gallery; until then Act 2 ends on a card.
 act2.stepTo = maps.step_gallery ? 'step_gallery' : null;
+// After the dusk vista Act 3 hands over to Act 4: the Morning card and the flat.
+act3.next = startAct4;
+// The sea cave's mouth opens onto the Goat Path once Act 2 part 2 registers it.
+seaCave.goatPath = maps.goat_path ? 'goat_path' : null;
+// After Act 4's last lines at the bronze door, Act 5 begins.
+act4End.next = startAct5;
+
+const items = { ...standInItems, ...openingItems, ...act2Items, ...act3Items, ...act4Items, ...act5Items, ...testItemDefs };
+// The Ship Plan (Act 3's) gains its Act 4 looks.
+items.ship_plan = shipPlanAct4(items.ship_plan);
 
 export default {
   title: 'Moonshine',
 
-  // Where a new game begins: Cheryl on her roof, facing the tub.
-  start: { map: 'cistern_court', x: 3, y: 6, facing: 'up' },
+  // Where a new game begins: Cheryl on her roof, by the tub.
+  start: { map: 'cistern_court', x: 3, y: 6, facing: 'down' }, // facing the player (client feedback)
 
   // Sitting on the tub's edge, she sits on its rim, a little above her tile.
   player: { name: 'Cheryl', sprite: { sheet: cheryl }, poseOffsets: { sit_right: [0, -4], rise_right: [0, -2] } },
@@ -31,10 +43,10 @@ export default {
   maps,
   // People defined once and placed by story state (see the engine README).
   characters: { ...testCharacters },
-  items: { ...standInItems, ...openingItems, ...act2Items, ...act3Items, ...act5Items, ...testItemDefs },
+  items,
 
   // Named scripts, runnable with ?run=<name> for testing.
-  scripts: { ...openingScripts, ...act2Scripts, ...act3Scripts, ...act5Scripts, ...testScripts },
+  scripts: { ...openingScripts, ...act2Scripts, ...act3Scripts, ...act4Scripts, ...act5Scripts, ...testScripts },
 
   // Runs once when a new game starts.
   onNewGame: openingIntro,

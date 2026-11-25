@@ -82,7 +82,9 @@ Walks use the engine's names: `<dir>_0` stands, `<dir>_1`, `<dir>_2` step.
 | --- | --- |
 | Cheryl: walk and idle, 4 directions | `cheryl:<dir>_0..2`; blink `idle_<dir>` (2 frames) |
 | Cheryl: reach / interact (up, side, down) | `cheryl:reach_up`, `reach_left`, `reach_right`, `reach_down` |
-| Cheryl: sit on the tub edge facing east; stand up | `cheryl:sit_right` (and `sit_left`); `rise_right` is the half-way frame between `sit_right` and `right_0`. For the moonrise she stands on (3,5) and the sprite is drawn with offset `[0, -17]`, so her seat lands on the tub's rim and her shins hang down its front (and hide her ground shadow, which stays on the floor otherwise). See `?only=scene:court&state=moonrise` |
+| Cheryl: sit on the tub edge facing east; stand up | `cheryl:sit_tub_right`: she sits on the tub's west-end rim, facing east, with her shins down in the water (the frame stops them at a pale ring on the waterline, and the tub's own water shows around her, so it works over `tub_full`, `tub_slosh`, and `tub_whirl_wrong`). For the moonrise she stands on (3,5) and the frame is drawn with offset `[-2, -25]` (frame spans world x 46–61, y 39–70 over the tub's left tile at (3,4)), so her back hangs just past the tub's west end, the white rim shows under her seat, and the ring sits in the water. Hide her ground shadow while she sits. `rise_right` is still the half-way frame between sitting and `right_0`; `sit_right`/`sit_left` remain for ledges. See `?only=scene:court&state=moonrise` |
+| Cheryl in her bathing costume (moonrise only): walk left, right, down; stand; sit on the tub edge facing east, feet in the water; stand up | A character sheet of its own, `cheryl_swim` (exported by `cheryl.js`): navy and cream stripes to just above the knee, bare arms and feet, a navy cap with a cream band over her bun. It has the full set of character frames (`<dir>_0..2` in all four directions and the `idle_<dir>` blink), so swap it in with `g.setSprite('cheryl', { sheet: cheryl_swim })` when she steps out from behind the chimney and back with `{ sheet: cheryl }` afterwards; walking works as usual. Poses: `sit_tub_right`, the same geometry as `cheryl:sit_tub_right` (stand on (3,5), offset `[-2, -25]`, no shadow), and `rise_right`/`rise_left` (half-way up). |
+| Her cardigan folded on the nearer chair (2,7) | `roof_props:chair_cardigan`, in place of `chair_fold` on the objects layer: the cardigan folded on the seat, a sleeve over the side |
 | Old Man: seated idle (thinking, reaching for a piece) | `old_man_seated:think_right` (frame 0 chin on hand, frame 1 reaching; durations 2600/900 ms) |
 | Old Man: turning the pepper mill | `old_man_seated:mill_right` (2 frames) |
 | Old Man: sneeze | `old_man_seated:sneeze_right_0` (head back), `sneeze_right_1` (achoo) |
@@ -113,15 +115,18 @@ Walks use the engine's names: `<dir>_0` stands, `<dir>_1`, `<dir>_2` step.
 
 ## The moonrise vista (`vista.js`)
 
-Cheryl's silhouette shows her bun with its coral tie and her coral cardigan. Draw in this order, each frame:
+Cheryl's silhouette, from behind on the tub's rim, wears her bathing costume (bare shoulders and arms, two straps, navy and cream stripes) and the navy cap with its cream band over her bun. Draw in this order, each frame:
 
 1. `vista:bowl_dusk` at (0, 0).
 2. `vista_glow:glow_<n>` with its bottom center at (176, 90), so its top-left is (116, 42). Glow 0 from about 1 s, 1 from 2.2 s, 2 from 3.4 s.
-3. `vista_moon:moon` (2-frame shimmer) centered on x = 176. Its center starts at y = 104, hidden behind the cliffs, rises about 3 px/s, and stops at y = 56. About half of it is up at center y ≈ 86.
+3. `vista_moon` (2-frame shimmer, 500 ms) centered on x = 176. Its center starts at y = 104, hidden behind the cliffs, and stops at y = 56. About half of it is up at center y ≈ 86. It whitens as it climbs: draw `moon` (pale peach-gold) while its center is below y = 80, `moon_mid` from y = 80, and `moon_high` from y = 64.
 4. `vista_rim:rim` at (0, 0), over the moon.
-5. `vista_twinkle:twinkle` at each point in `VISTA_BASINS` (exported by `vista.js`), offset by (−3, −3), each with its own phase.
-6. `vista_cheryl:cheryl_tub` at (0, 128).
+5. The moon's path on the Bowl, at (0, 0), after the rim: `vista_path:path_faint` once the moon is half up, then the `path` shimmer (3 frames, 260 ms) about 2 s later. It's pale peach-gold, broken into streaks, and stops at the roofs.
+6. `vista_twinkle:twinkle` at each point in `VISTA_BASINS` (exported by `vista.js`), offset by (−3, −3), each with its own phase.
+7. `vista_cheryl:cheryl_tub` at (0, 128).
 
-The Gate goes cold: as the moon clears the ridge off to the side, draw `vista_gate_cold:cold_0` (half) and then `cold_1` (full) over the background, after step 1 and before the glow. The notch's apricot drains to violet while the glow stays on the moon, so the wrongness is unmistakable. The dev scene switches at 7 s and 8 s.
+The Gate goes cold: as the moon clears the ridge off to the side, draw `vista_gate_cold:cold_0` (half) and then `cold_1` (full) over the background, after step 1 and before the glow. The Earth's shadow in the notch deepens a step while the silver glow stays on the moon, so the wrongness is unmistakable.
 
-`game/dev/scene-vista.js` plays the sequence in a loop; `?still` holds the moment the moon is half up.
+The picture looks east, opposite the sunset (see [art-direction.md](art-direction.md), Skies): the Earth's shadow on the horizon, the pink Belt of Venus above it, then blue and indigo. The Rim's cliffs catch rose alpenglow, and the glow before the moon is cool silver. The moon itself is pale and faintly peach-gold as it clears the Rim, whitening as it climbs. The dev scene switches at 7 s and 8 s.
+
+`game/dev/scene-vista.js` plays the sequence in a loop, with the moon's height as `content/opening/moonrise.js` has it; `?still` holds the moment the moon is half up, and `?still=<ms>` any moment of the loop.

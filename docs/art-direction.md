@@ -86,11 +86,13 @@ Tessel's domes are blue, but they are not Aegean postcards: they sit on a squat 
 
 ### Cheryl
 
-Late 50s, the player. Silver hair in a bun with a small coral tie; a coral cardigan over a cream blouse; a navy mid-calf skirt; sensible brown shoes; a leather satchel on a strap across her body, riding on her right hip (the inventory lives in it). She stands straight; she walks briskly and stops to look at things. Coral and navy make her the most saturated, highest-contrast figure on warm stone, and they hold up under the dusk tint. Keep her palette distinct from every NPC's.
+Late 50s, the player, and vigorous with it. Silver-streaked hair (an ash-grey base, `cheryl_hair`, with streaks of `silver`, never white all over) pulled back into a bun with a small coral tie; a smallish, neat head, an upright back, and a skirt that falls straight rather than bundling. The client found the first version read older than 58, so keep her brisk and upright in every pose and vista. A coral cardigan over a cream blouse; a navy mid-calf skirt; sensible brown shoes; a leather satchel on a strap across her body, riding on her right hip (the inventory lives in it). She stands straight; she walks briskly and stops to look at things. Coral and navy make her the most saturated, highest-contrast figure on warm stone, and they hold up under the dusk tint. Keep her palette distinct from every NPC's.
 
 The story bible defers to this section for her look. (Round 2 briefly redrew her in a mustard cardigan and teal skirt to match an earlier draft of the bible while the bible was being changed to match this design. The coral look won: mustard sits too close in value and hue to the warm paving, especially at dusk.)
 
-Her sheet also has interaction poses: `reach_up`, `reach_down`, `reach_left`, `reach_right`; `sit_left`/`sit_right` (seated on the tub's edge); `rise_left`/`rise_right` (half-way up); and `idle_<dir>_0/1` (a blink) for scripts.
+Her sheet also has interaction poses: `reach_up`, `reach_down`, `reach_left`, `reach_right`; `sit_left`/`sit_right` (seated on a ledge, shins hanging); `sit_tub_right` (on the tub's west-end rim, facing east, shins in the water: they stop at a pale ring at the waterline and the tub shows through around her); `rise_left`/`rise_right` (half-way up); and `idle_<dir>_0/1` (a blink) for scripts.
+
+For the moonrise only, she changes into a 1920s bathing costume (`cheryl_swim`, its own character sheet; the writer's design in docs/design/01-opening.md): navy and cream horizontal stripes, wide straps, a low back, knee-length legs, bare arms and feet, and a snug navy cap with a cream band over her bun, which keeps the bun's bump in her silhouette. The stripes are one pixel each in sprites and three in the vistas. Her coral cardigan goes folded onto a chair (`roof_props:chair_cardigan`). Both vista silhouettes of her in the tub (Act 1 and the final vista) wear the costume and cap. She wears it as unselfconsciously as her cardigan: same upright stance, same brisk walk.
 
 ### Generic residents
 
@@ -121,11 +123,12 @@ Her sheet also has interaction poses: `reach_up`, `reach_down`, `reach_left`, `r
 
 ## Time of day
 
-The tiles are painted in neutral late-morning light. Dusk, night, and day are global washes from `game/src/art/tints.js`, applied with the engine's `tint()`:
+The tiles are painted in neutral late-morning light. Dusk, night, day, and dawn are global washes from `game/src/art/tints.js`, applied with the engine's `tint()`:
 
 - **Dusk** is two multiply passes: a deep rose-amber at 62% and a violet at 30%. Whitewash goes rose and dim and shadows cool, so it reads as sunset with the moon on its way. (It was 42% apricot, then 50% rose-amber; both read as afternoon in play.)
 - **Night** multiplies by a moonlit blue at 70%: dark and cool, but every shape still readable.
 - **Day** multiplies by a light warm grey at 35%, so whitewash in full sun isn't blown out (playtesters found the untinted morning bleached).
+- **Dawn** (Act 6, Cistern Court after the climb out of the well) is a pink multiply at 45% and then a gold screen at 16%: whitewash goes pale pink with a warm lift, lighter than dusk. The Act 6 build chose the values; art keeps them in `tints.js`.
 
 Check new tiles under `?tint=dusk` and `?tint=night` on the dev page. Tints compress hue, so never rely on hue alone for contrast (a coral cardigan against terracotta pots, a pale blue door on white): separate important shapes by value too. Shapes that depend on a small hue difference (a pale blue door on white) can vanish at night; separate them by value too. Colors listed in `EMISSIVE` (in `tints.js`: lamp glow, lit window glass, relic amber and cyan) skip the tint, so lit windows and lamps glow at dusk and night; anything meant to give off light should use one of them. Light some windows at dusk and night with the buildings sheet's `_lit` swaps (warm glass): a few, not all, so the town looks lived in.
 
@@ -140,6 +143,16 @@ Light indoors comes from the room's window, which for Cheryl's flat is on the no
 ## Cutscene pictures
 
 Full-screen pictures (the moonrise vista) are separate 256×224 sheets with their own palettes, split into layers the scene can move: background, a transparent foreground or skyline overlay, and small sprites (the moon, the glow, twinkles). They may use richer gradients than tiles (a limited two-row checker between sky bands), but the same rules otherwise: big clear shapes, light from a stated direction, no pixel soup.
+
+### Skies
+
+Paint skies the way the sun and moon really sit (client feedback). A full moon rises in the east as the sun sets in the west, so a moonrise horizon never has a sunset glow.
+
+- **Looking east at dusk** (the moonrise vistas): from the horizon up, the Earth's shadow (`earth_shadow*`, blue-grey), the Belt of Venus (`venus_pink`, `venus_mauve`), then blue (`sky_east_blue`) deepening to indigo, with stars. Whatever faces the viewer catches the last sun from behind them: the Rim's cliffs glow rose (`alpen_rose*`, lit tops, cool `alpen_shadow` at the feet), and town walls and roofs facing the viewer are warm. The water reflects the cool sky and the pink band. Before the moon rises, the sky above that spot brightens with a cool silver glow (`moonrise_glow*`). The moon comes up large and pale, faintly peach-gold as it first clears the Rim (`moon_peach*`), and whitens as it climbs; its path on the water is the same pale gold (the writer's reconciliation in the story bible, "The sky over Tessel"). The sky around it stays cool.
+- **Full dark** (the Act 6 Basin view, about an hour after sunset): indigo to the horizon with no glow, only a faint blue-grey (`earth_shadow_deep`) along the Rim. Two nights past full the moon is a waning gibbous: rising in the east, its lit limb faces the sun below the horizon, down and to the left, so its upper-right edge is a hair flattened (drawn for a northern-hemisphere sky). It's slightly warm (the cream `moon*` ramp).
+- **Looking west at dusk** (the Act 3 dusk vista): the sunset's afterglow is right here, orange low to violet and indigo high. Cliffs and the faces of houses toward the viewer are backlit, so they're dark; edges facing the glow catch it.
+- Stars are cool (silver or moon-white) whichever way the picture looks.
+- Before painting a sky, find which way the picture looks in the design doc, and keep the Gate (east) out of westward views.
 
 ## Do and don't
 

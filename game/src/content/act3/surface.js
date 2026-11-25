@@ -18,6 +18,10 @@ import { LOOKS, talking } from '../act2/common.js';
 import { WRONGNESS, unbolted } from './common.js';
 
 const surfaced = (g) => !!g.flag('act3.surfaced');
+
+// Set by src/content/index.js: the script that starts Act 4 (it takes over
+// after the dusk vista, from black), or null for Act 3's end card.
+export const act3 = { next: null };
 const done = (g) => !!g.flag('act3.done');
 
 // ---------------------------------------------------------------------------
@@ -108,7 +112,7 @@ function withCrypt(def) {
   return {
     ...def,
     tileset: { ...def.tileset, sheets: { ...def.tileset.sheets, founders_door_open } },
-    lighting: (g) => (unbolted(g) ? 'dusk' : typeof def.lighting === 'function' ? def.lighting(g) : def.lighting),
+    lighting: (g) => (unbolted(g) && !g.flag('act4.started') && !g.flag('epilogue') ? 'dusk' : typeof def.lighting === 'function' ? def.lighting(g) : def.lighting),
     patches: morePatches(def.patches, DOOR_TILES),
     // The doorway's lower row is open ground; the door entity blocks it until it opens.
     collision: Array.from({ length: def.ground.length }, (_, y) => (y === 2 ? '     oo   ' : '          ')),
@@ -141,7 +145,7 @@ function withArchive(def) {
   });
   return {
     ...def,
-    lighting: (g) => (unbolted(g) ? 'dusk' : typeof def.lighting === 'function' ? def.lighting(g) : def.lighting),
+    lighting: (g) => (unbolted(g) && !g.flag('act4.started') && !g.flag('epilogue') ? 'dusk' : typeof def.lighting === 'function' ? def.lighting(g) : def.lighting),
     exits: [
       {
         x: 7, y: 13, w: 2, when: (g) => unbolted(g) && !surfaced(g),
@@ -165,8 +169,10 @@ const STUDS = [[5, 8], [9, 12], [14, 9], [18, 12], [3, 10], [20, 8]];
 const quad = (x, y) => `${y % 2 ? 's' : 'n'}${x % 2 ? 'e' : 'w'}`;
 
 // Act 2 places the plain studs; at dusk they glow.
-function studPatches(g) {
-  if (!(g.flag('moonEyes.glow') && surfaced(g))) return [];
+// They glow once Act 3 has lit them, whenever the Crown is lit for dusk or night;
+// by day they're plain.
+function studPatches(g, lit) {
+  if (!g.flag('moonEyes.glow') || !['dusk', 'night'].includes(lit)) return [];
   const glow = '_glow';
   return [
     ...STUDS.map(([x, y]) => ['ground', x, y, `moon_eyes:pave_${quad(x, y)}_eye${glow}`]),
@@ -175,11 +181,12 @@ function studPatches(g) {
   ];
 }
 
-const dusk = (g) => surfaced(g);
+// The Crown at dusk lasts from surfacing until Act 4's morning (or Act 6's epilogue).
+const dusk = (g) => surfaced(g) && !g.flag('act4.started') && !g.flag('epilogue');
 
 const duskPeople = [
   {
-    id: 'ambrose_dusk', name: 'Ambrose', x: 6, y: 7, facing: 'down', sprite: LOOKS.ambrose, behavior: 'face',
+    id: 'ambrose_dusk', name: 'Ambrose', x: 6, y: 7, facing: 'down', sprite: LOOKS.ambrose, turnToTalk: false,
     when: dusk,
     talks: [
       'THE STEPS ARE GLOWING. EVERY STEP IN TESSEL. NOBODY RANG FOR THAT.',
@@ -197,7 +204,7 @@ const duskPeople = [
     use: { '*': (g, self) => g.say(self, "Can't carry it! I'm running in the DARK!") },
   },
   {
-    id: 'watering_dusk', name: 'Woman with Watering Can', x: 14, y: 12, facing: 'left', sprite: LOOKS.watering_woman, behavior: 'face',
+    id: 'watering_dusk', name: 'Woman with Watering Can', x: 14, y: 12, facing: 'down', sprite: { sheet: LOOKS.watering_woman.sheet, frame: 'down_0' }, turnToTalk: false,
     when: dusk,
     talks: [
       [
@@ -269,6 +276,16 @@ export async function crownEnding(g) {
   await g.think('The Fountain was me, and the lights were me.');
   await g.think("I've been down there one afternoon.");
   await g.wait(1);
+  // Act 4 takes over from here once it registers (see act3.next); until then, the end card.
+  if (act3.next) {
+    g.stopMusic(1500);
+    g.stopLoop('glow_shimmer', 1500);
+    await g.fade('out', 1.2);
+    await g.hidePicture({ fade: 0 });
+    g.place('player', 11, 12, 'down');
+    g.setFlag('act3.done');
+    return act3.next(g);
+  }
   await g.hidePicture({ fade: 0 });
   await showEndCard(g);
 }
@@ -276,12 +293,13 @@ export async function crownEnding(g) {
 function withCrown(def) {
   const baseMusic = def.music;
   const baseLighting = def.lighting;
+  const crownLighting = (g) => (dusk(g) ? 'dusk' : typeof baseLighting === 'function' ? baseLighting(g) : baseLighting);
   return {
     ...def,
     tileset: { ...def.tileset, sheets: { ...def.tileset.sheets, moon_eyes } },
     // Music starts in onEnter so the dusk scene can have none.
     music: undefined,
-    lighting: (g) => (dusk(g) ? 'dusk' : typeof baseLighting === 'function' ? baseLighting(g) : baseLighting),
+    lighting: crownLighting,
     // At dusk a little darkness, so each glowing moon-eye casts its own pool.
     darkness: (g) => (dusk(g) ? 0.4 : 0),
     darkColor: 'dusk_indigo_deep',
@@ -290,14 +308,14 @@ function withCrown(def) {
       { x: 11.5, y: 14, radius: 1.6, color: 'relic_cyan' },
       { x: 8, y: 7.4, radius: 2.4, color: 'lamp_warm' }, { x: 15, y: 7.4, radius: 2.4, color: 'lamp_warm' },
     ] : []),
-    patches: morePatches(def.patches, studPatches),
+    patches: morePatches(def.patches, (g) => studPatches(g, crownLighting(g))),
     exits: [
       // At dusk the way down is the end of the act (after the vista, the card).
       { x: 11, y: 15, w: 2, when: dusk, run: (g) => (done(g) ? showEndCard(g) : crownEnding(g)) },
       ...(def.exits || []),
     ],
     triggers: [
-      { x: 0, y: 13, w: 24, when: (g) => !!g.flag('act3.surfaced') && !g.flag('act3.done'), run: crownEnding },
+      { x: 0, y: 13, w: 24, when: (g) => !!g.flag('act3.surfaced') && !g.flag('act3.done') && !g.flag('act4.started') && !g.flag('epilogue'), run: crownEnding },
       ...(def.triggers || []),
     ],
     entities: [

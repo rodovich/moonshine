@@ -20,7 +20,7 @@
 
 import { composedMap, blankGrid } from '../opening/grid.js';
 import { act2Tiles } from './tiles.js';
-import { layout, house, pave, lowRoof, LOOKS, moverPose, pianoSprite, bump, cycle, firstMeet, getItem, cherylDeclines } from './common.js';
+import { layout, house, pave, lowRoof, LOOKS, moverPose, pianoSprite, actWrongness, bump, cycle, firstMeet, getItem, cherylDeclines } from './common.js';
 import { props } from '../../art/props.js';
 import { fx, fx_mist } from '../../art/fx.js';
 import { sweaty_kid } from '../../art/opening_npcs.js';
@@ -170,7 +170,6 @@ const objects = [
   { id: 'view', x: 15, y: 26, h: 3, look: 'Halfway down Tessel. Halfway up, if you\'re the Kid.' },
   { id: 'bench', x: 2, y: 27, w: 2, look: 'A bench for the halfway point. Nobody has ever sat on it going down.' },
   ...[[1, 8], [15, 8], [1, 17], [14, 17]].map(([x, y]) => ({ id: `pot_${x}_${y}`, x, y, lookKey: 'geraniums', look: 'Geraniums.' })),
-  { id: 'basin_door', x: 7, y: 15, look: 'Her doorstep. Wet. It always is, the morning after.' },
 ].map((o) => ({ solid: false, use: { crowbar: (g) => g.describe(PRY_STEPS), '*': cherylDeclines }, ...o }));
 
 const piano = {
@@ -304,7 +303,8 @@ async function showGuidebook(g, self) {
   g.sfx('step_stairs');
   await g.moveNpc(self, 'd d d d d d d d', { ghost: true, speed: 11 }); // down flight 3 to landing 3
   const pianoThere = !slid(g);
-  if (pianoThere) await g.panCamera(6, 34, 3);
+  // Down to the bottom landing, so the arch, the piano and the Movers are in frame for the climb.
+  if (pianoThere) await g.panCamera(7, 41, 3);
   await g.moveNpc(self, 'l l l l d d d d d d d d d d d d r', { ghost: true, speed: 11 }); // along, down flight 4, to (6,39)
   if (pianoThere) {
     g.faceNpc('big_mover', 'right'); g.faceNpc('other_mover', 'left');
@@ -312,8 +312,8 @@ async function showGuidebook(g, self) {
     g.setSprite(self, { sheet: LOOKS.counting_woman.sheet, frame: 'climb_up' });
     await g.moveNpc(self, 'd', { ghost: true, speed: 14 });
     await g.tween(self, { offset: [0, -10], seconds: 0.25 });
-    await g.say('Big Mover', "Madam! That's a PIANO!");
-    await g.say(self, 'And these are MY STEPS.');
+    await g.say('Big Mover', "Madam! That's a PIANO!", { position: 'top' });
+    await g.say(self, 'And these are MY STEPS.', { position: 'top' });
     await g.tween(self, { offset: [0, -6], seconds: 0.3 });
     await g.moveNpc(self, 'd', { ghost: true, speed: 14 });
     await g.tween(self, { offset: [0, 0], seconds: 0.15 });
@@ -368,7 +368,8 @@ const basinWoman = {
 
 // ---------------------------------------------------------------------------
 // The Sweaty Kid: laps from landing 2, past the Counting Woman, down flight 3
-// to landing 3 and back. He never stops on the narrow stretch (x10, y18–24).
+// to landing 3 and back. He never stops on the narrow stretch (x9–10, y18–24),
+// so he can't stand on the hollow step once the Counting Woman has gone.
 
 const LAP = [[10, 18], [10, 27], [13, 27], [10, 27]];
 const LAP_OPEN = [[10, 27], [13, 27]]; // once the step is open, landing 3 only
@@ -412,7 +413,7 @@ const kidBase = {
 const kids = [
   {
     ...kidBase, id: 'kid', x: 10, y: 18, when: (g) => !open(g),
-    behavior: { type: 'patrol', route: LAP, stopNear: 2, nearPose: 'jog', noStop: [[10, 18, 1, 7]], onWaypoint: onKidWaypoint },
+    behavior: { type: 'patrol', route: LAP, stopNear: 2, nearPose: 'jog', noStop: [[9, 18, 2, 7]], onWaypoint: onKidWaypoint },
   },
   {
     ...kidBase, id: 'kid_after', x: 10, y: 27, when: open,
@@ -515,12 +516,13 @@ export const stepsMap = composedMap(compose, {
       when: (g) => !slid(g) && g.player.facing === 'down' && !pianoLineShown,
       run: async (g) => {
         pianoLineShown = true;
-        await g.describe("I'm not climbing over a piano at my age.");
+        await g.describe("I'm not climbing over a piano that isn't mine. The Goat Path goes round the long way.");
       },
     },
   ],
   onEnter: async (g) => {
     pianoLineShown = false;
+    actWrongness(g);
     if (g.flag('n.stepsArrived')) return;
     g.setFlag('n.stepsArrived', 1);
     await g.describe(

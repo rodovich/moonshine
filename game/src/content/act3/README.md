@@ -18,6 +18,13 @@ The first descent: from the hundredth step, through the Step Gallery, the Cradle
 
 Act 2's maps belong to Act 2 (`../act2/`). The way down is Act 2's own hook: `src/content/index.js` sets `act2.stepTo = 'step_gallery'`, and the hundredth step's ladder leads to (3, 3) there. For the way back up, `withAct3(maps)` in `surface.js` returns them with Act 3's states layered on, without editing them: extra exits, triggers, and entities; `when`s on the Act 2 entities that step aside (the closed Founders' Door, day-time Ambrose); extra tile patches; lighting and `onEnter` chained. `src/content/index.js` applies it to the whole map set. What it relies on in Act 2: the map ids `hundred_steps`, `crypt`, `archive`, `crown`; the crypt's door at (5–6, 1–2), its `founders_door` entity, and its stair at (1, 5); the Archive's door (7–8, 13) and its `ottilie`; the Crown's parapet row 14, stair (11–12, 14–15), and `ambrose`; the items `crowbar` and `paper_charcoal`.
 
+## Handing on to Act 4, and reuse
+
+- **The end.** After the dusk vista, if `act3.next` (exported from `index.js`) is set, Act 3 fades to black, sets `act3.done`, leaves Cheryl at (11, 12) on the Crown, and awaits `act3.next(g)`; `src/content/index.js` sets it to Act 4's `startAct4` once Act 4 registers. Until then it shows the end card and returns to the title.
+- **Act 3's dusk states** (the Crown's darkness, glowing studs, residents, and ending triggers; the Crypt's and Archive's dusk lighting stays) switch off once `act4.started` or `epilogue` is set.
+- **Flags later acts can read:** `act3.surfaced`, `act3.done`, `halls.valve` (the Fountain's feed jammed), `moonEyes.glow`, `got.shipPlan`, `founders.unbolted`.
+- **For other underground maps:** `tiles.js` exports the tileset (`act3Tiles`), and `common.js` exports `deck`, `wall`, `floor`, `ribs`, `wallHotspots`, `lampEntity`, `nicheTile`, `discLight`, `keepLoops`, `UNDER` (music, ambience, footsteps), `WRONGNESS`, and the shared lines. Import rather than copy.
+
 ## Story flags
 
 From the design: `act3.started`, `gallery.lever`, `gallery.mirror` (0–3), `gallery.hatch`, `got.disc`, `halls.ladder`, `lamp.<id>` (`gallery_w`, `gallery_e`, `halls_w`, `halls_e`, `bunk`), `got.valveKey`, `halls.valve`, `chart.seen`, `got.shipPlan`, `founders.unbolted`, `act3.surfaced`, `moonEyes.glow`. Added by the build: `gallery.lit1`, `gallery.lit2` (the beam has lit that inlay once), `crypt.ottilie` (Ottilie is in the crypt, during her scene), `act3.crypt` (her scene has played), `act3.done` (the end card has shown), and `n.*` counters for looks and first-time lines.
@@ -48,13 +55,13 @@ Where the design left something open, or didn't work in play, this is what the b
 - **Each target's lines play the first time the beam lights it**; later turns just clunk and swing the beam.
 - **The ladder up, the grate, and the drop-ladder are walked into** (walking up into the ladder, onto the open grate, or up into the dropped ladder climbs at once). Clicking or facing one gives its look line and then a "Climb up?" / "Climb down?" choice, so a pointer player can climb and the look line isn't lost. The hooked-up ladder's look is followed by "Pull the chain?".
 - **Ladders up are climbed on screen**: Cheryl climbs out of sight before the fade.
-- **The light-pipes** are at (6, 8), (14, 8), (22, 8), clear of the ribs, and solid (glass rods to the floor).
+- **The light-pipes** are at (6, 8), (14, 8), (22, 8), clear of the ribs, and solid. The one at (22, 8) is the art's short rod, so it doesn't reach up to Cheryl's feet when she stands at the valve.
 - **The flooded passage's floor is walkable ground**, blocked by the passage hotspot until the valve turns, so arriving from the Chart Room at (25–26, 1) is on open floor. "Drained. Wet, but walkable. North." plays the first time Cheryl steps onto it (a hotspot on a walkable passage would catch clicks meant for walking).
 - **The gushing pipe** is looked at from below, at (27, 6); after the valve it has a dry line.
 - **The Bunk Room's doorway line** plays on first entering, as "Pitch dark in here…": a hotspot on the doorway would catch clicks meant for walking through it.
 - **The Bunk Room's wall** is rows 0–1 (the tool rack, roster, and lamp on the upper row, used from row 2). Its lamp's light covers the room from its middle, so the rack at the far end reads once it's lit.
-- **The Chart Room's first look is a light sweep, not a camera pan.** The room is exactly one screen, so the camera can't move; instead the room dims and a band of daylight passes up the floor from the hull to the Crown, then back to the waterline for "the sea comes up to… there," and fades into the room under the reveal cue.
-- **The Chart Room's hotspots follow the art** (`chart:inlay_*`; the art index lists them): town rows 5–6, hull rows 7–8 and 10, waterline row 9, mast (7, 5–6), shaft and bowl (5, 5–10), chain (11–12, 7–10), Sisters (8–9, 8), teapot (7–8, 7–8), with the design's priority. Every inlay tile is its own hotspot, so clicking the inlay looks at that part of it.
+- **The Chart Room's first look is a light sweep, not a camera pan.** The room is exactly one screen, so the camera can't move; instead the room dims and a band of daylight passes up the floor from the hull to the Crown, then back down to the waterline at the hull's middle for "the sea comes up to… there," and fades into the room under the reveal cue.
+- **The Chart Room's hotspots follow the art** (`chart:inlay_*`; the art index lists them): the sea comes up to the boundary between rows 7 and 8, crossing the hull at its widest. Town rows 5–6; hull rows 7–8 (above and below the water); waterline at the hull's ends (x3 and x12 from row 7) and the sea below it (rows 9–10); mast (7, 5–6); shaft and bowl (5, 5–10); chain from the bow (11, 7) to the anchor (12, 8–10); Sisters (8–9, 8, underwater); teapot (7–8, 7–8). The design's priority order applies. Every inlay tile is its own hotspot, so clicking the inlay looks at that part of it.
 - **The Keeper's cup is on the table at (3, 4) and the ledger beside it at (4, 4)**, as the art draws them.
 - **The Founders' Door** is looked at once, and the second interaction draws the bolt. The crowbar has its own line ("It's a bolt. It doesn't want prying; it wants pulling.").
 - **Ottilie's crypt scene** has her come down the stair to (4, 3), beside Cheryl at (5, 3), and go back up. She carries her lamp (her `lamp_*` frames as a walking sheet) and lights the dusk crypt around her.
@@ -62,8 +69,3 @@ Where the design left something open, or didn't work in play, this is what the b
 - **The vista starts when Cheryl steps onto row 13**, anywhere along the parapet (the stair at x11–12 is beyond it). After the end card Cheryl is saved at (11, 12) on the plaza; on Continue, the way down the stair shows the end card again, until Act 4 exists.
 - **The moon-eye studs on the Crown** are Act 2's (`CROWN_MOON_EYES`); Act 3 swaps them for their glowing frames at dusk.
 - **Lines added for states the design doesn't cover:** a lit lamp used again ("It's already lit. It doesn't want seconds."), the moons inlay with paper ("Four moons. I'll remember four moons."), the mirror with the disc, paper, or crowbar, the grate and the jammed valve with the crowbar, the passage and the drowned corridor with anything, the light-pipes and ledger with paper, the duty roster with paper, the Ship Plan on the inlay, Ottilie in the crypt if talked to mid-scene, and the dusk residents' "not now" answers to items.
-
-## Stand-ins (until the art lands)
-
-- **The Ship Plan's icon** is the letter recolored in charcoal on off-white (requested from the art task as `items3:ship_plan`).
-- **Ambrose and the Woman with Watering Can** wear Act 2's stand-in looks (`LOOKS` in `../act2/common.js`).

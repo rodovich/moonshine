@@ -2,7 +2,7 @@
 // the underground's wall and floor helpers, lines used on several maps, and
 // the audio and darkness settings every Downstairs map shares.
 
-import { items, items3 } from '../../art/items.js';
+import { items3 } from '../../art/items.js';
 import { ship_plan } from '../../art/chartroom.js';
 import { layout, bump, cycle, getItem, cherylDeclines } from '../act2/common.js';
 import { blankGrid } from '../opening/grid.js';
@@ -61,8 +61,7 @@ export const act3Items = {
   },
   ship_plan: {
     name: 'Ship Plan',
-    // Stand-in icon: the letter, in charcoal on off-white (no ship_plan icon yet).
-    icon: { sheet: items, frame: 'letter', palette: { W: 'paper_light', w: 'white', v: 'white_shade', b: 'charcoal', B: 'charcoal_deep' } },
+    icon: { sheet: items3, frame: 'ship_plan' },
     description: "My rubbing of the Founders' floor. Tessel, drawn as a boat. I've folded it in quarters, which feels rude.",
     // Looking at it unfolds it full-screen; any key or tap folds it again.
     examine: async (g) => {

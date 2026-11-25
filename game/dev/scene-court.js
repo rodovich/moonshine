@@ -39,7 +39,7 @@ export function SCENE(state = 'dusk') {
   const tub = moonrise ? 'tub_full' : 'tub_empty';
   set(objects, 3, 4, `tub:${tub}_l`); set(objects, 4, 4, `tub:${tub}_r`);
   set(objects, 2, 4, 'tub:tap');
-  set(objects, 2, 7, 'roof_props:chair_fold'); set(objects, 3, 7, 'roof_props:chair_fold');
+  set(objects, 2, 7, moonrise ? 'roof_props:chair_cardigan' : 'roof_props:chair_fold'); set(objects, 3, 7, 'roof_props:chair_fold');
   // clotheslines: posts at y3 and y7 on x12 and x15
   for (const x of [12, 15]) {
     set(objects, x, 3, 'laundry:post'); set(objects, x, 7, 'laundry:post');
@@ -139,10 +139,11 @@ export function SCENE(state = 'dusk') {
     at('neighbor', 'smooth_left', px(17, 5));
     at('sweaty_kid', 'jog_down', px(13, 15));
   }
-  // the moonrise: Cheryl sits on the tub's front rim. She stands on (3,5) and the content draws
-  // her sit_right frame 17 px up (offset [0, -17]), so her seat lands on the rim and her shins
-  // hang down the tub's front.
-  if (moonrise) at('cheryl', 'sit_right', [3 * 16 + 8, 5 * 16 + 16 - 17]);
+  // the moonrise: Cheryl, in her bathing costume, sits on the tub's west-end rim, facing east, shins
+  // in the water, her cardigan folded on the chair. She stands on (3,5) and the content draws her
+  // sit_tub_right frame 2 px west and 25 px up (offset [-2, -25]), so her back hangs just outside
+  // the tub's west end.
+  if (moonrise) at('cheryl_swim', 'sit_tub_right', [3 * 16 + 8 - 2, 5 * 16 + 16 - 25]);
   // the Pelletiers' cat, sitting: by their gate side of the court at dusk, by the bench in the morning
   at('props', 'cat', morning ? px(12, 12) : px(17, 19));
 
