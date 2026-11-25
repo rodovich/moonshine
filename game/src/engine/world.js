@@ -11,7 +11,8 @@ import { Control } from './control.js';
 import { writeSave } from './save.js';
 import { colorOf, loadSheet } from './art.js';
 import { uiSmall } from '../art/ui.js';
-import { drawText } from './text.js';
+import { drawText, measure, wrap, LINE_HEIGHT } from './text.js';
+import { STYLES, drawBox } from './ui.js';
 import { playMusic, stopMusic } from './sound.js';
 
 export class World {
@@ -26,7 +27,8 @@ export class World {
     this.busy = 0; // scripts running
     this.queue = [];
     this.waiters = [];
-    this.cam = { x: 0, y: 0 };
+    this.cam = { x: 0, y: 0 }; // whole pixels, for drawing
+    this.camF = { x: 0, y: 0 }; // exact position, for slow pans
     this.camPan = null; // { x, y } fixed camera center while panning
     this.marker = null;
     this.api = makeApi(this);
@@ -49,35 +51,111 @@ export class World {
     p.x = p.fromX = x;
     p.y = p.fromY = y;
     p.moving = false;
-    p.walkDist = 0;
+    p.walkPx = 0;
+    p.route = null;
     if (facing) p.facing = facing;
     this.entities = [p];
     this.byId = new Map();
     this.removed = new Set(); // ids removed by scripts until the map reloads
+    this.patched = [];
     this.refreshEntities();
+    this.placeSafely(def);
     this.control.reset();
     this.camPan = null;
     this.snapCamera();
+    this.applyLighting(0);
     if (def.music !== undefined) {
       if (def.music) playMusic(def.music);
       else stopMusic();
     }
   }
 
-  // Add entities whose `when` now passes; remove ones whose `when` fails.
+  // If the player would start inside something solid or off the map (an old
+  // save, a typo in a door's `at`), move them to the map's spawn or the
+  // nearest open tile.
+  placeSafely(def) {
+    const p = this.player;
+    const ok = (x, y) => this.map.inBounds(x, y) && !this.blocked(x, y, p);
+    if (ok(p.x, p.y)) return;
+    console.warn(`[world] ${def.id}: (${p.x},${p.y}) isn't walkable; moving the player`);
+    let best = def.spawn && ok(def.spawn[0], def.spawn[1]) ? def.spawn : null;
+    if (!best) {
+      let bestD = Infinity;
+      const cx = this.map.inBounds(p.x, p.y) ? p.x : Math.floor(this.map.w / 2);
+      const cy = this.map.inBounds(p.x, p.y) ? p.y : Math.floor(this.map.h / 2);
+      for (let y = 0; y < this.map.h; y++) {
+        for (let x = 0; x < this.map.w; x++) {
+          const d = Math.abs(x - cx) + Math.abs(y - cy);
+          if (d < bestD && ok(x, y) && !this.isExit(x, y)) {
+            best = [x, y];
+            bestD = d;
+          }
+        }
+      }
+    }
+    if (best) {
+      p.x = p.fromX = best[0];
+      p.y = p.fromY = best[1];
+    }
+  }
+
+  // Bring the map up to date with the game state: add entities whose `when`
+  // now passes, remove ones whose `when` fails, re-pick sprites given as
+  // functions, and apply the map's tile patches. Runs after every script.
   refreshEntities() {
     for (const def of this.mapDef.entities || []) {
-      const show = !def.when || def.when(this.api);
-      const existing = this.byId.get(def.id);
-      if (show && !existing && !this.removed.has(def.id)) {
-        const e = new Entity(def);
+      const show = !def.when || safeCall(def.when, this.api);
+      let e = this.byId.get(def.id);
+      if (show && !e && !this.removed.has(def.id)) {
+        e = new Entity(def);
         e.home = { x: def.x, y: def.y, facing: e.facing };
         this.entities.push(e);
         this.byId.set(def.id, e);
-      } else if (!show && existing) {
-        this.removeEntity(existing);
+      } else if (!show && e) {
+        this.removeEntity(e);
+        e = null;
+      }
+      if (e && typeof def.sprite === 'function') {
+        const sprite = safeCall(def.sprite, this.api) || null;
+        if (!sameSprite(sprite, e.sprite)) e.setSprite(sprite);
       }
     }
+    this.applyPatches();
+  }
+
+  // A map's `patches(g)` returns [layer, x, y, tile] changes for the current
+  // state (a taken item leaves a bare counter, a moved piano clears the stair).
+  applyPatches() {
+    const fn = this.mapDef.patches;
+    if (!fn) return;
+    // Undo previous patches, then apply the current list.
+    for (const [layer, x, y, tile] of [...(this.patched || [])].reverse()) this.map.setTile(layer, x, y, tile);
+    this.patched = [];
+    for (const [layer, x, y, value] of safeCall(fn, this.api) || []) {
+      this.patched.push([layer, x, y, this.originalTile(layer, x, y)]);
+      this.map.setTile(layer, x, y, value);
+    }
+  }
+
+  originalTile(layer, x, y) {
+    const rows = this.mapDef[layer];
+    const ch = rows?.[y]?.[x];
+    return ch && ch !== ' ' ? this.mapDef.legend[ch] : null;
+  }
+
+  // The map's lighting: `lighting` is a preset name ('dusk', 'night', 'day')
+  // or a function of the state returning one.
+  applyLighting(seconds) {
+    let l = this.mapDef.lighting;
+    if (typeof l === 'function') l = safeCall(l, this.api);
+    this.setLighting(l || null, seconds);
+  }
+
+  setLighting(name, seconds = 0) {
+    const presets = { ...LIGHTING, ...(this.content.lighting || {}) };
+    if (name && !presets[name]) console.warn(`[world] unknown lighting "${name}"`);
+    this.lighting = name;
+    return this.effects.setLight(name ? presets[name] || [] : [], seconds);
   }
 
   removeEntity(e) {
@@ -125,9 +203,16 @@ export class World {
   }
 
   // Path for an entity to any of `goals`, avoiding solid tiles and entities.
-  // If none is reachable and `closest` is set, path to the nearest reachable tile.
+  // If none is reachable and `closest` is set, path to the nearest reachable
+  // tile. The player's paths never cross an exit unless it's the goal, so a
+  // click near a door can't carry Cheryl through it.
   pathFor(mover, goals, { closest = false, ignoreEntities = false } = {}) {
-    const blocked = (x, y) => (ignoreEntities ? this.map.solid(x, y) : !this.canEnter(mover, x, y));
+    const goalKeys = new Set(goals.map(([x, y]) => `${x},${y}`));
+    const avoidExits = mover.isPlayer;
+    const blocked = (x, y) => {
+      if (ignoreEntities ? this.map.solid(x, y) : !this.canEnter(mover, x, y)) return true;
+      return avoidExits && !goalKeys.has(`${x},${y}`) && this.isExit(x, y);
+    };
     const start = [mover.x, mover.y];
     let path = findPath(start, goals, blocked, this.map.w, this.map.h);
     if (path || !closest || !goals.length) return path;
@@ -153,7 +238,7 @@ export class World {
             sy -= dy;
           }
           const k = `${sx},${sy}`;
-          if (seen.has(k) || !this.map.inBounds(sx, sy) || this.map.solid(sx, sy)) continue;
+          if (seen.has(k) || !this.map.inBounds(sx, sy) || this.map.solid(sx, sy) || this.isExit(sx, sy)) continue;
           seen.add(k);
           spots.push({ x: sx, y: sy, facing: dir });
         }
@@ -184,7 +269,11 @@ export class World {
       job.resolve(undefined);
     } finally {
       this.busy--;
-      this.refreshEntities();
+      try {
+        this.refreshEntities();
+      } catch (err) {
+        console.error('[world] refresh after script', err);
+      }
       if (!this.queue.length) this.save();
       this.next();
     }
@@ -209,28 +298,47 @@ export class World {
     writeSave(this.state);
   }
 
+  // Always called from inside a script (changeMap), so the new map's onEnter
+  // runs inline: `await g.changeMap(...)` returns after it. No save here:
+  // saves happen only between scripts, so a reload never lands mid-cutscene.
   async transition(mapId, x, y, facing, { fade = true, seconds = 0.25 } = {}) {
     if (fade) await this.effects.fade('out', seconds);
     this.loadMap(mapId, x, y, facing);
-    this.save();
     const onEnter = this.mapDef.onEnter;
     if (fade) await this.effects.fade('in', seconds);
-    if (onEnter) this.run(onEnter);
+    if (onEnter) await onEnter(this.api);
   }
 
   // Interact with or use an item on an entity (player already in place).
+  // How many times the player has looked at (interacted with) `e` before.
+  // Entities sharing a `lookKey` share a count (all the windows on a street).
+  lookKey(e) {
+    return `${this.state.map}:${e.def.lookKey || e.id}`;
+  }
+
+  looks(e) {
+    return (this.state.looks || {})[this.lookKey(e)] || 0;
+  }
+
   async interactWith(e, itemId = null) {
     const p = this.player;
-    const face = dirBetween(p.x, p.y, nearestTileOf(e, p.x, p.y)[0], nearestTileOf(e, p.x, p.y)[1]);
+    const [tx, ty] = nearestTileOf(e, p.x, p.y);
+    const face = dirBetween(p.x, p.y, tx, ty);
     if (face) p.facing = face;
     const turn = e.directional && e.def.turnToTalk !== false;
     const prevFacing = e.facing;
     if (turn) e.facing = dirBetween(e.x, e.y, p.x, p.y) || e.facing;
     e.talking = true;
+    if (e.def.talkPose) e.setPose(e.def.talkPose);
     try {
       if (itemId) await this.useItemOn(e, itemId);
-      else await runInteract(this.api, e);
+      else await runInteract(this.api, e, this.looks(e));
     } finally {
+      if (!itemId) {
+        this.state.looks = this.state.looks || {};
+        this.state.looks[this.lookKey(e)] = this.looks(e) + 1;
+      }
+      if (e.def.talkPose && e.pose === e.def.talkPose) e.setPose(null);
       e.talking = false;
       if (turn && (!e.def.behavior || e.def.behavior === 'idle') && !e.moving && this.byId.get(e.id) === e && e.facing !== prevFacing) {
         e.facing = e.home?.facing || prevFacing;
@@ -264,16 +372,17 @@ export class World {
 
     for (const e of this.entities) {
       if (e.updateMove() && e.isPlayer) this.control.arrived();
-      e.animTick++;
     }
     for (const e of this.entities) {
       if (!e.moving && e.route && e.route.length) followRoute(this, e);
       else if (!e.isPlayer) this.updateNpc(e);
-      if (!e.moving) e.walkDist = 0;
     }
     if (!this.textbox.open && !this.inventory.open && !this.busy) this.control.afterMove(input);
     else this.control.afterMove(null);
-    if (!this.player.moving) this.player.walkDist = 0;
+    for (const e of this.entities) e.tickAnim();
+    if (this.picture) this.picture.ms += 1000 / 60;
+    // Hints wait (and stay hidden) while a text box or the bag is open.
+    if (this.hintState && !this.textbox.open && !this.inventory.open) this.hintState.t++;
 
     // Waiters
     if (this.waiters.length) {
@@ -311,6 +420,62 @@ export class World {
       e.facing = dir;
       if (nx < ax || ny < ay || nx + e.w > ax + aw || ny + e.h > ay + ah) return;
       if (this.canEnter(e, nx, ny) && !this.isExit(nx, ny)) e.startStep(dir);
+    } else if (type === 'patrol') {
+      this.patrol(e, b);
+    }
+  }
+
+  // Walk a loop of waypoints: { type: 'patrol', route: [[x, y], ...], pause,
+  // ghost, blockedPose, stopNear, nearPose }. With ghost, tiles don't block
+  // (hurdles, low walls) but characters still do; when someone is in the way
+  // the patroller waits. With stopNear: n, it stops and faces Cheryl while
+  // she's within n tiles or walking over to it (clicked), then carries on.
+  patrol(e, b) {
+    const p = this.player;
+    const near = b.stopNear && Math.abs(p.x - e.x) + Math.abs(p.y - e.y) <= b.stopNear;
+    const approached = this.control.pending && this.control.pending.entity === e;
+    if (near || approached) {
+      e.facing = dirBetween(e.x, e.y, p.x, p.y) || e.facing;
+      const pose = b.nearPose || b.blockedPose;
+      if (pose && e.pose !== pose) e.setPose(pose);
+      e.patrolHeld = true;
+      return;
+    }
+    if (e.patrolHeld) {
+      e.patrolHeld = false;
+      if (e.pose === (b.nearPose || b.blockedPose)) e.setPose(null);
+    }
+    if (e.patrolWait > 0) {
+      e.patrolWait--;
+      return;
+    }
+    const route = b.route;
+    e.patrolIdx = e.patrolIdx ?? 0;
+    let [tx, ty] = route[e.patrolIdx % route.length];
+    if (e.x === tx && e.y === ty) {
+      e.patrolIdx = (e.patrolIdx + 1) % route.length;
+      e.patrolWait = Math.round((b.pause || 0) * 60);
+      // A plain callback, not a script: it mustn't take control from the player.
+      if (b.onWaypoint) b.onWaypoint(this.api, e, e.patrolIdx);
+      [tx, ty] = route[e.patrolIdx];
+      if (e.patrolWait) return;
+    }
+    let dir;
+    if (b.ghost) {
+      dir = tx !== e.x ? (tx > e.x ? 'right' : 'left') : ty > e.y ? 'down' : 'up';
+    } else {
+      const path = this.pathFor(e, [[tx, ty]]);
+      dir = path && path.length ? dirBetween(e.x, e.y, path[0][0], path[0][1]) : null;
+    }
+    if (!dir) return;
+    const [dx, dy] = DIR_VEC[dir];
+    const free = b.ghost ? !this.entityAt(e.x + dx, e.y + dy, e) : this.canEnter(e, e.x + dx, e.y + dy);
+    if (free) {
+      if (b.blockedPose && e.pose === b.blockedPose) e.setPose(null);
+      e.startStep(dir);
+    } else {
+      e.facing = dir;
+      if (b.blockedPose && e.pose !== b.blockedPose) e.setPose(b.blockedPose);
     }
   }
 
@@ -339,6 +504,7 @@ export class World {
   snapCamera() {
     const t = this.cameraTarget();
     this.cam = this.clampCamera(t.x, t.y);
+    this.camF = { ...this.cam };
   }
 
   updateCamera() {
@@ -347,40 +513,128 @@ export class World {
     if (this.camPan && this.camPan.speed) {
       // Glide toward the pan target.
       const s = this.camPan.speed;
-      const dx = want.x - this.cam.x;
-      const dy = want.y - this.cam.y;
+      const dx = want.x - this.camF.x;
+      const dy = want.y - this.camF.y;
       const dist = Math.hypot(dx, dy);
-      if (dist <= s) this.cam = want;
-      else this.cam = { x: Math.round(this.cam.x + (dx / dist) * s), y: Math.round(this.cam.y + (dy / dist) * s) };
+      if (dist <= s) this.camF = { ...want };
+      else this.camF = { x: this.camF.x + (dx / dist) * s, y: this.camF.y + (dy / dist) * s };
     } else {
-      this.cam = want;
+      this.camF = { ...want };
     }
+    this.cam = { x: Math.round(this.camF.x), y: Math.round(this.camF.y) };
   }
 
   // ---- Drawing --------------------------------------------------------
 
   draw(ctx) {
+    if (this.picture) {
+      this.drawPicture(ctx);
+    } else {
+      this.drawWorld(ctx);
+    }
+    if (!this.busy && !this.textbox.open && !this.inventory.open && !this.picture) this.control.drawHud(ctx);
+    this.drawHint(ctx);
+    this.inventory.draw(ctx);
+    this.textbox.draw(ctx, this.picture ? 0 : this.player.py - this.cam.y);
+  }
+
+  drawWorld(ctx) {
     const bg = this.mapDef.background ? colorOf(this.mapDef.background) : '#000000';
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
     const [sx, sy] = this.effects.shakeOffset();
     const cx = this.cam.x - sx;
     const cy = this.cam.y - sy;
-    this.map.draw(ctx, 'ground', cx, cy, WIDTH, HEIGHT, this.tick);
-    this.map.draw(ctx, 'objects', cx, cy, WIDTH, HEIGHT, this.tick);
+    const ms = (this.tick * 1000) / 60;
+    // Lighting is applied per layer: the map at full strength, characters at
+    // SPRITE_LIGHT (as SNES color math often spared sprites), so they stay
+    // the most saturated things on screen at dusk and night.
+    this.map.draw(ctx, 'ground', cx, cy, WIDTH, HEIGHT, ms);
+    this.map.draw(ctx, 'detail', cx, cy, WIDTH, HEIGHT, ms);
     this.drawMarker(ctx, cx, cy);
+    const lit = this.effects.hasLight();
+    if (lit) this.effects.applyLight(ctx, 1);
     const sorted = [...this.entities].sort((a, b) => {
       const la = a.layer === 'ground' ? 0 : 1;
       const lb = b.layer === 'ground' ? 0 : 1;
       return la - lb || a.sortY - b.sortY || a.px - b.px;
     });
-    for (const e of sorted) e.draw(ctx, cx, cy);
-    this.map.draw(ctx, 'overhead', cx, cy, WIDTH, HEIGHT, this.tick);
+    const sprites = lit ? this.layer('sprites') : ctx;
+    for (const e of sorted) e.drawShadow(sprites, cx, cy);
+    for (const e of sorted) e.draw(sprites, cx, cy);
+    if (lit) this.compositeLit(ctx, sprites, this.content.spriteLight ?? SPRITE_LIGHT);
+    const over = lit ? this.layer('overhead') : ctx;
+    this.map.draw(over, 'overhead', cx, cy, WIDTH, HEIGHT, ms);
+    if (lit) this.compositeLit(ctx, over, 1);
     if (this.game.debug.debug) this.drawDebug(ctx, cx, cy);
     this.effects.applyWorld(ctx);
-    if (!this.busy && !this.textbox.open && !this.inventory.open) this.control.drawHud(ctx);
-    this.inventory.draw(ctx);
-    this.textbox.draw(ctx, this.player.py - this.cam.y);
+  }
+
+  // A cleared, transparent offscreen layer the size of the screen.
+  layer(name) {
+    this.layers = this.layers || {};
+    let c = this.layers[name];
+    if (!c) {
+      c = document.createElement('canvas');
+      c.width = WIDTH;
+      c.height = HEIGHT;
+      this.layers[name] = c.getContext('2d');
+      c = this.layers[name];
+      c.imageSmoothingEnabled = false;
+    }
+    c.clearRect(0, 0, WIDTH, HEIGHT);
+    return c;
+  }
+
+  // Light a transparent layer at `strength` (keeping its transparency) and
+  // draw it onto ctx.
+  compositeLit(ctx, layerCtx, strength) {
+    const scratch = this.layer('scratch');
+    scratch.drawImage(layerCtx.canvas, 0, 0);
+    this.effects.applyLight(scratch, strength);
+    scratch.globalCompositeOperation = 'destination-in';
+    scratch.drawImage(layerCtx.canvas, 0, 0);
+    scratch.globalCompositeOperation = 'source-over';
+    ctx.drawImage(scratch.canvas, 0, 0);
+  }
+
+  // Full-screen picture (a vista): `draw(ctx, ms)` or { sheet, frame }.
+  drawPicture(ctx) {
+    const pic = this.picture;
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    const [sx, sy] = this.effects.shakeOffset();
+    ctx.save();
+    ctx.translate(sx, sy);
+    if (typeof pic.spec === 'function') pic.spec(ctx, pic.ms);
+    else {
+      const img = loadSheet(pic.spec.sheet, pic.spec.palette).frameAt(pic.spec.frame, pic.ms);
+      if (img) ctx.drawImage(img, 0, 0);
+    }
+    ctx.restore();
+    this.effects.applyWorld(ctx);
+  }
+
+  // A small, non-blocking hint box at the bottom of the screen.
+  drawHint(ctx) {
+    const h = this.hintState;
+    if (!h || this.textbox.open || this.inventory.open) return;
+    if (h.t > h.ticks) {
+      this.hintState = null;
+      return;
+    }
+    const fade = 20;
+    const a = Math.min(1, h.t / fade, (h.ticks - h.t) / fade);
+    const lines = wrap(h.text, WIDTH - 32);
+    const w = Math.max(...lines.map((l) => measure(l))) + 16;
+    const bh = lines.length * LINE_HEIGHT + 6;
+    const x = Math.round((WIDTH - w) / 2);
+    const y = HEIGHT - 7 - bh;
+    ctx.save();
+    ctx.globalAlpha = Math.round(a * 8) / 8;
+    drawBox(ctx, x, y, w, bh, STYLES.npc);
+    lines.forEach((l, i) => drawText(ctx, l, x + 8, y + 4 + i * LINE_HEIGHT, { color: 'ui_text' }));
+    ctx.restore();
   }
 
   drawMarker(ctx, cx, cy) {
@@ -413,14 +667,58 @@ export class World {
   }
 }
 
-export function isInteractable(e) {
-  const d = e.def;
-  return !!(d.interact || d.use || d.look || d.talk);
+// Call a content callback (a `when`, a sprite or lighting function); a throw
+// is logged and counts as a falsy result instead of stopping the game.
+export function safeCall(fn, ...args) {
+  try {
+    return fn(...args);
+  } catch (err) {
+    console.error('[content]', err);
+    return undefined;
+  }
 }
 
-async function runInteract(g, e) {
+export function isInteractable(e) {
   const d = e.def;
-  if (d.interact) return d.interact(g, e);
+  return !!(d.interact || d.use || d.look || d.looks || d.talk);
+}
+
+function sameSprite(a, b) {
+  if (!a || !b) return a === b;
+  return a.sheet === b.sheet && a.palette === b.palette && a.frame === b.frame;
+}
+
+// How strongly scene lighting tints characters, relative to the map.
+// content.spriteLight overrides it.
+export const SPRITE_LIGHT = 0.5;
+
+// Built-in lighting presets: lists of passes drawn over the world. Content
+// may override or add presets with `content.lighting`.
+export const LIGHTING = {
+  day: [],
+  // Warm and dimming. A soft multiply keeps lights and darks apart (white
+  // walls stay brighter than paving), and a small violet lift in the shadows.
+  dusk: [
+    { color: '#f8c0a0', mode: 'multiply', amount: 0.8 },
+    { color: '#d898a0', mode: 'multiply', amount: 0.35 },
+    { color: '#382048', mode: 'screen', amount: 0.15 },
+  ],
+  // Moonlit: dark and blue, with lifted blacks so detail survives.
+  night: [
+    { color: '#5060b0', mode: 'multiply', amount: 0.85 },
+    { color: '#182850', mode: 'screen', amount: 0.3 },
+  ],
+};
+
+// `looks` is how many times the player looked before this time.
+async function runInteract(g, e, looks) {
+  const d = e.def;
+  if (d.interact) return d.interact(g, e, looks);
+  if (d.looks) {
+    // looks: [first, second, ..., then]; each entry a line or a list of lines.
+    const entry = d.looks[Math.min(looks, d.looks.length - 1)];
+    return g.describe(...(Array.isArray(entry) ? entry : [entry]));
+  }
   if (d.talk) {
     const lines = Array.isArray(d.talk) ? d.talk : [d.talk];
     return g.say(e.name, ...lines);
@@ -449,10 +747,11 @@ export function followRoute(world, e) {
   const [dx, dy] = DIR_VEC[dir];
   const nx = e.x + dx;
   const ny = e.y + dy;
-  if (e.routeGhost || world.canEnter(e, nx, ny)) {
+  if (e.routeGhost || e.routeForce || world.canEnter(e, nx, ny)) {
     e.route.shift();
     e.startStep(dir);
     e.routeBlocked = 0;
+    e.routeForce = false; // walking through only lasts the one step that needed it
     return;
   }
   e.facing = dir;
@@ -462,7 +761,7 @@ export function followRoute(world, e) {
     if (path) e.route = pathToDirs([e.x, e.y], path);
   }
   // A scripted move must finish: after two seconds, walk through whatever is in the way.
-  if (e.routeBlocked > 120 && !world.map.solid(nx, ny)) e.routeGhost = true;
+  if (e.routeBlocked > 120 && !world.map.solid(nx, ny)) e.routeForce = true;
 }
 
 export function pathToDirs(start, path) {

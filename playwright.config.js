@@ -5,7 +5,7 @@ export default defineConfig({
   timeout: 60_000,
   workers: 2,
   use: {
-    baseURL: 'http://localhost:8123/',
+    baseURL: 'http://localhost:8131/',
     viewport: { width: 768, height: 672 },
   },
   projects: [
@@ -13,8 +13,8 @@ export default defineConfig({
     { name: 'phone', use: { ...devices['Pixel 7'] }, testMatch: /mobile\.spec\.js/ },
   ],
   webServer: {
-    command: 'node tests/serve.js 8123',
-    url: 'http://localhost:8123/',
-    reuseExistingServer: true,
+    command: 'node tests/serve.js 8131',
+    url: 'http://localhost:8131/',
+    reuseExistingServer: false,
   },
 });

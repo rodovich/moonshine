@@ -54,7 +54,10 @@ export class Display {
     this.drawW = Math.round(WIDTH * this.scale);
     this.drawH = Math.round(HEIGHT * this.scale);
     this.ox = Math.floor((devW - this.drawW) / 2);
-    this.oy = Math.floor((devH - this.drawH) / 2);
+    // In tall portrait screens, sit near the top and leave the space below
+    // for thumbs; otherwise center.
+    const portrait = devH > devW * 1.3;
+    this.oy = Math.floor(((devH - this.drawH) / 2) * (portrait ? 0.4 : 1));
     this.dpr = dpr;
     this.ctx.imageSmoothingEnabled = false;
   }

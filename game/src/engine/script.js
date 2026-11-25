@@ -7,7 +7,7 @@
 
 import { DIR_VEC, dirBetween } from './entity.js';
 import { pathToDirs } from './world.js';
-import { playMusic, stopMusic, sfx } from './sound.js';
+import { playMusic, stopMusic, sfx, playCue, setWrongness } from './sound.js';
 import { loadSheet } from './art.js';
 import { TILE } from './tilemap.js';
 
@@ -25,8 +25,22 @@ export function makeApi(world) {
     return speaker.name || null;
   }
 
+  // Lines may end with an options object: { auto: seconds }.
   async function showLines(lines, opts) {
-    for (const text of lines.flat()) await tb.show({ text, position: 'auto', ...opts });
+    let extra = {};
+    const last = lines[lines.length - 1];
+    if (last && typeof last === 'object' && !Array.isArray(last)) {
+      extra = last;
+      lines = lines.slice(0, -1);
+    }
+    for (const text of lines.flat()) await tb.show({ text, position: 'auto', ...opts, ...extra });
+  }
+
+  const warnedItems = new Set();
+  function checkItem(id) {
+    if (world.content.items?.[id] || warnedItems.has(id)) return;
+    warnedItems.add(id);
+    console.warn(`[script] "${id}" isn't in content.items (a typo?)`);
   }
 
   function resolveEntity(id) {
@@ -37,9 +51,14 @@ export function makeApi(world) {
 
   // Shared by moveNpc and movePlayer.
   async function move(e, target, opts = {}) {
+    const speedBefore = e.stepTicks;
     if (opts.speed) e.stepTicks = opts.speed;
     if (Array.isArray(target) && typeof target[0] === 'number') {
-      const path = world.pathFor(e, [target], { ignoreEntities: false }) || world.pathFor(e, [target], { ignoreEntities: true }) || [];
+      let path = world.pathFor(e, [target], { ignoreEntities: false }) || world.pathFor(e, [target], { ignoreEntities: true });
+      if (!path) {
+        console.warn(`[script] ${e.id} can't reach (${target}) on ${world.state.map}; not moving`);
+        path = [];
+      }
       e.route = pathToDirs([e.x, e.y], path);
       e.routeGoal = target;
     } else {
@@ -52,6 +71,7 @@ export function makeApi(world) {
     await world.until(() => !e.moving && (!e.route || !e.route.length));
     e.route = null;
     e.routeGhost = false;
+    e.stepTicks = speedBefore;
     if (opts.face) face(e, opts.face);
   }
 
@@ -91,24 +111,29 @@ export function makeApi(world) {
       return tb.choose({
         options, prompt, position: 'auto',
         speaker: speakerName(opts.speaker), style: opts.style || (opts.speaker ? 'npc' : 'cheryl'),
-        cancelIndex: opts.cancel ?? options.length - 1,
+        cancelIndex: 'cancel' in opts ? opts.cancel : options.length - 1,
       });
     },
 
     // ---- Items ----
     async giveItem(id, { silent = false } = {}) {
+      checkItem(id);
       if (!world.state.inventory.includes(id)) world.state.inventory.push(id);
+      world.refreshEntities();
       if (silent) return;
       const def = world.content.items[id] || { name: id };
       sfx('item');
       await tb.show({ text: `Got ${def.name}.`, style: 'npc', position: 'auto' });
     },
     takeItem(id) {
+      checkItem(id);
       const i = world.state.inventory.indexOf(id);
       if (i >= 0) world.state.inventory.splice(i, 1);
+      world.refreshEntities();
       return i >= 0;
     },
     hasItem(id) {
+      checkItem(id);
       return world.state.inventory.includes(id);
     },
     get items() {
@@ -119,6 +144,13 @@ export function makeApi(world) {
     setFlag(name, value = true) {
       if (value === false || value == null) delete world.state.flags[name];
       else world.state.flags[name] = value;
+      // Entities, sprites, and tile patches follow the new state at once.
+      world.refreshEntities();
+    },
+    // Re-check entities' `when`s, sprite functions, and the map's patches now
+    // (setFlag, giveItem, and takeItem already do this).
+    refresh() {
+      world.refreshEntities();
     },
     flag(name) {
       return world.state.flags[name];
@@ -171,6 +203,22 @@ export function makeApi(world) {
     setSprite(id, sprite) {
       resolveEntity(id).setSprite(sprite);
     },
+    // Play a named animation on an entity instead of its idle/walk frames
+    // (e.g. 'sit_right'); null returns to normal.
+    pose(id, anim) {
+      resolveEntity(id).setPose(anim);
+    },
+    // How many times the player has looked at / talked to this entity before
+    // (0 the first time). Also passed to `interact` as its third argument.
+    looks(id) {
+      return world.looks(resolveEntity(id));
+    },
+    // Change a tile until the map reloads. For changes that should last, use
+    // the map's `patches`. `value` is a legend value (tile name or
+    // 'sheet:frame'), or null to clear.
+    setTile(layer, x, y, value) {
+      world.map.setTile(layer, x, y, value);
+    },
 
     // ---- Time and screen ----
     wait(seconds) {
@@ -202,6 +250,52 @@ export function makeApi(world) {
     clearEffects(seconds = 0.3) {
       return fx.clear(seconds);
     },
+    // Scene lighting: 'day', 'dusk', 'night', or a preset from
+    // content.lighting; null for none. Lasts until the next map load, which
+    // applies that map's own `lighting`.
+    setLighting(name, seconds = 0) {
+      return world.setLighting(name, seconds);
+    },
+    get lighting() {
+      return world.lighting;
+    },
+    // Show a full-screen 256×224 picture instead of the map: either
+    // { sheet, frame, palette } or a function (ctx, ms) that draws it (ms
+    // since it appeared). Text boxes still work over it. `fade` in seconds
+    // (0 = hard cut).
+    async showPicture(spec, { fade = 0.5 } = {}) {
+      if (fade) await fx.fade('out', fade / 2);
+      world.picture = { spec, ms: 0 };
+      if (fade) await fx.fade('in', fade / 2);
+    },
+    async hidePicture({ fade = 0.5 } = {}) {
+      if (fade) await fx.fade('out', fade / 2);
+      world.picture = null;
+      if (fade) await fx.fade('in', fade / 2);
+    },
+    // Centered text over a black screen for `seconds` (e.g. "Cheryl did not
+    // sleep well."). Draws above fades, so fade out first if you like.
+    async card(text, seconds = 2.5) {
+      world.game.card = { text };
+      await world.waitTicks(secs(seconds));
+      world.game.card = null;
+    },
+    // A small hint at the bottom of the screen for `seconds` (time spent in
+    // dialog or the bag doesn't count). Doesn't block the player or the
+    // script. { untilBag: true } keeps it up until the player opens the bag
+    // (use seconds = Infinity for no time limit).
+    hint(text, seconds = 6, { untilBag = false } = {}) {
+      world.hintState = { text, t: 0, ticks: seconds === Infinity ? Infinity : secs(seconds), untilBag };
+    },
+    // True when the player is using touch (choose hint wording with this).
+    get usingTouch() {
+      return world.game.input.usingTouch();
+    },
+    // Back to the title screen (the game is saved first).
+    async toTitle() {
+      world.save();
+      await world.game.backToTitle();
+    },
     // Glide the camera to center on tile x,y (pixels per tick `speed`), or
     // back to the player with followPlayer().
     async panCamera(x, y, speed = 2) {
@@ -230,8 +324,17 @@ export function makeApi(world) {
     playMusic(id) {
       playMusic(id);
     },
-    stopMusic() {
-      stopMusic();
+    stopMusic(fadeMs) {
+      stopMusic(fadeMs);
+    },
+    // A one-shot music cue over the current track (which dips and returns,
+    // unless { resume: false }).
+    playCue(id, opts) {
+      playCue(id, opts);
+    },
+    // How far the Wrongness has crept into the music, 0..1.
+    setWrongness(amount) {
+      setWrongness(amount);
     },
     sfx(id) {
       sfx(id);

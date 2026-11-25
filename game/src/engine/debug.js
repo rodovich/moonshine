@@ -1,6 +1,6 @@
 // Debug URL parameters (see README.md "Debug parameters").
 //
-//   ?map=test_house&x=4&y=6&facing=up   start a new game here, skipping the title
+//   ?map=test_shop&x=4&y=6&facing=up   start a new game here, skipping the title
 //   &flags=met_old_man,door_open,count=3  set flags (value defaults to true)
 //   &items=brass_key,letter              start with these items
 //   &run=intro                           run content.scripts.intro on start

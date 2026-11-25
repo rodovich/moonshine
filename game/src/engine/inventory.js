@@ -1,9 +1,10 @@
-// Inventory screen: a grid of item icons, the selected item's name and
-// description (in Cheryl's voice), and Use / Close buttons.
+// Inventory screen: two rows of item icons (scrolling when there are more),
+// the selected item's name and description (in Cheryl's voice), and Use /
+// Close buttons.
 //
-// Keyboard: arrows select, Z uses, X closes.
+// Keyboard: arrows select (and scroll), Z uses, X closes.
 // Pointer: tap an item to select it, tap it again or tap Use to use it, tap
-// Close or outside the panel to close.
+// the arrows to scroll, tap Close or outside the panel to close.
 
 import { WIDTH, HEIGHT } from './display.js';
 import { drawText, drawTextCentered, measure, wrap, LINE_HEIGHT } from './text.js';
@@ -17,10 +18,15 @@ const COLS = 8;
 const SLOT = 22;
 const GRID_X = PANEL.x + (PANEL.w - COLS * SLOT) / 2;
 const GRID_Y = PANEL.y + 22;
-const ROWS = 3;
+const ROWS = 2; // visible rows; more scroll
 const DESC = { x: 8, y: 150, w: WIDTH - 16, h: 66 };
-const USE_BTN = { x: PANEL.x + PANEL.w - 98, y: PANEL.y + PANEL.h + 4, w: 46, h: 17 };
-const CLOSE_BTN = { x: PANEL.x + PANEL.w - 48, y: PANEL.y + PANEL.h + 4, w: 48, h: 17 };
+const DESC_LINES = 4;
+const BTN_Y = PANEL.y + PANEL.h - 24;
+const CLOSE_BTN = { x: PANEL.x + PANEL.w - 10 - 48, y: BTN_Y, w: 48, h: 17 };
+const USE_BTN = { x: CLOSE_BTN.x - 4 - 44, y: BTN_Y, w: 44, h: 17 };
+const UP_BTN = { x: PANEL.x + 10, y: BTN_Y, w: 18, h: 17 };
+const DOWN_BTN = { x: PANEL.x + 30, y: BTN_Y, w: 18, h: 17 };
+const warnedLong = new Set();
 
 export class Inventory {
   constructor(items) {
@@ -39,7 +45,8 @@ export class Inventory {
     sfx('select');
     return new Promise((resolve) => {
       const index = Math.max(0, owned.indexOf(selectId));
-      this.openState = { owned: [...owned], index, resolve };
+      this.openState = { owned: [...owned], index, scroll: 0, resolve };
+      this.keepVisible();
     });
   }
 
@@ -49,8 +56,36 @@ export class Inventory {
     return loadSheet(def.icon.sheet, def.icon.palette).anim(def.icon.frame)[0];
   }
 
+  // Screen rect of slot i, or null if it's scrolled out of view.
   slotRect(i) {
-    return { x: GRID_X + (i % COLS) * SLOT, y: GRID_Y + Math.floor(i / COLS) * SLOT, w: SLOT, h: SLOT };
+    const row = Math.floor(i / COLS) - (this.openState?.scroll || 0);
+    if (row < 0 || row >= ROWS) return null;
+    return { x: GRID_X + (i % COLS) * SLOT, y: GRID_Y + row * SLOT, w: SLOT, h: SLOT };
+  }
+
+  rowCount() {
+    return Math.max(ROWS, Math.ceil(this.openState.owned.length / COLS));
+  }
+
+  keepVisible() {
+    const s = this.openState;
+    const row = Math.floor(s.index / COLS);
+    if (row < s.scroll) s.scroll = row;
+    if (row >= s.scroll + ROWS) s.scroll = row - ROWS + 1;
+  }
+
+  scrollBy(d) {
+    const s = this.openState;
+    const max = this.rowCount() - ROWS;
+    const next = Math.max(0, Math.min(max, s.scroll + d));
+    if (next === s.scroll) return;
+    s.scroll = next;
+    // Keep the selection on a visible row.
+    const row = Math.floor(s.index / COLS);
+    const col = s.index % COLS;
+    const want = Math.max(s.scroll, Math.min(s.scroll + ROWS - 1, row));
+    s.index = Math.min(s.owned.length - 1, want * COLS + col);
+    sfx('cursor');
   }
 
   update(input) {
@@ -65,15 +100,18 @@ export class Inventory {
       if (d === 'right') i = (i + 1) % n;
       if (d === 'up' && i - COLS >= 0) i -= COLS;
       if (d === 'down' && i + COLS < n) i += COLS;
-      if (i !== s.index) { s.index = i; sfx('cursor'); }
+      if (i !== s.index) { s.index = i; this.keepVisible(); sfx('cursor'); }
     }
     if (input.pressed('confirm') && n) return this.close({ use: s.owned[s.index] });
     if (input.pressed('cancel')) return this.close(null);
     for (const t of input.taps()) {
       if (inRect(t, CLOSE_BTN)) return this.close(null);
       if (n && inRect(t, USE_BTN)) return this.close({ use: s.owned[s.index] });
+      if (this.rowCount() > ROWS && inRect(t, UP_BTN)) return this.scrollBy(-1);
+      if (this.rowCount() > ROWS && inRect(t, DOWN_BTN)) return this.scrollBy(1);
       for (let i = 0; i < n; i++) {
-        if (inRect(t, this.slotRect(i))) {
+        const r = this.slotRect(i);
+        if (r && inRect(t, r)) {
           if (i === s.index) return this.close({ use: s.owned[i] });
           s.index = i;
           sfx('cursor');
@@ -99,20 +137,27 @@ export class Inventory {
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
     drawBox(ctx, PANEL.x, PANEL.y, PANEL.w, PANEL.h, STYLES.npc);
     drawTextCentered(ctx, 'Belongings', PANEL.x + PANEL.w / 2, PANEL.y + 7, { color: 'ui_label' });
-    // Slots
-    for (let i = 0; i < COLS * ROWS; i++) {
+    // Slots: occupied ones darker than empty ones, so a short list doesn't
+    // read as a big empty grid.
+    for (let k = 0; k < COLS * ROWS; k++) {
+      const i = s.scroll * COLS + k;
       const r = this.slotRect(i);
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+      ctx.fillStyle = i < s.owned.length ? 'rgba(16, 16, 32, 0.45)' : 'rgba(16, 16, 32, 0.15)';
       ctx.fillRect(r.x + 2, r.y + 2, r.w - 4, r.h - 4);
     }
     s.owned.forEach((id, i) => {
       const r = this.slotRect(i);
+      if (!r) return;
       const img = this.icon(id);
       if (img) ctx.drawImage(img, r.x + 3, r.y + 3);
       else drawTextCentered(ctx, '?', r.x + r.w / 2, r.y + 7);
       if (i === s.index) this.drawSelection(ctx, r);
     });
-    // Buttons
+    // Buttons, inside the panel's bottom edge
+    if (this.rowCount() > ROWS) {
+      this.drawButton(ctx, UP_BTN, '<', s.scroll > 0);
+      this.drawButton(ctx, DOWN_BTN, '>', s.scroll < this.rowCount() - ROWS);
+    }
     this.drawButton(ctx, USE_BTN, 'Use', s.owned.length > 0);
     this.drawButton(ctx, CLOSE_BTN, 'Close', true);
     // Description
@@ -123,7 +168,12 @@ export class Inventory {
     }
     const def = this.items[s.owned[s.index]] || { name: s.owned[s.index], description: '' };
     drawText(ctx, def.name || s.owned[s.index], DESC.x + 8, DESC.y + 7, { color: 'ui_label' });
-    const lines = wrap(def.description || '', DESC.w - 16).slice(0, 4);
+    const all = wrap(def.description || '', DESC.w - 16);
+    if (all.length > DESC_LINES && !warnedLong.has(s.owned[s.index])) {
+      warnedLong.add(s.owned[s.index]);
+      console.warn(`[inventory] description of "${s.owned[s.index]}" is ${all.length} lines; only ${DESC_LINES} fit`);
+    }
+    const lines = all.slice(0, DESC_LINES);
     lines.forEach((line, i) => drawText(ctx, line, DESC.x + 8, DESC.y + 7 + (i + 1) * LINE_HEIGHT, { color: STYLES.cheryl.text }));
   }
 

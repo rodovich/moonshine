@@ -43,6 +43,7 @@ export class Input {
   }
 
   first() {
+    this.anyInput = true;
     if (this.onFirstInput) {
       const f = this.onFirstInput;
       this.onFirstInput = null;
@@ -78,8 +79,16 @@ export class Input {
     this.pointer.down = false;
   }
 
+  // True if the last input was a touch (as opposed to a mouse or keys).
+  usingTouch() {
+    // Before any input, guess from the device.
+    if (!this.anyInput) return !!window.matchMedia?.('(pointer: coarse)').matches;
+    return this.lastScheme === 'pointer' && this.lastPointerType === 'touch';
+  }
+
   pdown(e) {
     e.preventDefault();
+    this.lastPointerType = e.pointerType;
     this.first();
     this.lastScheme = 'pointer';
     if (this.pointer.down && e.pointerId !== this.pointer.id) return; // ignore extra fingers

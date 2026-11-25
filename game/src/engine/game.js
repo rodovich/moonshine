@@ -3,14 +3,15 @@
 // parameters say so), and runs a fixed 60 Hz update with rendering on every
 // animation frame.
 
-import { Display } from './display.js';
+import { Display, WIDTH, HEIGHT } from './display.js';
+import { wrap, drawTextCentered, LINE_HEIGHT } from './text.js';
 import { Input } from './input.js';
 import { Effects } from './effects.js';
 import { TextBox } from './textbox.js';
 import { Inventory } from './inventory.js';
 import { World } from './world.js';
 import { Title } from './title.js';
-import { newState, hasSave, loadSave, clearSave } from './save.js';
+import { newState, hasSave, loadSave, clearSave, validateState } from './save.js';
 import { readDebugParams } from './debug.js';
 import { unlockAudio } from './sound.js';
 
@@ -44,7 +45,7 @@ export class Game {
     this.scene = null;
 
     if (this.debug.start) {
-      this.startWorld(this.debug.state, { runNewGame: false });
+      this.startWorld(validateState(this.debug.state, content), { runNewGame: false });
       if (this.debug.run) {
         const script = content.scripts?.[this.debug.run];
         if (script) this.world.run(script);
@@ -64,18 +65,29 @@ export class Game {
   async startFromTitle(choice) {
     await this.effects.fade('out', 0.4);
     this.input.flush();
-    if (choice === 'continue') {
-      const s = loadSave();
-      if (s) {
-        this.startWorld(s, { runNewGame: false });
-      } else {
-        this.startWorld(newState(this.content.start), { runNewGame: true });
-      }
-    } else {
-      clearSave();
+    const saved = choice === 'continue' ? loadSave() : null;
+    try {
+      if (saved) this.startWorld(validateState(saved, this.content), { runNewGame: false });
+      else throw null;
+    } catch (err) {
+      // No save, or a save this build can't load: start fresh.
+      if (err) console.error('[save] could not load the saved game; starting a new one', err);
+      if (choice !== 'continue') clearSave();
       this.startWorld(newState(this.content.start), { runNewGame: true });
     }
     await this.effects.fade('in', 0.4);
+  }
+
+  // Leave the world for the title screen (used by the end-of-slice card).
+  async backToTitle() {
+    if (this.effects.fadeAlpha < 1) await this.effects.fade('out', 0.6);
+    this.input.flush();
+    this.card = null;
+    this.world = null;
+    this.scene = new Title(this, { canContinue: hasSave() && !!loadSave() });
+    this.effects.setLight([], 0);
+    await this.effects.clear(0);
+    await this.effects.fade('in', 0.6);
   }
 
   startWorld(state, { runNewGame }) {
@@ -86,6 +98,8 @@ export class Game {
   }
 
   frame(now) {
+    // Ask for the next frame first, so an error below can't stop the loop.
+    requestAnimationFrame(this.frame);
     let dt = now - this.last;
     this.last = now;
     if (dt > 250) dt = STEP; // tab was hidden; don't fast-forward
@@ -95,13 +109,12 @@ export class Game {
     this.acc += dt;
     let n = 0;
     while (this.acc >= STEP - 0.01 && n < 8) {
-      this.update();
+      guard('update', () => this.update());
       this.acc -= STEP;
       n++;
     }
     if (n === 8) this.acc = 0;
-    this.render();
-    requestAnimationFrame(this.frame);
+    guard('render', () => this.render());
   }
 
   update() {
@@ -131,6 +144,11 @@ export class Game {
       inventoryOpen: w.inventory.open,
       holding: w.control.holding,
       flags: { ...w.state.flags },
+      looks: { ...(w.state.looks || {}) },
+      lighting: w.lighting,
+      picture: !!w.picture,
+      card: this.card ? this.card.text : null,
+      hint: w.hintState ? w.hintState.text : null,
       items: [...w.state.inventory],
       entities: w.entities.filter((e) => !e.isPlayer).map((e) => ({ id: e.id, x: e.x, y: e.y, facing: e.facing })),
     };
@@ -146,8 +164,26 @@ export class Game {
     const ctx = this.display.bctx;
     this.scene.draw(ctx);
     this.effects.applyFade(ctx);
+    if (this.card) drawCard(ctx, this.card.text);
     this.display.present(this.effects.waveParams());
   }
+}
+
+function guard(what, fn) {
+  try {
+    fn();
+  } catch (err) {
+    console.error(`[game] ${what}`, err);
+  }
+}
+
+// A centered text card on black.
+function drawCard(ctx, text) {
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(0, 0, WIDTH, HEIGHT);
+  const lines = wrap(text, WIDTH - 48);
+  const top = Math.round(HEIGHT / 2 - (lines.length * LINE_HEIGHT) / 2);
+  lines.forEach((line, i) => drawTextCentered(ctx, line, WIDTH / 2, top + i * LINE_HEIGHT, { color: 'ui_text' }));
 }
 
 export function startGame(content, parent = document.body) {

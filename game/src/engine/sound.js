@@ -36,9 +36,9 @@ export function stopMusic(fadeMs) {
   try { audio.stopMusic(fadeMs); } catch (err) { warnOnce('stop', '', err); }
 }
 
-export function playCue(id) {
+export function playCue(id, opts) {
   if (!audio.MUSIC_IDS.includes(id)) return warnOnce('cue', id, 'unknown id');
-  try { audio.playCue(id); } catch (err) { warnOnce('cue', id, err); }
+  try { audio.playCue(id, opts); } catch (err) { warnOnce('cue', id, err); }
 }
 
 export function sfx(id) {
