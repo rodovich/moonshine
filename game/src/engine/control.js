@@ -121,8 +121,24 @@ export class Control {
     if (this.world.canEnter(p, p.x + dx, p.y + dy)) {
       p.startStep(dir);
       this.footstep();
+      this.pushing = null;
     } else {
       p.facing = dir;
+      // Pushing on into a character (three presses, or holding half a second)
+      // asks him to step aside; one bump just turns Cheryl to face him.
+      const w = this.world;
+      const blocker = w.entities.find((o) => o !== p && o.directional && o.visible && o.occupies(p.x + dx, p.y + dy));
+      if (blocker) {
+        const push = this.pushing && this.pushing.e === blocker && this.pushing.dir === dir ? this.pushing : { e: blocker, dir, n: 0, t: 0 };
+        push.n += held ? 0 : 1;
+        push.t += held ? 1 : 0;
+        this.pushing = push;
+        if (push.n >= 3 || push.t >= 30) {
+          const avoid = new Set([`${p.x},${p.y}`]);
+          for (let k = 1; k <= 3; k++) avoid.add(`${p.x + dx * k},${p.y + dy * k}`);
+          if (w.yieldTo(blocker, avoid)) this.pushing = null;
+        }
+      } else this.pushing = null;
       if (held && this.bump === 0) {
         sfx('bump');
         this.bump = 20;
@@ -156,8 +172,18 @@ export class Control {
       this.footstep();
       return;
     }
-    // Someone is in the way: wait a moment, then route around them.
+    // Someone is in the way: wait a moment, then route around them. A
+    // character in the way is asked to step aside (or a patroller turns back).
     this.waitT++;
+    // (Before the re-route at 8 ticks, which restarts this count.)
+    if (this.waitT === 6) {
+      const w = this.world;
+      const blocker = w.entities.find((o) => o !== p && o.directional && o.visible && o.occupies(nx, ny));
+      if (blocker && !(this.pending && this.pending.entity === blocker)) {
+        const avoid = new Set([`${p.x},${p.y}`, ...this.path.map(([x, y]) => `${x},${y}`)]);
+        w.yieldTo(blocker, avoid);
+      }
+    }
     if (this.waitT === 8 || this.waitT % 30 === 0) this.repath();
     if (this.waitT > 150) this.cancelMove();
   }
