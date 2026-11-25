@@ -27,6 +27,22 @@ export const RHYME = `
 
 export const RHYME_HARMONY = 'F | F C7 | Dm Bb | C | F C7 | Db | Eb | C7 F |';
 
+// The music box's broken-chord comb and its low notes, under the rhyme. Every bar states its
+// note lengths, so bars can be reused one at a time (the bath and the ending do).
+export const COMB = `
+  F4:4 A4 C5 A4 |
+  F4:4 A4 E4 Bb4 |
+  D4:4 A4 Bb3 F4 |
+  E4:4 G4 C5 G4 |
+  F4:4 A4 E4 Bb4 |
+  Db4:4 F4 Ab4 F4 |
+  Eb4:4 G4 Bb4 G4 |
+  E4:4 Bb4 F4 A4 |`;
+export const BOX_BASS = 'F3:16 | F3:8 C3:8 | D3:8 Bb2:8 | C3:16 | F3:8 C3:8 | Db3:16 | Eb3:16 | C3:8 F3:8 |';
+
+/** The bars of a part as an array (each bar's text, without its bar line). */
+export const bars = (part) => part.split('|').map((b) => b.trim()).filter(Boolean);
+
 export default {
   id: 'moonrise',
   title: 'Moonrise',
@@ -42,16 +58,8 @@ export default {
     R: {
       harmony: RHYME_HARMONY,
       lead: RHYME,
-      comb: `
-        F4:4 A4 C5 A4 |
-        F4 A4 E4 Bb4 |
-        D4 A4 Bb3 F4 |
-        E4 G4 C5 G4 |
-        F4 A4 E4 Bb4 |
-        Db4 F4 Ab4 F4 |
-        Eb4 G4 Bb4 G4 |
-        E4 Bb4 F4 A4 |`,
-      bass: 'F3:16 | F3:8 C3 | D3 Bb2 | C3:16 | F3:8 C3 | Db3:16 | Eb3 | C3:8 F3 |',
+      comb: COMB,
+      bass: BOX_BASS,
     },
   },
   intro: [],

@@ -8,11 +8,14 @@ import { cherylDeclines } from './opening/common.js';
 import { act2Maps, act2Items, act2Scripts, act2 } from './act2/index.js';
 import { act3Maps, act3Items, act3Scripts, withAct3, act3 } from './act3/index.js';
 import { act4Maps, act4Items, act4Scripts, shipPlanAct4, seaCave, withAct4, startAct4 } from './act4/index.js';
+import { act6Maps, act6Items, act6Scripts, act6Lighting, addAct6 } from './act6/index.js';
 import { cheryl } from '../art/cheryl.js';
 
 // Each act layers its states onto earlier acts' maps, in order: Act 3 (the crypt,
 // the Archive, the Crown at dusk), then Act 4 (its states of the town).
-const maps = withAct4(withAct3({ ...openingMaps, ...act2Maps, ...act3Maps, ...act4Maps, ...testMaps }));
+const maps = withAct4(withAct3({ ...openingMaps, ...act2Maps, ...act3Maps, ...act4Maps, ...act6Maps, ...testMaps }));
+// Act 6 adds its night, dawn, and epilogue states to the other acts' maps (last, so it sees them all).
+addAct6(maps);
 // The Squeeze leads on to Lamp Street once Act 2 registers it; until then it ends the slice.
 opening.squeezeTo = maps.lamp_street ? 'lamp_street' : null;
 // The ladder under the hundredth step leads into Act 3 once it registers the Step Gallery; until then Act 2 ends on a card.
@@ -22,7 +25,7 @@ act3.next = startAct4;
 // The sea cave's mouth opens onto the Goat Path once Act 2 part 2 registers it.
 seaCave.goatPath = maps.goat_path ? 'goat_path' : null;
 
-const items = { ...openingItems, ...act2Items, ...act3Items, ...act4Items, ...testItemDefs };
+const items = { ...openingItems, ...act2Items, ...act3Items, ...act4Items, ...act6Items, ...testItemDefs };
 // The Ship Plan (Act 3's) gains its Act 4 looks.
 items.ship_plan = shipPlanAct4(items.ship_plan);
 
@@ -41,7 +44,10 @@ export default {
   items,
 
   // Named scripts, runnable with ?run=<name> for testing.
-  scripts: { ...openingScripts, ...act2Scripts, ...act3Scripts, ...act4Scripts, ...testScripts },
+  scripts: { ...openingScripts, ...act2Scripts, ...act3Scripts, ...act4Scripts, ...act6Scripts, ...testScripts },
+
+  // Lighting presets beyond the art task's day, dusk, and night.
+  lighting: { ...act6Lighting },
 
   // Runs once when a new game starts.
   onNewGame: openingIntro,
