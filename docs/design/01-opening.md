@@ -157,7 +157,7 @@ Every examinable object also keeps a look counter, so that its first look, secon
 - The chessboard's pieces have slid to the lemon-tree end.
 - The well breathes: a faint mist rises every few seconds, with a cold whoosh.
 - The Kid jogs in place at (15,22), by the Squeeze. The Old Man is at chess. The Neighbor stands on her roof at (14,3), facing her grey sheets.
-- The moon chart and the hat can now be taken.
+- The moon chart can now be taken. (The hat stays in the wardrobe: see the structure pass.)
 
 ## Opening
 
@@ -325,8 +325,8 @@ Lines are Cheryl's descriptions unless labeled otherwise. Each line is one text 
 
 **Wardrobe** (10, 5–6)
 - Dusk: First: "My good cardigan, my other good cardigan, and my hat." Then: "The hat's for daytime. It isn't daytime."
-- After the hat is taken: "My good cardigan, and my other good cardigan. The hat is out seeing the world."
-- Morning: "My hat. It's daytime, and I'm going out." → take **hat** (used in Act 2; harmless in this slice).
+- Morning: "My good cardigan, my other good cardigan, and my hat. I'll want both cardigans by tonight." The hat isn't takeable. (Structure pass, [structure-pass.md](structure-pass.md): the Tourist's hat now comes from the Shop window, so Cheryl's own hat stays home.)
+- Old saves that hold `hat` without `tourist.hasHat` return it to the wardrobe on load (see the structure pass).
 
 **Washstand** (1, 6)
 - With soap: "Lavender and pumice soap. The pumice is for my heels. The lavender is for my soul." → take **soap**.
@@ -447,7 +447,6 @@ About ten. Runs laps of the well (see the map notes) at a steady jog, hopping th
 - Bath plug: SWEATY KID: That's a plug. …Why are you showing me a plug?
 - Clothes prop (after the trade): SWEATY KID: Keep it! Hurdles are for babies.
 - Moon chart (morning): SWEATY KID: Is that a race map? …It's just ticks. Boring ticks.
-- Hat (morning): SWEATY KID: No hats! Hats are drag!
 - Anything else: SWEATY KID: Can't carry it! Aerodynamics!
 
 **Morning** (jogging in place at 15,22 by the Squeeze)
@@ -465,7 +464,6 @@ About ten. Runs laps of the well (see the map notes) at a steady jog, hopping th
 | Bath plug | Brass plug with a little chain and ring | "My plug. Brass, with a little chain to pull it out by." |
 | Soap | Lilac bar | "Lavender and pumice. For heels and soul, respectively." |
 | Moon chart *(morning)* | Rolled paper with a crescent | "Thirty-one ticks in the Gate, and one outside it." |
-| Hat *(morning)* | Wide-brimmed straw hat | "My daytime hat. Wide brim. It has seen things." |
 
 ### Wrong combinations
 
@@ -513,7 +511,7 @@ Each NPC has its own "Anything else" decline (listed with their dialog), so givi
 
 Walking into the Squeeze exit in the morning ends the slice for now: fade to black, then a card reading **MOONSHINE** over **End of the opening. Tessel continues soon.**, then back to the title screen. When Act 2 is built, this exit leads to Lamp Street instead.
 
-Nothing in the morning is required before leaving. If the player leaves without the moon chart or the hat, Act 2 lets them come back for both.
+Nothing in the morning is required before leaving. If the player leaves without the moon chart, Act 2 lets them come back for it.
 
 ## Art needed
 
