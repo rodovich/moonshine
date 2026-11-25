@@ -497,7 +497,7 @@ The run is fully scripted and always succeeds.
 **Engine calls** (engine/core, 3fd9f41): `g.cameraFollow('kid')` on the Harbor while Cheryl stands at the lighthouse door; `await g.changeMap('bilge_dry', x, y, facing, { cutscene: true })` to follow him without her (her map, spot, and facing are kept; nothing is saved); `await g.restorePlayer()` to come back to her at the lighthouse door.
 
 **The Kid afterward** (on the mud by the door, then back at the Harbor):
-- SWEATY KID: Fifty-two seconds, Miss! And I jumped! Off the QUAY! Don't tell Mum.
+- SWEATY KID: Fifteen seconds, Miss! And I jumped! Off the QUAY! Don't tell Mum.
 - Repeat: SWEATY KID: The Stair Race is going to be EASY after that.
 
 ## The end of Act 5
@@ -578,6 +578,8 @@ The Act 5 builder (b_30JU3Nrc) built this act on `content/act5`; its full list i
 
 - **The disc after the relay:** the Kid keeps it on the mud by the open door and hands it back when Cheryl talks to him there, or throws it up to her ("CATCH!") if she talks to him from the broken edge before she has the rope. It doesn't sit in the eye.
 - **The Fishmonger's door is a look** ("The Fishmonger's door, down to her cellar. Ice. Fish. A hatch I'm not opening."), not a way back in.
+- **The Teeth on screen:** the first time Cheryl is on the Harbor at each stage (arriving, or back at the lighthouse door after the relay), the camera pans to the reef, holds two seconds while the surf swells, shows her stage line in a box at the top of the screen, and returns to her.
+- **The relay's length:** the `relay` cue was cut to 15.8 seconds to fit the run, so the Kid's time is "Fifteen seconds."
 - **The Kid's route:** west along the Harbor quay (MOTT: Mind the edge, boy!), into the Bilge on the south quay, over the bridge, east along the north quay, off the quay onto the mud by the Movers (OTHER MOVER: Hnn!), hurdling a beached boat and the Boatman's (BOATMAN: Go on, lad!).
 - **Placements:** the Clockmaker at (2, 4), back to us at his bench; the Counting Woman at (12, 17); the banner over x16–21. The open hundredth step is a hole Cheryl walks round ("The hundredth step, open, and the ladder down. Not today. My business is at the bottom of the canal.").
 - **The act opens** with the card "That afternoon." and: "The wind's getting up. Every line of washing on the quay is pointing out to sea." / "A door at the bottom of the canal, and stairs that don't reach it. Well. One thing at a time."
