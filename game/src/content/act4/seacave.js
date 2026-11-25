@@ -50,7 +50,7 @@ export const seaCaveMap = composedMap(compose, {
   spawn: [4, 6],
   exits: [{
     x: 4, y: 7, w: 2,
-    run: (g) => (seaCave.goatPath ? g.changeMap(seaCave.goatPath, 1, 21, 'right') : g.describe('The Goat Path, outside. (Not built yet.)')),
+    run: (g) => (seaCave.goatPath ? g.changeMap(seaCave.goatPath, 2, 37, 'right') : g.describe('The Goat Path, outside. (Not built yet.)')),
   }],
   entities: [
     {
