@@ -419,6 +419,45 @@ export class World {
     return spots;
   }
 
+  // Fallback spots diagonal to `e`, for things whose sides can't be reached:
+  // Cheryl faces up or down, and Z reaches what's diagonally ahead of her
+  // when nothing is straight ahead (see Control.interactFront).
+  diagonalSpots(e) {
+    const spots = [];
+    const seen = new Set();
+    for (let fy = e.y; fy < e.y + e.h; fy++) {
+      for (let fx = e.x; fx < e.x + e.w; fx++) {
+        for (const [dx, dy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+          const sx = fx + dx;
+          const sy = fy + dy;
+          const k = `${sx},${sy}`;
+          if (seen.has(k) || e.occupies(sx, sy) || !this.map.inBounds(sx, sy) || this.map.solid(sx, sy) || this.isExit(sx, sy)) continue;
+          seen.add(k);
+          spots.push({ x: sx, y: sy, facing: dy > 0 ? 'up' : 'down', diagonal: true });
+        }
+      }
+    }
+    return spots;
+  }
+
+  // What Z reaches from tile (x, y) facing `facing`: the thing straight
+  // ahead (across a counter if need be), else a character on her own tile,
+  // else something diagonally ahead. Shared by the game and the keyboard
+  // reachability check (tests/check-keyboard).
+  zTarget(x, y, facing, self = this.player) {
+    const [dx, dy] = DIR_VEC[facing];
+    let e = this.interactableAt(x + dx, y + dy);
+    if (!e && this.map.counter(x + dx, y + dy)) e = this.interactableAt(x + 2 * dx, y + 2 * dy);
+    const here = this.pickEntity(this.entities.filter((o) => o !== self && !o.isPlayer && o.visible && o.directional && isInteractable(o) && o.x === x && o.y === y));
+    if (here && (!e || !e.directional)) e = here;
+    if (!e) {
+      // Nothing ahead: something diagonally ahead (left or right of the tile in front).
+      const [px, py] = [dy, dx]; // perpendicular
+      e = this.pickEntity([this.interactableAt(x + dx + px, y + dy + py), this.interactableAt(x + dx - px, y + dy - py)].filter(Boolean));
+    }
+    return e;
+  }
+
   // ---- Scripts ---------------------------------------------------------
 
   // Run an async content script `fn(api, ...args)`. Scripts run one at a time;
@@ -1138,6 +1177,12 @@ function nearestTileOf(e, x, y) {
 // list of directions; e.routeGoal (optional) lets us re-path around obstacles.
 export function followRoute(world, e) {
   const dir = e.route[0];
+  if (!DIR_VEC[dir]) {
+    // Never let a bad step hang a scene: skip it.
+    console.warn(`[world] ${e.id}: skipping a route step that isn't a direction:`, dir);
+    e.route.shift();
+    return;
+  }
   const [dx, dy] = DIR_VEC[dir];
   const nx = e.x + dx;
   const ny = e.y + dy;
@@ -1189,6 +1234,13 @@ export function followRoute(world, e) {
   // A scripted move must finish: after two seconds, walk through another
   // character (never Cheryl, never a wall).
   if (e.routeBlocked > 120 && !world.map.solid(nx, ny)) e.routeForce = true;
+  // Into a wall (a step a script asked for that can never happen): skip it
+  // after two seconds rather than hang the scene.
+  if (e.routeBlocked > 120 && world.map.solid(nx, ny)) {
+    console.warn(`[world] ${e.id}: a scripted step ${dir} from (${e.x},${e.y}) runs into a wall; skipping it`);
+    e.route.shift();
+    e.routeBlocked = 0;
+  }
 }
 
 // Does `p` overlap mover `e`'s footprint if `e` stood at (x, y)?
