@@ -106,7 +106,7 @@ export class Input {
     if (this.pointer.down && e.pointerId !== this.pointer.id) return; // ignore extra fingers
     const p = this.display.toGame(e.clientX, e.clientY);
     this.pointer = { down: true, x: p.x, y: p.y, id: e.pointerId };
-    this.pointerQueue.push({ type: 'down', x: p.x, y: p.y });
+    this.pointerQueue.push({ type: 'down', x: p.x, y: p.y, cx: e.clientX, cy: e.clientY });
     try { this.display.canvas.setPointerCapture(e.pointerId); } catch { /* ignore */ }
   }
 

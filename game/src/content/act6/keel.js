@@ -140,11 +140,21 @@ const triggers = [
   // The grooves down the middle: a line the first time she walks in them, well along
   // (a hotspot on the walkway would catch clicks meant for walking).
   {
-    x: 10, y: 4, w: 20, h: 1, stop: false,
+    x: 24, y: 4, w: 6, h: 1, stop: false,
     when: (g) => !!g.flag('n.keelArrived') && !g.flag('n.keelGrooves'),
     run: async (g) => {
       g.setFlag('n.keelGrooves', 1);
       await g.describe('Two grooves worn in the floor, down the middle. Footsteps. Three hundred years of Keepers, walking this way.');
+    },
+  },
+  // Halfway: a grate in the floor, and the Middle Sister still thumping somewhere below.
+  {
+    x: 15, y: 3, w: 1, h: 3, stop: false,
+    when: (g) => !g.flag('n.keelGrate') && !g.flag('sisters.asleep'),
+    run: async (g) => {
+      g.setFlag('n.keelGrate', 1);
+      g.sfx('thump_middle', { volume: 0.5 });
+      await g.describe('A grate in the floor. Far below, a slow thump, and another. The Middle Sister, still at it.');
     },
   },
   { x: 5, y: 3, w: 1, h: 3, stop: false, when: (g) => !g.flag('keel.doorOpen'), run: keelDoor },

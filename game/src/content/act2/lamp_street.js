@@ -76,7 +76,8 @@ function compose(g) {
 
   // ---- Props ----
   L.lamp(5, 9); L.lamp(16, 9); L.lamp(25, 9);
-  L.bench(20, 11); // the Man on Bench sits on it from (20, 12)
+  L.bench(20, 11);
+  L.block(20, 11, false); // the Man on Bench sits on its west end (he's solid himself)
   L.pot(24, 5); L.pot(26, 5); L.pot(2, 5, 'pot_bay');
   return L.done();
 }
@@ -162,7 +163,7 @@ const rope = {
 };
 
 const wateringWoman = {
-  id: 'watering_woman', name: 'Woman with Watering Can', x: 24, y: 6, facing: 'down',
+  id: 'watering_woman', name: 'Woman with Watering Can', x: 27, y: 5, facing: 'down',
   sprite: LOOKS.watering_woman,
   turnToTalk: false,
   interact: async (g, self) => {
@@ -178,7 +179,7 @@ const wateringWoman = {
 };
 
 const benchMan = {
-  id: 'bench_man', name: 'Man on Bench', x: 20, y: 12, facing: 'down',
+  id: 'bench_man', name: 'Man on Bench', x: 20, y: 11, facing: 'down',
   sprite: LOOKS.bench_man,
   turnToTalk: false,
   interact: async (g, self) => {

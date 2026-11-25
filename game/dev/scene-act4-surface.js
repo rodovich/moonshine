@@ -9,6 +9,10 @@ export function SCENE(state) {
     case 'dry': return dry(false);
     case 'dry_lit': return dry(true);
     case 'cellar': return cellar();
+    case 'belfry_old': return belfry([4, 3]);
+    case 'belfry_ring': return belfry([4, 6]);
+    case 'belfry_hatch': return belfry([4, 6], 'shut');
+    case 'belfry_hatch_open': return belfry([4, 6], 'open');
     default: return belfry();
   }
 }
@@ -159,7 +163,7 @@ function dry(lit) {
 // ------------------------------------------------------------------------------------
 // Belfry (10 x 10), inside the Bell Tower.
 // ------------------------------------------------------------------------------------
-function belfry() {
+function belfry(amb, hatch) {
   const L = grid(10, 10, (x, y) => `belfry:floor_${'abc'[hash(x, y) % 3]}`);
   for (let x = 0; x < 10; x++) {
     L.set('ground', x, 0, 'belfry:wall_upper');
@@ -174,9 +178,13 @@ function belfry() {
   // the Clockmaker's drive (6-7, 3-4), ticking
   for (let dy = 0; dy < 2; dy++) for (let dx = 0; dx < 2; dx++) L.set('objects', 6 + dx, 3 + dy, `belfry_props:drive_x${dx}y${dy}`);
   L.set('objects', 8, 4, 'belfry_props:lever_up');
+  // ?state=belfry_hatch / belfry_hatch_open: the Keepers' hatch at (5, 6) beside the rope (Act 5)
+  if (hatch) L.set('ground', 5, 6, `keepers_hatch:${hatch}`);
   L.set('objects', 1, 6, 'belfry_props:bench_l'); L.set('objects', 2, 6, 'belfry_props:bench_r');
   const sprites = [{ sheet: 'belfry_rope', frame: 'rope_still', x: 4 * 16 + 8, y: 6 * 16 }];
-  return done(L, 'Belfry', sprites, { hero: [5 * 16 + 8, 8 * 16, 'up'], scale: 3 });
+  // ?state=belfry_ring: Ambrose ringing, standing on (4, 6) south of the rope hole, facing up, hands on the rope
+  if (amb) sprites.push({ sheet: 'ambrose', frame: 'ring_up_0', x: amb[0] * 16 + 8, y: (amb[1] + 1) * 16 });
+  return done(L, 'Belfry', sprites, { hero: hatch ? [7 * 16 + 8, 8 * 16, 'left'] : [5 * 16 + 8, 8 * 16, 'up'], scale: 3 });
 }
 
 // ------------------------------------------------------------------------------------

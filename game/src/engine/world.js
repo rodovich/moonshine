@@ -282,6 +282,20 @@ export class World {
     return true;
   }
 
+  // Like canEnter for route planning: moving non-solid characters don't count.
+  canPlan(mover, x, y) {
+    for (let dy = 0; dy < mover.h; dy++) {
+      for (let dx = 0; dx < mover.w; dx++) {
+        const tx = x + dx;
+        const ty = y + dy;
+        if (this.map.solid(tx, ty) || this.entityAt(tx, ty, mover)) return false;
+        const still = this.entities.some((o) => o !== mover && o.directional && o.visible && !isMover(o) && o.occupies(tx, ty));
+        if (still) return false;
+      }
+    }
+    return true;
+  }
+
   // Path for an entity to any of `goals`, avoiding solid tiles and entities.
   // If none is reachable and `closest` is set, path to the nearest reachable
   // tile. The player's paths never cross an exit unless it's the goal, so a
@@ -290,8 +304,12 @@ export class World {
     const goalKeys = new Set(goals.map(([x, y]) => `${x},${y}`));
     const avoidExits = mover.isPlayer;
     const exits = avoidExits ? this.activeExits() : null;
+    // Cheryl's routes plan through moving characters that don't block
+    // (solid: false patrollers and wanderers): they'll move on, and if one is
+    // in her way when she gets there she waits and he turns back.
+    const plan = mover.isPlayer && !ignoreEntities;
     const blocked = (x, y) => {
-      if (ignoreEntities ? this.map.solid(x, y) : !this.canEnter(mover, x, y)) return true;
+      if (plan ? !this.canPlan(mover, x, y) : ignoreEntities ? this.map.solid(x, y) : !this.canEnter(mover, x, y)) return true;
       return avoidExits && !goalKeys.has(`${x},${y}`) && this.isExit(x, y, exits);
     };
     const start = [mover.x, mover.y];
@@ -597,8 +615,9 @@ export class World {
     const route = b.route;
     e.patrolIdx = e.patrolIdx ?? 0;
     let [tx, ty] = route[e.patrolIdx % route.length];
+    const step = e.patrolReverse ? route.length - 1 : 1;
     if (e.x === tx && e.y === ty) {
-      e.patrolIdx = (e.patrolIdx + 1) % route.length;
+      e.patrolIdx = (e.patrolIdx + step) % route.length;
       e.patrolWait = Math.round((b.pause || 0) * 60);
       // A plain callback, not a script: it mustn't take control from the player.
       if (b.onWaypoint) b.onWaypoint(this.api, e, e.patrolIdx);
@@ -621,7 +640,20 @@ export class World {
     } else {
       e.facing = dir;
       if (b.blockedPose && e.pose !== b.blockedPose) e.setPose(b.blockedPose);
+      // Cheryl in the way (a narrow flight): after a moment he turns round and
+      // runs his lap the other way, so neither waits on the other for ever.
+      const [nx, ny] = [e.x + dx, e.y + dy];
+      if (p.occupies(nx, ny) || (this.control.path && this.control.path.some(([px, py]) => px === nx && py === ny))) {
+        e.patrolBlockedT = (e.patrolBlockedT || 0) + 1;
+        if (e.patrolBlockedT > 30) {
+          e.patrolBlockedT = 0;
+          e.patrolReverse = !e.patrolReverse;
+          e.patrolIdx = (e.patrolIdx + (e.patrolReverse ? route.length - 1 : 1)) % route.length;
+        }
+      }
+      return;
     }
+    e.patrolBlockedT = 0;
   }
 
   // Exits that count for pathing: open ones (no `when`, or `when` holds) and
@@ -691,7 +723,8 @@ export class World {
     if (!this.picture) this.ambient.drawBark(ctx);
     this.drawHint(ctx);
     this.inventory.draw(ctx);
-    this.textbox.draw(ctx, this.picture ? 0 : this.player.py - this.cam.y);
+    // On tall phones the game draws the box below the frame instead.
+    if (!this.textbox.below) this.textbox.draw(ctx, this.picture ? 0 : this.player.py - this.cam.y);
   }
 
   drawWorld(ctx) {
@@ -939,6 +972,13 @@ export function safeCall(fn, ...args) {
     console.error('[content]', err);
     return undefined;
   }
+}
+
+// A character that moves on its own (so routes may plan through it).
+function isMover(e) {
+  const b = e.def.behavior;
+  const t = b && (typeof b === 'string' ? b : b.type);
+  return !e.solid && (t === 'patrol' || t === 'wander');
 }
 
 export function isInteractable(e) {

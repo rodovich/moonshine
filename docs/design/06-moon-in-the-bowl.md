@@ -244,7 +244,7 @@ On entering, the nearest lamps wake one by one ahead of Cheryl (a chime each). A
 ## The dawn
 
 1. Cheryl steps into the cage; the gate closes. A clank, the long rumble of the counterweight going down as she goes up, and darkness with a slow upward scroll of shaft wall lit by her disc (about four seconds).
-2. Cut to **Cistern Court at dawn**: pale pink and gold. The iron grate on the well lifts, and Cheryl climbs out (a climbing-out sprite) and stands at (9, 18).
+2. Cut to **Cistern Court at dawn**: pale pink and gold. The iron grate on the well lifts, and Cheryl climbs out (a climbing-out sprite) and stands at (9, 18). "Cistern Court. My own front door, from underneath." (Added after a blind playtest found the return too quiet.)
 3. The Old Man at his chess table looks up.
 4. OLD MAN: Morning.
 5. Hold one second.
@@ -484,6 +484,9 @@ The Act 6 builder (A7CXb-ur4K) built the Long Keel, the Sighting Room, the dawn,
 - The Stair Race's finish is a tape across flight 3 at row 21, just below the open step, with the Counting Woman at (7, 18). The rope round the open step can be walked through (a solid barrier would cut the Steps in two).
 - The title is the art's MOONSHINE overlay in the sky above the moon; it fades out before the credits roll, and the roll starts with "Story and design" (no repeated MOONSHINE line).
 - The montage cuts are staged on Act 4's dry Bilge, the belfry, the lamp room, and the wet Bilge; Mott's toast uses Act 5's risen Harbor.
+- **The montages move.** In the lurch, the crowd sits down hard and the piano rolls along the mud and drops into the Boatman's boat. The Teeth can't be seen through the lamp room's one-tile window, so the Keeper's "It's GOING" comes just before the cut to the risen Harbor, which holds on the horizon for the Teeth's three-second slide away while Mott raises his tea. In the refill, the water comes in at the canal mouth and rushes west along the trench with the camera running beside it, rises in two more steps, and lifts the Boatman's boat with the piano in it before "I'M AFLOAT!"
+- **The trim wheel asks which way to turn** (toward the Gate, back, or leave it), so stopping two fingers past the Gate is the player's choice. The moon glides between positions.
+- **Lines added from the blind playtest:** in the lift, "The cage creaks past numbers painted on the shaft wall. Nine. Eight. Up and up."; halfway along the Long Keel, "A grate in the floor. Far below, a slow thump, and another. The Middle Sister, still at it."; in the epilogue, walking onto the open hundredth step: "Not today. I've been down enough for one week." and a step back.
 - The Harbor epilogue: the Pelletiers at (15–16, 6) with their luggage at (17, 6) ("The Pelletiers' luggage. A week on the mainland, and they bought a hatbox."); the Keeper at (21, 7); Mott on his bollard at (13, 8). Epilogue declines adopted as written: the Fishmonger ("Not today, Miss. Today I'm just enjoying the smell."), the Boatman ("I've got everything a man needs, Miss. A boat. Water under it."), the Pelletiers ("We've got enough luggage, thank you."), Mott ("No, no. I've given up the jug. Tea, now. Mostly tea."), the Keeper ("I've no use for that down here. I'm just looking.").
 - Lines the builder added, adopted as written: the signed log; the master stop afterward; the shaft and walls; the Keel's lamps; the drum, hawse, coil, sealed hatch, and speaking tube before the hauling; the Old Man after the piano ("Play it when you're ready. Gerald's in no hurry."); the tub with the new plug ("Next year. On Moonshine Night. With the moon in the Gate."); the Movers ("Delivered."); the Stair Race runners and crowd; the Tourist's luggage; and the epilogue declines for the Clockmaker, Ambrose, Ottilie, and the Shopkeeper.
 

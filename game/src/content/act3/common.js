@@ -50,7 +50,7 @@ export const act3Items = {
   moonglass_disc: {
     name: 'Moonglass Disc',
     icon: { sheet: items3, frame: 'moonglass_disc' },
-    description: "A disc of milky glass. It glows, and it's warm. Lamps down here like it.",
+    description: "A disc of milky glass. It glows, and it's warm. Lamps Downstairs like it.",
     useOn: { object: 'It glows at it. Nothing happens. The disc doesn\'t seem to mind.' },
   },
   valve_key: {

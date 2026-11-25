@@ -108,6 +108,7 @@ export async function plugBasin(g) {
   g.takeItem('found_plug');
   await g.describe("The Basin's own stopper went missing centuries ago. Mine fits.", 'Plugs are plugs.');
   g.setFlag('basin.plugged');
+  g.save(); // the step survives a reload during the long scene after it
   // Water wells up through the grille, slow and clean, over about four seconds.
   g.sfx('basin_fill');
   for (let i = 0; i < 4; i++) {
@@ -171,7 +172,11 @@ export async function trimWheel(g) {
     return g.describe('A bronze wheel, marked with a moon and an arrow. It won\'t turn. It wants something to look at first.');
   }
   if (g.flag('moon.true')) return g.describe("It won't go any further. It knows.");
-  const step = (g.flag('trim') || 0) + 1;
+  const from = g.flag('trim') || 0;
+  const way = await g.choose('Turn the wheel which way?', ['Toward the Gate', 'Back', 'Leave it']);
+  if (way === 2) return;
+  if (way === 1 && from === 0) return g.describe("It won't go back any further. The moon's as far from the Gate as it gets.");
+  const step = way === 0 ? from + 1 : from - 1;
   // Cheryl hauls the wheel round a notch: a deep creak, and the whole hull swings a hair on its chain.
   g.facePlayer('up');
   g.pose('player', 'wheel_up');
@@ -182,12 +187,15 @@ export async function trimWheel(g) {
   g.setFlag('fx.trim', null);
   g.pose('player', null);
   g.setFlag('trim', step);
+  g.save(); // the step survives a reload during the long scene after it
   await g.wait(0.2);
-  const v = basinView(g, { step: step - 1 });
+  const v = basinView(g, { step: from });
   await showBasin(g, v, { hold: 0.4 });
   v.moveTo(step);
   await g.wait(v.glideMs / 1000 + 0.4);
-  if (step === 1) {
+  if (step < from) {
+    await g.describe(step === 0 ? 'Back off to the right, where it started.' : 'Back out of the Gate. Off to the right again.');
+  } else if (step === 1) {
     await g.describe('Closer.');
   } else if (step === 2) {
     await g.describe('Dead in the Gate. Like every Moonshine Night of my life.', "But it isn't Moonshine Night. It's two nights past full. 'Allow two fingers.'");
@@ -213,6 +221,7 @@ export async function moonTrue(g, v) {
     await g.wait(0.14);
   }
   g.setFlag('moon.true');
+  g.save(); // the step survives a reload during the long scene after it
   g.sfx('lamps_blaze');
   await g.wait(3.2);
   // 5. The master stop unlocks with a clack and rises an inch.
@@ -233,11 +242,13 @@ export async function masterStop(g) {
   if (!g.flag('moon.true')) {
     return g.describe('A bronze rod in the floor, with the three-bars emblem, and the middle bar picked out. Locked.');
   }
-  // Pull: Cheryl heaves the rod up.
-  g.facePlayer('master_stop');
+  // Pull: Cheryl heaves the rod up, from the floor below it.
+  await g.movePlayer([9, 7]);
+  g.facePlayer('up');
   g.pose('player', 'heave_up');
   await g.wait(0.7);
   g.setFlag('sisters.asleep');
+  g.save(); // the step survives a reload during the long scene after it
   g.pose('player', null);
   // 1. Far off, a cough, and a thump that stops. Then silence.
   g.sfx('sisters_sleep');
@@ -362,7 +373,8 @@ const objects = [
     interact: masterStop,
   },
   {
-    id: 'shaft', x: 7, y: 2, w: 2, solid: false,
+    // The moonbeam over the Basin: an item used here goes to the Basin below (a click on the beam lands here).
+    id: 'shaft', x: 7, y: 2, w: 2, solid: false, use: basinUse,
     looks: [['Straight up. All the way up to my roof. To my tub.', "I've been bathing on top of this for thirty-one years."], 'Straight up. Moonlight all the way down.'],
   },
   { id: 'walls', x: 9, y: 1, w: 4, h: 2, look: 'Eight walls, plain slate. Nothing on them but the wheel and the lift. The Basin is the point.' },

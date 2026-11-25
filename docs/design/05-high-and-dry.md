@@ -246,6 +246,7 @@ At the window, facing out.
 - LIGHTHOUSE KEEPER: I turned round this morning to see what the shouting was. I've never turned round. And THERE IT WAS.
 - LIGHTHOUSE KEEPER: I've lit the lamp. In the afternoon. For the reef. I've polished it twelve times. I've run out of polish.
 - LIGHTHOUSE KEEPER: Nobody touches the lamp. Not without polish. If I can't polish it after, I'll go to pieces.
+- LIGHTHOUSE KEEPER: The Shop has polish. He won't sell it. He never sells anything.
 
 **Repeat** (alternate)
 - LIGHTHOUSE KEEPER: Polish. I need polish. The Shop has polish. He won't sell it. He never sells anything.
@@ -409,6 +410,7 @@ At his bench, repairing the clock drive she unclamped. Calm now, in a brittle wa
 - **The bronze door** (from the quay): "The door. Bronze, barnacled, a glass eye in the middle. At the bottom of a canal that's been full for five hundred years." / "It opens onto the mud. And the stairs don't reach the mud."
 - **The bronze door** (from the mud, eye dark): "A glass eye, the size of a dinner plate. Like the lock in the Step Gallery, only hungrier."
 - **Disc on the door's eye** (uncharged). It works from the stair tiles (22–25, 7) as well as from the mud, so this clue doesn't wait on the rope. From the stairs: "I hold the disc out over the edge. The eye glints, and goes dark again." / "It wants more than I've got. It wants the brightest light in Tessel." From the mud: "The eye stays dark. It wants more than my disc has in it." / "Brighter. It wants the brightest light in Tessel."
+- **The square jug for water** (it reads as the wrong container, not the wrong idea): on the Boatman, "Mott's jug? It'd make the boat drunk." (the blind playtester's line); on the Fountain, "In Mott's jug it'd come out moonshine. I want something that smells of fish, not of Mott."
 - **Other water, for the bucket:** the trickle at the canal mouth, from the quay: "It's on the mud. So is the Boatman. That's the problem." The sea, from the risen Harbor's quay edge: "Six feet down. My arms aren't." The ice in the Fishmonger's cellar: "I'd be here till Tuesday waiting for it to melt."
 - **The stair ring** (25, 7): "A bronze mooring ring, set in the last good step." With the rope: use → `rope.tied`: "A round turn and two half hitches. My father taught me that, on a lake a long way from here." Then: "Tied. I'm not proud. I'm not not proud."
 - **The rope climb** (first time down): "Down a rope into a canal, on a weekday." / "I've done worse. I've taken thirty children on a nature walk."
@@ -457,6 +459,21 @@ At his bench, repairing the clock drive she unclamped. Calm now, in a brittle wa
 - **The sealed hatch** (7–8, 1–2): "A sealed hatch, marked with a moon in a bowl. The same as on the Ship Plan, at the bottom of the shaft." / "Shut tight. Not yet, it seems to say."
 - **The chain coils**: "Spare chain, coiled and waiting. A good place to sit, if you're me, and you've nothing to do but wait."
 
+### The Keepers' ladder (the shortcut)
+
+A ladder of bronze rungs runs up beside the speaking tube, from the Windlass Room to a small floor hatch in the belfry, beside Ambrose at the foot of the rope. It's two-way once Cheryl has climbed it from below. (Orchestrator decision; see Decisions.)
+
+- **The speaking tube, first look in the Windlass Room,** gets a second box: "And rungs beside it, going up into the dark. Somebody had to climb up and clean it." From then on, interacting with the tube gives its current look, then a choice: "Climb up?" **Yes** / **Not now**.
+- **The first climb:** darkness with a slow upward scroll of shaft wall lit by the disc, like the dawn lift in Act 6 (about four seconds). The wind in the tube grows louder, then a bell's hum, then Ambrose's voice through the hatch. The hatch lifts and Cheryl climbs out beside the rope. `keepers.ladder` is set.
+  1. AMBROSE: CHERYL. YOU CAME UP THROUGH MY FLOOR.
+  2. AMBROSE: THAT HATCH HAS BEEN THERE FIFTY-TWO YEARS. I THOUGHT IT WAS FOR MICE.
+  3. "The bell to the bow, in one ladder." / "The Keepers didn't take the Steps."
+- **Later climbs,** either way: a short fade (about a second) with the climbing sound, and no lines.
+- **The belfry hatch,** before `keepers.ladder` (Acts 4 and 5): "A little bronze hatch in the floor by the rope. Bolted from underneath. Everything in this town is bolted from the other side." After: "My ladder to the bow." → choice "Climb down?" **Yes** / **Not now**. Down puts Cheryl in the Windlass Room at the foot of the tube.
+- **In Act 6,** while Cheryl waits for the bell, the tube's choice is replaced by: "Not tonight. Ambrose has the top end. I've got this one."
+
+**Art:** the rungs beside the tube in the Windlass Room; the belfry floor hatch (closed, open). **Audio:** reuse the ladder climb, and the dawn lift's shaft scroll if it fits.
+
 ### Items and wrong combinations
 
 | Item | Icon idea | Inventory description |
@@ -472,6 +489,7 @@ At his bench, repairing the clock drive she unclamped. Calm now, in a brittle wa
 - Polish on anything: "It's for a lighthouse. It says so on the tin."
 - Clapper on anything but the socket: "It's heavy, and it wants to be somewhere particular."
 - Disc on the lamp before the polish: the Keeper's decline.
+- **The Ship Plan in Act 5** (inventory look, first time): "The chain runs from the bow to the anchor. Beside it, at the bow, a little drawing of a tooth." / "Rounded at one end, notched at the other." Later looks: the second line only. This lets a player recognize the doorstop before going down the rope, so the clapper can be fetched on the way and not after a trip to the Windlass Room.
 
 ## The disc and the Kid
 
@@ -497,7 +515,7 @@ The run is fully scripted and always succeeds.
 **Engine calls** (engine/core, 3fd9f41): `g.cameraFollow('kid')` on the Harbor while Cheryl stands at the lighthouse door; `await g.changeMap('bilge_dry', x, y, facing, { cutscene: true })` to follow him without her (her map, spot, and facing are kept; nothing is saved); `await g.restorePlayer()` to come back to her at the lighthouse door.
 
 **The Kid afterward** (on the mud by the door, then back at the Harbor):
-- SWEATY KID: Fifty-two seconds, Miss! And I jumped! Off the QUAY! Don't tell Mum.
+- SWEATY KID: Fifteen seconds, Miss! And I jumped! Off the QUAY! Don't tell Mum.
 - Repeat: SWEATY KID: The Stair Race is going to be EASY after that.
 
 ## The end of Act 5
@@ -578,6 +596,8 @@ The Act 5 builder (b_30JU3Nrc) built this act on `content/act5`; its full list i
 
 - **The disc after the relay:** the Kid keeps it on the mud by the open door and hands it back when Cheryl talks to him there, or throws it up to her ("CATCH!") if she talks to him from the broken edge before she has the rope. It doesn't sit in the eye.
 - **The Fishmonger's door is a look** ("The Fishmonger's door, down to her cellar. Ice. Fish. A hatch I'm not opening."), not a way back in.
+- **The Teeth on screen:** the first time Cheryl is on the Harbor at each stage (arriving, or back at the lighthouse door after the relay), the camera pans to the reef, holds two seconds while the surf swells, shows her stage line in a box at the top of the screen, and returns to her.
+- **The relay's length:** the `relay` cue was cut to 15.8 seconds to fit the run, so the Kid's time is "Fifteen seconds."
 - **The Kid's route:** west along the Harbor quay (MOTT: Mind the edge, boy!), into the Bilge on the south quay, over the bridge, east along the north quay, off the quay onto the mud by the Movers (OTHER MOVER: Hnn!), hurdling a beached boat and the Boatman's (BOATMAN: Go on, lad!).
 - **Placements:** the Clockmaker at (2, 4), back to us at his bench; the Counting Woman at (12, 17); the banner over x16–21. The open hundredth step is a hole Cheryl walks round ("The hundredth step, open, and the ladder down. Not today. My business is at the bottom of the canal.").
 - **The act opens** with the card "That afternoon." and: "The wind's getting up. Every line of washing on the quay is pointing out to sea." / "A door at the bottom of the canal, and stairs that don't reach it. Well. One thing at a time."
@@ -587,6 +607,7 @@ The Act 5 builder (b_30JU3Nrc) built this act on `content/act5`; its full list i
 
 - **Act 5 is one afternoon, ending at dusk in the Windlass Room** with the Tooth replaced, so Act 6 can begin with the bell.
 - **Seating the clapper moves from Act 6 to the end of Act 5.** It's the act's payoff; Act 6 then starts with the wait and the bell. (The story bible is updated to match.)
+- **The speaking tube has a Keepers' ladder beside it, from the Windlass Room to the belfry.** A blind playtester crossed town about five times in Act 5, and the orchestrator decided to add a shortcut once the bronze door is open. The tube fits the story best: it already joins the bell to the bow, the Keepers would have needed a way to service it, and it puts the Windlass Room one climb from the Clockmaker's Shop and Ambrose. Cheryl finds the rungs herself, so it feels discovered rather than given. The hundredth step leads only to Act 3's maps, and the Fountain is flowing over its hatch, so neither would help. The Ship Plan's Act 5 look also draws the tooth, so players can fetch the clapper before going down the rope.
 - **The Kid jumps down for the relay, so the rope and the door are independent.** Cheryl needs both to get through the door herself.
 - **The disc comes back, dimmed,** so Cheryl still carries a light for Act 6.
 - **The Teeth are a visible, growing sprite on the Harbor horizon** and a changing look from the lighthouse, never a fail state.

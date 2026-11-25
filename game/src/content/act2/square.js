@@ -112,6 +112,8 @@ export async function hatWindow(g) {
     return g.describe('A wide straw hat, in the window. Display stock. It\'s been in that window since before I went grey.');
   }
   if (bump(g, 'hat.window') === 0) return g.describe("Display stock. She'll be peeling by lunchtime.");
+  if (g.flag('tourist.hasHat')) return g.describe("Display stock. Mine's on a tourist now, and it suits her better.");
+  if (g.hasItem('hat')) return g.describe('Display stock. I have a perfectly good hat right here.');
   return g.describe('Display stock. I have a perfectly good hat at home, in the wardrobe.');
 }
 
@@ -183,7 +185,7 @@ const mayor = {
           ['Counting Woman', "A HUNDRED, Duncan! It's in the NAME!"],
           ['Mayor', 'Madam, a guidebook is not an official document--'],
           ['Counting Woman', 'Then make it OFFICIAL! Count them! Get a committee!'],
-          ['Mayor', '...Miss, did you give her a guidebook? Why would you give her a guidebook?'],
+          ['Mayor', '...Miss, did you show her a guidebook? Why would you show her a guidebook?'],
         ]);
       }
       return g.say(self, 'There will be a committee. There is always a committee.');
@@ -317,9 +319,9 @@ const shopObjects = [
       "Every marble, on the same side. Downhill, if the floor was a hill. It isn't.",
     ],
   },
-  { id: 'shelves', x: 1, y: 1, w: 4, lookKey: 'shop_shelves', look: 'Brass polish, lamp oil, string, lanterns. Everything a lighthouse could want. All display.' },
-  { id: 'shelves_e', x: 8, y: 1, lookKey: 'shop_shelves', look: 'Brass polish, lamp oil, string, lanterns. Everything a lighthouse could want. All display.' },
-  { id: 'barometer', x: 7, y: 0, h: 2, look: "The barometer says FAIR. It's said FAIR for nine years. He won't tap it in case it changes its mind." },
+  { id: 'shelves', x: 1, y: 1, w: 3, h: 2, lookKey: 'shop_shelves', look: 'Brass polish, lamp oil, string, lanterns. Everything a lighthouse could want. All display.' },
+  { id: 'shelves_e', x: 8, y: 1, h: 2, lookKey: 'shop_shelves', look: 'Brass polish, lamp oil, string, lanterns. Everything a lighthouse could want. All display.' },
+  { id: 'barometer', x: 7, y: 0, h: 3, look: "The barometer says FAIR. It's said FAIR for nine years. He won't tap it in case it changes its mind." },
   ...[2, 6].map((x) => ({ id: `counter_${x}`, x, y: 3, lookKey: 'counter', look: 'A counter, polished by a lifetime of not selling things.' })),
 ].map((o) => ({ solid: false, use: { '*': cherylDeclines }, ...o }));
 

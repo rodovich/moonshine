@@ -1,11 +1,12 @@
 // Act 5 underground, laid out as docs/design/05-high-and-dry.md's maps (for judging the art in place).
 // ?state=windlass (default): the Windlass Room, the Tooth's stump in its socket, the brake locked, the drum still.
 // ?state=windlass_clapper: the clapper seated, the brake thrown, the drum turning, the hawse gone violet.
+// ?state=windlass_ladder: the Keepers' rungs beside the tube (16, 1-2), Cheryl on them as the game places her.
 // ?state=passage: the Bow Passage, the door shut, the lamps dead. ?state=passage_lit: the door open, the lamps lit.
 
 export function SCENE(state) {
   if (state === 'passage' || state === 'passage_lit') return passage(state === 'passage_lit');
-  return windlass(state === 'windlass_clapper');
+  return windlass(state === 'windlass_clapper', state === 'windlass_ladder');
 }
 
 const hull = f => `hull:${f}`, w5 = s => f => `${s}:${f}`;
@@ -31,7 +32,7 @@ function floor(L, x0, x1, y0, y1) {
   }
 }
 
-function windlass(clapper) {
+function windlass(clapper, ladder) {
   const W = 22, H = 14, L = grid(W, H);
   wall(L, 1, 20, 1);
   floor(L, 1, 20, 3, 12);
@@ -44,6 +45,8 @@ function windlass(clapper) {
   // north wall: lamps (2, 19) and the speaking tube (15) on the upper row; the Long Keel hatch (7–8, 1–2)
   L.set('ground', 2, 1, kh('lamp_lit')); L.set('ground', 19, 1, kh('lamp_lit'));
   L.set('ground', 15, 1, 'ds:horn');
+  // the Keepers' ladder beside the tube, up into the dark toward the belfry
+  L.set('ground', 16, 1, 'keepers_rungs:rungs_top'); L.set('ground', 16, 2, 'keepers_rungs:rungs_bot');
   for (const [n, x, y] of [['nw', 7, 1], ['ne', 8, 1], ['sw', 7, 2], ['se', 8, 2]]) L.set('ground', x, y, kh(`keel_sealed_${n}`));
   // light pools under the lamps
   L.set('ground', 2, 3, hull('floor_glow')); L.set('ground', 19, 3, hull('floor_glow'));
@@ -58,8 +61,9 @@ function windlass(clapper) {
   L.set('objects', 3, 10, wl('coil_a_l')); L.set('objects', 4, 10, wl('coil_a_r'));
   L.set('objects', 15, 10, wl('coil_b_l')); L.set('objects', 16, 10, wl('coil_b_r'));
   const sprites = [{ sheet: 'brake', frame: clapper ? 'brake_thrown' : 'brake_locked', x: 17 * 16 + 8, y: 9 * 16 }];
+  if (ladder) sprites.push({ sheet: 'cheryl', frame: 'climb_up_0', x: 16 * 16 + 8, y: 3 * 16 });
   return { title: 'Windlass Room' + (clapper ? ' (the clapper seated, the brake thrown)' : ''), ...L, sprites,
-    hero: clapper ? [3 * 16 + 8, 11 * 16, 'right'] : [11 * 16 + 8, 10 * 16, 'up'], scale: 2,
+    hero: ladder ? null : clapper ? [3 * 16 + 8, 11 * 16, 'right'] : [11 * 16 + 8, 10 * 16, 'up'], scale: 2,
     after: clapper ? null : undefined };
 }
 
