@@ -23,9 +23,13 @@ const W = 32, H = 14;
 const q = (x, y) => `${y % 2 ? 's' : 'n'}${x % 2 ? 'e' : 'w'}`;
 const DOORS = { 6: 'locked', 12: 'office', 18: 'locked' };
 
-function compose() {
-  const L = layout(W, H, blankGrid);
-  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) L.set('ground', x, y, pave(x, y));
+// The Harbor's rows 0–8, exactly as Act 2 draws them: paving, the headland
+// with the Goat stair, the harbor-front terrace, the lighthouse and its door,
+// the crates, nets, and bollards. Exported so later states of the Harbor (Act
+// 5's risen Harbor) keep the same harbor front. `L` is a layout from
+// act2/common.js (`layout(W, H, blankGrid)`), at least 32 wide.
+export function harborTopRows(L) {
+  for (let y = 0; y <= 8; y++) for (let x = 0; x < W; x++) L.set('ground', x, y, pave(x, y));
 
   // ---- The headland behind the harbor front, the Goat stair, the lighthouse ----
   for (let y = 0; y <= 3; y++) for (let x = 0; x < W; x++) {
@@ -55,6 +59,11 @@ function compose() {
   L.set('detail', 8, 8, 'harbor_props:bollard_rope', true);
   L.set('detail', 18, 8, 'harbor_props:bollard_rope', true);
   L.set('detail', 13, 8, 'harbor_props:bollard', true);
+}
+
+function compose() {
+  const L = layout(W, H, blankGrid);
+  harborTopRows(L);
 
   // ---- The quay edge, the Keyhole, and the sea ----
   for (let x = 0; x < W; x++) {

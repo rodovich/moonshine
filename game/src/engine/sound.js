@@ -65,7 +65,7 @@ export function muffleMusic(on, opts) {
   try { audio.muffleMusic(on, opts); } catch (err) { warnOnce('muffle', '', err); }
 }
 
-// opts: { volume (0..1), pitch (semitones) }, passed to the audio module.
+// opts: { volume (0..1, e.g. softer for a source far across the map), pitch (semitones), pan (-1..1) }.
 export function sfx(id, opts) {
   const real = SFX_ALIASES[id] ?? id;
   if (!audio.SFX_IDS.includes(real)) return warnOnce('sfx', id, 'unknown id');

@@ -112,7 +112,7 @@ function withCrypt(def) {
   return {
     ...def,
     tileset: { ...def.tileset, sheets: { ...def.tileset.sheets, founders_door_open } },
-    lighting: (g) => (unbolted(g) && !g.flag('epilogue') ? 'dusk' : typeof def.lighting === 'function' ? def.lighting(g) : def.lighting),
+    lighting: (g) => (unbolted(g) && !g.flag('act4.started') && !g.flag('epilogue') ? 'dusk' : typeof def.lighting === 'function' ? def.lighting(g) : def.lighting),
     patches: morePatches(def.patches, DOOR_TILES),
     // The doorway's lower row is open ground; the door entity blocks it until it opens.
     collision: Array.from({ length: def.ground.length }, (_, y) => (y === 2 ? '     oo   ' : '          ')),
@@ -145,7 +145,7 @@ function withArchive(def) {
   });
   return {
     ...def,
-    lighting: (g) => (unbolted(g) && !g.flag('epilogue') ? 'dusk' : typeof def.lighting === 'function' ? def.lighting(g) : def.lighting),
+    lighting: (g) => (unbolted(g) && !g.flag('act4.started') && !g.flag('epilogue') ? 'dusk' : typeof def.lighting === 'function' ? def.lighting(g) : def.lighting),
     exits: [
       {
         x: 7, y: 13, w: 2, when: (g) => unbolted(g) && !surfaced(g),
@@ -169,8 +169,10 @@ const STUDS = [[5, 8], [9, 12], [14, 9], [18, 12], [3, 10], [20, 8]];
 const quad = (x, y) => `${y % 2 ? 's' : 'n'}${x % 2 ? 'e' : 'w'}`;
 
 // Act 2 places the plain studs; at dusk they glow.
-function studPatches(g) {
-  if (!(g.flag('moonEyes.glow') && surfaced(g))) return [];
+// They glow once Act 3 has lit them, whenever the Crown is lit for dusk or night;
+// by day they're plain.
+function studPatches(g, lit) {
+  if (!g.flag('moonEyes.glow') || !['dusk', 'night'].includes(lit)) return [];
   const glow = '_glow';
   return [
     ...STUDS.map(([x, y]) => ['ground', x, y, `moon_eyes:pave_${quad(x, y)}_eye${glow}`]),
@@ -291,12 +293,13 @@ export async function crownEnding(g) {
 function withCrown(def) {
   const baseMusic = def.music;
   const baseLighting = def.lighting;
+  const crownLighting = (g) => (dusk(g) ? 'dusk' : typeof baseLighting === 'function' ? baseLighting(g) : baseLighting);
   return {
     ...def,
     tileset: { ...def.tileset, sheets: { ...def.tileset.sheets, moon_eyes } },
     // Music starts in onEnter so the dusk scene can have none.
     music: undefined,
-    lighting: (g) => (dusk(g) ? 'dusk' : typeof baseLighting === 'function' ? baseLighting(g) : baseLighting),
+    lighting: crownLighting,
     // At dusk a little darkness, so each glowing moon-eye casts its own pool.
     darkness: (g) => (dusk(g) ? 0.4 : 0),
     darkColor: 'dusk_indigo_deep',
@@ -305,14 +308,14 @@ function withCrown(def) {
       { x: 11.5, y: 14, radius: 1.6, color: 'relic_cyan' },
       { x: 8, y: 7.4, radius: 2.4, color: 'lamp_warm' }, { x: 15, y: 7.4, radius: 2.4, color: 'lamp_warm' },
     ] : []),
-    patches: morePatches(def.patches, studPatches),
+    patches: morePatches(def.patches, (g) => studPatches(g, crownLighting(g))),
     exits: [
       // At dusk the way down is the end of the act (after the vista, the card).
       { x: 11, y: 15, w: 2, when: dusk, run: (g) => (done(g) ? showEndCard(g) : crownEnding(g)) },
       ...(def.exits || []),
     ],
     triggers: [
-      { x: 0, y: 13, w: 24, when: (g) => !!g.flag('act3.surfaced') && !g.flag('act3.done'), run: crownEnding },
+      { x: 0, y: 13, w: 24, when: (g) => !!g.flag('act3.surfaced') && !g.flag('act3.done') && !g.flag('act4.started') && !g.flag('epilogue'), run: crownEnding },
       ...(def.triggers || []),
     ],
     entities: [
