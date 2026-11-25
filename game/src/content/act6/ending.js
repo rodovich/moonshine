@@ -13,7 +13,7 @@ function finalVista(g) {
     twinkle: g.sheet(vista_twinkle), cheryl: g.sheet(vista_cheryl_bath), title: g.sheet(vista_title),
   };
   const phases = VISTA_BASINS.map((_, i) => (i * 677) % 1180);
-  const v = { t: 0, titleAt: null, titleOff: null };
+  const v = { t: 0, titleAt: null, titleOff: null, dimAt: null };
   v.at = (offset) => (ctx, ms) => v.draw(ctx, ms + offset);
   v.draw = (ctx, ms) => {
     v.t = ms;
@@ -32,6 +32,11 @@ function finalVista(g) {
       let step = ms - v.titleAt > 800 ? 1 : 0;
       if (v.titleOff != null && ms >= v.titleOff) step = ms - v.titleOff > 800 ? -1 : 0;
       if (step >= 0) ctx.drawImage(art.title.frame(`title_${step}`), 0, 0);
+    }
+    // Under the credits, the picture dims a little so the lines read over the moon.
+    if (v.dimAt != null && ms >= v.dimAt) {
+      ctx.fillStyle = `rgba(8,8,24,${Math.min(0.5, ((ms - v.dimAt) / 1500) * 0.5).toFixed(3)})`;
+      ctx.fillRect(0, 0, 256, 224);
     }
   };
   return v;
@@ -92,6 +97,7 @@ export async function endingVista(g) {
   v.titleAt = v.t;
   await g.wait(5);
   v.titleOff = v.t;
+  v.dimAt = v.t + 600;
   await g.wait(1.4);
   // 9. The credits roll over the vista.
   await g.credits(CREDITS, { picture: v.at(v.t), speed: 14, skipAfter: 3, hold: 5, fade: 0 });

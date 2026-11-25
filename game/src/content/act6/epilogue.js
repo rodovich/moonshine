@@ -97,7 +97,7 @@ export function courtEpilogue(map) {
     use: { '*': cherylDeclines },
   };
   const movers = [
-    { ...LOOKS.big_mover, id: 'epi_big_mover', name: 'Big Mover', x: 6, y: 13, look: null },
+    { ...LOOKS.big_mover, id: 'epi_big_mover', name: 'Big Mover', x: 7, y: 13 },
     { ...LOOKS.other_mover, id: 'epi_other_mover', name: 'Other Mover', x: 6, y: 12 },
   ].map(({ sheet, palette, ...m }) => ({
     ...m, facing: 'down', sprite: { sheet, palette }, when: (g) => epilogue(g) && !!g.flag('epi.leftCourt') && !g.flag('epi.piano'),
@@ -384,7 +384,7 @@ export function stepsEpilogue(map) {
       out.push(['detail', STEPS.tape[0], STEPS.tape[1], `bunting:${broken}_l`], ['detail', STEPS.tape[0] + 1, STEPS.tape[1], `bunting:${broken}_r`]);
       for (let y = 0; y < 3; y++) for (let x = 0; x < 4; x++) {
         if ((x === 1 || x === 2) && y === 1) continue; // the hole itself
-        out.push(['overhead', 8 + x, 18 + y, `step_barrier:step_barrier_x${x}y${y}`]);
+        out.push(['detail', 8 + x, 18 + y, `step_barrier:step_barrier_x${x}y${y}`]);
       }
       return out;
     },

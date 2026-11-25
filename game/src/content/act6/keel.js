@@ -116,10 +116,6 @@ function lights(g) {
 // ---------------------------------------------------------------------------
 
 const objects = [
-  {
-    id: 'grooves', x: 1, y: 4, w: 38, solid: false,
-    look: 'Two grooves worn in the floor, down the middle. Footsteps. Three hundred years of Keepers, walking this way.',
-  },
   ...RIBS.map((x) => ({
     id: `rib_${x}`, x, y: 1, h: 2, lookKey: 'ribs',
     look: 'Ribs, every few paces, all the way along. The inside of a hull. I know that now.',
@@ -140,6 +136,16 @@ const triggers = [
     run: async (g) => {
       g.setFlag('n.keelArrived', 1);
       await g.describe('The Long Keel. It runs the whole length of us, straight as a ruler.', "The lamps wake up as I come. Like they've been waiting.");
+    },
+  },
+  // The grooves down the middle: a line the first time she walks in them, well along
+  // (a hotspot on the walkway would catch clicks meant for walking).
+  {
+    x: 10, y: 4, w: 20, h: 1, stop: false,
+    when: (g) => !!g.flag('n.keelArrived') && !g.flag('n.keelGrooves'),
+    run: async (g) => {
+      g.setFlag('n.keelGrooves', 1);
+      await g.describe('Two grooves worn in the floor, down the middle. Footsteps. Three hundred years of Keepers, walking this way.');
     },
   },
   { x: 5, y: 3, w: 1, h: 3, stop: false, when: (g) => !g.flag('keel.doorOpen'), run: keelDoor },
