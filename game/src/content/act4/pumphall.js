@@ -345,7 +345,7 @@ export const pumpHallMap = composedMap(compose, {
     if (!g.flag('seen.pumphall')) {
       g.setFlag('seen.pumphall');
       await g.wait(2);
-      await g.describe('Down where the water is. Three of them, side by side.');
+      await g.describe('Down where the water is. Further down than the Bilge, by the rungs. Three of them, side by side.');
     }
   },
   entities: objects,
