@@ -403,7 +403,7 @@ At his bench, repairing the clock drive she unclamped. Calm now, in a brittle wa
 ### Cistern Court
 
 - OLD MAN: The whole house lifted in the night. Gerald says we've risen in the world. Gerald thinks he's funny.
-- NEIGHBOR: The wind! My sheets are out on the line flat as flags. Whiter than ever. I don't trust it.
+- NEIGHBOR: My whites have never been whiter. Not since the house lifted in the night. I don't trust it.
 
 ## Objects and descriptions
 
@@ -427,7 +427,7 @@ At his bench, repairing the clock drive she unclamped. Calm now, in a brittle wa
 
 ### Lamp room
 
-- **The lamp** (before the telescope): "The lamp, lit in the middle of the afternoon. Brightest light in Tessel." / "She's standing between me and it."
+- **The lamp** (before the telescope): "The lamp, lit in the middle of the afternoon. Brightest light in Tessel." / "And she won't let me near it." (As built, after the QA description sweep: she stands at the window, not between Cheryl and the lamp.) The tower door in Act 5: "The tower door, unbolted at last. Ambrose is up there, waiting for moonrise." The Clockmaker's wall: "A wall of clocks, every one at a different time."
 - **The window** (by stage): as the Teeth, but from up here: Stage 1: "From up here, the Teeth are a white line across the mouth of the Bowl. And we're pointing at them." Stage 2: "Closer. The whole town's leaning toward them like a dog on a lead." Stage 3: "Close enough to count. I don't."
 - **The dust sheet**: "The dust sheet the telescope lived under. She's kicked it into a corner."
 
