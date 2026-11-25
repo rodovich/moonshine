@@ -177,7 +177,8 @@ test('pointer: Act 4, the morning to the reveal', async ({ page }) => {
   await ptrExit(page, 'lamp_street');
   await ptrExit(page, 'hundred_steps');
   await ptrExit(page, 'fountain_square');
-  await ptrInteract(page, 'ring_hatch'); await read();
+  // Stepping over the rope on the way says a line, which interrupts the walk; click again.
+  for (let i = 0; i < 3 && !(await snap(page)).flags['hatch.open']; i++) { await ptrInteract(page, 'ring_hatch'); await read(); }
   await ptrExit(page, 'pump_hall');
   await read();
   await ptrUse(page, 'copper_throat', 'sister_middle'); await read();
@@ -190,7 +191,7 @@ test('pointer: Act 4, the morning to the reveal', async ({ page }) => {
     const s = await snap(page);
     if (s.map === 'ice_cellar') break;
     if (s.text || s.busy) { await ptrAdvance(page)(); await page.waitForTimeout(150); continue; }
-    const p = await page.evaluate(() => window.moonshine.display.toClient(128, 40));
+    const p = await page.evaluate(() => window.moonshine.display.toClient(128, 10));
     await page.mouse.click(p.x, p.y);
     await page.waitForTimeout(700);
   }

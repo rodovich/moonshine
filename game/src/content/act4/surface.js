@@ -58,7 +58,12 @@ export function withAct4(maps) {
   const towerDoor = {
     id: 'tower_door_a4', x: 4, y: 4, w: 2, h: 3, solid: false, when: act4,
     interact: async (g) => {
-      if (g.flag('clockmaker.out')) return g.describe(g.flag('clock.lifted') ? 'The tower door, open. The ticking has stopped.' : "The tower door, wide open. He left in a hurry. Tick, tick, tick, from up there.");
+      if (g.flag('clockmaker.out')) {
+        // Open: looking at it (or clicking it) goes in.
+        if (bump(g, 'tower.open') === 0 && !g.flag('clock.lifted')) await g.describe('The tower door, wide open. He left in a hurry. Tick, tick, tick, from up there.');
+        g.sfx('door');
+        return g.changeMap('belfry', 1, 7, 'up');
+      }
       if (g.flag('clockmaker.atDoor')) return g.describe("He's in the doorway, guarding it with his whole waistcoat.");
       g.sfx('knock');
       await g.wait(0.8);
@@ -179,8 +184,9 @@ export function withAct4(maps) {
   const mayorHere = (g) => act4(g) && (!g.flag('mayor.atCrown') || risen(g));
   const fountainDry = (g) => act4(g) && !g.flag('pumps.burst');
 
-  const fountain4 = {
-    id: 'fountain_a4', x: 10, y: 7, w: 4, h: 4, solid: false, when: act4,
+  // The Fountain's rims, east and west, so the basin, the hatch, and the fish keep their own clicks.
+  const fountainRim = (x) => ({
+    id: `fountain_a4_${x}`, lookKey: 'fountain_a4', x, y: 7, w: 1, h: 4, solid: false, when: act4,
     interact: async (g) => {
       if (g.flag('pumps.burst')) {
         return g.describe('Flowing again. Fuller than before. I shut its feed down there, and the pumps found it anyway.', "There's no getting to that hatch now.");
@@ -191,7 +197,7 @@ export function withAct4(maps) {
       return g.describe('Dry. A heap of coins in the bottom, and something round and bronze under them.');
     },
     use: { crowbar: (g) => g.describe('Not with the whole Square watching.'), '*': cherylDeclines },
-  };
+  });
 
   const hatch = {
     id: 'ring_hatch', x: 11, y: 8, w: 2, solid: false, when: (g) => fountainDry(g) && !g.flag('hatch.open'),
@@ -275,7 +281,7 @@ export function withAct4(maps) {
       { x: 11, y: 9, w: 2, stop: false, when: fountainDry, run: (g) => g.sfx('coins_rattle') },
     ],
     // The hatch and basin come before the whole-Fountain hotspot, so they win on their tiles.
-    entities: [hatch, basin, cordonSign, mayor4, fountain4, {
+    entities: [hatch, basin, cordonSign, mayor4, fountainRim(10), fountainRim(13), {
       id: 'fish_a4', x: 11, y: 7, w: 2, solid: false, kind: 'object', when: act4, offset: [0, 19], // on the rim row, drawn where Act 2 draws it
       sprite: (g) => ({ sheet: fishArt, frame: fountainDry(g) ? 'fish_dry' : 'fish' }),
       interact: (g) => g.describe(fountainDry(g) ? "The bronze fish, with nothing coming out of its mouth. It looks like it's waiting to be asked." : 'The fish, spouting again. Harder than before. It looks pleased with itself.'),

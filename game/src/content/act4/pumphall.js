@@ -205,13 +205,21 @@ const objects = [
   {
     id: 'emergency_ladder', x: 22, y: 1, h: 2,
     interact: (g) => {
-      if (g.flag('pumps.burst')) return g.describe('The hatch is open. Up.');
+      if (g.flag('pumps.burst')) return g.changeMap('emergency_shaft', 2, 28, 'up'); // open: clicking it climbs
       return g.describe(...(bump(g, 'look.eladder') === 0
         ? ['Rungs up the wall, to a hatch that\'s shut tight. A little wave pictured on it, and an arrow pointing up.', 'For emergencies. I hope I never find out what kind.']
         : ['For emergencies.']));
     },
   },
-  { id: 'fountain_ladder', x: 2, y: 1, h: 2, interact: (g) => g.describe(g.flag('pumps.burst') ? 'Under water. That way\'s gone.' : 'Back up to the Fountain.') },
+  {
+    id: 'fountain_ladder', x: 2, y: 1, h: 2,
+    interact: async (g) => {
+      if (g.flag('pumps.burst')) return g.describe("Under water. That way's gone.");
+      await g.describe('Back up to the Fountain.');
+      g.sfx('step_stairs');
+      return g.changeMap('fountain_square', ...BASIN, 'down');
+    },
+  },
   {
     id: 'main_pipe', x: 1, y: 3, h: 8,
     interact: (g) => g.describe(g.flag('pumps.burst')

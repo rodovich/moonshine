@@ -164,7 +164,8 @@ export const onScreen = (page, tx, ty) => page.evaluate(([x, y]) => {
   const w = window.moonshine.world;
   const sx = x * 16 + 8 - w.cam.x;
   const sy = y * 16 + 8 - w.cam.y;
-  return sx >= 4 && sy >= 30 && sx < 252 && sy < 220;
+  // Anywhere on screen except the bag button's corner (top right).
+  return sx >= 4 && sy >= 4 && sx < 252 && sy < 220 && !(sx >= 224 && sy < 30);
 }, [tx, ty]);
 
 // Click toward (x, y); if it's off screen, click the farthest on-screen tile

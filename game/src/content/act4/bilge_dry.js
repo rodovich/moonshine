@@ -103,7 +103,9 @@ const people = [
       : g.say(self, "It'll be back by teatime.")),
   },
   {
-    id: 'boatman', name: 'Boatman', x: 22, y: 10, w: 2, facing: 'down', solid: true, shadow: false,
+    // Beached at the foot of the broken stairs; his footprint reaches up the broken flight so
+    // Cheryl can talk to him from the bottom step (22-23, 7), calling down.
+    id: 'boatman', name: 'Boatman', x: 22, y: 8, w: 2, h: 3, facing: 'down', solid: false, shadow: false,
     sprite: { sheet: boatman_mud, frame: 'mud' }, turnToTalk: false, talkPose: 'sing',
     interact: async (g, self) => {
       if (bump(g, 'dry.boatman') === 0) {
@@ -129,8 +131,8 @@ const people = [
   {
     id: 'kid', name: 'Sweaty Kid', x: 2, y: 10, facing: 'right',
     sprite: { sheet: sweaty_kid, walk: [1, 2, 3, 4] }, stepTicks: 11,
-    // He runs the west reach of the mud, between the bridge pier and the far end.
-    behavior: { type: 'patrol', route: [[1, 10], [10, 10]], ghost: true, stopNear: 3, nearPose: 'jog' },
+    // He runs the west reach of the mud, from the far end to the bridge pier.
+    behavior: { type: 'patrol', route: [[1, 10], [11, 10]], ghost: true, stopNear: 3, nearPose: 'jog' },
     talkPose: 'jog',
     interact: (g, self) => g.say(self, "It's a ROAD, Miss! I've done eleven laps! There's a CRAB that's faster than me!"),
   },
@@ -164,7 +166,7 @@ const objects = [
   { id: 'mouth', x: 28, y: 7, w: 4, h: 4, look: "The last of the canal, running out to the Bowl. And the Bowl's down there. Lower. Of course it's lower." },
   { id: 'laundry', x: 14, y: 3, w: 6, look: "Every line of washing on the quay is streaming out sideways, hard. The wind's got more of us to push now." },
   // The bronze door and the Water Stairs: looking at either ends the act.
-  { id: 'door_view', x: 22, y: 7, w: 6, h: 3, interact: (g) => endOfAct4(g) },
+  { id: 'door_view', x: 24, y: 7, w: 4, h: 3, interact: (g) => endOfAct4(g) },
   { id: 'fish_door', x: 4, y: 2, h: 2, look: notYet },
 ].map((o) => ({ solid: false, use: { '*': cherylDeclines }, ...o }));
 
