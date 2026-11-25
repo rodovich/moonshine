@@ -3,15 +3,13 @@
 // through the bell, the Sisters, the rise, the climb, and the reveal, to the
 // end card. Screenshots go to tests/screenshots/act4-*.
 //
-// Until Act 2 part 2 exists there's no Goat Path or Mott, so the copper throat
-// starts in the bag.
 import { test, expect } from '@playwright/test';
 import { boot, snap, waitFor, shot } from './helpers.js';
 import { settle, readThrough, pageTexts, kbAdvance, kbWalk, kbInteract, ptrAdvance, ptrWalk, ptrInteract, ptrUse } from './playthrough.js';
 
 const START = '?map=flat&x=8&y=4&seed=1'
-  + '&flags=act1.moonrise,act2.started,act2.done,piano.slid,counter.left,step.open,act3.surfaced,halls.valve,moonEyes.glow,got.moon_chart'
-  + '&items=moon_chart,guidebook,crowbar,ship_plan,copper_throat&run=act4_start';
+  + '&flags=act1.moonrise,act2.started,act2.done,piano.slid,counter.left,step.open,act3.surfaced,act3.done,founders.unbolted,halls.valve,moonEyes.glow,got.shipPlan,got.moon_chart'
+  + '&items=moon_chart,guidebook,crowbar,ship_plan,moonglass_disc&run=act4_start';
 
 async function mapIs(page, id) {
   try {
@@ -66,6 +64,15 @@ test('keyboard: Act 4, the morning to the reveal', async ({ page }) => {
   // The Skipping Girls, each with her own version.
   for (const id of ['girl_1_a4', 'girl_2_a4', 'girl_3_a4']) { await kbInteract(page, id); log = await read(); }
   expect(pageTexts(log)).toContain('Two of them say thin first');
+
+  // The throat thread: Mott, sober, at his shack on the Goat Path.
+  await kbExit(page, 'goat_path', [0, 10]);
+  await kbInteract(page, 'mott_a4'); await read();
+  await kbInteract(page, 'mott_a4', 'moon_chart'); log = await read();
+  expect(pageTexts(log)).toContain('the greedy one');
+  expect((await snap(page)).items).toEqual(expect.arrayContaining(['copper_throat', 'square_jug']));
+  await settle(page); await shot(page, 'act4-01b-mott');
+  await kbExit(page, 'lamp_street');
 
   // The bell thread.
   await kbExit(page, 'crown');
@@ -160,6 +167,10 @@ test('pointer: Act 4, the morning to the reveal', async ({ page }) => {
   // This time the order thread first: Ottilie, then the girls, then the bell.
   await ptrExit(page, 'cistern_court');
   await ptrExit(page, 'lamp_street', [16, 25]);
+  await ptrExit(page, 'goat_path', [0, 10]);
+  await ptrUse(page, 'moon_chart', 'mott_a4'); await read();
+  expect((await snap(page)).items).toContain('copper_throat');
+  await ptrExit(page, 'lamp_street');
   await ptrExit(page, 'crown');
   await ptrExit(page, 'archive');
   await ptrUse(page, 'ship_plan', 'ottilie_a4'); await read();

@@ -6,7 +6,7 @@ Waking the Sisters, and the sea going out. The design is [docs/design/04-the-lis
 
 | File | Contents |
 |---|---|
-| `index.js` | The act's maps, items, scripts, the Ship Plan's Act 4 looks, and a stand-in Ship Plan until Act 3 is in the game. |
+| `index.js` | The act's maps, items, scripts, and the Ship Plan's Act 4 looks. |
 | `common.js` | Items (copper throat, square jug), the act's state helpers, and `overlayMap`. |
 | `tiles.js` | The tileset: Act 2's sheets, the underground's, and Act 4's. |
 | `surface.js` | `withAct4(maps)`: Act 4's states of the Crown, Fountain Square, Lamp Street, the Archive, the Hundred Steps, Cistern Court, and the flat; `startAct4`. |
@@ -35,7 +35,7 @@ Every Act 4 state yields once `act5.started` or `epilogue` is set (`act4(g)` in 
 
 ## Hand-offs
 
-- **In:** Act 3's ending calls `act3.next(g)`; `src/content/index.js` sets it to `startAct4` once Act 3 is in the game. `startAct4` shows the Morning card, sets `act4.started` and Wrongness 0.35, and wakes Cheryl in her flat.
+- **In:** Act 3's ending calls `act3.next(g)`, which `src/content/index.js` sets to `startAct4`. `startAct4` shows the Morning card, sets `act4.started` and Wrongness 0.35, and wakes Cheryl in her flat.
 - **Out:** looking at the bronze door ends the act. `endOfAct4` says the door lines, sets `act4.done`, then calls `act4End.next(g)` if Act 5 has set it; otherwise the end card and the title screen.
 - **Act 2 part 2** (the wet Bilge, Goat Path, Harbor, lamp room) is still being built; Act 4's states of those maps (the flood stages, Mott at his shack, the sea-cave mouth) will be added as overlays when it lands. Until then the playthrough tests start with the copper throat in the bag.
 

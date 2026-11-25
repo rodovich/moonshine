@@ -18,6 +18,8 @@ import { reveal, bilge_flood } from '../../art/act4_surface.js';
 import { seacave } from '../../art/act4_under.js';
 import { sea, harbor_props, keyhole, lighthouse, lamproom } from '../../art/act5_surface.js';
 import { roof_props } from '../../art/roof.js';
+import { goatpath, mott_shack, mott_jugs } from '../../art/act2b_goat.js';
+import { headland, harbor_quay, fish_stall } from '../../art/act2b_harbor.js';
 
 export const act2Tiles = {
   sheets: {
@@ -28,10 +30,7 @@ export const act2Tiles = {
     act2_marks, act2_props, act2_water, crown_parapet, school, schoolyard,
     archive, archive_furniture, crypt, shop, square_props,
     reveal, bilge_flood, seacave, sea, harbor_props, keyhole, lighthouse, lamproom, roof_props,
+    goatpath, mott_shack, mott_jugs, headland, harbor_quay, fish_stall,
   },
-  tiles: {
-    // The piano's scrape marks lie on the paving, under characters; the art names them over_* (asked to rename).
-    scrape_a: { sheet: act2_marks, frame: 'over_scrape_a' },
-    scrape_b: { sheet: act2_marks, frame: 'over_scrape_b' },
-  },
+  tiles: {},
 };

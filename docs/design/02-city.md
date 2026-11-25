@@ -1076,6 +1076,22 @@ The Act 2 part 1 builder (5DfQsiqAZf) built Lamp Street through the Shop on `con
 - In part 1, the Goat Path gate and the rope to the Bilge decline with the lines the builder wrote (the goats have the path; CANAL CLEANING). Its added lines for objects the design didn't cover (the yard wall, the bay tree, the lamps, the views, and a few wrong combinations) are adopted as written.
 - In part 1 the Count thread can only happen after the piano moves, since the guidebook needs the Square.
 
+## As built (part 2)
+
+The same builder built the Goat Path, Harbor, lamp room, and Bilge on `content/act2b`. This document follows its choices:
+
+- Lamp Street's west edge (0, 9–11) is a gap in the wall to the Goat Path (no gate art); the gate line plays the first time, before the map changes.
+- The Fishmonger stands at (4, 4), in front of her door, not under a stall's canopy. The Bilge's west mooring post is at (10, 6), so the north quay's west end stays open.
+- In the Counting Woman's storm-off, the camera pans down to the arch so the piano, both Movers, and her climb over it are in frame, with the lines at the top of the screen; then it follows Cheryl again.
+- The Lighthouse Keeper polishes from (4, 4), facing the lamp (up).
+- Mott sits on the middle bollard at (13, 8) and swigs from his jug every so often.
+- Wading into the flooded street plays its first and second looks on the first and second wades (no hotspot on the water).
+- The bronze fish's line is the Fountain's second look (the fish sits on the solid Fountain): the Fountain's first look, then the fish, then the Fountain's repeat.
+- Lines the builder added, adopted as written: the Bilge cat, the harbor water, the lighthouse from below, and the cliff behind the Harbor.
+- From part 1, moved for reachability: the Woman with Watering Can at (24, 6), the bay tree at (2, 5).
+- Act 2's Wrongness is 0.1 throughout.
+- The blocked arch uses the age-free line ("I'm not climbing over a piano that isn't mine…"), per the client's note on Cheryl's age.
+
 ## Decisions
 
 - **Act 2 is eleven maps, all at day, ending at the hundredth step.** The act's job is to open the city, introduce everyone who matters later, and get Cheryl underground.

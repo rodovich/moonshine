@@ -781,7 +781,7 @@ test('keyboard: the long way round, the Count thread first', async ({ page }) =>
   await waitFor(page, () => !!window.moonshine.snapshot().choice, null, 4000);
   await settle(page);
   await page.keyboard.press('z');
-  await waitFor(page, () => window.moonshine.snapshot().scene === 'title', null, 20000);
+  await waitFor(page, () => window.moonshine.snapshot().map === 'step_gallery', null, 20000);
   expect(errors).toEqual([]);
 });
 

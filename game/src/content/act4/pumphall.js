@@ -248,7 +248,7 @@ async function rise(g) {
   g.sfx('hull_creak_long');
   await g.tilt(-1, 0, 2);
   // 4–6.
-  await g.describe("The floor's levelling. I can feel it in my knees.", "It worked. It's working.");
+  await g.describe("The floor's levelling. I can feel it through my shoes.", "It worked. It's working.");
   await g.wait(3);
   await g.describe("Middle sister's greedy. Put her back to bed.");
   // 7. Control returns: she must walk to the Middle Sister's valve.

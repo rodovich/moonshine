@@ -71,8 +71,8 @@ function compose(g) {
   }
 
   // ---- The scrape: from below the Squeeze along the street to the top of the Steps ----
-  for (let x = 3; x <= 28; x++) L.set('detail', x, 10, `scrape_${x % 2 ? 'a' : 'b'}`);
-  for (const y of [11, 12]) for (const x of [27, 28]) L.set('detail', x, y, `scrape_${x % 2 ? 'a' : 'b'}`);
+  for (let x = 3; x <= 28; x++) L.set('detail', x, 10, `act2_marks:scrape_${x % 2 ? 'a' : 'b'}`);
+  for (const y of [11, 12]) for (const x of [27, 28]) L.set('detail', x, y, `act2_marks:scrape_${x % 2 ? 'a' : 'b'}`);
 
   // ---- Props ----
   L.lamp(5, 9); L.lamp(16, 9); L.lamp(25, 9);

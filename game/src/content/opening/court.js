@@ -60,7 +60,7 @@ function compose(g) {
   set(overhead, 8, 1, rattle ? 'roof:over_chimney_rattle_r' : 'roof:over_chimney_r');
   // Herbs, tub, tap, chairs.
   set(detail, 1, 2, 'roof_props:herb_basil'); set(detail, 2, 2, 'roof_props:herb_rosemary'); block(1, 2); block(2, 2);
-  set(detail, 2, 7, 'roof_props:chair_fold'); set(detail, 3, 7, 'roof_props:chair_fold'); block(2, 7); block(3, 7);
+  set(detail, 2, 7, f('fx.cardigan') ? 'roof_props:chair_cardigan' : 'roof_props:chair_fold'); set(detail, 3, 7, 'roof_props:chair_fold'); block(2, 7); block(3, 7);
   let tubArt = 'tub_empty';
   if (!am) {
     if (f('tub.full')) tubArt = 'tub_full';
@@ -180,7 +180,28 @@ const dusk = (g) => !morning(g);
 // The sheets on the N–S lines, while they hang there.
 const sheetsUp = (g) => !morning(g) && !g.flag('neighbor.sheetsMoved');
 
+// The privacy beat (docs/design/01-opening.md, "Tub"): said once, on the third
+// look at the tub, or on the first if the plug thread is already done, after
+// the look's own line, so the state hints ("Plugged. Now the water.") still come.
+async function tubPrivacy(g, n) {
+  const plugDone = g.flag('oldMan.hasPepperKing') || g.flag('tub.plugged');
+  if (g.flag('n.tub.privacy') || !(n >= 2 || (n === 0 && plugDone))) return;
+  g.setFlag('n.tub.privacy', 1);
+  await g.describe("In full view of Her Next Door's roof. On Moonshine Night nobody looks at anybody else's roof. That's the rule.", "We've both kept it for thirty-one years. She's very good at not looking. So am I.");
+}
+
 const tubLook = async (g) => {
+  if (!morning(g)) {
+    const n = bump(g, 'tub.looks');
+    if (!(g.flag('tub.full') && g.flag('neighbor.sheetsMoved'))) {
+      await tubState(g);
+      return tubPrivacy(g, n);
+    }
+  }
+  return tubState(g);
+};
+
+const tubState = async (g) => {
   if (morning(g)) {
     const n = bump(g, 'tub.morning');
     if (n === 0) await g.describe('Empty. No plug. It went down the drain last night, chain and all. Plugs don\'t do that.');
@@ -276,8 +297,8 @@ const objects = [
       ? 'Basins on every roof, still full. Nobody wants to be the first to tip theirs out.'
       : 'Tessel, all the way down to the water. Every roof has a basin on it tonight, waiting for the moon.'),
   },
-  { id: 'parapet_w', x: 0, y: 2, h: 7, lookKey: 'parapets', look: 'The next roof over is a long step and a short fall. I was nineteen once. Never again.' },
-  { id: 'parapet_n', x: 1, y: 1, w: 9, lookKey: 'parapets', look: 'The next roof over is a long step and a short fall. I was nineteen once. Never again.' },
+  { id: 'parapet_w', x: 0, y: 2, h: 7, lookKey: 'parapets', look: "The next roof over is a long step and a short fall. I've made it before. Not tonight, and not in my good cardigan." },
+  { id: 'parapet_n', x: 1, y: 1, w: 9, lookKey: 'parapets', look: "The next roof over is a long step and a short fall. I've made it before. Not tonight, and not in my good cardigan." },
   { id: 'low_wall_n', x: 9, y: 2, h: 3, lookKey: 'low_wall', look: 'The wall between my roof and hers. Low enough to talk over. She does.' },
   { id: 'low_wall_s', x: 9, y: 6, h: 3, lookKey: 'low_wall', look: 'The wall between my roof and hers. Low enough to talk over. She does.' },
 
@@ -568,6 +589,7 @@ const neighborTalk = async (g, self) => {
     }
     return g.say(self, cycle(g, 'neighbor.repeat', [
       "Bring me my prop and I'll move them. I'm not unreasonable. I'm just right.",
+      "And it's the striped costume tonight, is it? Good. Not that I'll be looking. Nobody looks. That's the rule.",
       'I can hear you thinking. You think very loudly for a quiet woman.',
     ]));
 };
@@ -791,7 +813,7 @@ export const courtMap = composedMap(compose, {
       // Walking down into the piano.
       x: 15, y: 22, w: 2,
       when: (g) => !morning(g) && g.player.facing === 'down',
-      run: (g) => g.describe("I'm not climbing over a piano at my age. Besides, I'm not going anywhere tonight."),
+      run: (g) => g.describe("I'm not climbing over a piano I didn't order. Besides, I'm not going anywhere tonight."),
     },
     {
       // The first step onto the cleared Squeeze.

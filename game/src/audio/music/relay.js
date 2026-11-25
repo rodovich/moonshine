@@ -1,12 +1,16 @@
 // "Beat the Egg" — the Kid's run in Act 5 (docs/design/05-high-and-dry.md, "The disc and the
 // Kid"). A one-shot: play it with playMusic('relay', { fadeMs: 0 }) as he sets off.
-// A quick, bright chase on the surface instruments: Cheryl's home phrase (Cistern Court's
-// opening, F–Bb–D–F, then F–Eb–D) in double time on the flute, harp racing in sixteenths, a
-// bouncing bass, tambourine and a light kit. A middle section climbs in G minor, the home phrase
-// comes back, and a coda races up broken chords to the door. Then everything stops for the last
-// bar, and the egg timer's DING is the final note (pitched on D, the third of B-flat, so it lands
-// as a resolution).
-// 31 bars of 4/4 at 152 bpm = 48.9 s, plus the ding's ring. Format: docs/audio-direction.md.
+// A quick, bright chase on the surface instruments: one bar of harp and ticking as the timer
+// starts, then Cheryl's home phrase (Cistern Court's opening, F–Bb–D–F, then F–Eb–D) in double
+// time on the flute over harp racing in sixteenths, a bouncing bass, tambourine and a light kit;
+// then a coda races up broken chords to the door. Then everything stops for the last bar, and the
+// egg timer's DING is the final note (pitched on D, the third of B-flat, so it lands as a
+// resolution). Sized to the run as built (about 15 s; content/act5).
+// 10 bars of 4/4 at 152 bpm = 15.8 s: the DING lands at 14.21 s and rings about 1.6 s.
+// Format: docs/audio-direction.md.
+
+/** Seconds from the start of `relay` to its final DING (the door should open just before). */
+export const RELAY_DING = (9 * 4 * 60) / 152;
 
 const arp = (a, b, c, d) => `(${a}:1 ${b} ${c} ${d})x4`;
 const half = (a, b, c, d) => `(${a}:1 ${b} ${c} ${d})x2`;
@@ -32,6 +36,7 @@ const BASS = {
   D7: bounce('D2', 'A2'),
 };
 
+const firstHalf = (part) => `${part.split('|').map((b) => b.trim()).filter(Boolean).slice(0, 4).join(' | ')} |`;
 const harmonyA = 'Bb | Eb | Cm F7 | Bb | Bb | Eb | Cm F7 | Bb |';
 const melodyA = `
   F4:2 Bb4 D5 F5 F5:3 Eb5:1 D5:4 |
@@ -63,44 +68,20 @@ export default {
   ],
   patterns: {
     I: {
-      harmony: 'Bb | F7 |',
-      lead: '.:16 | .:16 |',
-      harp: `${HARP.Bb} | ${HARP.F7} |`,
-      bass: `${BASS.Bb} | ${BASS.F7} |`,
-      tamb: `(tick:2 tock)x4 | ${tamb} |`,
-      drums: '.:16 | .:8 k:2 k sn sn! |',
+      harmony: 'F7 |',
+      lead: '.:16 |',
+      harp: `${HARP.F7} |`,
+      bass: `${BASS.F7} |`,
+      tamb: '(tick:2 tock)x4 |',
+      drums: '.:8 k:2 k sn sn! |',
     },
     A: {
-      harmony: harmonyA,
-      lead: melodyA,
-      harp: harpA,
-      bass: bassA,
-      tamb: `(${tamb} |)x8`,
-      drums: `(${kick} |)x8`,
-    },
-    B: {
-      harmony: 'Gm | Eb | F | D7 | Gm | Eb | F | F7 |',
-      lead: `
-        D5:2 G5 Bb5 G5 D5 G5 Bb5 D6 |
-        Eb5:2 G5 Bb5 G5 Eb5 G5 Bb5 Eb6 |
-        F5:2 A5 C6 A5 F5 A5 C6 F6 |
-        F#5:2 A5 C6 D6 C6 A5 F#5 D5 |
-        G5:4 Bb5 D6:8 |
-        Eb6:4 D6:2 C6 Bb5:8 |
-        A5:4 C6 F6:8 |
-        Eb6:4 C6 A5 C5 |`,
-      harp: `${HARP.Gm} | ${HARP.Eb} | ${HARP.F} | ${HARP.D7} | ${HARP.Gm} | ${HARP.Eb} | ${HARP.F} | ${HARP.F7} |`,
-      bass: `${BASS.Gm} | ${BASS.Eb} | ${BASS.F} | ${BASS.D7} | ${BASS.Gm} | ${BASS.Eb} | ${BASS.F} | ${BASS.F7} |`,
-      tamb: `(${tamb} |)x8`,
-      drums: `(${kick} |)x7 k:4 sn:2 sn sn sn! tom:4 |`,
-    },
-    A2: {
-      harmony: harmonyA,
-      lead: melodyA,
-      harp: harpA,
-      bass: bassA,
-      tamb: '(sh:2 sh tam sh sh sh tam tam! |)x8',
-      drums: `(${kick} |)x8`,
+      harmony: firstHalf(harmonyA),
+      lead: firstHalf(melodyA),
+      harp: firstHalf(harpA),
+      bass: firstHalf(bassA),
+      tamb: `(${tamb} |)x4`,
+      drums: `(${kick} |)x3 k:4 sn:2 sn sn sn! tom:4 |`,
     },
     C: {
       harmony: 'Gm | Eb | F | F7 | Bb |',
@@ -117,6 +98,6 @@ export default {
       drums: `(${kick} |)x3 k:2 k k k sn sn sn! sn! | ding!:16 |`,
     },
   },
-  intro: ['I', 'A', 'B', 'A2', 'C'],
+  intro: ['I', 'A', 'C'],
   loop: null,
 };

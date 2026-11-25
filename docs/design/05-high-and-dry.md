@@ -572,6 +572,17 @@ All of this is built (audio/foundation, 0518c2a); ids and a suggested order are 
 - [ ] Every line fits in its box.
 - [ ] First-time players finish in 30–40 minutes.
 
+## As built
+
+The Act 5 builder (b_30JU3Nrc) built this act on `content/act5`; its full list is in `game/src/content/act5/README.md`. This document follows it:
+
+- **The disc after the relay:** the Kid keeps it on the mud by the open door and hands it back when Cheryl talks to him there, or throws it up to her ("CATCH!") if she talks to him from the broken edge before she has the rope. It doesn't sit in the eye.
+- **The Fishmonger's door is a look** ("The Fishmonger's door, down to her cellar. Ice. Fish. A hatch I'm not opening."), not a way back in.
+- **The Kid's route:** west along the Harbor quay (MOTT: Mind the edge, boy!), into the Bilge on the south quay, over the bridge, east along the north quay, off the quay onto the mud by the Movers (OTHER MOVER: Hnn!), hurdling a beached boat and the Boatman's (BOATMAN: Go on, lad!).
+- **Placements:** the Clockmaker at (2, 4), back to us at his bench; the Counting Woman at (12, 17); the banner over x16–21. The open hundredth step is a hole Cheryl walks round ("The hundredth step, open, and the ladder down. Not today. My business is at the bottom of the canal.").
+- **The act opens** with the card "That afternoon." and: "The wind's getting up. Every line of washing on the quay is pointing out to sea." / "A door at the bottom of the canal, and stairs that don't reach it. Well. One thing at a time."
+- **Lines the builder added, adopted as written:** after the relay ("He did it. I heard him from here. Half of Tessel heard him from here."); the Clockmaker as the door swings shut ("Ah! …It's fine! The jug's fine! It's the DOOR that moved!"); the Square's crowd; Mott's declines ("Keep it. I'm off it. I'm off all of it till she's tied up again." / "Grandad had a bit of glass like that. Said it came off a door. I thought he meant a pub door."); the Shop's display; the lamp after the relay; the passage and Windlass lamps; and the socket with the clapper in the bag ("I know exactly what goes in there. It's in my bag.").
+
 ## Decisions
 
 - **Act 5 is one afternoon, ending at dusk in the Windlass Room** with the Tooth replaced, so Act 6 can begin with the bell.

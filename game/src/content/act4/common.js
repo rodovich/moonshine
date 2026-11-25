@@ -102,6 +102,12 @@ export function overlayMap(base, o) {
           T.block(x, y, solid);
         }
       },
+      // Set a cell to a legend value as is ({ tile, solid, step, ... }).
+      raw(layer, x, y, v) {
+        if (x < 0 || y < 0 || x >= w || y >= h) return;
+        cur[layer].set(`${x},${y}`, v);
+        out.push([layer, x, y, v]);
+      },
       // Change a tile's solidity, keeping its art.
       block(x, y, solid = true) {
         const g0 = get('ground', x, y);

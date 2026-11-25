@@ -226,7 +226,7 @@ On entering, the nearest lamps wake one by one ahead of Cheryl (a chime each). A
 **Trigger:** interacting with the Basin after `sisters.asleep`.
 
 1. "The best bath I'll ever have, and I didn't bring a towel."
-2. Cheryl takes off her shoes and sets them side by side beside the Basin (a shoes sprite at (6, 6)). She climbs in and sits (a sitting-in-water sprite), facing down, the moonlight on her.
+2. Cheryl takes off her shoes and sets them side by side beside the Basin (a shoes sprite at (6, 6)). She climbs in and sits, in her clothes (she hadn't planned a bath; her striped costume is at home, which is the joke of "I didn't bring a towel"), facing down, the moonlight on her. The sitting-in-water sprite and the Basin view's reflection show her ordinary cardigan and bun, not the costume.
 3. The music box plays the skipping rhyme, slowly, perfectly in tune: the tune from the Moonrise scene in Act 1, this time not going flat.
 4. **The Basin view** once more, now with Cheryl's reflection at the edge of the circle: the Gate, the moon true, the ripples from her settling.
 5. Internal monologue (the game's last):
@@ -370,9 +370,7 @@ The ferry *Persistence* is tied up at the landing, level, as it should be. Two n
 
 Plain and short, in the game's font, over the final vista. Roles, not people (decided by the orchestrator). Headings in gold; a blank line between entries:
 
-- **MOONSHINE**
-- *(gap)*
-- **Story and design** / Claude (Anthropic)
+- **Story and design** / Claude (Anthropic) *(the roll starts here; the MOONSHINE title has just shown over the vista)*
 - **Art** / Claude (Anthropic)
 - **Music and sound** / Claude (Anthropic)
 - **Engine** / Claude (Anthropic)
@@ -409,8 +407,8 @@ Plain and short, in the game's font, over the final vista. Roles, not people (de
 - The Fountain Square café with luggage; the Shop window with the guidebook
 
 **Full-screen images**
-- **The Basin view**: a circle of still water in a stone rim, reflecting the Rim's silhouette, the notch of the Gate, and the night sky (full dark: it's an hour after sunset, so no glow on the horizon, just stars and a faint blue-grey along the Rim), with the moon as a separate sprite so it can sit at four positions (far right, nearer, dead center, two fingers past). Two nights past full, the moon is a waning gibbous, a hair flattened on one edge, pale and silver; a variant with Cheryl's reflection at the edge and ripples
-- **The final vista**: the Act 1 vista (the Bowl from Cheryl's roof, looking east) with the full moon rising dead in the Gate, large and pale, the sky around it brightening to silver; the scene's warmth comes only from the rose-lit cliffs and the lit town. The sky follows the same rules as the corrected Act 1 vista: deep blue, a rose-pink band above the Rim, the Earth's shadow along it, and no sunset glow (the sun is setting behind Cheryl); the title MOONSHINE over it. **New:** Cheryl's silhouette sitting *in* the tub (head and shoulders above the rim, from behind, in her striped bathing costume and cap, as in Act 1), replacing the edge-sitting silhouette
+- **The Basin view**: a circle of still water in a stone rim, reflecting the Rim's silhouette, the notch of the Gate, and the night sky (full dark: it's an hour after sunset, so no glow on the horizon, just stars and a faint blue-grey along the Rim), with the moon as a separate sprite so it can sit at four positions (far right, nearer, dead center, two fingers past). Two nights past full, the moon is a waning gibbous, a hair flattened on its upper-right edge, slightly warm because it's low; a variant with Cheryl's reflection at the edge and ripples
+- **The final vista**: the Act 1 vista (the Bowl from Cheryl's roof, looking east) with the full moon rising dead in the Gate, large, pale peach-gold low and whitening as it climbs, with a silver halo and a faint peach-gold path across the Bowl from the Gate; the sky's own warmth comes only from the rose-lit cliffs and the lit town. The sky follows the same rules as the corrected Act 1 vista: deep blue, a rose-pink band above the Rim, the Earth's shadow along it, and no sunset glow (the sun is setting behind Cheryl); the title MOONSHINE over it. **New:** Cheryl's silhouette sitting *in* the tub (head and shoulders above the rim, from behind, in her striped bathing costume and cap, as in Act 1), replacing the edge-sitting silhouette
 
 **Sprites**
 - A generic "sitting down hard" pose for residents (the crowd falling over), and a flying chess piece or two
@@ -473,6 +471,21 @@ All of this is built (audio/foundation, 865415c); ids and a step-by-step order f
 - [ ] The final tick and the vista close the game cleanly; the credits are short.
 - [ ] Every line fits in its box.
 - [ ] First-time players finish the act in 15–25 minutes.
+
+## As built
+
+The Act 6 builder (A7CXb-ur4K) built the Long Keel, the Sighting Room, the dawn, the epilogue on the opening's and Act 2's maps, the final scene, the vista, and the credits on `content/act6` (the Windlass climax, the montages, and the Bilge and Harbor epilogue wait for Acts 4–5's maps). Its full list is in `game/src/content/act6/README.md`. This document follows it:
+
+- The Long Keel's grooves are a line Cheryl says the first time she walks in them, not a hotspot.
+- The Sighting Room has two moonglass lamps on its north wall (x5, x10), dark until the moon is true, so the lamps have something to flare.
+- Looking into the full Basin shows the Basin view at the current trim, with one line per position: "The moon, off to the right of the Gate." / "Closer to the Gate. Not there yet." / "Dead in the Gate. But it isn't Moonshine Night. 'Allow two fingers.'" / after true, "Moon in the Gate, and moon in the bowl."
+- The lift before the bath: "Not yet. Not with the moon off to one side like that." (repeat: "'Up,' says the arrow. Not yet.").
+- Cheryl's shoes stay at (6, 6) while she bathes.
+- The Stair Race's finish is a tape across flight 3 at row 21, just below the open step, with the Counting Woman at (7, 18). The rope round the open step can be walked through (a solid barrier would cut the Steps in two).
+- The title is the art's MOONSHINE overlay in the sky above the moon; it fades out before the credits roll, and the roll starts with "Story and design" (no repeated MOONSHINE line).
+- The montage cuts are staged on Act 4's dry Bilge, the belfry, the lamp room, and the wet Bilge; Mott's toast uses Act 5's risen Harbor.
+- The Harbor epilogue: the Pelletiers at (15–16, 6) with their luggage at (17, 6) ("The Pelletiers' luggage. A week on the mainland, and they bought a hatbox."); the Keeper at (21, 7); Mott on his bollard at (13, 8). Epilogue declines adopted as written: the Fishmonger ("Not today, Miss. Today I'm just enjoying the smell."), the Boatman ("I've got everything a man needs, Miss. A boat. Water under it."), the Pelletiers ("We've got enough luggage, thank you."), Mott ("No, no. I've given up the jug. Tea, now. Mostly tea."), the Keeper ("I've no use for that down here. I'm just looking.").
+- Lines the builder added, adopted as written: the signed log; the master stop afterward; the shaft and walls; the Keel's lamps; the drum, hawse, coil, sealed hatch, and speaking tube before the hauling; the Old Man after the piano ("Play it when you're ready. Gerald's in no hurry."); the tub with the new plug ("Next year. On Moonshine Night. With the moon in the Gate."); the Movers ("Delivered."); the Stair Race runners and crowd; the Tourist's luggage; and the epilogue declines for the Clockmaker, Ambrose, Ottilie, and the Shopkeeper.
 
 ## Decisions
 

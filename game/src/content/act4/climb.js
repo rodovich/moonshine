@@ -48,7 +48,7 @@ export const shaftMap = composedMap(composeShaft, {
     }),
     climbLine(14, 'climb.14', async (g) => {
       g.setLoopVolume('roar', 0.1, 3000);
-      await g.describe("My arms are fifty-eight years old. They'd like that noted.");
+      await g.describe('Fifty rungs. Fifty-one. The Counting Woman would be proud of me.');
     }),
     climbLine(7, 'climb.7', async (g) => {
       g.stopLoop('roar', 3000);

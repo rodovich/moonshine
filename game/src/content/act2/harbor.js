@@ -27,12 +27,15 @@ function compose() {
   const L = layout(W, H, blankGrid);
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) L.set('ground', x, y, pave(x, y));
 
-  // ---- The cliff behind the harbor front, the Goat stair, the lighthouse ----
+  // ---- The headland behind the harbor front, the Goat stair, the lighthouse ----
   for (let y = 0; y <= 3; y++) for (let x = 0; x < W; x++) {
-    L.set('ground', x, y, y === 3 ? `seacave:rock_face_${x % 2 ? 'b' : 'a'}` : 'seacave:rock', true);
+    let f = `cliff_${y % 2 ? 's' : 'n'}${x % 2 ? 'e' : 'w'}`;
+    if (y === 1 && (x === 9 || x === 24)) f = 'cliff_gull';
+    if (y === 3) f = `cliff_foot_${x % 2 ? 'b' : 'a'}`;
+    L.set('ground', x, y, `headland:${f}`, true);
   }
   for (let y = 0; y <= 3; y++) {
-    L.set('ground', 2, y, 'street:stairs_l', false); L.set('ground', 3, y, 'street:stairs_r', false);
+    L.set('ground', 2, y, `headland:goatstair_x0y${y}`, false); L.set('ground', 3, y, `headland:goatstair_x1y${y}`, false);
     L.step[y][2] = L.step[y][3] = 'step_stairs';
   }
   const top = [], base = [];
@@ -55,10 +58,10 @@ function compose() {
 
   // ---- The quay edge, the Keyhole, and the sea ----
   for (let x = 0; x < W; x++) {
-    L.set('ground', x, 9, 'canal:bank_n', true);
+    L.set('ground', x, 9, `harbor_quay:quay_${x % 2 ? 'b' : 'a'}`, true);
     for (let y = 10; y < H; y++) L.set('ground', x, y, `sea:sea_${q(x, y)}`, true);
   }
-  for (let y = 0; y < 2; y++) for (let x = 0; x < 2; x++) L.set('ground', 30 + x, 9 + y, `keyhole:keyhole_x${x}y${y}`, true);
+  L.set('ground', 30, 9, 'harbor_quay:keyhole_l', true); L.set('ground', 31, 9, 'harbor_quay:keyhole_r', true);
   return L.done();
 }
 
@@ -82,7 +85,7 @@ const objects = [
   },
   ...[[0, 10], [16, 3]].map(([x, w]) => ({ id: `harbor_water_${x}`, x, y: 9, w, lookKey: 'harbor_water', look: 'The harbor, slopping at the quay. The sea has nothing to say this morning. It\'s thinking.' })),
   {
-    id: 'keyhole', x: 30, y: 9, w: 2, h: 2,
+    id: 'keyhole', x: 30, y: 9, w: 2,
     look: 'Under the lighthouse the rock has a hole worn clean through it. The Keyhole. The sea goes in and out of it like breath.',
   },
   ...[8, 18].map((x) => ({ id: `bollard_${x}`, x, y: 8, lookKey: 'bollards', look: "A bollard. Mott's sitting on the good one." })),

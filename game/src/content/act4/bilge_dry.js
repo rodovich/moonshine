@@ -134,7 +134,10 @@ const people = [
     // He runs the west reach of the mud, from the far end to the bridge pier.
     behavior: { type: 'patrol', route: [[1, 10], [11, 10]], ghost: true, stopNear: 3, nearPose: 'jog' },
     talkPose: 'jog',
-    interact: (g, self) => g.say(self, "It's a ROAD, Miss! I've done eleven laps! There's a CRAB that's faster than me!"),
+    interact: async (g, self) => {
+      if (bump(g, 'dry.kid') === 0) await g.describe("He jumped. I could. I'm not landing in six feet of mud in my good skirt.");
+      return g.say(self, "It's a ROAD, Miss! I've done eleven laps! There's a CRAB that's faster than me!");
+    },
   },
   ...[[6, 10], [21, 10], [28, 10]].map(([x, y], i) => ({
     id: `crab_${i}`, x, y, solid: false, shadow: false,
