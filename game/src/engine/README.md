@@ -52,7 +52,7 @@ A map is a JS object; put each in its own module under `src/content/maps/`.
 export default {
   id: 'harbor_steps',
   tileset: townTiles,            // see Tilesets
-  music: 'harbor',               // played on entry; null stops music; omit to leave it alone
+  music: 'harbor',               // played on entry; null stops music; omit to leave it alone; or (g) => id
   lighting: 'dusk',              // 'day', 'dusk', 'night', or (g) => one of them; see Lighting
   background: 'sea_dark',        // palette color shown outside small maps (default black)
   spawn: [5, 6],                 // default position for ?map= debug starts
@@ -83,9 +83,9 @@ All layers are the same size as `ground`. The legend is shared by all layers, so
 
 **Darkness** (the Lamp Halls): `darkness: 0.9` (or `dark`; a number or a function of the state) covers the map in near-black (`darkColor`, default `void`) with holes around lights. Light sources: the map's `lights: [{ x, y, radius, color, when }]` (tiles; or a function returning such a list; `when` lets a flag relight a lamp), entities with `light: radius` or `light: { radius, color }`, and `playerLight` on the map or the content (a radius, `{ radius, color }`, or a function, e.g. `(g) => g.hasItem('moonglass_disc') && { radius: 3, color: 'relic_cyan' }`). Each light cuts a pool that fades out in three bands; a `color` tints the pool.
 
-**Ambient events** happen on a timer without stopping the player: `ambient: [{ every: [18, 24], when, run: (g) => ... }]` (seconds, a random interval in the range). `run` is a plain callback, not a script, so use non-blocking calls there: `g.bark`, `g.emote`, `g.spawnEffect`, `g.sfx`, `g.setTile`. Timers pause while a script runs.
+**Ambient events** happen on a timer without stopping the player: `ambient: [{ every: [18, 24], when, run: (g) => ... }]` (seconds, a random interval in the range). `run` is a plain callback, not a script, so use non-blocking calls there: `g.bark`, `g.emote`, `g.spawnEffect`, `g.sfx`, `g.setTile`. Timers pause while a script runs. With `script: true`, `run` is queued as a full script instead (it takes control and may `say`, `changeMap`, and so on): a bell that rings on its own after 15 seconds. From any plain callback, `g.runScript(fn)` does the same.
 
-**Audio per map:** `ambience: ['crowd', 'wind']` starts those looping sounds when the map loads and fades out the previous map's (ids from the audio module's loops). `musicFilter: 'muffled'` and `step: 'step_stone'` (footstep sound; a tile's own `step` property wins) pass to the audio module if it supports them, and are quietly ignored until then. Scripts can also `g.startLoop(id)` / `g.stopLoop(id, fadeMs)`.
+**Audio per map:** `music`, `ambience`, and `musicFilter` may each be a function of the state, like `lighting`, evaluated as the map loads (so the morning's music starts with the fade-in, not after). `ambience: ['crowd', 'wind']` starts those looping sounds when the map loads and fades out the previous map's (ids from the audio module's loops). `musicFilter: 'muffled'` and `step: 'step_stone'` (footstep sound; a tile's own `step` property wins) pass to the audio module if it supports them, and are quietly ignored until then. Scripts can also `g.startLoop(id)` / `g.stopLoop(id, fadeMs)`.
 
 **Exits** fire when the player finishes a step onto them by walking. An exit whose `when` fails but has `blocked: 'line'` (a line, a list of lines, or an async function) explains itself in Cheryl's voice and steps her back. `confirm: 'Go down?'` asks first (options `choices`, default Yes / Not yet; anything but the first steps her back). Exits don't fire during a script: `movePlayer` onto a door does nothing, so call `changeMap` yourself. Click-to-walk paths never cross an open exit (or a closed one with `blocked`) on the way to somewhere else; a closed exit without `blocked` is ordinary floor until it opens, and an exit is never chosen as "the nearest reachable tile" for an unreachable click.
 
@@ -304,7 +304,7 @@ Maps, audio, misc:
 | `restorePlayer({ fade })` | Ends a cutscene visit: back to Cheryl's own map and spot, visible. If a script ends without it, the engine restores her (with a console warning). |
 | `cameraFollow(id, speed)` | Keeps the camera on another character as they move, also across cutscene visits (the Kid's relay run); `speed` glides (px per frame), 0 snaps. `followPlayer()` returns to Cheryl. |
 | `map` | Current map id. |
-| `playMusic(id)`, `stopMusic(fadeMs)`, `sfx(id)`, `playCue(id, { resume })`, `windDownMusic(ms)`, `muffleMusic(on)`, `bendMusic(cents, ms)`, `setLoopVolume(id, v, fadeMs)`, `startLoop(id)`, `stopLoop(id, fadeMs)`, `setWrongness(0..1)` | Audio (see below and `src/audio/README.md`). |
+| `playMusic(id, { fadeMs })`, `stopMusic(fadeMs)`, `sfx(id)`, `playCue(id, { resume })`, `windDownMusic(ms)`, `startLoop(id)`, `stopLoop(id, fadeMs)`, `setWrongness(0..1)` | Audio (see below and `src/audio/README.md`). |
 | `sfx(id, { at, range, volume })` | A sound placed in the world: `at` is a tile `[x, y]` or an entity id, and the volume falls off with Cheryl's distance, silent beyond `range` tiles (default 12). Use it for map-wide ambient sounds (a chess tap, the Kid's hop). |
 | `save()` | Save now (saving also happens automatically). |
 | `toTitle()` | Save and return to the title screen (end of a slice). |

@@ -306,6 +306,12 @@ export function makeApi(world) {
       world.picture = null;
       if (fade) await fx.fade('in', fade / 2);
     },
+    // Queue a full script from a plain callback (an ambient event, a patrol's
+    // onWaypoint): it runs after the current one, like any interaction.
+    // Resolves with its result; don't await it from inside a script.
+    runScript(fn, ...args) {
+      return world.run(fn, ...args);
+    },
     // Resolves on the next key (Z/X and friends) or tap: for a full-screen
     // picture the player dismisses (the Ship Plan).
     waitForInput() {
@@ -460,8 +466,9 @@ export function makeApi(world) {
     },
 
     // ---- Audio ----
-    playMusic(id) {
-      playMusic(id);
+    // opts go to the audio module, e.g. { fadeMs: 0 } for a hard cut.
+    playMusic(id, opts) {
+      playMusic(id, opts);
     },
     stopMusic(fadeMs) {
       stopMusic(fadeMs);
@@ -487,7 +494,7 @@ export function makeApi(world) {
         volume *= Math.max(0, 1 - d / range) ** 1.5;
         if (volume < 0.03) return;
       }
-      sfx(id, { volume, pitch: opts.pitch });
+      sfx(id, { volume, pitch: opts.pitch, pan: opts.pan });
     },
     // A one-shot music cue over the current track (which dips and returns,
     // unless { resume: false }).
