@@ -215,6 +215,7 @@ const keeperObjects = [
         return g.describe(
           "The other side of Ottilie's door. A bronze bolt as thick as my arm, shot home from this side.",
           read ? "'I have bolted the door. Someone must stay.'" : 'Somebody bolted this from in here. And stayed in here.',
+          'It looks like it would slide, if I put my weight on it.',
         );
       }
       return drawBolt(g);
