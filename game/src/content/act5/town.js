@@ -160,8 +160,9 @@ export function withSquare5(def) {
 
 // ---------------------------------------------------------------------------
 // The Shop: the window display fallen over in the rise, with the Keeper's
-// telescope lying in it. Once she's asked for it back, he swaps it for the
-// guidebook (docs/design/structure-pass.md, section 6).
+// telescope lying in it. He swaps it for the guidebook, whether or not the
+// Keeper has asked for it yet (docs/design/structure-pass.md, section 6; the
+// "only once she's asked" gate is dropped, since it only lengthened the route).
 
 const swapped = (g) => !!g.flag('telescope.back');
 const asked = (g) => !!g.flag('keeper.asked');
@@ -172,15 +173,14 @@ async function shopkeeperTalk(g, self) {
     await g.say(self,
       'Miss. Look. The window. It went over in the night. When the whole shop lifted.',
       'The telescope\'s lying in it like a fallen soldier. Best thing I\'ve ever displayed.');
-    if (!asked(g)) return;
   }
   if (asked(g)) return g.say(self, 'Give it BACK? Then there\'s a GAP, Miss. I need something local. Something that says Tessel.');
-  return g.say(self, 'A fallen soldier. People will talk. They\'ll say, "Did you see his window?"');
+  // Before the Keeper has asked, he still names his price, so the swap can come first.
+  return g.say(self, 'If it goes, there\'s a GAP, Miss. I\'d need something local. Something that says Tessel.');
 }
 
 async function giveGuidebook(g, self) {
   if (swapped(g)) return g.say(self, "It's in. It's perfect. Don't touch the window.");
-  if (!asked(g)) return g.say(self, 'A genuine local guidebook! Lovely. But my window is complete.');
   g.takeItem('guidebook');
   g.sfx('give');
   await g.say(self, 'A guidebook! "Tessel: A Pocket Companion." Genuinely local. Confidently wrong. PERFECT.');

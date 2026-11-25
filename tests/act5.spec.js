@@ -656,33 +656,12 @@ test('pointer: Act 5', async ({ page }) => {
   await read();
   await ptrGo(page, 'fountain_square');
   await read();
-  // Before the Keeper asks, the Shopkeeper's window is complete.
+  // The Shop first, before the Keeper has asked: the swap works anyway.
   await ptrGo(page, 'shop');
   await read();
-  await ptrUse(page, 'guidebook', 'shopkeeper5');
+  await ptrInteract(page, 'shopkeeper5');
   log = await read();
-  expect(joined(log)).toContain('my window is complete');
-  await ptrGo(page, 'fountain_square');
-  await read();
-
-  // The Keeper asks for her telescope; back to the Shop for it.
-  await ptrGo(page, 'bilge_dry');
-  await read();
-  await ptrGo(page, 'harbor_risen');
-  log = await read();
-  expect(joined(log)).toContain('Closer. I can see the rocks');
-  await ptrGo(page, 'lamp_room');
-  await read();
-  await ptrInteract(page, 'keeper5');
-  await read();
-  await ptrGo(page, 'harbor_risen');
-  await read();
-  await ptrGo(page, 'bilge_dry');
-  await read();
-  await ptrGo(page, 'fountain_square');
-  await read();
-  await ptrGo(page, 'shop');
-  await read();
+  expect(joined(log)).toContain('something local');
   await ptrUse(page, 'guidebook', 'shopkeeper5');
   log = await read();
   expect(joined(log)).toContain("I'm practically a merchant");
@@ -693,7 +672,8 @@ test('pointer: Act 5', async ({ page }) => {
   await ptrGo(page, 'bilge_dry');
   await read();
   await ptrGo(page, 'harbor_risen');
-  await read();
+  log = await read();
+  expect(joined(log)).toContain('Closer. I can see the rocks');
   await ptrGo(page, 'lamp_room');
   await read();
   await ptrUse(page, 'telescope', 'keeper5');
