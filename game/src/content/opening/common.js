@@ -33,11 +33,6 @@ export const openingItems = {
     icon: { sheet: items2, frame: 'moon_chart' },
     description: 'Thirty-one ticks in the Gate, and one outside it.',
   },
-  hat: {
-    name: 'Hat',
-    icon: { sheet: items2, frame: 'hat' },
-    description: 'My daytime hat. Wide brim. It has seen things.',
-  },
 };
 
 export const morning = (g) => !!g.flag('act1.moonrise');

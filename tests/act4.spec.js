@@ -37,7 +37,8 @@ async function kbExit(page, to, at = null) {
 async function ptrExit(page, to, at = null) {
   const tile = at || await page.evaluate((to) => {
     const ex = window.moonshine.world.mapDef.exits.find((e) => e.to === to);
-    return [ex.x, ex.y];
+    // The middle of the exit, clear of the bag button when an exit runs down the top-right corner.
+    return [ex.x + Math.floor((ex.w || 1) / 2), ex.y + Math.floor((ex.h || 1) / 2)];
   }, to);
   for (let i = 0; i < 4 && (await snap(page)).map !== to; i++) {
     await ptrWalk(page, tile[0], tile[1]);

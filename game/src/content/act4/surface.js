@@ -451,7 +451,6 @@ export function withAct4(maps) {
   const boarded = (g) => !!g.flag('step.open') && (!!g.flag('act4.started') || !!g.flag('epilogue'));
   const stepsBoarded = overlayMap(steps4, {
     when: boarded,
-    baseTriggers: false,
     baseExitsAt: [[9, 19], [10, 19]],
     hide: ['hundredth_step', 'hollow_step', 'hollow_step_free'],
     tiles: (g, T) => {
