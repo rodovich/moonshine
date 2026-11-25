@@ -299,6 +299,18 @@ const objects = [
   },
   { id: 'parapet_w', x: 0, y: 2, h: 7, lookKey: 'parapets', look: "The next roof over is a long step and a short fall. I've made it before. Not tonight, and not in my good cardigan." },
   { id: 'parapet_n', x: 1, y: 1, w: 9, lookKey: 'parapets', look: "The next roof over is a long step and a short fall. I've made it before. Not tonight, and not in my good cardigan." },
+  // The sighting pins (client feedback): one on the low wall, one on the far parapet,
+  // lined up on the Gate from the tub. Listed before the wall and the view they sit on.
+  ...[[9, 4], [19, 4]].map(([x, y]) => ({
+    id: `pin_${x}`, x, y, lookKey: 'pins',
+    interact: async (g) => {
+      if (morning(g)) return g.describe("Still lined up on the Gate. So it isn't the pins that moved either.");
+      if (bump(g, 'pins') === 0) {
+        return g.describe('Two bronze pins. One on our wall, one on the far parapet, past her sheets.', 'Sit in the tub and they line up on the Gate. The moon comes up right between them. Every year.');
+      }
+      return g.describe('The pins. Lined up on the Gate, waiting.');
+    },
+  })),
   { id: 'low_wall_n', x: 9, y: 2, h: 3, lookKey: 'low_wall', look: 'The wall between my roof and hers. Low enough to talk over. She does.' },
   { id: 'low_wall_s', x: 9, y: 6, h: 3, lookKey: 'low_wall', look: 'The wall between my roof and hers. Low enough to talk over. She does.' },
 
@@ -489,6 +501,7 @@ const oldMan = {
     return g.say(self, cycle(g, 'oldMan.repeat', [
       "Black. Tall. Dignified. Gerald won't play against a teaspoon. I've tried.",
       "I could win in one move. I won't. I'd never hear the end of it.",
+      "Gerald says it'll come up straight in the Gate again. He says it every year. He's always right. It's maddening.",
       'Shh.',
     ]));
   },
@@ -579,7 +592,7 @@ const neighborTalk = async (g, self) => {
       return g.say(self, 'Mother would be mortified. Mother would blame the moon. Mother was usually right.');
     }
     if (g.flag('neighbor.sheetsMoved')) {
-      return g.say(self, cycle(g, 'neighbor.after', ['Look at them. Drinking it in.', "Enjoy your bath. Don't splash my whites."]));
+      return g.say(self, cycle(g, 'neighbor.after', ['Look at them. Drinking it in.', 'Straight up the Gate, it\'ll be. Between your pins, like always. My sheets know.', "Enjoy your bath. Don't splash my whites."]));
     }
     if (!g.flag('neighbor.wantsProp')) {
       g.setFlag('neighbor.wantsProp');
