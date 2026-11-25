@@ -337,8 +337,11 @@ export class Control {
       return;
     }
     const tx = Math.floor((t.x + w.cam.x) / TILE);
-    const ty = Math.floor((t.y + w.cam.y) / TILE);
+    let ty = Math.floor((t.y + w.cam.y) / TILE);
     if (!w.map.inBounds(tx, ty)) return;
+    // A door is drawn two tiles tall over a one-tile exit: a tap on the wall
+    // tile right above an exit goes to the exit.
+    if (w.map.solid(tx, ty) && !w.isExit(tx, ty) && w.isExit(tx, ty + 1)) ty += 1;
     // Holding an item and tapping terrain (water, a wall) or the ground right
     // beside her means "use it there": she walks over, says it doesn't go
     // there, and puts it away. Tapping open floor farther off is just
@@ -354,7 +357,7 @@ export class Control {
   interactFront() {
     const p = this.player;
     const w = this.world;
-    const e = w.zTarget(p.x, p.y, p.facing);
+    const e = w.zTarget(p.x, p.y, p.facing, p, { underfoot: !!this.holding });
     if (e) {
       this.act(e, this.holding);
     } else if (this.holding) {

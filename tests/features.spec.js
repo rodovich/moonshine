@@ -393,3 +393,76 @@ test('a thing reachable only diagonally: Z reaches it, and a click walks to the 
   await press(page, 'z');
   await waitFor(page, () => (window.moonshine.snapshot().text || '').includes('plaque'), null, 5000);
 });
+
+test('no lone word on the last page of a line', async ({ page }) => {
+  await boot(page, STREET);
+  const pages = await page.evaluate(async () => {
+    const { paginate } = await import('/src/engine/textbox.js');
+    return [paginate(['a b', 'c d', 'e f', 'one.']), paginate(['a b', 'c d', 'e f', 'one more.']), paginate(['one.'])];
+  });
+  expect(pages[0]).toEqual([['a b', 'c d'], ['e f', 'one.']]);
+  expect(pages[1]).toEqual([['a b', 'c d', 'e f'], ['one more.']]);
+  expect(pages[2]).toEqual([['one.']]);
+});
+
+test('using an item with nothing ahead reaches what Cheryl stands on', async ({ page }) => {
+  // The hollow step (10, 19), the Counting Woman sitting beside it at (9, 19).
+  await boot(page, '?map=hundred_steps&x=10&y=19&facing=right&flags=act1.moonrise,act2.started,piano.slid,movers.met&items=crowbar&seed=3');
+  await waitText(page); // the steps' arrival lines
+  await readAll(page);
+  await waitIdle(page);
+  await page.evaluate(() => {
+    const w = window.moonshine.world;
+    w.player.facing = 'right';
+    w.control.holding = 'crowbar';
+  });
+  expect(await page.evaluate(() => window.moonshine.world.interactableAt(11, 19))).toBeFalsy();
+  await press(page, 'z');
+  await waitFor(page, () => (window.moonshine.snapshot().text || '').includes('brave, not rude'), null, 5000);
+});
+
+test('a tap on the top half of a door goes through the door', async ({ page }) => {
+  await boot(page, '?map=cistern_court&x=3&y=13&seed=3');
+  await waitIdle(page);
+  await readAll(page);
+  await waitIdle(page);
+  expect(await page.evaluate(() => window.moonshine.world.map.solid(3, 10))).toBe(true);
+  await clickTile(page, 3, 10); // the wall tile above the flat's door
+  await waitFor(page, () => window.moonshine.snapshot().map === 'flat', null, 10000);
+});
+
+test('a tap past a trigger marked avoid routes around it', async ({ page }) => {
+  // A trigger that turns Cheryl back, on open floor between her and the tap.
+  await boot(page, `${STREET}&x=3&y=8&facing=right`);
+  await waitIdle(page);
+  await page.evaluate(() => {
+    window.moonshine.world.mapDef.triggers.push({
+      id: 'bouncer', x: 6, y: 8,
+      run: async (g) => { await g.say('Guard', 'Back you go.'); await g.movePlayer([5, 8]); },
+    });
+  });
+  const tapPast = async () => {
+    await clickTile(page, 9, 8);
+    await waitFor(page, () => { const s = window.moonshine.snapshot(); return (s.x === 9 && s.y === 8) || !!s.text; }, null, 10000);
+    return snap(page);
+  };
+  // Unmarked, the straight route walks into it and gets sent back.
+  let s = await tapPast();
+  expect(s.text || '').toContain('Back you go');
+  await readAll(page);
+  await waitIdle(page);
+  // Marked avoid, the route goes around it.
+  await page.evaluate(() => {
+    const w = window.moonshine.world;
+    w.mapDef.triggers.find((t) => t.id === 'bouncer').avoid = (g) => !g.flag('guard.gone');
+  });
+  await runScript(page, "g.place('player', 3, 8, 'right');");
+  s = await tapPast();
+  expect(s.text).toBeFalsy();
+  expect([s.x, s.y]).toEqual([9, 8]);
+  // A tap on the trigger itself still walks in.
+  await runScript(page, "g.place('player', 3, 8, 'right');");
+  await clickTile(page, 6, 8);
+  await waitText(page);
+  expect((await snap(page)).text).toContain('Back you go');
+});
