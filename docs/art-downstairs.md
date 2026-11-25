@@ -16,7 +16,7 @@ A north wall face is two tiles tall: an upper row (`hull:face_top`) over a lower
 | Floor plates (variants, wet) | `hull:floor`, `floor_worn`, `floor_glyph`, `floor_broken`, `floor_wet` | ground |
 | Rock void | `hull:top` | ground |
 | Chamfered 45° corner walls (Chart Room) | `hull:top_chamfer_nw/ne/sw/se`; the north face's ends `hull:face_base_end_l/r` | ground |
-| Ceiling ribs | `hull:over_rib_v` (across an east–west deck: one per row at the rib's x), `over_rib_h`; crossing `ds:over_rib_x` | overhead |
+| Ceiling ribs | `hull:over_rib_v` (across an east–west deck: one per row at the rib's x), `over_rib_h`; crossing `ds:over_rib_x`. See-through: solid edges and a sparse dither between, so Cheryl shows when she walks under one | overhead |
 | Bronze ladder up into daylight (Step Gallery, 3, 3) | `ds_mirror:dropladder_down` (16×32 sprite at the tile) under `ds_day:over_shaft_open` (one tile north, overhead) and `ds_day:over_column` (on the tile, overhead), with `ds_day:day_spot` on the floor. A wall-face version also exists: `ds_day:day_ladder_top/bot` | sprite; overhead; ground |
 | Wall lever: seized / open (Step Gallery, 10, 2) | `ds:lever_jammed` / `lever_ready` / `lever_pulled` (lower row) | ground |
 | The lid over the mirror: closed / open | `ds_day:over_shaft_shut` / `over_shaft_open`, two tiles north of the mirror (11, 4) | overhead |
@@ -49,7 +49,7 @@ A north wall face is two tiles tall: an upper row (`hull:face_top`) over a lower
 | Table with a cup and a bronze-bound ledger (3, 4) | `ds:stone_table` with `chart:keeper_ledger`; or the 2×1 `chart:stone_desk_l/r` | objects |
 | The Founders' Door, inside (7–8, 1–2): bolt shot / drawn / door open | `chart:fdoor_in_x<0-1>y<0-1>` / `fdoor_in_open_x..y..` / `fdoor_in_opened_x..y..` | ground |
 | Crypt: the Founders' Door open, steps going down | `founders_door_open:founders_door_open_x<0-1>y<0-1>` (replaces `landmarks:founders_door_*`) | ground |
-| Crown: moon-eye studs in the plaza paving and stair, plain / glowing | `moon_eyes:pave_<q>_eye` / `pave_<q>_eye_glow` (2 frames), where `<q>` is the paving quadrant for that tile (`nw` on even x and y, `ne` odd x, `sw` odd y, `se` both odd); stair `moon_eyes:stairs_l_eye` / `stairs_r_eye` / `stairs_eye` and `_glow` | ground |
+| Crown: moon-eye studs in the plaza paving and stair, plain / glowing | `moon_eyes:pave_<q>_eye` / `pave_<q>_eye_glow` (2 frames), where `<q>` is the paving quadrant for that tile (`nw` on even x and y, `ne` odd x, `sw` odd y, `se` both odd); stair `moon_eyes:stairs_l_eye` / `stairs_r_eye` / `stairs_eye` and `_glow`. The glow's halo is dithered `relic_cyan` (emissive), so it stays cool under the dusk tint | ground |
 
 ## Sprites
 

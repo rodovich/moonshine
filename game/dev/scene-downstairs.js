@@ -67,6 +67,7 @@ function gallery(dark, aim) {
   const mirror = dark ? 'mirror_s' : { ne: 'mirror_ne', nw: 'mirror_nw', n: 'mirror_n', rest: 'mirror_e' }[aim];
   const sprites = [
     { sheet: 'ds_mirror', frame: mirror, x: 11 * 16 + 8, y: 7 * 16 },
+    { sheet: 'cheryl', frame: 'down_0', x: 5 * 16 + 8, y: 8 * 16 },   // under a rib: the beam must not hide her
     { sheet: 'ds_mirror', frame: 'dropladder_down', x: 3 * 16 + 8, y: 4 * 16 },
   ];
   return { title: 'Step Gallery' + (dark ? ' (before the lever)' : ` (mirror ${aim})`), ...L, sprites, hero: [9 * 16, 4 * 16 + 14, 'up'], scale: 2 };
