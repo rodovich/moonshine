@@ -471,8 +471,17 @@ async function goDown(g) {
   await g.tween('player', { offset: [0, 18], seconds: 0.4, clipBelow: true });
   g.sfx('step_stairs');
   await g.tween('player', { offset: [0, 32], seconds: 0.5, clipBelow: true });
-  await endOfAct(g);
+  if (!act2.stepTo) return endOfAct(g);
+  // Act 3 is in the game: down the ladder into it.
+  await g.fade('out', 0.6);
+  await g.tween('player', { offset: [0, 0], seconds: 0, clipBelow: false });
+  g.setFlag('act2.done');
+  await g.changeMap(act2.stepTo, 3, 3, 'down');
 }
+
+// Where the ladder under the hundredth step leads. src/content/index.js sets
+// it once Act 3 registers its first map; until then the act ends on a card.
+export const act2 = { stepTo: null };
 
 // ---------------------------------------------------------------------------
 

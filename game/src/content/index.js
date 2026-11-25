@@ -5,12 +5,14 @@
 import { testMaps, testItemDefs, testScripts, testCharacters } from './test/index.js';
 import { openingMaps, openingItems, openingScripts, openingIntro, opening } from './opening/index.js';
 import { cherylDeclines } from './opening/common.js';
-import { act2Maps, act2Items, act2Scripts } from './act2/index.js';
+import { act2Maps, act2Items, act2Scripts, act2 } from './act2/index.js';
 import { cheryl } from '../art/cheryl.js';
 
 const maps = { ...openingMaps, ...act2Maps, ...testMaps };
 // The Squeeze leads on to Lamp Street once Act 2 registers it; until then it ends the slice.
 opening.squeezeTo = maps.lamp_street ? 'lamp_street' : null;
+// The ladder under the hundredth step leads into Act 3 once it registers the Step Gallery; until then Act 2 ends on a card.
+act2.stepTo = maps.step_gallery ? 'step_gallery' : null;
 
 export default {
   title: 'Moonshine',

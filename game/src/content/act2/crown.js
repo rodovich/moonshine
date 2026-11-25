@@ -17,6 +17,9 @@ import { props } from '../../art/props.js';
 
 const W = 24, H = 16;
 
+// Where the moon-eye studs sit in the plaza (docs/design/03-downstairs.md); Act 3 swaps them to their glow at dusk.
+export const CROWN_MOON_EYES = [[5, 8], [9, 12], [14, 9], [18, 12], [3, 10], [20, 8]];
+
 function compose(g) {
   const L = layout(W, H, blankGrid);
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) L.set('ground', x, y, pave(x, y));
@@ -66,6 +69,11 @@ function compose(g) {
     L.set('ground', 12, y, 'street:stairs_r', false);
     L.step[y][11] = L.step[y][12] = 'step_stairs';
   }
+
+  // Moon-eye studs set in the paving and the stair (plain by day; Act 3 lights them at dusk).
+  const q = (x, y) => `${y % 2 ? 's' : 'n'}${x % 2 ? 'e' : 'w'}`;
+  for (const [x, y] of CROWN_MOON_EYES) L.set('ground', x, y, `moon_eyes:pave_${q(x, y)}_eye`);
+  L.set('ground', 11, 14, 'moon_eyes:stairs_l_eye', false); L.set('ground', 12, 14, 'moon_eyes:stairs_r_eye', false);
 
   // Props.
   L.lamp(8, 8); L.lamp(15, 8);
