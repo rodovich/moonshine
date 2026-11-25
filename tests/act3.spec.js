@@ -306,8 +306,8 @@ async function ptrSelect(page, item) {
 }
 
 async function ptrUse(page, item, id) {
-  const slot = await ptrSelect(page, item);
-  await page.mouse.click(slot.x, slot.y);
+  await ptrSelect(page, item);
+  await clickGame(page, 148, 94); // the Use button
   await waitFor(page, (item) => window.moonshine.snapshot().holding === item, item);
   await waitFor(page, () => !window.moonshine.snapshot().busy);
   await ptrInteract(page, id);
