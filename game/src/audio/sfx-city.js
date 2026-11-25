@@ -125,6 +125,19 @@ export const CITY_SFX = {
       },
     },
   },
+  // The last water running out at the far end of the dry Bilge (loop): a faint, distant trickle,
+  // with nothing else of the sea in it. Quieter and farther off than `trickle`.
+  runoff: {
+    gain: 1.2, echo: 0.45,
+    loop: {
+      beds: [{ type: 'noise', gain: 0.025, filter: { type: 'bandpass', freq: 1800, q: 2 }, lfo: { target: 'gain', rate: 1.7, depth: 0.5 } }],
+      period: 0.18, jitter: 0.35,
+      layers: () => {
+        const f = rand(900, 1800);
+        return [{ type: 'tone', wave: 'sine', freq: [f, f * rand(1.2, 1.5)], dur: rand(0.02, 0.04), gain: rand(0.008, 0.02) }];
+      },
+    },
+  },
   // Water sinking into a crack: a small gurgle, going down.
   sink_gurgle: {
     gain: 1.8, echo: 0.3,
