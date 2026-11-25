@@ -214,7 +214,8 @@ export class Control {
     if (!pend) return;
     const e = pend.entity;
     if (!this.world.entities.includes(e)) return;
-    const spot = this.world.interactSpots(e).find((s) => s.x === p.x && s.y === p.y);
+    const spot = this.world.interactSpots(e).find((s) => s.x === p.x && s.y === p.y)
+      || this.world.diagonalSpots(e).find((s) => s.x === p.x && s.y === p.y && this.world.zTarget(p.x, p.y, s.facing) === e);
     if (spot) {
       p.facing = spot.facing;
       this.act(e, pend.item);
@@ -259,6 +260,8 @@ export class Control {
       this.pending.at = [this.pending.entity.x, this.pending.entity.y];
       const spots = w.interactSpots(this.pending.entity);
       let path = w.pathFor(p, spots.map((s) => [s.x, s.y]));
+      // No side reachable: a diagonal approach, if there is one.
+      if (!path) path = w.pathFor(p, w.diagonalSpots(this.pending.entity).map((s) => [s.x, s.y]));
       if (!path) path = w.pathFor(p, [[this.pending.entity.x, this.pending.entity.y]], { closest: true });
       this.setPath(path);
     } else if (this.goal) {
@@ -351,13 +354,7 @@ export class Control {
   interactFront() {
     const p = this.player;
     const w = this.world;
-    const [dx, dy] = DIR_VEC[p.facing];
-    let e = w.interactableAt(p.x + dx, p.y + dy);
-    if (!e && w.map.counter(p.x + dx, p.y + dy)) e = w.interactableAt(p.x + 2 * dx, p.y + 2 * dy);
-    // A character that doesn't block (solid: false) may be standing on her
-    // tile; he beats anything in front of her but another character.
-    const here = w.pickEntity(w.entities.filter((o) => !o.isPlayer && o.visible && o.directional && isInteractable(o) && o.x === p.x && o.y === p.y));
-    if (here && (!e || !e.directional)) e = here;
+    const e = w.zTarget(p.x, p.y, p.facing);
     if (e) {
       this.act(e, this.holding);
     } else if (this.holding) {

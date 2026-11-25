@@ -32,6 +32,7 @@ export default {
   items: { brass_key: { ... }, ... },                        // by id
   scripts: { intro: async (g) => { ... } },                  // runnable with ?run=intro
   onNewGame: async (g) => { ... },                           // optional, once per new game
+  onLoad: [async (g) => { ... }, ...],                       // optional, once per loaded game (see Old saves)
   lighting: { dusk: [ ... ] },                               // optional: add or replace lighting presets
   defaults: {
     useFail: async (g, target, itemId) => g.describe("That won't help."), // item has no effect
@@ -42,7 +43,15 @@ export default {
 
 Game state is `{ flags, inventory, looks, map, x, y, facing }` (`looks` counts how often each thing has been looked at). It saves to `localStorage` whenever a script finishes (walking through a door is a script), never in the middle of one, so a reload can't land halfway through a cutscene. The title screen offers Continue when a save exists.
 
-**Old saves.** `main` deploys on every push, so players will load saves from older builds. On load the engine fills in missing fields, drops unknown item ids, falls back to `content.start` if the saved map no longer exists, and moves the player to the map's `spawn` (or the nearest open tile) if they'd stand inside something solid or off the map. For renamed flags or items, give the content a `migrate: (state) => state` function; it runs first. Characters' positions after `moveNpc` aren't saved: they reset to the map's layout when it reloads, so put lasting moves in the entity's `x`/`y` behind a `when`, or `g.place` them in `onEnter`.
+**Old saves.** `main` deploys on every push, so players will load saves from older builds. On load the engine fills in missing fields, drops unknown item ids, falls back to `content.start` if the saved map no longer exists, and moves the player to the map's `spawn` (or the nearest open tile) if they'd stand inside something solid or off the map. For renamed flags or items, give the content a `migrate: (state) => state` function; it runs first, on the raw saved state. For fixes that need the script API, list functions in `content.onLoad`: each runs once, in order, every time a game is loaded (Continue, `?start=continue`, or a debug start with `?map=`), before the first map's `onEnter`, and never on a new game. Write them so they do nothing on a save that doesn't need them, and keep them until no player could still hold such a save. One that throws is logged and skipped. For example, retiring an item:
+
+```js
+onLoad: [
+  (g) => { if (g.hasItem('hat') && !g.flag('tourist.hasHat')) g.takeItem('hat'); },
+],
+```
+
+Item ids missing from `content.items` are dropped before `onLoad` runs, so to test for a retired item, keep its entry until the rule is gone. Characters' positions after `moveNpc` aren't saved: they reset to the map's layout when it reloads, so put lasting moves in the entity's `x`/`y` behind a `when`, or `g.place` them in `onEnter`.
 
 ## Maps
 
@@ -86,6 +95,8 @@ All layers are the same size as `ground`. The legend is shared by all layers, so
 **Ambient events** happen on a timer without stopping the player: `ambient: [{ every: [18, 24], when, run: (g) => ... }]` (seconds, a random interval in the range). `run` is a plain callback, not a script, so use non-blocking calls there: `g.bark`, `g.emote`, `g.spawnEffect`, `g.sfx`, `g.setTile`. Timers pause while a script runs. With `script: true`, `run` is queued as a full script instead (it takes control and may `say`, `changeMap`, and so on): a bell that rings on its own after 15 seconds. From any plain callback, `g.runScript(fn)` does the same.
 
 **Audio per map:** `music`, `ambience`, and `musicFilter` may each be a function of the state, like `lighting`, evaluated as the map loads (so the morning's music starts with the fade-in, not after). `ambience: ['crowd', 'wind']` starts those looping sounds when the map loads and fades out the previous map's (ids from the audio module's loops). `musicFilter: 'muffled'` and `step: 'step_stone'` (footstep sound; a tile's own `step` property wins) pass to the audio module if it supports them, and are quietly ignored until then. Scripts can also `g.startLoop(id)` / `g.stopLoop(id, fadeMs)`.
+
+**What Z reaches.** Facing a tile, Z reaches the thing there (any tile of a multi-tile hotspot counts); across a `counter` tile, the thing beyond it; if nothing is ahead, a character standing on Cheryl's own tile, else something diagonally ahead (left or right of the tile in front). So a thing with no free side can still be reached from a diagonal, by keyboard and by click (the walk goes to a diagonal tile when no side is reachable).
 
 **Exits** fire when the player finishes a step onto them by walking. An exit whose `when` fails but has `blocked: 'line'` (a line, a list of lines, or an async function) explains itself in Cheryl's voice and steps her back. `confirm: 'Go down?'` asks first (options `choices`, default Yes / Not yet; anything but the first steps her back). Exits don't fire during a script: `movePlayer` onto a door does nothing, so call `changeMap` yourself. Click-to-walk paths never cross an open exit (or a closed one with `blocked`) on the way to somewhere else; a closed exit without `blocked` is ordinary floor until it opens, and an exit is never chosen as "the nearest reachable tile" for an unreachable click.
 
@@ -352,6 +363,7 @@ node tests/shot.js "?map=test_street" out.png 800 ArrowRight z   # one screensho
 ## Authoring aids
 
 - **`npm run check`** (`node tests/check-content.mjs`) loads the content in Node and reports errors: legend characters without entries, layers of different sizes, tile references to missing sheets, frames, or palettes, exits to unknown maps or arriving on solid tiles (an exit's `checkFlags: ['act1.moonrise']` checks the arrival with those flags set, through the destination's variants and patches, for exits only usable later in the story), `changeMap` calls to unknown maps or solid tiles, unknown item ids in scripts and `use` handlers, entity ids that aren't on any map, characters placed on solid tiles, unknown lighting. It warns about flags read but never set (typos), flags set but never read, music and sounds that don't exist yet, and `over_*` frames off the overhead layer. Script checks read each function's source, so they see literal ids only.
+- **`npm run check:keyboard`** (`node tests/check-keyboard.mjs`, also a suite test) checks that every interactable thing can be reached by keyboard alone: for every map in every story state listed in the file, a reachable tile beside it (or diagonal to it) from which facing it and pressing Z reaches that thing under the engine's own rules (priority, counters, diagonals). Add a line to its `STATES` when an act adds a state. Something meant to be out of reach in some state (the Fountain behind the Mayor's rope) sets `unreachable: 'reason'` or `(g) => reason or null`. The suite test only lists failures until `KEYBOARD_STRICT=1`.
 - **The map viewer** at `/dev/map.html` draws any map whole, with solid tiles, exits (faint when closed), triggers, entity footprints, and spawn points overlaid. Enter flags and items to see a story state (variants, patches, `when`s, sprite functions, and characters' `at` all follow). Hover a tile for its coordinates, tiles, and anything defined there; click to open the game there with those flags and items.
 
 ## Engine decisions

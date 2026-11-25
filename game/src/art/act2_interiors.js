@@ -2,7 +2,7 @@
 // archive: the Archive under the Blue Dome (formal limestone floor, frieze walls, high windows,
 //   light pools, the Eye 2x2, the stair down). archive_furniture: curved wall bookcases (4x2),
 //   freestanding shelves, Ottilie's desk with seven cups, the teapot, crypt crates and lectern.
-// crypt: older, dimmer stone, stair up. shop: shelving, counter, marble jar, hat display, barometer.
+// crypt: older, dimmer stone, stair up. shop: shelving, counter, marble jar, hat display, telescope display (display_scope_l/r), barometer.
 // square_props: market stall (canopy overhead), cafe table and chairs, the Mayor's crate, plaque.
 // See docs/art-direction.md.
 
@@ -1377,6 +1377,42 @@ export const shop = {
       'yyyyyyzzkkkk....',
       'zzzzzzkkkrrkkkk.',
       'kkkkkkoooooooook',
+      'oooooooooooooook',
+      'oooooooooooooook',
+      'OOOOOOOOOOOOOOOk',
+      'OOOOOOOOOOOOOOOk',
+      'pppppppppppppppk',
+      'kkkkkkkkkkkkkkk.',
+    ],
+    display_scope_l: [
+      '................',
+      '................',
+      '................',
+      '............kkkk',
+      '..........kkzYYY',
+      '.....kkkkkYYzyyy',
+      '....kYYYYyyyzyyy',
+      '...kzzyyyykpzzkk',
+      '.kkkkkkkkpPpkkkk',
+      'kooooooooooooooo',
+      'kooooooooooooooo',
+      'kooooooooooooooo',
+      'kOOOOOOOOOOOOOOO',
+      'kOOOOOOOOOOOOOOO',
+      'kppppppppppppppp',
+      '.kkkkkkkkkkkkkkk',
+    ],
+    display_scope_r: [
+      '........kkkkk...',
+      '...kkkkkYYWWWk..',
+      '.kkzYYYYyyWWk...',
+      'kYYzyyyyyyGGk...',
+      'YyyzyyyyyyyGGk..',
+      'yyyzyyyyyykkk...',
+      'ykkzzkkkkk......',
+      'k.kpkpk.........',
+      'kkkpPpkkkkkkkkk.',
+      'oooooooooooooook',
       'oooooooooooooook',
       'oooooooooooooook',
       'OOOOOOOOOOOOOOOk',

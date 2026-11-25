@@ -53,6 +53,15 @@ export function addAct6(maps) {
     const base = map.onEnter;
     maps[id] = { ...map, onEnter: joined(async (g) => { if (base) await base(g); if (epilogue(g)) g.setWrongness(0); }, base) };
   }
+  // The epilogue's Bilge: a west exit to the rebuilt Goat Path's foot (docs/design/structure-pass.md),
+  // once Act 2's Goat Path is tall enough to have it (the rebuilt one is 40+ rows).
+  const goat = maps.goat_path;
+  if (goat && maps.bilge && goat.ground.length > 40) {
+    maps.bilge = {
+      ...maps.bilge,
+      exits: [{ x: 0, y: 11, h: 3, to: 'goat_path', at: [14, 40], facing: 'left', when: epilogue, checkFlags: ['epilogue'] }, ...(maps.bilge.exits || [])],
+    };
+  }
   if (!maps[act6.ids.windlass]) {
     maps.long_keel = { ...maps.long_keel, exits: maps.long_keel.exits.filter((e) => e.to !== act6.ids.windlass) };
   }
