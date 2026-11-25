@@ -34,7 +34,9 @@ function makeVista(g) {
       const cy = Math.max(56, t < 6 ? 104 - t * 3 : 86 - (t - 6) * 6);
       // It whitens as it climbs.
       const moon = cy < 64 ? 'moon_high' : cy < 80 ? 'moon_mid' : 'moon';
-      ctx.drawImage(art.moon.frameAt(moon, ms), 176 - 16, Math.round(cy) - 16);
+      // It climbs on a slant, up and to the right, away from the pins and the Gate.
+      const cx = 176 + (104 - cy) * 0.35;
+      ctx.drawImage(art.moon.frameAt(moon, ms), Math.round(cx) - 16, Math.round(cy) - 16);
     }
     ctx.drawImage(art.rim.frame('rim'), 0, 0);
     // Its path across the Bowl: faint once it's half up, then shimmering.
@@ -86,7 +88,11 @@ export async function moonrise(g) {
   const scene = makeVista(g);
   await g.showPicture(scene.draw, { fade: 1 });
   g.playMusic('moonrise');
-  await g.wait(1.5);
+  await g.wait(1.2);
+
+  // 5a. The pins, lined up on the Gate, before any glow.
+  await g.think('Pins lined up. The Gate, dead between them.', 'Any second now.');
+  await g.wait(0.6);
 
   // 6. A glow behind the Rim, to the right of the Gate.
   scene.glowAt = scene.now;

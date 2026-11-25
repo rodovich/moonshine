@@ -210,7 +210,7 @@ test('pointer: Act 4, the morning to the reveal', async ({ page }) => {
   await read();
   await mapIs(page, 'ice_cellar');
   await ptrWalk(page, 6, 1);
-  await waitFor(page, () => window.moonshine.snapshot().map === 'bilge_dry', null, 10000);
+  await read({ stop: (s) => s.map === 'bilge_dry' });
   await read({ timeout: 120000 });
   expect((await snap(page)).flags['act4.risen']).toBe(true);
   await ptrInteract(page, 'boatman'); await read();
@@ -243,7 +243,7 @@ for (const [label, query] of SCENES) {
       .map((e) => e.id));
     expect(ids.length).toBeGreaterThan(1);
     for (const id of ids) {
-      if (['door_view', 'lever', 'ring_hatch', 'ambrose_a4', 'tower_door_a4'].includes(id) || id.startsWith('valve_')) continue; // these start scenes
+      if (['door_view', 'lever', 'ring_hatch', 'ambrose_a4', 'tower_door_a4', 'stair'].includes(id) || id.startsWith('valve_')) continue; // these start scenes
       for (const item of [null, 'soap']) {
         const there = await page.evaluate(([id, item]) => {
           const w = window.moonshine.world;

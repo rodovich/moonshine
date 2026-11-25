@@ -185,7 +185,7 @@ async function riseValve(g, name) {
 
 const objects = [
   ...Object.keys(SISTERS).map((name) => ({
-    id: `sister_${name}`, x: SISTERS[name].x, y: 3, w: SISTERS[name].w, h: 2,
+    id: `sister_${name}`, unreachable: (g) => !!g.flag('pumps.burst') && 'under the flood',  x: SISTERS[name].x, y: 3, w: SISTERS[name].w, h: 2,
     interact: sisterLooks[name],
     use: {
       copper_throat: name === 'middle' ? fitThroat : (g) => g.describe('That goes somewhere particular. Not here.'),
@@ -193,18 +193,19 @@ const objects = [
     },
   })),
   ...Object.keys(SISTERS).map((name) => ({
-    id: `valve_${name}`, x: SISTERS[name].valve, y: 5,
+    id: `valve_${name}`, unreachable: (g) => !!g.flag('pumps.burst') && 'under the flood',  x: SISTERS[name].valve, y: 5,
     interact: (g) => wakeValve(g, name),
     use: { crowbar: noPry, moon_chart: notThatChart, copper_throat: name === 'middle' ? fitThroat : undefined, '*': cherylDeclines },
   })),
   {
-    id: 'drive_shaft', x: 3, y: 1, w: 18,
+    // Overhead on the wall; its look reaches down the wall's face to the floor's edge.
+    id: 'drive_shaft', x: 3, y: 1, w: 18, h: 2,
     interact: (g) => g.describe(g.flag('bell.restored')
       ? 'A bronze shaft along the top of the wall, turning slow and steady. From the Tide Wheel. From the bell.'
       : 'A bronze shaft along the top of the wall. Still.'),
   },
   ...GRATES.map((x) => ({
-    id: `grate_${x}`, x, y: 9, w: 2, lookKey: 'grates',
+    id: `grate_${x}`, unreachable: (g) => !!g.flag('pumps.burst') && 'under the flood',  x, y: 9, w: 2, lookKey: 'grates',
     interact: (g) => {
       if (g.flag('pumps.running')) return g.describe('Dry. The cells under the floor are empty.');
       return g.describe(bump(g, 'look.grates') === 0 ? 'A grate in the floor. Underneath, dark water, very close. Fuller than it should be, I think.' : 'Full.');
@@ -220,7 +221,7 @@ const objects = [
     },
   },
   {
-    id: 'fountain_ladder', x: 2, y: 1, h: 2,
+    id: 'fountain_ladder', unreachable: (g) => !!g.flag('pumps.burst') && 'under the flood',  x: 2, y: 1, h: 2,
     interact: async (g) => {
       if (g.flag('pumps.burst')) return g.describe("Under water. That way's gone.");
       await g.describe('Back up to the Fountain.');
@@ -229,7 +230,7 @@ const objects = [
     },
   },
   {
-    id: 'main_pipe', x: 1, y: 3, h: 8,
+    id: 'main_pipe', unreachable: (g) => !!g.flag('pumps.burst') && 'under the flood',  x: 1, y: 3, h: 8,
     interact: (g) => g.describe(g.flag('pumps.burst')
       ? 'Split open, and roaring. All that water, with nowhere to go but up the Fountain.'
       : 'A great pipe along the wall. One of its joints is weeping, a bead at a time.'),
@@ -322,7 +323,7 @@ export const pumpHallMap = composedMap(compose, {
   exits: [
     // Up to the dry Fountain's basin (walkable only in Act 4's state of the Square, so it's passed as a variable).
     { x: 2, y: 2, when: (g) => !g.flag('pumps.burst'), sfx: 'step_stairs', run: (g) => g.changeMap('fountain_square', ...BASIN, 'down') },
-    { x: 25, y: 6, h: 2, to: 'tide_wheel', at: [1, 4], facing: 'right', when: (g) => !g.flag('pumps.burst') },
+    { x: 25, y: 6, h: 2, to: 'tide_wheel', at: [1, 4], facing: 'right' },
     { x: 22, y: 2, to: 'emergency_shaft', at: [2, 28], facing: 'up', when: (g) => !!g.flag('pumps.burst') },
   ],
   ambient: [{
