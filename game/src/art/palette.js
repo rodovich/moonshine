@@ -203,6 +203,14 @@ export const COLORS = {
   hull_cell: '#586878',
   hull_water: '#183848',
 
+  // Downstairs (art): daylight falling into the dark, and the charcoal rubbing of the Ship Plan.
+  daylight: '#f8f0c8',
+  daylight_dim: '#c8b880',
+  paper_light: '#f8f0e0',
+  charcoal_light: '#a09898',
+  charcoal: '#686068',
+  charcoal_deep: '#302830',
+
   // UI (engine)
   ui_ink: '#080810',
   ui_box: '#182048',

@@ -1,5 +1,5 @@
 // Inventory item icons, 16x16, outlined, lit from the upper left. See docs/art-direction.md.
-// items: everyday objects. items2: the opening slice (with lilac for the soap).
+// items: everyday objects. items2: the opening slice (with lilac for the soap). items3: Downstairs (moonglass_disc).
 
 export const items = {
   palette: {
@@ -277,6 +277,39 @@ export const items2 = {
       '....kkkkkkkk....',
       '................',
       '................',
+    ],
+  },
+};
+
+export const items3 = {
+  palette: {
+    k: 'ink',
+    W: 'moonglass_light',
+    C: 'relic_cyan',
+    c: 'moonglass_dim',
+    b: 'bronze',
+    B: 'bronze_shade',
+    v: 'verdigris',
+  },
+  size: [16, 16],
+  frames: {
+    moonglass_disc: [
+      '.......c........',
+      '................',
+      '.....kkkkkk.....',
+      '...kkbbbbbBkk...',
+      '..kbbkkkkkkBBk..',
+      'c.kbkWWCCCCkBk.c',
+      '.kbkWWWCCCCCkBk.',
+      '.kbkWWCCCCCCkBk.',
+      '.kbkCCCCCCCckBk.',
+      '.kbkCCCCCCcckBk.',
+      'c.kbkCCCcccckBk.',
+      '..kbBkkkkkkkBk..',
+      '...kkBBBBBvkk...',
+      '.....kkkkkk.....',
+      '................',
+      '.......c........',
     ],
   },
 };
