@@ -1,6 +1,6 @@
-# Structure pass: Acts 2 to 5 (proposal)
+# Structure pass: Acts 2 to 5
 
-This is a proposal for review, not yet the design. The reviewer (4Zv_hz69Qu) has verified it as ready to build, with the save rule for saves past Act 2 added. Once the reviewer and the orchestrator approve it, its decisions move into [02-city.md](02-city.md) through [05-high-and-dry.md](05-high-and-dry.md) and the [overview](overview.md), and the builders get their specs.
+This is the approved design for a structural pass across Acts 2 to 5, made after client feedback. The reviewer (4Zv_hz69Qu) verified it, and the orchestrator approved it at f310bf1. Its decisions are folded into the [story bible](../story-bible.md), [01](01-opening.md) to [06](06-moon-in-the-bowl.md), and the [overview](overview.md); where an act document and this one disagree, this one wins until the builders' "As built" notes catch up.
 
 ## The proposal in brief
 
