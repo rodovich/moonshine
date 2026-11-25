@@ -50,10 +50,13 @@ Every script in this folder is also a named script (`?run=pullLever`, `?run=turn
 Where the design left something open, or didn't work in play, this is what the build does. The writer (ibWBNxYUAE) has been told about the ones that change the design.
 
 - **Wrongness 0.2** (the story bible's level for Act 3) is set on entering every Act 3 map and the Crown at dusk, since the audio's global amount isn't saved.
-- **Step Gallery ribs are at x5, x17, and x21.** The design's x9 and x13 lie on the up-left and up-right beams' paths (the overhead layer holds one tile per cell); this follows the art task's layout. The flat beam (before the first turn) crosses under the ribs at x17 and x21, which give way to it on row 6.
+- **Ribs are rib faces on the walls, not overhead beams.** Step Gallery at x5, x17, x21 (the design's x9 and x13 lie on the diagonal beams' paths); Lamp Halls at x4, x8, x12, x16, x20, x24 where the wall is plain. Overhead ribs across the floor hid Cheryl, who is one tile wide (playtest, oPzkJ-fHFT).
 - **The beam is lit**: small lights run along it and a glow sits where it lands, so the darkness doesn't dim it.
 - **Each target's lines play the first time the beam lights it**; later turns just clunk and swing the beam.
 - **The ladder up, the grate, and the drop-ladder are walked into** (walking up into the ladder, onto the open grate, or up into the dropped ladder climbs at once). Clicking or facing one gives its look line and then a "Climb up?" / "Climb down?" choice, so a pointer player can climb and the look line isn't lost. The hooked-up ladder's look is followed by "Pull the chain?".
+- **The first arrival in the Step Gallery** starts nearly black and eases to the room's darkness as Cheryl's eyes adjust; after "Under the Steps." the camera drifts east across the gallery (mirror, inlays, hatch, lever) and back before "Thirty-one years I've gone up and down those Steps…" and "And all this was underneath. All this time." (lines from the writer, design 3f5f0ff) (playtest: the threshold needed more weight).
+- **Lights stay inside small rooms**: the Cradle's daylight from the hatch and the Step Gallery's ladder light are kept within the walls, so no pool shows in the black outside.
+- **The Bunk Room's dead lamp glints faintly** until it's lit, so there's something to walk toward in the dark.
 - **Ladders up are climbed on screen**: Cheryl climbs out of sight before the fade.
 - **The light-pipes** are at (6, 8), (14, 8), (22, 8), clear of the ribs, and solid. The one at (22, 8) is the art's short rod, so it doesn't reach up to Cheryl's feet when she stands at the valve.
 - **The flooded passage's floor is walkable ground**, blocked by the passage hotspot until the valve turns, so arriving from the Chart Room at (25–26, 1) is on open floor. "Drained. Wet, but walkable. North." plays the first time Cheryl steps onto it (a hotspot on a walkable passage would catch clicks meant for walking).

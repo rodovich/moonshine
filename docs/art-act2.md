@@ -25,7 +25,7 @@ Module `game/src/art/act2_objects.js`. See them composed at `/dev/art.html?only=
 
 | # | Piece | Frames | Layer |
 | --- | --- | --- | --- |
-| 10 | Icons | `items_act2:paper_charcoal`, `guidebook`, `crowbar` | inventory |
+| 10 | Icons | `items_act2:paper_charcoal`, `guidebook`, `crowbar` (light iron with a white gleam and no ink outline, so it reads on the navy bag panel) | inventory |
 | 10 | Crowbar lying on the paving | `act2_props:crowbar_ground` (2 frames: a glint runs along it, 1400/160 ms) | sprite (16×16) or objects |
 | 11 | The piano as one entity (32×32, bottom-centered) | `piano:piano_front` (wedged at an angle, as in the court), `piano_level` (standing level), `piano_slide_0/1` (tipping as it slides, 120 ms), `piano_back` (seen from behind and above, for the Fountain Square arch) | sprite |
 | 12 | Water trickle across a landing | `act2_water:trickle_h` (4 frames; tiles chain along a row, west to east), ending in `trickle_end` (4 frames: the stream narrows and slips into the step's joint). Transparent overlays | objects |

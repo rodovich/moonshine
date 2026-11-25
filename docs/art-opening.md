@@ -101,7 +101,7 @@ Walks use the engine's names: `<dir>_0` stands, `<dir>_1`, `<dir>_2` step.
 
 ## Items (`items.js`, sheet `items2`)
 
-`items2:pepper_mill`, `egg_timer`, `clothes_prop`, `bath_plug`, `soap`, `moon_chart`, `hat`.
+`items2:pepper_mill` (black, as the Look text says, with an iron-light rim and gleam down the left so it reads on the navy bag panel), `egg_timer`, `clothes_prop`, `bath_plug`, `soap`, `moon_chart`, `hat`.
 
 ## Effects (`fx.js`)
 
