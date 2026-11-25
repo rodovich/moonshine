@@ -58,8 +58,14 @@ export function withAct4(maps) {
   }
 
   const towerDoor = {
-    id: 'tower_door_a4', x: 4, y: 4, w: 2, h: 3, solid: false, when: act4,
+    // Up over the clock face too (they share a column), so the clock answers a look,
+    // by keyboard as well; the first look takes in the clock, as Act 2's does.
+    id: 'tower_door_a4', x: 4, y: 0, w: 2, h: 7, solid: false, when: act4,
     interact: async (g) => {
+      if (!g.flag('n.a4.clockSeen')) {
+        g.setFlag('n.a4.clockSeen', 1);
+        await g.describe("The Mayor's clock. Twelve minutes ahead of the sundial now, and prouder than ever.");
+      }
       if (g.flag('clockmaker.out')) {
         // Open: looking at it (or clicking it) goes in.
         if (bump(g, 'tower.open') === 0 && !g.flag('clock.lifted')) await g.describe('The tower door, wide open. He left in a hurry. Tick, tick, tick, from up there.');
@@ -445,28 +451,6 @@ export function withAct4(maps) {
     onEnter: surfaceAudio,
   });
 
-  // From Act 4 on, through Acts 5 and 6, the hundredth step is boarded over
-  // (structure pass, client feedback): a plank lid, walkable, MIND THE STEP;
-  // in the epilogue somebody's chalked 100 on it. No hole, no prompt.
-  const boarded = (g) => !!g.flag('step.open') && (!!g.flag('act4.started') || !!g.flag('epilogue'));
-  const stepsBoarded = overlayMap(steps4, {
-    when: boarded,
-    baseTriggers: false,
-    baseExitsAt: [[9, 19], [10, 19]],
-    hide: ['hundredth_step', 'hollow_step', 'hollow_step_free'],
-    tiles: (g, T) => {
-      const lid = g.flag('epilogue') ? 'chalked' : 'boarded';
-      T.raw('ground', 9, 19, { tile: `steps_lid:${lid}_l`, step: 'step_bonk' });
-      T.raw('ground', 10, 19, { tile: `steps_lid:${lid}_r`, step: 'step_bonk' });
-    },
-    entities: [{
-      id: 'boarded_step', x: 9, y: 19, w: 2, solid: false, when: boarded,
-      interact: (g) => (g.flag('epilogue')
-        ? g.describe('Boarded over, and somebody\'s chalked 100 on it. Twice.')
-        : g.describe('Somebody\'s boarded over the hundredth step. MIND THE STEP. BY ORDER.', 'The Mayor\'s handwriting. He\'s never forgiven a step.')),
-    }],
-  });
-
   // ---------------------------------------------------------------------------
   // Cistern Court and the flat.
 
@@ -521,7 +505,7 @@ export function withAct4(maps) {
   });
 
 
-  return { ...withAct4Part2(maps), crown: crown4, fountain_square: square4, lamp_street: lamp4, archive: archive4, hundred_steps: stepsBoarded, cistern_court: court4, flat: flat4 };
+  return { ...withAct4Part2(maps), crown: crown4, fountain_square: square4, lamp_street: lamp4, archive: archive4, hundred_steps: steps4, cistern_court: court4, flat: flat4 };
 }
 
 // The act's start: the morning after Act 3, in the flat (design: "What changes when Act 4 begins").

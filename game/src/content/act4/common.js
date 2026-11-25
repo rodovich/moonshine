@@ -142,10 +142,7 @@ export function overlayMap(base, o) {
     patches,
     lighting: o.lighting !== undefined ? pick('lighting') : base.lighting,
     entities: [...baseEntities, ...(o.entities || [])],
-    // `baseExitsAt: [[x, y], ...]` switches off the base map's exits on those tiles while it applies.
-    exits: [...(o.exits || []), ...(base.exits || []).map((e) => ((o.baseExitsAt || []).some(([x, y]) => x >= e.x && y >= e.y && x < e.x + (e.w || 1) && y < e.y + (e.h || 1))
-      ? { ...e, when: (g) => !on(g) && (!e.when || e.when(g)) }
-      : e))],
+    exits: [...(o.exits || []), ...(base.exits || [])],
     // `baseTriggers: false` switches the base map's triggers off while the overlay applies.
     triggers: [...(o.triggers || []), ...(base.triggers || []).map((t) => (o.baseTriggers === false
       ? { ...t, when: (g) => !on(g) && (!t.when || t.when(g)) }

@@ -193,11 +193,15 @@ export async function ptrWalk(page, x, y) {
         for (const [px, py] of path || []) {
           const sx = px * 16 + 8 - w.cam.x;
           const sy = py * 16 + 8 - w.cam.y;
-          if (sx >= 24 && sy >= 40 && sx < 232 && sy < 200 && !w.isExit(px, py)) best = [px, py];
+          // Anywhere on screen but the bag button's corner, as in onScreen.
+          if (sx >= 4 && sy >= 4 && sx < 252 && sy < 220 && !(sx >= 224 && sy < 30) && !w.isExit(px, py)) best = [px, py];
         }
         return best;
       }, [x, y]);
-      if (!step) throw new Error(`no on-screen step toward ${x},${y}`);
+      if (!step) {
+        const why = await page.evaluate(([x, y]) => { const w = window.moonshine.world; const path = w.pathFor(w.player, [[x, y]]); return `from ${w.player.x},${w.player.y} on ${w.state.map}, camera ${w.cam.x},${w.cam.y}, path ${path ? JSON.stringify(path.slice(0, 6)) : 'none'}`; }, [x, y]);
+        throw new Error(`no on-screen step toward ${x},${y} (${why})`);
+      }
       await clickTileAt(page, step[0], step[1]);
     }
     await page.waitForTimeout(100);
