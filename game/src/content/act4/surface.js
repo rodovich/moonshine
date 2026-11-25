@@ -399,7 +399,7 @@ export function withAct4(maps) {
       when: (g) => act4(g) && !!g.flag('step.open') && !g.flag('stepped.hundredth'),
       run: async (g) => { g.setFlag('stepped.hundredth'); await g.describe('I step over the open step, the way you step over a sleeping dog.'); },
     }],
-    hide: ['kid', 'kid_after', 'counting_woman', 'basin_woman'],
+    hide: ['kid', 'kid_after', 'counting_woman', 'basin_woman', 'hundredth_step'], // Act 4 has its own look at the open step
     entities: [
       {
         id: 'open_step_a4', x: 10, y: 19, solid: false, when: (g) => act4(g) && !!g.flag('step.open'),
