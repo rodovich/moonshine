@@ -29,7 +29,8 @@ Modules: `roof.js` (sheets `roof`, `tub`, `roof_props`, `laundry`) and `court.js
 | `s` sheets on the N–S lines | `laundry:over_line` (y3); `over_sheet_n`, `over_sheet_m`, `over_sheet_s` (y4–6, flutter) | overhead |
 | Bare N–S lines (after the move) | `laundry:over_line` (y4–5), `over_line_s` (y6) | overhead |
 | Back line, (11,1)–(18,1) | `laundry:backline_<state>_<a–h>_<n\|s>`: columns a–h are x11–18, `n` row 1, `s` row 2. States `sag`, `prop`, `one`, `two` (sheets going up one per beat), `sheets` (flutter), `swung` (the groan). `@grey` for the morning | objects |
-| `D` doors (3 and 14, rows 10–11) | `facade:door_top`, `door_bot` (blue moon-eye studs in the step); the Neighbor's `@sage` | ground |
+| `D` doors (3 and 14, rows 10–11) | `facade:door_top`, `door_bot` (blue moon-eye studs in the step) `@dim`; the Neighbor's `@sage_dim` | ground |
+| `#` `w` facade walls and windows (rows 10–11) | `buildings:` wall, window, and window-box tiles `@facade` (Cheryl's) and `@facade_sage` (the Neighbor's): the wall face a step dimmer than the roof above, so the drop reads. For lit windows at dusk and night use `@facade_lit` / `@facade_sage_lit` (warm glass) on a few of them. | ground |
 | `^` outside stair (x7) | `court:stair_head` (y8), `stair_cut` (y9), `stair` (y10–11), `stair_foot` (y12) | ground |
 | `,` cobbles | `court:cobble_a` … `cobble_e` (pick by a hash of the position so no pattern repeats), `cobble_drain` | ground |
 | `#` court side walls | `court:court_wall_w`, `court_wall_e` | ground |

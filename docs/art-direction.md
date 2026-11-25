@@ -54,6 +54,10 @@ Warm, bright, and soft-edged. Curves are rounded (domes, arches, the lips of fla
 
 A different architecture by a different people. Where the city is rounded, soft, and whitewashed, the tunnels are **straight-edged, precise, and dark**: long corridors of fitted slate blocks with no visible mortar, chamfered (45°) corners instead of arches, repeated geometric inlays, and floors of large square plates. Colors are cool and desaturated (`slate_*`, `void`), with verdigris on old metal. Light comes from the long-forgotten technology itself — panels, channels, and lenses glowing `relic_amber` or `relic_cyan` — so here light sources are local and shading is lit from the glow, not from the upper left. Keep surface colors out of the underground so that the first glimpse of whitewash or a terracotta tile down there (a fallen roof, a dropped pot) means something.
 
+**Building it** (`underground.js`, `machines.js`). Rooms are carved out of the hull's dark mass: fill with `hull:top`, then cut the floor. A north wall shows its face two tiles tall (`face_top` over `face_base`, with `_b` offset seams and lit or inlaid variants: `face_top_line`, `lightpipe`, `lamp_*`). Other walls show only their top, with a lit edge facing the floor (`top_edge_n` along a south wall, `top_edge_e` / `top_edge_w` along the west / east walls). Where floor meets wall the corner is a 45° cut (`top_chamfer_*`), never square or rounded. Floors are one plate per tile with hairline seams, so the grid is meant to show; break it with a few variants (`floor_glyph`, `floor_worn`, `floor_broken`, `floor_wet`), not noise. Corridors get a rib every 3 tiles: `face_rib_*` on the wall and `over_rib_v` / `over_rib_h` overhead across the floor. Openings are hatches (`hatch_*`, `floor_hatch*`, the moon-lock door), never arches. Light is local: put a `floor_glow` / `floor_glow_amber` pool under each light-pipe or lamp and leave the rest dark. Machines sit on the objects layer, bronze darkened with verdigris. The Wrongness uses `hull_wrong` frames only, crossing seams rather than following them. The underground is authored at its final lighting; it takes no tint.
+
+The Founders' style first shows on the surface in the Bell Tower's base and the Founders' Door: dark slate, blocks told apart only by tone, 45° chamfers, `relic_cyan` only at seams.
+
 ### The Wrongness
 
 It should look like an error in the world rather than a monster in it.
@@ -95,10 +99,10 @@ Her sheet also has interaction poses: `reach_up`, `reach_down`, `reach_left`, `r
 ## Animation
 
 - Frames numbered `_0`, `_1`, … form an animation. Optional `durations` on a sheet set the time per frame in ms: a number for every frame, or an array with one entry per frame.
-- **Walks use the engine's names:** `<dir>_0` stands, `<dir>_1` and `<dir>_2` are the two steps, and the engine plays 1, 0, 2, 0. The body sits one pixel lower on the step frames. The Sweaty Kid runs on a 4-frame cycle (`<dir>_1`…`<dir>_4`; set `sprite.walk: [1, 2, 3, 4]`).
+- **Walks use the engine's names:** `<dir>_0` stands, `<dir>_1` and `<dir>_2` are the two steps, and the engine plays 1, 0, 2, 0. The body sits one pixel lower on the step frames. The Sweaty Kid runs on a 4-frame cycle (`<dir>_1`…`<dir>_4`; set `sprite.walk: [1, 2, 3, 4]`). **Walk timing comes from distance, not `durations`:** the engine advances one walk frame per 8 px walked (a 4-frame cycle every two tiles), so Cheryl at 80 px/s shows about 100 ms per frame and NPCs at 60 px/s about 133 ms; `walk_*`/`<dir>_*` entries in `durations` are ignored. Idles and all other animations use `durations` as drawn. (From the engine task.)
 - **Idles and poses carry personality** and are 2 frames with a long hold and a short beat where they loop: Cheryl blinks; the Old Man rests his chin on his hand and now and then reaches for a piece; Her Next Door smooths a sheet and then admires it, hands on hips; the Kid jogs in place and throws both arms up.
 - **Walk-cycle checklist:** the legs touch the body on every frame (no transparent row between hem and foot); the two step frames are visibly different (the near leg lighter, the far leg darker, and the forward foot swaps); the arms or what they carry move opposite to the legs (a hand or a bag rides one pixel); the body bobs one pixel down on the steps.
-- **Shadows under characters** are drawn by the engine from `fx:shadow`, a small soft oval under the feet that grounds sprites on pale paving.
+- **Shadows under characters:** the engine draws a small oval ground shadow under the feet, which grounds sprites on pale paving. `fx:shadow` is the art's version of that oval if the engine wants to use a drawn frame instead.
 - Ambient animation is slow and small: water at 260 ms with ripples that sway rather than scroll; laundry flaps at 600 ms; the cat's tail flicks after a long pause. Nothing on the surface should feel frantic.
 
 ## Tiles and maps
@@ -109,21 +113,25 @@ Her sheet also has interaction poses: `reach_up`, `reach_down`, `reach_left`, `r
 - **Arched passage** (2 tiles wide): shaded paving on the ground, `over_arch_l/r` overhead on the wall row, `arch_jamb_l/r` on the objects layer in the row below, and the roof above the passage on the overhead layer.
 - **Terraces**: `retain_top` (coping), any number of `retain`, then `retain_base`. Cut stairs through with `stairs_l` + `stairs_r` (or `stairs` between them for wider flights).
 - **Canal**: `bank_n` (the far quay's wall face), `water` rows, `bank_s` (the near quay's lip). The stepped bridge is 2 wide and 4 tall: `bridge_n_*`, `bridge_down_*`, `bridge_up_*`, `bridge_s_*`, with `water_shadow` on its east side.
+- **Terrace corners** (`city:terrace`): where the upper terrace reaches further south on the left, put `retain_top_inner_l` and `retain_base_inner_l` in the corner column for the right-hand wall's rows, and below them in the same column `retain_top_end_r` and `retain_base_end_r` to end the lower wall, so the north–south coping stays in one pixel column. `ledge_e` / `ledge_w` carry the drop's edge north.
+- **Canal ends** (`city:canal_edges`): `bank_n_end_w`, then `bank_w` for each water row, then `bank_s_end_w` (and the `_e` versions at the other end). A north–south canal uses `bank_w` / `bank_e` as its sides.
+- **More buildings** (`city:facades`, same letters and swaps as `buildings`): an outside stair (3×2), an arcade row, a shopfront, a cupola and a squat dome; `city:gables` puts a pitched roof's gable end on the objects layer over a roof row and a wall row.
+- **Landmarks** (`landmarks.js`): grids are named `name_x<col>y<row>`, with `_<frame>` for animated tiles: the Fountain of the Fish (full, low, dry) with the bronze fish as an entity, the Bell Tower, the Blue Dome and its door, the sundial, the Hundred Steps (flights, landings, the moon-eye riser, the hollow step dry / wet / open), and the Founders' Door.
 - **Multi-tile objects** are drawn whole and cut into tiles (dome 2×2, bench 2×1, awning 3×1, laundry 3×1, vine 2×1), so their pieces only make sense together and in order.
 
 ## Time of day
 
 The tiles are painted in neutral late-morning light. Dusk, night, and day are global washes from `game/src/art/tints.js`, applied with the engine's `tint()`:
 
-- **Dusk** multiplies by a warm apricot at 42%: whitewash turns gold, shadows warm, blues deepen.
+- **Dusk** is two multiply passes: a rose-amber at 50% and a faint violet at 18%. Whitewash turns rose and shadows cool, so it reads as the last light of the day rather than late afternoon (it was a single 42% apricot until the opening ran in the engine and dusk looked too much like day).
 - **Night** multiplies by a moonlit blue at 70%: dark and cool, but every shape still readable.
 - **Day** is the art as painted.
 
-Check new tiles under `?tint=dusk` and `?tint=night` on the dev page. Tints compress hue, so never rely on hue alone for contrast (a coral cardigan against terracotta pots, a pale blue door on white): separate important shapes by value too. Shapes that depend on a small hue difference (a pale blue door on white) can vanish at night; separate them by value too. Lamp glows and lit windows can't brighten under a multiply tint, so they read as warm accents, not light sources.
+Check new tiles under `?tint=dusk` and `?tint=night` on the dev page. Tints compress hue, so never rely on hue alone for contrast (a coral cardigan against terracotta pots, a pale blue door on white): separate important shapes by value too. Shapes that depend on a small hue difference (a pale blue door on white) can vanish at night; separate them by value too. Colors listed in `EMISSIVE` (in `tints.js`: lamp glow, lit window glass, relic amber and cyan) skip the tint, so lit windows and lamps glow at dusk and night; anything meant to give off light should use one of them. Light some windows at dusk and night with the buildings sheet's `_lit` swaps (warm glass): a few, not all, so the town looks lived in.
 
 ## Walkable roofs
 
-Roof terraces people walk on (Cheryl's roof) are paved like a street, not left as the flat, empty top surface of an unwalkable roof: a whitewashed plaster floor in slabs with joints, a step darker than an unwalkable roof's top, with 2×2 macro variants and a cracked slab. They are bordered by parapets that show their top (lightest), their inner face (toward the terrace, base value, visible on the north parapet because it faces south), and, on the south edge, the drop beyond. The low wall between two roofs is a parapet seen from both sides.
+Roof terraces people walk on (Cheryl's roof) are paved like a street, not left as the flat, empty top surface of an unwalkable roof: a whitewashed plaster floor in slabs with joints, a step darker than an unwalkable roof's top, with 2×2 macro variants and a cracked slab. They are bordered by parapets that show their top (lightest), their inner face (toward the terrace, base value, visible on the north parapet because it faces south), and, on the south edge, the drop beyond. The low wall between two roofs is a parapet seen from both sides. The facade below a walkable roof uses the dimmer `facade` plaster swap (`white_dim` for the wall face), so floor, coping, shade band, and wall read as four distinct steps; and a sheet hung on a line running north–south is seen nearly edge-on, as a tall narrow drape lit on its west side with a soft shadow to the east.
 
 ## Interiors
 
@@ -164,6 +172,10 @@ Full-screen pictures (the moonrise vista) are separate 256×224 sheets with thei
 | `fx.js` | `fx`, `fx_mist` | sweat drops, swifts, gulls, dust puffs, splashes, the well's breath |
 | `vista.js` | `vista`, `vista_rim`, `vista_glow`, `vista_moon`, `vista_twinkle`, `vista_cheryl` | the moonrise picture and its moving parts |
 | `tints.js` | `TINTS` | dusk, night, and day washes |
+| `underground.js` | `hull`, `hull_water`, `hull_wrong`, … | the Founders' tunnels and chambers: plates, walls, ribs, hatches, moon-lock door, ladders, channels, lights, the Wrongness |
+| `machines.js` | `machines`, `keeper`, `keeper_chair` | ballast pump, valves, gauges, conduits, speaking tube, gears, windlass and chain, the Keeper's desk and chair |
+| `city.js` | `terrace`, `canal_edges`, `facades`, `gables` | terrace corners and ledges, canal ends, more facades, domes, gable ends |
+| `landmarks.js` | `fountain`, `fish`, `bell_tower`, `blue_dome`, `sundial`, `steps`, `founders_door` | Act 2's landmarks |
 | `items.js` | `items`, `items2` | inventory icons: key, letter, teacup, bread, watering can, spectacles; the opening's pepper mill, egg timer, clothes prop, bath plug, soap, moon chart, hat |
 
 ### Item icons
