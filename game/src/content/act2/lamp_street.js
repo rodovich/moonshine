@@ -15,7 +15,7 @@
 
 import { composedMap, blankGrid } from '../opening/grid.js';
 import { act2Tiles } from './tiles.js';
-import { layout, house, pave, lowRoof, LOOKS, bump, cycle, firstMeet, cherylDeclines, actWrongness } from './common.js';
+import { layout, house, pave, lowRoof, LOOKS, bump, cycle, firstMeet, cherylDeclines, actWrongness, getItem } from './common.js';
 import { props } from '../../art/props.js';
 
 const W = 32, H = 16;
@@ -107,7 +107,7 @@ const objects = [
   },
   {
     id: 'lamp_view', x: 0, y: 13, w: 27, lookKey: 'lamp_view',
-    look: 'Roofs all the way down to the water, and every basin still full.',
+    interact: (g) => g.describe(g.flag('act2.done') ? 'Roofs all the way down to the water.' : 'Roofs all the way down to the water, and every basin still full.'),
   },
   { id: 'yard_wall', x: 7, y: 8, w: 5, lookKey: 'yard', look: 'The school yard. Hopscotch squares I painted in my second year. Somebody keeps repainting them.' },
   { id: 'yard_wall_e', x: 14, y: 8, w: 5, lookKey: 'yard', look: 'The school yard. Hopscotch squares I painted in my second year. Somebody keeps repainting them.' },
@@ -131,6 +131,10 @@ async function girlsTalk(g, self, mine) {
       ['First Girl', "You're both wrong and you're both OUT."],
     ]);
     return;
+  }
+  if (self.id === 'girl_3' && g.flag('met.bench_man') && !g.flag('glasses.back') && !g.flag('n.girlGlasses')) {
+    g.setFlag('n.girlGlasses', 1);
+    return g.say(self, "Miss, why's she got glasses on her head? She doesn't even wear glasses.");
   }
   // Each girl alternates her own line with the chant.
   if (bump(g, `girls.${self.id}`) % 2 === 0) return g.say(self, mine);
@@ -164,30 +168,62 @@ const rope = {
 
 const wateringWoman = {
   id: 'watering_woman', name: 'Woman with Watering Can', x: 27, y: 5, facing: 'down',
-  sprite: LOOKS.watering_woman,
+  // Her husband's glasses up in her hair, until she gives them back.
+  sprite: (g) => (g.flag('glasses.back') ? LOOKS.watering_woman : LOOKS.watering_woman_glasses),
   turnToTalk: false,
   interact: async (g, self) => {
     if (firstMeet(g, 'watering_woman')) {
-      await g.describe("She waters the geraniums at nine every morning. The geraniums would set their watches by her, if geraniums had watches.");
-      return g.say(self,
+      await g.describe(
+        "She waters the geraniums at nine every morning. The geraniums would set their watches by her, if geraniums had watches.",
+        "And a pair of thin gold reading glasses pushed up in her hair. She doesn't wear glasses.");
+      await g.say(self,
         'Did you see the moon, Cheryl? Sideways! The whole street saw.',
         "My husband says it's the new clock. Everything's the new clock, with him. The milk went off: the clock.");
+      if (g.flag('met.bench_man')) await returnGlasses(g, self);
+      return;
     }
+    if (g.flag('met.bench_man') && !g.flag('glasses.back')) return returnGlasses(g, self);
     return g.say(self, 'The clock. I ask you.');
   },
   use: { '*': (g, self) => g.say(self, "Lovely, dear. I've got my hands full of can.") },
 };
 
+// The wife gives the glasses back and puts them on his nose without a word;
+// he reads, and gives Cheryl the Tide-Sheet (structure pass, section 3).
+async function returnGlasses(g, self) {
+  await g.say(self,
+    "...His glasses? On my-- oh, for heaven's sake. I've had them on since breakfast.",
+    "Don't tell him.");
+  const home = [self.x, self.y];
+  g.setSprite(self, { sheet: LOOKS.watering_woman_glasses.sheet, frame: 'down_0' });
+  await g.moveNpc(self, [20, 10]);
+  g.faceNpc(self, 'down');
+  g.sfx('give');
+  await g.wait(0.5);
+  g.setFlag('glasses.back');
+  await g.moveNpc(self, home);
+  g.setSprite(self, LOOKS.watering_woman);
+  const man = g.npc('bench_man');
+  await g.say(man,
+    '"Refracted." I KNEW it. Refracted by that new clock, I expect. ...And the letters page.',
+    "Somebody's counted the Hundred Steps. Take it, Miss. I've read it now. Properly.");
+  g.setFlag('got.tideSheet');
+  await getItem(g, 'tide_sheet');
+}
+
 const benchMan = {
   id: 'bench_man', name: 'Man on Bench', x: 20, y: 11, facing: 'down',
-  sprite: LOOKS.bench_man,
+  sprite: (g) => (g.flag('glasses.back') ? LOOKS.bench_man_glasses : LOOKS.bench_man),
   turnToTalk: false,
   interact: async (g, self) => {
+    if (g.flag('glasses.back')) return g.say(self, 'Refracted. Look it up.');
     if (firstMeet(g, 'bench_man')) {
       await g.describe("He's read the same page of the Tide-Sheet three times this morning. He's hoping it changes its mind.");
-      return g.say(self, 'Says here the moon was "refracted by unusual atmospheric conditions." Refracted. I said refracted. Last night.');
+      return g.say(self,
+        'Says here the moon was "re-" something. "Refri-"? Can\'t read a word without my glasses.',
+        "Lost them again. She says I'd lose my head if it wasn't screwed on.");
     }
-    return g.say(self, 'Refracted. Look it up.');
+    return g.say(self, 'My glasses, Miss, if you see them. Thin gold rims.');
   },
   use: { '*': (g, self) => g.say(self, "Not now. I'm being right.") },
 };
@@ -225,9 +261,9 @@ export const lampStreetMap = composedMap(compose, {
         const y = 1 + (g.player.y - 9);
         if (!g.flag('n.goatGate')) {
           g.setFlag('n.goatGate', 1);
-          await g.describe("The Goat Path. Down the back of the island the long way, past the goats and Mott's shack.");
+          await g.describe('The Goat Path. Down the back of the island the long way. The Steps and then some, plus goats.');
         }
-        await g.changeMap('goat_path', 13, y, 'down');
+        await g.changeMap('goat_path', 14, y, 'left');
       },
     },
   ],

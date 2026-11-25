@@ -10,7 +10,7 @@ import { squareMap, shopMap } from './square.js';
 import { goatPathMap } from './goat_path.js';
 import { harborMap, lampRoomMap } from './harbor.js';
 import { bilgeMap } from './bilge.js';
-import { act2Items } from './common.js';
+import { act2Items, migrateAct2 } from './common.js';
 import { endOfAct } from './ending.js';
 
 export const act2Maps = {
@@ -27,7 +27,7 @@ export const act2Maps = {
   bilge: bilgeMap,
 };
 
-export { act2Items, act2 };
+export { act2Items, act2, migrateAct2 };
 
 export const act2Scripts = {
   // ?map=hundred_steps&x=10&y=18&flags=act2.started,piano.slid,counter.left,step.open&run=act2_end

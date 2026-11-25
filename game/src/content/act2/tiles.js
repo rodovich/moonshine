@@ -18,8 +18,9 @@ import { reveal, bilge_flood } from '../../art/act4_surface.js';
 import { seacave } from '../../art/act4_under.js';
 import { sea, harbor_props, keyhole, lighthouse, lamproom } from '../../art/act5_surface.js';
 import { roof_props } from '../../art/roof.js';
-import { goatpath, mott_shack, mott_jugs } from '../../art/act2b_goat.js';
-import { headland, harbor_quay, fish_stall } from '../../art/act2b_harbor.js';
+import { goatpath, mott_shack, mott_jugs, goatcliff, goatcliff_a, goatcliff_b, goatcliff_c, goatcliff_d, gull } from '../../art/act2b_goat.js';
+import { headland, harbor_quay, fish_stall, bilge_west, signpost, harbor_culvert } from '../../art/act2b_harbor.js';
+import { steps_lid } from '../../art/hundredth.js';
 
 export const act2Tiles = {
   sheets: {
@@ -31,6 +32,7 @@ export const act2Tiles = {
     archive, archive_furniture, crypt, shop, square_props,
     reveal, bilge_flood, seacave, sea, harbor_props, keyhole, lighthouse, lamproom, roof_props,
     goatpath, mott_shack, mott_jugs, headland, harbor_quay, fish_stall,
+    goatcliff, goatcliff_a, goatcliff_b, goatcliff_c, goatcliff_d, gull, bilge_west, signpost, harbor_culvert, steps_lid,
   },
   tiles: {},
 };
