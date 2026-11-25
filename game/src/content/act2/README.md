@@ -25,7 +25,7 @@ From the design: `act2.started`, `movers.met`, `piano.slid`, `got.crowbar`, `tou
 
 ## Jumping to a moment
 
-- Arriving on Lamp Street from the opening: `?map=lamp_street&x=3&y=1&facing=down&items=moon_chart,soap,hat`
+- Arriving on Lamp Street from the opening: `?map=lamp_street&x=3&y=1&facing=down&items=moon_chart,soap`
 - The Steps, ready to grease the piano: `?map=hundred_steps&x=8&y=38&flags=act2.started,n.stepsArrived,movers.met&items=soap,hat`
 - The Square after the slide: `?map=fountain_square&x=11&y=4&flags=act2.started,piano.slid,got.crowbar&items=crowbar,hat`
 - Ready to open the step: `?map=hundred_steps&x=9&y=18&facing=down&flags=act2.started,n.stepsArrived,piano.slid,got.crowbar,counter.left&items=crowbar,guidebook`
@@ -66,6 +66,23 @@ Where the design left something open, or didn't work in play, this is what the b
 - **The end card** matches the opening's: the title over "End of Act 2. / Downstairs continues soon." Cheryl is saved standing at (10, 18) beside the open step.
 - **Lines added after the playtest:** the shop window's hat once Cheryl's own hat has left the wardrobe ("...I have a perfectly good hat in my bag." / "...Mine is out in the Square on a tourist, and it suits her."); the Crown's east bench ("The other bench. Same view, no cat. The cat has made its choice."); the Harbor's nets; Cheryl's thought after Mott turns down the moon chart ("Not today, he says. So some other day. I'll hold him to that."). The Mayor now asks "did you show her a guidebook?", since Cheryl keeps it.
 - **Lines added for states the design doesn't cover:** the Bilge cat; the harbor water west of the sea view; the lighthouse from below; the cliff behind the Harbor; the yard wall, the bay tree, the lamps and the view on Lamp Street; the tower door with the crowbar; the piano and the crowbar, the piano in the Square with soap, the shop hat display with Cheryl's hat; the Woman with Basin's doorstep.
+
+## The structure pass
+
+After the client played to Act 4, Act 2 was restructured ([docs/design/structure-pass.md](../../../../docs/design/structure-pass.md), sections 3 to 5, which win over 02-city.md where they differ). As built:
+
+- **Three required threads.** The piano (soap, crowbar) is unchanged. **The guidebook** now comes through a chain: the Shopkeeper names what would fill the window's gap ("Something brass. Something nautical."); the Tourist and Mott point east; the Lighthouse Keeper hands over her telescope (on the second talk, or on the first if Cheryl has already looked at it under its dust sheet at (6, 5)); the Shopkeeper won't touch the window ("Curating is hands-off"), so Cheryl uses the telescope on the window display herself and gets the straw hat (`shop_hat`); the Tourist trades the straw hat for the guidebook. **The Tide-Sheet:** the Man on Bench can't read without his glasses; his wife has them in her hair (her first-meet description says so, and the Third Girl hints once he's been met); talking to her after he's met makes her walk to the bench, put them on his nose, and he gives Cheryl the Tide-Sheet.
+- **The Counting Woman needs both printed sources,** in either order. The first gets a reaction that names the other; she keeps the Tide-Sheet "as EVIDENCE"; the guidebook stays with Cheryl. The second sends her storming off (over the piano if it's still there). Then the camera comes back up to her step, the Woman with Basin tips, the water vanishes into it, and Cheryl says "Steps don't drink." (`step.found`).
+- **Signposting:** walking onto the free hollow step goes bonk (`step_bonk`; the first time, "Bonk." / "The Kid was right."); the Kid's line after she's gone points at her step; in the Square, her repeat and the Mayor's point back to it.
+- **Rubbings:** Ottilie's handover and repeat say "floors, where the light falls"; paper and charcoal on the sundial, the bell tower, the Fountain, the mooring posts and the Water Stairs answer "Old, but not Founder-old. And Ottilie said floors."; the Founders' Door answers "Rubbed to a shine."
+- **Cheryl's own hat is retired** in Act 2's files: no handler uses `hat`. The Shop window shows the telescope after the swap; `shop_hat` has its own declines. Old saves: `content.migrate` (act2/common.js, `migrateAct2`) takes `hat` out of the bag unless the Tourist already has it, and gives a save past the old hat trade `window.telescope` and `telescope.migrated`, so Act 5's telescope chain works.
+- **Geography:** the Goat Path is a 16 × 42 cliff path (`PATH` in goat_path.js): irregular switchbacks, rough steps where it's steep, Mott's shack and yard partway down, a hairpin viewpoint halfway, the sea cave mouth at the waterline, the lower town's roofs at eye level near the bottom. It's 129 steps top to bottom, about 26 seconds. Lamp Street's west gate arrives at its top right, facing left, with "The Goat Path. Down the back of the island the long way. The Steps and then some, plus goats." the first time; its bottom leaves by the east edge onto the Bilge's flooded west end, and the Bilge's new west exit (0, 11–13) comes back up. The Harbor's goat stair is gone (`harborTopRows` draws rock there, so Act 5's risen Harbor follows); signs at the Bilge's east end and the Harbor's west end point between them.
+
+New flags: `got.telescope`, `window.telescope`, `telescope.migrated`, `glasses.back`, `got.tideSheet`, `counter.sawBook`, `counter.sawPaper`. New items: `telescope`, `shop_hat` (Straw Hat), `tide_sheet` (Tide-Sheet; Look reads the letter).
+
+Lines the build adds for the new states (the writer has them): the window with the telescope ("The Keeper's telescope, in pride of place. Looked at, not looked through. She'd approve."), the window before the swap once the Tourist is met ("Display stock. He'd let it go if something filled the gap..."), the Shopkeeper after the swap, Mott with the telescope, the telescope's description, the straw hat on the window, the Counting Woman in the Square shown the Tide-Sheet, the Mayor's "a guidebook and a letter", the Goat Path's viewpoint, views and roofs, and the two signs.
+
+**Stand-ins until the art lands:** the Goat Path's own cliff-path tiles (it's drawn with the goat path's dirt, the headland's rock and gull, and the sea's cliff lips), the telescope under its dust sheet (a crate), the Shop window with the telescope (a bare table), the Woman with Watering Can's glasses, the telescope and Tide-Sheet icons (the crowbar and the letter), and the two signs (the sign board).
 
 ## Art and audio
 
