@@ -37,6 +37,8 @@ This file records the project's technical and process decisions. Creative decisi
 - **Controls.** Keyboard: arrow keys (WASD also works) to move, Z / Space / Enter to interact and advance text, X / Escape to open the inventory and cancel. Pointer: click or tap a spot to walk there by A* pathfinding; click or tap a character or object to walk next to it and interact; tap to advance text; an on-screen button opens the inventory. Every action must be possible with either scheme alone.
 - **Content is data plus small scripts.** Maps, characters, items, and text live under `game/src/content/`. Interactions and cutscenes are async functions that call a small engine API (say a line, give an item, set a flag, move a character, change map, play music). Game state is a set of flags plus the inventory, saved to `localStorage`.
 - **Debug hooks for testing.** URL parameters let a tester start at a given map and position with given flags and items (documented in the engine README), so reviewers and Playwright tests can reach any scene quickly.
+- **The Playwright server's port** is `$PORT`, or else one derived from the checkout's path, so several worktrees can run their tests at once. (Added by the opening content task.)
+- **New Game starts the opening** (Cheryl's roof in Cistern Court). The engine test maps stay in the game but are reachable only through debug parameters (`?map=test_street`). The opening's content and its build decisions are in `game/src/content/opening/README.md`. (Added by the opening content task.)
 
 ## Engine
 

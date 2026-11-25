@@ -439,3 +439,60 @@ test('pointer: the whole opening', async ({ page }) => {
   await waitFor(page, () => window.moonshine.snapshot().scene === 'title', null, 15000);
   expect(errors).toEqual([]);
 });
+
+test('the Kid laps the well and stops for Cheryl', async ({ page }) => {
+  const errors = await boot(page, '?map=cistern_court&x=3&y=6&seed=1');
+  // He gets past the hurdle to the far corners of his lap.
+  await waitFor(page, () => { const k = window.moonshine.world.entity('kid'); return k.x === 13 && k.y === 19; }, null, 9000);
+  await waitFor(page, () => { const k = window.moonshine.world.entity('kid'); return k.x === 7 && k.y === 19; }, null, 6000);
+  // Stand by his route: he stops within two tiles and stays put.
+  await page.evaluate(() => window.moonshine.world.api.place('player', 10, 13, 'down'));
+  await waitFor(page, () => {
+    const w = window.moonshine.world; const k = w.entity('kid'); const p = w.player;
+    return Math.abs(k.x - p.x) + Math.abs(k.y - p.y) <= 2 && !k.moving;
+  }, null, 9000);
+  const before = await page.evaluate(() => { const k = window.moonshine.world.entity('kid'); return [k.x, k.y]; });
+  await page.waitForTimeout(800);
+  const after = await page.evaluate(() => { const k = window.moonshine.world.entity('kid'); return [k.x, k.y]; });
+  expect(after).toEqual(before);
+  expect(errors).toEqual([]);
+});
+
+// Every hotspot and character answers a look and an item, at dusk and in the
+// morning: nothing is silent.
+const SCENES = [
+  ['court at dusk', '?map=cistern_court&x=3&y=6'],
+  ['court in the morning', '?map=cistern_court&x=3&y=6&flags=act1.moonrise'],
+  ['flat at dusk', '?map=flat&x=5&y=7'],
+  ['flat in the morning', '?map=flat&x=5&y=7&flags=act1.moonrise'],
+];
+for (const [label, query] of SCENES) {
+  test(`every object answers: ${label}`, async ({ page }) => {
+    test.setTimeout(180000);
+    const errors = await boot(page, `${query}&items=soap,pepper_mill`);
+    await page.waitForTimeout(600);
+    await readThrough(page, kbAdvance(page));
+    const ids = await page.evaluate(() => window.moonshine.world.entities
+      .filter((e) => !e.isPlayer && (e.def.interact || e.def.look || e.def.looks || e.def.talk))
+      .map((e) => e.id));
+    expect(ids.length).toBeGreaterThan(5);
+    for (const id of ids) {
+      if (id === 'tub' || id === 'tap') continue; // these start scenes; the playthroughs cover them
+      for (const item of [null, 'soap']) {
+        const there = await page.evaluate(([id, item]) => {
+          const w = window.moonshine.world;
+          const e = w.entity(id);
+          if (e) w.run(() => w.interactWith(e, item));
+          return !!e;
+        }, [id, item]);
+        if (!there) continue; // taken a moment ago
+        await page.waitForTimeout(50);
+        const log = await readThrough(page, kbAdvance(page), { timeout: 20000 });
+        expect(log.length, `${id} with ${item || 'a look'}`).toBeGreaterThan(0);
+        // Taking things changes the inventory; keep the soap for the next one.
+        await page.evaluate(() => { const st = window.moonshine.world.state; if (!st.inventory.includes('soap')) st.inventory.push('soap'); });
+      }
+    }
+    expect(errors).toEqual([]);
+  });
+}

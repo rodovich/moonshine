@@ -149,7 +149,7 @@ const entities = [
       return g.describe('The plug hook. Empty. Oh -- I lent the plug to him downstairs. A "chess emergency."');
     },
   },
-].map((e) => ({ use: { '*': cherylDeclines }, ...e }));
+].map((e) => ({ solid: false, use: { '*': cherylDeclines }, ...e })); // the tiles under hotspots are solid already
 
 export const flatMap = composedMap(compose, {
   id: 'flat',

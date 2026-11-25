@@ -235,6 +235,10 @@ const tubUse = {
   '*': cherylDeclines,
 };
 
+// Hotspots don't block anything themselves: the map's tiles under them already
+// do, and a solid hotspot would stop the Kid hopping the hurdle.
+const hotspot = (o) => ({ solid: false, ...o });
+
 const objects = [
   // ---- Cheryl's roof ----
   { id: 'tub', x: 3, y: 4, w: 2, interact: tubLook, use: tubUse },
@@ -783,7 +787,7 @@ export const courtMap = composedMap(compose, {
   onEnter: async (g) => {
     g.playMusic(morning(g) ? 'morning_after' : 'cistern_court');
   },
-  entities: [...objects, oldMan, ...neighborDefs, kidNpc, sweatDrop, kidMorning, cat, catMorning, mist, ...swifts],
+  entities: [...objects.map(hotspot), oldMan, ...neighborDefs, kidNpc, sweatDrop, kidMorning, cat, catMorning, mist, ...swifts],
 });
 
 export async function flySwifts(g) {
