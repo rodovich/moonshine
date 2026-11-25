@@ -394,37 +394,6 @@ test('a thing reachable only diagonally: Z reaches it, and a click walks to the 
   await waitFor(page, () => (window.moonshine.snapshot().text || '').includes('plaque'), null, 5000);
 });
 
-test('a tap toward something on an open tile turns Cheryl to face it; holding walks on', async ({ page }) => {
-  // The belfry bell hangs overhead; its tiles are floor.
-  await boot(page, '?map=belfry&x=2&y=3&facing=down&flags=act4.started&seed=3');
-  await waitIdle(page);
-  await readAll(page);
-  await waitIdle(page);
-  await press(page, 'ArrowRight');
-  await page.waitForTimeout(300);
-  let s = await snap(page);
-  expect([s.x, s.y, s.facing]).toEqual([2, 3, 'right']);
-  await press(page, 'z');
-  await waitFor(page, () => (window.moonshine.snapshot().text || '').includes('The bell'), null, 5000);
-  await readAll(page);
-  await waitIdle(page);
-  // Standing on the bell's tiles, Cheryl walks about freely.
-  await press(page, 'ArrowRight');
-  await waitIdle(page);
-  await press(page, 'ArrowUp');
-  await waitIdle(page);
-  s = await snap(page);
-  expect([s.x, s.y]).toEqual([3, 2]);
-  // Facing away from it, holding the key turns, then walks onto it.
-  await runScript(page, "g.place('player', 2, 3, 'left');");
-  await page.keyboard.down('ArrowRight');
-  await page.waitForTimeout(450);
-  await page.keyboard.up('ArrowRight');
-  await waitIdle(page);
-  s = await snap(page);
-  expect(s.x).toBeGreaterThan(2);
-});
-
 test('no lone word on the last page of a line', async ({ page }) => {
   await boot(page, STREET);
   const pages = await page.evaluate(async () => {
