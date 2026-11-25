@@ -60,7 +60,10 @@ const errors = [];
 const ZOOM = +params.get('zoom') || 3;
 
 let TINTS = {};
-try { ({ TINTS } = await import('../src/art/tints.js')); } catch (e) { /* not yet */ }
+let EMISSIVE = [];
+try { ({ TINTS, EMISSIVE = [] } = await import('../src/art/tints.js')); } catch (e) { /* not yet */ }
+// Emissive colors skip the tint, as in the engine: their pixels are restored after the passes.
+const EMISSIVE_RGB = new Set(EMISSIVE.filter(n => COLORS[n]).map(n => parseInt(COLORS[n].slice(1), 16)));
 
 // ---- Tiny renderer for the art module format (self-contained; the engine has its own loader). ----
 const cache = new Map();
@@ -217,6 +220,7 @@ for (const n of ['scene default', 'none', ...Object.keys(TINTS)]) {
 if (only) tintBar.style.display = 'none';
 function applyTint(ctx, w, h, name) {
   const passes = [].concat(TINTS[name] || []);
+  const before = passes.length && EMISSIVE_RGB.size ? ctx.getImageData(0, 0, w, h) : null;
   for (const t of passes) {
     if (!t.amount) continue;
     ctx.save();
@@ -225,6 +229,13 @@ function applyTint(ctx, w, h, name) {
     ctx.fillStyle = t.color;
     ctx.fillRect(0, 0, w, h);
     ctx.restore();
+  }
+  if (before) {
+    const after = ctx.getImageData(0, 0, w, h), b = before.data, d = after.data;
+    for (let i = 0; i < b.length; i += 4) {
+      if (EMISSIVE_RGB.has((b[i] << 16) | (b[i + 1] << 8) | b[i + 2])) { d[i] = b[i]; d[i + 1] = b[i + 1]; d[i + 2] = b[i + 2]; }
+    }
+    ctx.putImageData(after, 0, 0);
   }
 }
 

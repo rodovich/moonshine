@@ -234,6 +234,8 @@ export const COLORS = {
   mud_light: '#988870',
   mud: '#685848',
   mud_deep: '#403028',
+  // Paving under ankle-deep water: the stone seen through a film of sea, grey-green.
+  flood_stone: '#a8c0b0',
 
   // Cheryl (art): silver-streaked hair, an ash-grey base under silver streaks, so she reads
   // as a vigorous late-50s woman rather than a white-haired grandmother (client feedback).
