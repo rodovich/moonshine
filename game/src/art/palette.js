@@ -178,8 +178,27 @@ export const COLORS = {
   moon: '#f0e0b0',
   moon_shade: '#d0b890',
   moon_mare: '#c0a888',
+  // The full moon just clear of the Rim: pale, faintly peach-gold (it whitens as it climbs).
+  moon_peach: '#f8d8b0',
+  moon_peach_shade: '#e8b890',
+  moon_peach_mare: '#d8b098',
   mist_light: '#e8f0f0',
   mist: '#b8d0d8',
+
+  // Skies (art): looking east at dusk, opposite the setting sun. From the horizon up: the Earth's
+  // shadow (blue-grey), the Belt of Venus (pink), then blue deepening to indigo. What faces the
+  // viewer catches the last sun (alpenglow); the rising moon brightens the sky with cool silver.
+  sky_east_blue: '#405888',
+  venus_pink: '#c890a8',
+  venus_mauve: '#a08098',
+  earth_shadow_light: '#687898',
+  earth_shadow: '#506080',
+  earth_shadow_deep: '#405070',
+  alpen_rose_light: '#e0a8a8',
+  alpen_rose: '#b07888',
+  alpen_shadow: '#584868',
+  moonrise_glow: '#d8e0f0',
+  moonrise_glow_dim: '#98a8c8',
 
   // Interior and items (art)
   // Clay: unglazed terracotta floor tiles, more muted than terra_*.
@@ -215,6 +234,11 @@ export const COLORS = {
   mud_light: '#988870',
   mud: '#685848',
   mud_deep: '#403028',
+
+  // Cheryl (art): silver-streaked hair, an ash-grey base under silver streaks, so she reads
+  // as a vigorous late-50s woman rather than a white-haired grandmother (client feedback).
+  cheryl_hair: '#807880',
+  cheryl_hair_shade: '#585060',
 
   // UI (engine)
   ui_ink: '#201828',

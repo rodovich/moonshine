@@ -329,7 +329,7 @@ Cheryl sits at the mouth and lets go. Fade to black with a long sliding whoosh t
 - **The hall** (first look anywhere on the floor, or automatically 3 seconds after landing): "A long hall going east, ribbed like the gallery. Pools of daylight here and there, coming down through the ceiling."
 - **Light-pipes**: First: "A glass rod coming down through the ceiling, full of daylight." / "That's the bottom of a moon-eye. Somebody's doorstep is up there." / "Daylight, coming down. Did I do that? I think I did that." Then: "Somebody's doorstep. I wonder whose."
 - **Lamps** (9, 5) and (18, 5): as in the Step Gallery.
-- **The hooked-up ladder** (8, 4–5): First: "A ladder, hooked up high on the wall, and a bronze chain hanging from its cleat. Up above it, a dark square." Pull the chain → `halls.ladder`: a rattle, a crash, and the ladder drops to the floor. "That'll save my knees." Then: "The ladder, down. A way back to the gallery and the Steps."
+- **The hooked-up ladder** (8, 4–5): First: "A ladder, hooked up high on the wall, and a bronze chain hanging from its cleat. Up above it, a dark square." Pull the chain → `halls.ladder`: a rattle, a crash, and the ladder drops to the floor. "There. A back door." Then: "The ladder, down. A way back to the gallery and the Steps."
 - **The chute mouth** (3–4, 5): "Where I came in. It's a long way up, and it's polished."
 - **The speaking tube** (20, 5): a bronze horn in the wall. Before the valve, each listen plays one faint line in turn (speaker label FAR-OFF VOICE, small italic):
   1. FAR-OFF VOICE: …Tessel: Forward!… …please disperse…
@@ -431,7 +431,7 @@ The hollow hull, the chain, and the bowl are left to the hotspots for players wh
    - WOMAN WITH WATERING CAN: My husband says it's the Pelletier boys.
    - WOMAN WITH WATERING CAN: Who are on the mainland. Which is exactly what they'd want you to think.
    - WOMAN WITH WATERING CAN (repeat): The Mayor says it's thieves. Water thieves. With glowing paint.
-3. **At the south parapet** (trigger): Cheryl stops and looks out. Cut to the **vista**: Tessel from the Crown at dusk, stepping down to the Bowl, every doorstep and stair a point of cyan light, like a necklace spilled down a hill; the Bowl dark; the Rim and the Gate against a violet sky. Music: the **reveal** cue's last phrase, softly.
+3. **At the south parapet** (trigger): Cheryl stops and looks out. Cut to the **vista**: Tessel from the Crown at dusk, looking south-west down over the town to the Bowl and the western Rim, every doorstep and stair a point of cyan light, like a necklace spilled down a hill; the Bowl darkening, with the last of the sunset's afterglow fading behind the western Rim (orange low, rising to violet and deep blue). The Gate is out of view, east, behind Cheryl's shoulder, and the moon isn't up yet: the night after full, it rises about an hour after sunset. Music: the **reveal** cue's last phrase, softly.
 4. Internal monologue over the vista: *That was me.* / *The Fountain was me, and the lights were me.* / *I've been down there one afternoon.*
 5. Fade to black. Card: **MOONSHINE** over **End of Act 3. Tessel continues soon.** Until Act 4 exists, back to the title. When it exists, Act 4 begins the next morning.
 

@@ -70,10 +70,14 @@ export class World {
     this.snapCamera();
     this.applyLighting(0);
     // Audio: ambience beds and a music filter per map (see sound.js).
-    setAmbience(def.ambience || []);
-    setMusicFilter(def.musicFilter || null);
-    if (def.music !== undefined) {
-      if (def.music) playMusic(def.music);
+    // music, ambience, and musicFilter may be functions of the state, like
+    // lighting, so a later act can change a map's mood before it fades in.
+    const val = (v) => (typeof v === 'function' ? safeCall(v, this.api) : v);
+    setAmbience(val(def.ambience) || []);
+    setMusicFilter(val(def.musicFilter) || null);
+    const music = val(def.music);
+    if (music !== undefined) {
+      if (music) playMusic(music);
       else stopMusic();
     }
   }
@@ -989,7 +993,10 @@ export function followRoute(world, e) {
   const [dx, dy] = DIR_VEC[dir];
   const nx = e.x + dx;
   const ny = e.y + dy;
-  if (e.routeGhost || e.routeForce || world.canEnter(e, nx, ny)) {
+  const p = world.player;
+  // Nobody ever walks into Cheryl: not ghosts, not forced steps.
+  const intoPlayer = !e.isPlayer && p.solid && p.visible && occupiesWithFootprint(p, e, nx, ny);
+  if (!intoPlayer && (e.routeGhost || e.routeForce || world.canEnter(e, nx, ny))) {
     e.route.shift();
     e.startStep(dir);
     e.routeBlocked = 0;
@@ -1002,8 +1009,55 @@ export function followRoute(world, e) {
     const path = world.pathFor(e, [e.routeGoal]);
     if (path) e.route = pathToDirs([e.x, e.y], path);
   }
-  // A scripted move must finish: after two seconds, walk through whatever is in the way.
+  if (intoPlayer) {
+    // Cheryl is in the way. In a cutscene she can't move herself, so after a
+    // moment she steps aside; otherwise the walker waits for her.
+    if (world.busy && e.routeBlocked > 90 && !p.moving && !(p.route && p.route.length)) nudgeAside(world, p, e, dir);
+    return;
+  }
+  // Cheryl's own scripted walk never passes through anyone: after three
+  // seconds blocked, she stops where she is (and the script carries on).
+  if (e.isPlayer) {
+    if (e.routeBlocked > 180) {
+      console.warn(`[script] the player's walk is blocked at (${e.x},${e.y}); stopping it`);
+      e.route = [];
+    }
+    return;
+  }
+  // A scripted move must finish: after two seconds, walk through another
+  // character (never Cheryl, never a wall).
   if (e.routeBlocked > 120 && !world.map.solid(nx, ny)) e.routeForce = true;
+}
+
+// Does `p` overlap mover `e`'s footprint if `e` stood at (x, y)?
+function occupiesWithFootprint(p, e, x, y) {
+  for (let fy = 0; fy < e.h; fy++) for (let fx = 0; fx < e.w; fx++) if (p.occupies(x + fx, y + fy)) return true;
+  return false;
+}
+
+// Step Cheryl one tile out of a walker's way: to the side if possible (not
+// along the walker's next steps), else back.
+function nudgeAside(world, p, e, dir) {
+  const [dx, dy] = DIR_VEC[dir];
+  const ahead = new Set();
+  let [x, y] = [e.x, e.y];
+  for (const d of e.route.slice(0, 4)) {
+    x += DIR_VEC[d][0];
+    y += DIR_VEC[d][1];
+    ahead.add(`${x},${y}`);
+  }
+  const sides = dx ? ['up', 'down'] : ['left', 'right'];
+  const back = Object.keys(DIR_VEC).find((d) => DIR_VEC[d][0] === dx && DIR_VEC[d][1] === dy);
+  for (const d of [...sides, back]) {
+    const tx = p.x + DIR_VEC[d][0];
+    const ty = p.y + DIR_VEC[d][1];
+    if (ahead.has(`${tx},${ty}`) || !world.canEnter(p, tx, ty) || world.isExit(tx, ty)) continue;
+    const facing = p.facing;
+    p.startStep(d);
+    p.facing = facing; // she steps aside without turning her back
+    e.routeBlocked = 0;
+    return;
+  }
 }
 
 export function pathToDirs(start, path) {
