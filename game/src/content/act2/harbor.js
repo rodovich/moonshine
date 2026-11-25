@@ -99,7 +99,7 @@ const objects = [
   },
   ...[8, 18].map((x) => ({ id: `bollard_${x}`, x, y: 8, lookKey: 'bollards', look: "A bollard. Mott's sitting on the good one." })),
   { id: 'crates', x: 7, y: 4, w: 2, lookKey: 'crates', look: 'Crates of nothing much, waiting for a ferry.' },
-  { id: 'nets', x: 20, y: 4, look: 'Fishing nets, heaped up to dry. They\'ve been drying since Tuesday. Nothing to catch with them until the ferry runs.' },
+  { id: 'nets', x: 20, y: 4, look: 'Nets, drying. Or forgotten. With nets it\'s hard to tell.' },
   // The lighthouse, round its door (the door itself is the way in).
   ...[[26, 0, 1, 4], [29, 0, 1, 4]].map(([x, y, w, h]) => ({
     id: `lighthouse_${x}`, x, y, w, h, lookKey: 'lighthouse', look: 'The Prow Light. Somebody up there polishes it every hour of the day.',
@@ -202,7 +202,7 @@ function composeLamp() {
   for (let x = 1; x < LW - 1; x++) L.set('ground', x, 1, 'lamproom:window', true);
   for (let y = 2; y < LH - 1; y++) for (let x = 1; x < LW - 1; x++) L.set('ground', x, y, 'lamproom:floor', false);
   for (let y = 0; y < 2; y++) for (let x = 0; x < 2; x++) L.set('detail', 3 + x, 2 + y, `lamproom:lamp_x${x}y${y}`, true);
-  L.set('ground', 3, LH - 1, 'interior:door', false); L.set('ground', 4, LH - 1, 'interior:door', false);
+  L.set('ground', 3, LH - 1, 'lamproom:stair_down_l', false); L.set('ground', 4, LH - 1, 'lamproom:stair_down_r', false);
   return L.done();
 }
 

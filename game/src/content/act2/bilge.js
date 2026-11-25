@@ -30,9 +30,13 @@ const STALLS = [2, 5, 8];
 const POSTS = [[10, 6], [17, 6], [28, 6]];
 const DOORS = [1, 4, 7, 16, 19, 22, 25, 28];
 
-function compose() {
-  const L = layout(W, H, blankGrid);
-  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) L.set('ground', x, y, pave(x, y));
+// The Bilge's rows 0–6, exactly as Act 2 draws them: paving, the houses along
+// the north quay, the stair up to Fountain Square (11–12, 0–3), the fish stalls
+// and their awnings, and the mooring posts. Exported so later states of the
+// Bilge (Act 4's flooded and dry Bilge) keep the same quay. `L` is a layout from
+// act2/common.js (`layout(W, H, blankGrid)`), at least 32 wide.
+export function bilgeTopRows(L) {
+  for (let y = 0; y <= 6; y++) for (let x = 0; x < W; x++) L.set('ground', x, y, pave(x, y));
 
   // ---- North: houses along the quay, and the stair up to Fountain Square ----
   for (let x = 0; x < W; x++) {
@@ -58,6 +62,12 @@ function compose() {
     L.set('detail', x0, 5, 'fish_stall:stall_l', true); L.set('detail', x0 + 1, 5, 'fish_stall:stall_r', true);
   });
   for (const [x, y] of POSTS) L.set('detail', x, y, 'canal:mooring_post', true);
+}
+
+function compose() {
+  const L = layout(W, H, blankGrid);
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) L.set('ground', x, y, pave(x, y));
+  bilgeTopRows(L);
 
   // ---- The canal, the stepped bridge, and the Water Stairs ----
   for (let x = 0; x < W; x++) {

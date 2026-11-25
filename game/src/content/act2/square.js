@@ -112,8 +112,8 @@ export async function hatWindow(g) {
     return g.describe('A wide straw hat, in the window. Display stock. It\'s been in that window since before I went grey.');
   }
   if (bump(g, 'hat.window') === 0) return g.describe("Display stock. She'll be peeling by lunchtime.");
-  if (g.flag('tourist.hasHat')) return g.describe('Display stock. Mine is out in the Square on a tourist, and it suits her.');
-  if (g.hasItem('hat')) return g.describe('Display stock. I have a perfectly good hat in my bag.');
+  if (g.flag('tourist.hasHat')) return g.describe("Display stock. Mine's on a tourist now, and it suits her better.");
+  if (g.hasItem('hat')) return g.describe('Display stock. I have a perfectly good hat right here.');
   return g.describe('Display stock. I have a perfectly good hat at home, in the wardrobe.');
 }
 
