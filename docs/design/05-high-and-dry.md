@@ -404,6 +404,7 @@ At his bench, repairing the clock drive she unclamped. Calm now, in a brittle wa
 
 - OLD MAN: The whole house lifted in the night. Gerald says we've risen in the world. Gerald thinks he's funny.
 - NEIGHBOR: My whites have never been whiter. Not since the house lifted in the night. I don't trust it.
+- The back line (Acts 5 and 6's night; builder's line after the QA sweep, edited): "Still grey to me. She says whiter than ever. I'm not arguing with her about her sheets. Nobody wins that." Her door: "Shut. She'll be up on her roof, guarding her sheets."
 
 ## Objects and descriptions
 
