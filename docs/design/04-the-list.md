@@ -319,7 +319,7 @@ Each line is one box; every line has been measured against the real box. "→" m
 - → He stands, slowly, and walks into the tower. Cheryl follows (the camera follows him up; the map changes to the belfry with both of them there, Ambrose at (4, 3) beside the rope).
 
 **In the belfry: the ringing** → `bell.restored`, `mayor.atCrown`
-1. AMBROSE: THE TURN'S AT TWENTY PAST. TULLS DON'T NEED CLOCKS. WE NEED KNEES.
+1. AMBROSE: THE TURN'S AT TWENTY PAST TWO. TULLS DON'T NEED CLOCKS. WE NEED KNEES.
 2. He takes the rope and waits, eyes shut. Two seconds of silence. Gulls outside.
 3. AMBROSE: …NOW.
 4. Three great strokes of the bell, each with a 1 px shake and the screen flashing slightly warmer. The rope runs down through the floor and back with each one.
@@ -341,7 +341,9 @@ The tea stain is deliberate: the flyleaf confirms the greedy-sister warning and 
 
 **Ambrose afterward** (in the belfry for the rest of the act, at the rope)
 - AMBROSE: I'LL BE HERE. EVERY TURN. TELL THE MAYOR. NO. DON'T. I'LL TELL HIM MYSELF.
-- Repeat: AMBROSE: TWENTY PAST, AND TEN TO NINE TONIGHT. THE SEA KEEPS BETTER TIME THAN HE DOES.
+- Repeat: AMBROSE: TWENTY PAST TWO, AND HALF PAST EIGHT TONIGHT. THE SEA KEEPS BETTER TIME THAN HE DOES.
+
+(The tide turns about every six and a quarter hours. The bell rings at twenty past two in the afternoon; the next turn, half past eight, is the moonrise turn Act 5 and 6 build to. See the story bible's "The sky over Tessel.")
 - Show the flyleaf again: any interaction with the ledger on his knee replays step 10.
 
 **Items:** Ship Plan: AMBROSE: A ROPE FROM THE BELL TO A WHEEL. I KNEW IT. I ALWAYS KNEW IT WAS ATTACHED TO SOMETHING. / Copper throat: AMBROSE: COPPER. GOOD FOR BELLS. NOT FOR THIS ONE.
@@ -382,7 +384,7 @@ A thin, precise man in a waistcoat, with a jeweler's loupe on a cord. He was the
 
 ### The belfry objects
 
-- **The bell**: "The bell. Green and enormous, and much older than the tower around it. It looks like it's listening."
+- **The bell**: "The bell. Green and enormous, and much older than the tower around it. It looks like it's listening." / "A new steel clapper hangs inside it. The old one was bronze, Ambrose says. This one sounds like a saucepan, he says." (When the Clockmaker fitted his clock, he fitted the steel clapper too and kept the old bronze one as a doorstop; see Act 5.)
 - **The clock drive** (before the lever): First: "The Clockmaker's machine, clamped onto the old bell linkage like a leech. Tick, tick, tick." Then: "It's got its hooks in the bell. Ambrose is right."
 - **The lever** (8, 4): First: "A lever. A card hung on it, in his handwriting: DO NOT TOUCH. VERY IMPORTANT." / "Every pupil I ever had knew what a sign like that is for." Then: pull → `clock.lifted`: a clank, a whir winding down, and the ticking stops. The clamp lifts off the linkage and the old rope swings free. "There. Unclamped." / "In thirty years of teaching, I never once touched a sign that said DO NOT TOUCH. I'm making up for lost time."
 - **The clock drive** (after): "Still. Not even a tick. It looks embarrassed."
@@ -627,7 +629,7 @@ Input is locked until step 12, except where noted. All shakes are 1 px unless no
 1. The Middle Sister coughs, catches, and goes. All three are running together. The thump is now a rolling, three-part rhythm. Music: the **pumps** cue (see Audio) starts under it.
 2. The cell grates: the water below them begins to drop, visibly, tile by tile, over four seconds.
 3. A long, low creak runs through the whole hull, and the screen eases one pixel back toward level (a slow 2-second shake in one direction).
-4. "The floor's levelling. I can feel it in my knees."
+4. "The floor's levelling. I can feel it through my shoes."
 5. "It worked. It's working." (Then hold three seconds with no text. Let this be relief.)
 6. "Middle sister's greedy. Put her back to bed."
 7. Control returns briefly: Cheryl must walk to the Middle Sister's valve (16, 5) and use it (the only interaction that does anything; others get "Not now."). → She hauls on it. It won't turn. A hiss, and a sweet, sharp smell.
@@ -643,7 +645,7 @@ Input is locked until step 12, except where noted. All shakes are 1 px unless no
 Walking up into the emergency ladder changes the map to the Emergency Shaft, with Cheryl at (2–3, 28). She climbs by holding Up. The roar of water fills the bottom of the shaft. Each trigger fires once:
 
 - **Row 22**: "Up and up." The roar is still loud below.
-- **Row 14**: the roar has faded to a distant rush. "My arms are fifty-eight years old. They'd like that noted."
+- **Row 14**: the roar has faded to a distant rush. "Fifty rungs. Fifty-one. The Counting Woman would be proud of me."
 - **Row 7**: near silence. Drips. Then, faint and far too close, a gull cries. "A gull. That's close. That's very close."
 - **Row 2**: a slab overhead, light leaking round its edge. "A slab over the hatch. Heavy. It smells of fish." → Cheryl shoves; a grinding scrape; daylight leaks in around the slab.
 
@@ -698,7 +700,7 @@ At the top (row 0), the map changes to the Ice Cellar.
 - **The canal** (from the quay): "Six feet down, to mud. The canal walls aren't stone, under the old waterline. They're slate, fitted, like Downstairs." / "Barnacles, all the way up to a line. The line where the sea used to be. On us."
 - **The boats**: "Boats, lying on their sides like dogs asleep in the sun."
 - **The stranded fish**: "A fish, on the quay. It's looking at me. I look away first."
-- **The Kid jumping down**: "He jumped. I am not jumping."
+- **The Kid jumping down**: "He jumped. I could. I'm not landing in six feet of mud in my good skirt."
 - **The trickle at the canal mouth**: "The last of the canal, running out to the Bowl. And the Bowl's down there. Lower. Of course it's lower."
 - **The laundry**: "Every line of washing on the quay is streaming out sideways, hard. The wind's got more of us to push now."
 - **The exits** (north, east, the Fishmonger's door): "Not yet. That door."

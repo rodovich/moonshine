@@ -329,7 +329,7 @@ Cheryl sits at the mouth and lets go. Fade to black with a long sliding whoosh t
 - **The hall** (first look anywhere on the floor, or automatically 3 seconds after landing): "A long hall going east, ribbed like the gallery. Pools of daylight here and there, coming down through the ceiling."
 - **Light-pipes**: First: "A glass rod coming down through the ceiling, full of daylight." / "That's the bottom of a moon-eye. Somebody's doorstep is up there." / "Daylight, coming down. Did I do that? I think I did that." Then: "Somebody's doorstep. I wonder whose."
 - **Lamps** (9, 5) and (18, 5): as in the Step Gallery.
-- **The hooked-up ladder** (8, 4–5): First: "A ladder, hooked up high on the wall, and a bronze chain hanging from its cleat. Up above it, a dark square." Pull the chain → `halls.ladder`: a rattle, a crash, and the ladder drops to the floor. "That'll save my knees." Then: "The ladder, down. A way back to the gallery and the Steps."
+- **The hooked-up ladder** (8, 4–5): First: "A ladder, hooked up high on the wall, and a bronze chain hanging from its cleat. Up above it, a dark square." Pull the chain → `halls.ladder`: a rattle, a crash, and the ladder drops to the floor. "There. A back door." Then: "The ladder, down. A way back to the gallery and the Steps."
 - **The chute mouth** (3–4, 5): "Where I came in. It's a long way up, and it's polished."
 - **The speaking tube** (20, 5): a bronze horn in the wall. Before the valve, each listen plays one faint line in turn (speaker label FAR-OFF VOICE, small italic):
   1. FAR-OFF VOICE: …Tessel: Forward!… …please disperse…
@@ -431,7 +431,7 @@ The hollow hull, the chain, and the bowl are left to the hotspots for players wh
    - WOMAN WITH WATERING CAN: My husband says it's the Pelletier boys.
    - WOMAN WITH WATERING CAN: Who are on the mainland. Which is exactly what they'd want you to think.
    - WOMAN WITH WATERING CAN (repeat): The Mayor says it's thieves. Water thieves. With glowing paint.
-3. **At the south parapet** (trigger): Cheryl stops and looks out. Cut to the **vista**: Tessel from the Crown at dusk, stepping down to the Bowl, every doorstep and stair a point of cyan light, like a necklace spilled down a hill; the Bowl dark; the Rim and the Gate against a violet sky. Music: the **reveal** cue's last phrase, softly.
+3. **At the south parapet** (trigger): Cheryl stops and looks out. Cut to the **vista**: Tessel from the Crown at dusk, looking south-west down over the town to the Bowl and the western Rim, every doorstep and stair a point of cyan light, like a necklace spilled down a hill; the Bowl darkening, with the last of the sunset's afterglow fading behind the western Rim (orange low, rising to violet and deep blue). The Gate is out of view, east, behind Cheryl's shoulder, and the moon isn't up yet: the night after full, it rises about an hour after sunset. Music: the **reveal** cue's last phrase, softly.
 4. Internal monologue over the vista: *That was me.* / *The Fountain was me, and the lights were me.* / *I've been down there one afternoon.*
 5. Fade to black. Card: **MOONSHINE** over **End of Act 3. Tessel continues soon.** Until Act 4 exists, back to the title. When it exists, Act 4 begins the next morning.
 
@@ -527,6 +527,20 @@ All of this is built (audio/foundation, e4adffd): `downstairs`, `reveal`, and `r
 - [ ] The inlay sequence lands: the player should see it's a boat a beat before Cheryl says "Oh."
 - [ ] Every line fits in its box.
 - [ ] First-time players finish in 18–25 minutes.
+
+## As built
+
+The Act 3 builder (zEKLwXahJL) built this act on `content/act3`; its full list of build decisions is in `game/src/content/act3/README.md`. This document follows them:
+
+- **Chart Room reveal:** the room is exactly one screen, so the camera can't pan. Instead the room dims and a band of daylight sweeps up the floor from the hull to the Crown, then back down to the waterline on "the sea comes up to… there," and fades back under the reveal cue. Same lines, same order.
+- **Chart Room hotspots** follow the art's drawing: town rows 5–6; hull rows 7–8 and 10; waterline row 9; mast (7, 5–6); shaft and bowl (5, 5–10); chain (11–12, 7–10); Sisters (8–9, 8); teapot (7–8, 7–8). Priority as designed. The ledger is at (4, 4) beside the table, the cup on the table at (3, 4).
+- **Step Gallery ribs** at x5, x17, x21 only (x9 and x13 lie on the diagonal beams).
+- **Doorway and passage lines play on arrival**, not as hotspots: entering the Bunk Room plays "Pitch dark in here. Darker than the hall. My disc barely gets past the door."; first stepping onto the drained passage plays "Drained. Wet, but walkable. North."
+- **Ladders, grates, and the drop-ladder:** walking into them climbs; looking at them gives the look line, then a "Climb up?" / "Climb down?" choice ("Pull the chain?" for the hooked ladder), so pointer players can climb.
+- **The mirror:** each inlay's lines play the first time the beam lights it; later turns are silent.
+- **The Crown at dusk:** on arriving, "Dusk already. And the plaza is full of little blue lights." Residents at Ambrose (6, 7), the Kid (10, 10), and the Woman with Watering Can (14, 12). The vista starts on stepping onto row 13 anywhere along the parapet.
+- **Lines added by the builder,** adopted as written: a lamp already lit ("It's already lit. It doesn't want seconds."); paper on the moons inlay ("Four moons. I'll remember four moons."); crowbar on the bolt ("It's a bolt. It doesn't want prying; it wants pulling."); the pipe after the valve ("Dry. A drip, then nothing. The Fountain on a hot day, gone."); crowbar on the grate ("It's bolted from underneath. Somebody liked their grates where they were."); disc on the mirror ("It shows me the disc, and the disc shows it back. Nothing happens. They seem to get on."); crowbar on the mirror ("It turns. I don't need to bully it."); Ottilie mid-scene ("Go home, Cheryl. Soup."); and the dusk residents' declines.
+- **The waterline:** the inlay shows the sea crossing the hull at the hill's shoulders, full width, on the boundary between map rows 7 and 8 (art/foundation, 863b602), with the ribbed, hollow belly continuing beneath it in a darker underwater tint. Act 4's exposed hull depends on this. The hotspot rows follow the art (the art task sent the Act 3 builder the new rows), and the reveal's lines stand as written.
 
 ## Decisions
 

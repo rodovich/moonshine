@@ -164,3 +164,43 @@ test('closing the bag with a tap never acts in the world; letterbox taps are ign
   expect(s.holding).toBe('letter');
   expect([s.x, s.y, s.text]).toEqual([12, 8, null]);
 });
+
+// Watch every frame for a character overlapping Cheryl (by pixels).
+async function watchOverlap(page, seconds) {
+  return page.evaluate(async (seconds) => {
+    const w = window.moonshine.world;
+    let worst = null;
+    const end = performance.now() + seconds * 1000;
+    while (performance.now() < end) {
+      await new Promise((r) => requestAnimationFrame(r));
+      const p = w.player;
+      for (const e of w.entities) {
+        if (e.isPlayer || !e.solid || !e.visible) continue;
+        if (Math.abs(e.px - p.px) < 16 && Math.abs(e.py - p.py) < 16) worst = `${e.id} at ${e.px},${e.py} on Cheryl at ${p.px},${p.py}`;
+      }
+    }
+    return worst;
+  }, seconds);
+}
+
+test('a patrolling NPC never runs through Cheryl, even a ghost patrol', async ({ page }) => {
+  await boot(page, `${STREET}&x=16&y=6&facing=left`);
+  await waitIdle(page);
+  // No stopNear: he has to wait for her because she's in his way.
+  await page.evaluate(() => {
+    const k = window.moonshine.world.byId.get('kid');
+    k.def = { ...k.def, behavior: { type: 'patrol', route: [[14, 6], [19, 6], [19, 9], [14, 9]], ghost: true } };
+  });
+  expect(await watchOverlap(page, 6)).toBe(null);
+});
+
+test('a scripted walk into Cheryl waits, then she steps aside; it never passes through her', async ({ page }) => {
+  await boot(page, `${STREET}&x=17&y=6&facing=left`);
+  await waitIdle(page);
+  const watching = watchOverlap(page, 6);
+  const r = await runScript(page, "await g.moveNpc('kid', 'r r r r r', { ghost: true }); return [g.npc('kid').x, g.player.x, g.player.y];", 8000);
+  expect(await watching).toBe(null);
+  expect(r.done).toBe(true);
+  expect(r.v[0]).toBeGreaterThanOrEqual(19); // he got past where she stood
+  expect([r.v[1], r.v[2]]).not.toEqual([17, 6]); // because she stepped aside
+});

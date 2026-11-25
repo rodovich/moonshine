@@ -29,6 +29,7 @@ A north wall face is two tiles tall: an upper row (`hull:face_top`) over a lower
 | Chute mouth (Cradle 2–3, 2; Lamp Halls 3–4, 5) | `ds:chute_l`, `chute_r` (2 wide, lower row); a 1-wide `ds:chute` | ground |
 | Moonglass lamps in niches: dead / lit | `ds:niche_dead`, `niche_lit` (upper row); put `hull:floor_glow` on the floor below a lit one | ground |
 | Light-pipes from the ceiling, with a pool below (Lamp Halls 5, 12, 20 on y8) | `ds_rod:rod` (3 frames), `rod_dark` (16×32 sprites); `hull:floor_glow` under each | sprite; ground |
+| A shorter light-pipe rod, for spots where the tall rod would reach into the row above (e.g. Lamp Halls 22, 8, under the valve's standing spot) | `ds_rod_short:rod_short` (3 frames), `rod_short_dark` (16×16 sprites: the rod fits within its own tile); `hull:floor_glow` under it | sprite; ground |
 | Drop-ladder: hooked up / down (Lamp Halls, 8, 6) | `ds:over_dropladder_hooked` / `ds_mirror:dropladder_down` | overhead / sprite |
 | The drop-ladder's chain on the wall (Lamp Halls, 7, 5) | `ds:wall_chain` (lower row) | ground |
 | Floor grate (Step Gallery, 6, 8): closed / open with the ladder top | `ds:grate_closed` / `grate_open` | ground |
@@ -36,12 +37,13 @@ A north wall face is two tiles tall: an upper row (`hull:face_top`) over a lower
 | Fountain valve (Lamp Halls, 22–23, 4–5; used from 22–23, 6), 2×2 | bare square spindle (no key) `machines:valve_spindle_nw/ne/sw/se`; key fitted `valve_key_*`; key turned `valve_key_turned_*`; jammed `valve_key_jammed_<q>` (2 frames, a strained shake). The older handwheel `machines:valve_big_*` is still there for other valves | objects |
 | Bunk Room tool rack, with / without the valve key | `ds:tool_rack_key` / `tool_rack` (upper wall row); it reads once the lamp is relit | ground |
 | Valve key icon | `items3:valve_key` (bronze T-handle with a square socket) | inventory |
+| Ship Plan icon | `items3:ship_plan` (Cheryl's charcoal rubbing folded once, the hull drawn pale on it) | inventory |
 | Gushing pipe (27, 2) / stopped | `ds_water:gush` (4 frames) / `gush_stopped`, over `hull:face_base` | objects |
 | Flooded fast water (north passage 25–26, 1–6) | `ds_water:flood` (4 frames); where it meets dry floor `flood_edge_n`; under the pipe `flood_splash` | ground |
 | Drained wet floor (after the valve) | `ds_water:floor_drained`, `floor_soaked` | ground |
 | Still black deep water sloping away (17–18, 11–13) | `ds_water:black_edge` (the steps going under, top row), `black` (2 frames, very slow) | ground |
 | Bunk Room: stone bunks (1–2, 7–8 on y3), tool rack (7–8, y1), stone table with a cup (3, 4) | `ds:bunk_l/r` (2×1); `ds:tool_rack` (upper row, use twice or once); `ds:stone_table` | objects; ground |
-| Chart Room floor inlay (3–12, 5–10) | `chart:inlay_x<0-9>y<0-5>`: column = map x − 3, row = map y − 5. Laid out to the hotspot table: town (6–9, 5), mast (7, 5–6), hull (4–11, 7–8), Sisters (8–9, 8), chain (11–12, 7–10), shaft and bowl (5, 5–10), waterline (row 9), teapot shadow (7–8, 7–8) | ground |
+| Chart Room floor inlay (3–12, 5–10) | `chart:inlay_x<0-9>y<0-5>`: column = map x − 3, row = map y − 5. The sea comes halfway up the hill: the waterline crosses the hull at its widest, on the boundary between map rows 7 and 8, and the ribbed, hollow belly lies under it. Map positions: town and houses on the hill (4–11, 5–7, the crown on 5–6); mast and bell (7, 5–6), its rope to a wheel (7, 6); hull above water, from the hill's slopes down to the main deck (4–11, 6–7); waterline (3–12, between rows 7 and 8); hull below water, the ribbed belly (4–11, 8, its keel just touching row 9); the Sisters' three bars, underwater (8–9, 8); the shaft from a narrow house (5, 5–6) straight down to the bowl with a moon in it (5, 10); the chain from the bow (11, 7) down to the anchor (12, 10); sparse swells below the waterline (rows 8–10); the teapot's shadow in the pool (7–8, 7–8). The Ship Plan rubbing (`ship_plan:plan`) matches | ground |
 | The Eye's pool of light with the teapot shadow (an overlay) | `chart:pool_x<c>y<r>` on the same cells as the inlay (only the cells it touches exist) | objects |
 | The Keeper's stone chair (2, 4) | `chart_chair:keeper_stone_chair` | sprite |
 | Table with a cup and a bronze-bound ledger (3, 4) | `ds:stone_table` with `chart:keeper_ledger`; or the 2×1 `chart:stone_desk_l/r` | objects |

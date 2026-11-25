@@ -34,7 +34,8 @@ export function SCENE(state) {
           ctx.drawImage(anim('final_moon', 'moon', now), 128 - 16, cy - 16);
         }
         ctx.drawImage(img('vista_rim', 'rim'), 0, 0);
-        ctx.drawImage(img('vista_cheryl', 'cheryl_tub'), 0, 128);
+        // a year later: Cheryl in her tub (the Act 1 vista keeps her perched on its edge)
+        ctx.drawImage(img('vista_cheryl_bath', 'cheryl_bath'), 0, 128);
         // hold, then the title: a two-step fade
         if (t > 10500) ctx.drawImage(img('vista_title', t > 11300 ? 'title_1' : 'title_0'), 0, 0);
         return;

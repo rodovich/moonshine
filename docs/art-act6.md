@@ -16,7 +16,7 @@ Lined up on the dev page at `/dev/art.html?only=scene:act6_people`. New sheets a
 | Cheryl writing at the table | `cheryl:write_up_0/1` (seated, seen from behind, her right elbow working). Put her on the chair's tile; the table is above |
 | Cheryl turning the trim wheel; pulling the stop rod | the existing `cheryl:wheel_up_0/1` and `heave_up_0/1` |
 | The Boatman with the piano in his boat | `boatman_piano:piano_rock_0..3` (450 ms) and `piano_sing_0/1`, 32×32, placed like `boatman:rock_*` |
-| Mott raising his empty jug | `mott_jug:raise_down_0` (jug raised), `raise_down_1` (tipped: empty) |
+| Mott raising a mug of tea (the climax montage) | `mott_jug:raise_mug_down_0` (mug raised, steam), `raise_mug_down_1` (raised higher). The earlier jug frames `raise_down_0/1` are kept |
 | Ambrose at the rope at night; the Keeper at the window | the existing `ambrose:ring_up_*` and `keeper:window_up_*` |
 | The Pelletiers home with luggage | `pelletier_m`, `pelletier_f`: `<dir>_0..2`, each with a suitcase in hand |
 | The Tourist with her suitcase | `tourist_case:down_0..2` (standing, and walking toward the camera) |
@@ -53,12 +53,12 @@ Draw in this order:
 
 The Act 1 composition made right. Draw in this order:
 
-1. `vista_final:bowl_moonrise` at (0, 0): the Act 1 Bowl and roofs, with more stars in a clearer sky and the moon's path laid straight down the water from the Gate.
+1. `vista_final:bowl_moonrise` at (0, 0): the Act 1 Bowl and roofs under the same eastern dusk sky (the Earth's shadow and the Belt of Venus; see [art-direction.md](art-direction.md), Skies), with more stars and the moon's silver path laid straight down the water from the Gate. The warmth comes from the alpenglow on the Rim and the lit town, not the sky.
 2. `vista_glow:glow_<0-2>` (the Act 1 glow) bottom-centred on (128, 112), so it gathers in the Gate: `glow_0` from about 0.8 s, `glow_1` from 1.8 s, `glow_2` from 2.8 s.
 3. `final_moon:moon` (32×32, 2-frame shimmer, 500 ms) centred on x = 128, rising from y = 126 (hidden behind the cliffs) at about 6 px/s, from 2 s, and stopping at y = 92: dead in the Gate, framed by its walls. (A new moon sprite: the Act 1 moon's markings read as a face once the whole disc is visible.)
 4. `vista_rim:rim` at (0, 0), over the moon.
 5. `vista_twinkle:twinkle` on the `VISTA_BASINS` points (as in Act 1), if wanted.
-6. `vista_cheryl:cheryl_tub` at (0, 128).
+6. `vista_cheryl_bath:cheryl_bath` at (0, 128): a year later, Cheryl sits in her tub, seen from behind with only her head (the bun and its coral tie) and bare shoulders above the water, the moon's glint on the water beside her. (The Act 1 vista keeps `vista_cheryl:cheryl_tub`, perched on the edge.)
 7. The title, once the moon has settled and the music has landed: `vista_title:title_0` (a half-dissolved first step) and then `title_1` (full), at (0, 0). MOONSHINE in cream with a dark outline and a soft violet glow, with a thin rule and a small moon-in-a-notch ornament beneath. The dev scene shows it at 10.5 s and 11.3 s. The credits roll over this picture.
 
 ## Underground
