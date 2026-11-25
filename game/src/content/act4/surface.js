@@ -36,6 +36,8 @@ async function surfaceAudio(g) {
 
 // Act 4's states of the given maps (built by earlier acts, possibly already
 // wrapped by them), as overlays over the same ids.
+import { withAct4Part2 } from './part2.js';
+
 export function withAct4(maps) {
   // ---------------------------------------------------------------------------
   // The Crown
@@ -460,7 +462,7 @@ export function withAct4(maps) {
   });
 
 
-  return { ...maps, crown: crown4, fountain_square: square4, lamp_street: lamp4, archive: archive4, hundred_steps: steps4, cistern_court: court4, flat: flat4 };
+  return { ...withAct4Part2(maps), crown: crown4, fountain_square: square4, lamp_street: lamp4, archive: archive4, hundred_steps: steps4, cistern_court: court4, flat: flat4 };
 }
 
 // The act's start: the morning after Act 3, in the flat (design: "What changes when Act 4 begins").
