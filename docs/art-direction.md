@@ -64,17 +64,27 @@ It should look like an error in the world rather than a monster in it.
 - **It pulses irregularly** (uneven frame timings, such as 500/120/260 ms), never with a smooth, regular rhythm.
 - Symptoms on the surface can be small: a crack in the paving (`street:pave_wrong`), a window that reflects the wrong color, a cat that won't sit on one particular slab. Make them small and few at first.
 
+## Props and furniture in 3/4
+
+Every freestanding object shows three things: its **top plane** (the lightest value, 3–5 rows deep for a table, crate, or bench seat), its **south face** (one step darker), and a **contact shadow** (a dark line or two where it meets the floor, offset to the right). An object drawn as only a front face reads as a picture on the wall. Signs and boards that stand at an angle show their slant and their legs. Props take an `ink` outline; the edge of a board or frame inside the outline uses a lighter value than `ink`.
+
+## Domes
+
+Tessel's domes are blue, but they are not Aegean postcards: they sit on a squat drum with round windows (oculi), and they carry a small moon finial (a disc or crescent on a one-pixel stem). Avoid the blue-dome-on-white-cube-with-a-cross silhouette.
+
 ## Proportions and characters
 
 - Tiles are 16×16. Character frames are 16×32, anchored at the bottom center: the bottom row of the frame is where the feet touch the ground.
 - **Adults stand about 24 px to the crown** (Cheryl's bun adds 4 more; the Old Man's stoop and cap make him about 23); the head is 9–11 px, around 40% of the height. This is the chunky, expressive SNES proportion: big heads for readable faces, short legs. **Children are about 19 px**, with even bigger heads. Door openings are 26 px tall to the top of the arch, so an adult fits with a little room.
-- **Personality is in the silhouette first.** Each character needs one shape you'd recognize as a black blob: Cheryl's bun with its pencil and her tote, the Old Man's cap and cane, Her Next Door's knotted headscarf, the Shopkeeper's round apron, the Sweaty Kid's spiky hair and sweatband. Then color, then face.
+- **Personality is in the silhouette first.** Each character needs one shape you'd recognize as a black blob: Cheryl's bun and satchel, the Old Man's cap and cane, Her Next Door's knotted headscarf, the Shopkeeper's round apron, the Sweaty Kid's spiky hair and sweatband. Then color, then face.
 - Faces are minimal: 1 px eyes in `ink`, a 2 px mouth or a mustache, a shade pixel for the nose in profile.
-- Side views (`left`) are drawn. `right` frames may be mirrors of `left` when the character is symmetric enough; when an asymmetric detail matters (Cheryl's tote is always on her right hip), draw `right` properly. The engine mirrors `right` into `left` only when `left` is missing.
+- Side views (`left`) are drawn. `right` frames may be mirrors of `left` when the character is symmetric enough; when an asymmetric detail matters (Cheryl's satchel is always on her right hip), draw `right` properly. The engine mirrors `right` into `left` only when `left` is missing.
 
 ### Cheryl
 
-Late 50s, the player, as the story bible describes her: silver-streaked hair in a loose bun with a pencil through it; reading glasses on a beaded chain; a mustard cardigan over a cream blouse; a teal mid-calf skirt; sensible brown shoes; a canvas tote on her right shoulder (the inventory lives in it). The cardigan uses a deeper mustard (`mustard_mid`) as its base so she separates from warm paving, and the teal skirt anchors her. She stands straight; she walks briskly and stops to look at things. Keep her palette distinct from every NPC's (no other resident wears mustard and teal together). (Round 1 had her in coral and navy before the story bible existed; the bible's look replaced it.)
+Late 50s, the player. Silver hair in a bun with a small coral tie; a coral cardigan over a cream blouse; a navy mid-calf skirt; sensible brown shoes; a leather satchel on a strap across her body, riding on her right hip (the inventory lives in it). She stands straight; she walks briskly and stops to look at things. Coral and navy make her the most saturated, highest-contrast figure on warm stone, and they hold up under the dusk tint. Keep her palette distinct from every NPC's.
+
+The story bible defers to this section for her look. (Round 2 briefly redrew her in a mustard cardigan and teal skirt to match an earlier draft of the bible while the bible was being changed to match this design. The coral look won: mustard sits too close in value and hue to the warm paving, especially at dusk.)
 
 Her sheet also has interaction poses: `reach_up`, `reach_down`, `reach_left`, `reach_right`; `sit_left`/`sit_right` (seated on the tub's edge); `rise_left`/`rise_right` (half-way up); and `idle_<dir>_0/1` (a blink) for scripts.
 
@@ -87,6 +97,8 @@ Her sheet also has interaction poses: `reach_up`, `reach_down`, `reach_left`, `r
 - Frames numbered `_0`, `_1`, … form an animation. Optional `durations` on a sheet set the time per frame in ms: a number for every frame, or an array with one entry per frame.
 - **Walks use the engine's names:** `<dir>_0` stands, `<dir>_1` and `<dir>_2` are the two steps, and the engine plays 1, 0, 2, 0. The body sits one pixel lower on the step frames. The Sweaty Kid runs on a 4-frame cycle (`<dir>_1`…`<dir>_4`; set `sprite.walk: [1, 2, 3, 4]`).
 - **Idles and poses carry personality** and are 2 frames with a long hold and a short beat where they loop: Cheryl blinks; the Old Man rests his chin on his hand and now and then reaches for a piece; Her Next Door smooths a sheet and then admires it, hands on hips; the Kid jogs in place and throws both arms up.
+- **Walk-cycle checklist:** the legs touch the body on every frame (no transparent row between hem and foot); the two step frames are visibly different (the near leg lighter, the far leg darker, and the forward foot swaps); the arms or what they carry move opposite to the legs (a hand or a bag rides one pixel); the body bobs one pixel down on the steps.
+- **Shadows under characters** are drawn by the engine from `fx:shadow`, a small soft oval under the feet that grounds sprites on pale paving.
 - Ambient animation is slow and small: water at 260 ms with ripples that sway rather than scroll; laundry flaps at 600 ms; the cat's tail flicks after a long pause. Nothing on the surface should feel frantic.
 
 ## Tiles and maps
@@ -107,11 +119,15 @@ The tiles are painted in neutral late-morning light. Dusk, night, and day are gl
 - **Night** multiplies by a moonlit blue at 70%: dark and cool, but every shape still readable.
 - **Day** is the art as painted.
 
-Check new tiles under `?tint=dusk` and `?tint=night` on the dev page. Shapes that depend on a small hue difference (a pale blue door on white) can vanish at night; separate them by value too. Lamp glows and lit windows can't brighten under a multiply tint, so they read as warm accents, not light sources.
+Check new tiles under `?tint=dusk` and `?tint=night` on the dev page. Tints compress hue, so never rely on hue alone for contrast (a coral cardigan against terracotta pots, a pale blue door on white): separate important shapes by value too. Shapes that depend on a small hue difference (a pale blue door on white) can vanish at night; separate them by value too. Lamp glows and lit windows can't brighten under a multiply tint, so they read as warm accents, not light sources.
+
+## Walkable roofs
+
+Roof terraces people walk on (Cheryl's roof) are paved like a street, not left as the flat, empty top surface of an unwalkable roof: a whitewashed plaster floor in slabs with joints, a step darker than an unwalkable roof's top, with 2×2 macro variants and a cracked slab. They are bordered by parapets that show their top (lightest), their inner face (toward the terrace, base value, visible on the north parapet because it faces south), and, on the south edge, the drop beyond. The low wall between two roofs is a parapet seen from both sides.
 
 ## Interiors
 
-Rooms are seen in the same 3/4 view: the north wall's inner face fills the top two rows (wall objects such as shelves, clocks, and windows hang there), the side and south walls show only their tops, and the floor is warm terracotta (`clay_*`). Furniture sits on the objects layer with an `ink` outline like props. Keep rooms lived-in but calm: a few strong pieces, empty floor between them.
+Light indoors comes from the room's window, which for Cheryl's flat is on the north wall, so interiors keep the same upper-left convention for consistency; the window itself is the brightest thing in the room. Rooms are seen in the same 3/4 view: the north wall's inner face fills the top two rows (wall objects such as shelves, clocks, and windows hang there), the side and south walls show only their tops, and the floor is warm terracotta (`clay_*`). Furniture sits on the objects layer with an `ink` outline like props. Keep rooms lived-in but calm: a few strong pieces, empty floor between them.
 
 ## Cutscene pictures
 

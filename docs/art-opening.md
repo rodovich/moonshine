@@ -31,7 +31,7 @@ Modules: `roof.js` (sheets `roof`, `tub`, `roof_props`, `laundry`) and `court.js
 | Back line, (11,1)–(18,1) | `laundry:backline_<state>_<a–h>_<n\|s>`: columns a–h are x11–18, `n` row 1, `s` row 2. States `sag`, `prop`, `one`, `two` (sheets going up one per beat), `sheets` (flutter), `swung` (the groan). `@grey` for the morning | objects |
 | `D` doors (3 and 14, rows 10–11) | `facade:door_top`, `door_bot` (blue moon-eye studs in the step); the Neighbor's `@sage` | ground |
 | `^` outside stair (x7) | `court:stair_head` (y8), `stair_cut` (y9), `stair` (y10–11), `stair_foot` (y12) | ground |
-| `,` cobbles | `court:cobble_a`, `cobble_b`, `cobble_c` (mix freely), `cobble_drain` | ground |
+| `,` cobbles | `court:cobble_a` … `cobble_e` (pick by a hash of the position so no pattern repeats), `cobble_drain` | ground |
 | `#` court side walls | `court:court_wall_w`, `court_wall_e` | ground |
 | `G` Pelletiers' gate | `court:gate_w` | ground |
 | `L` `l` lemon tree | trunk `court_tree:lemon_trunk`; canopy `court_tree:over_lemon_{nw,n,ne,w,c,e,sw,s,se}` | objects; overhead |
@@ -41,6 +41,7 @@ Modules: `roof.js` (sheets `roof`, `tub`, `roof_props`, `laundry`) and `court.js
 | `o` `-` pots and hurdle | `court_tree:hurdle_l`, `hurdle_m`, `hurdle_r`; after the trade `flowerpot`, `flowerpot_kicked` | objects |
 | `b` bench | `court_props:bench_l/r` | objects |
 | `p` geraniums | `props:pot_geranium` | objects |
+| The Pelletiers' cat | `props:cat` (sitting; tail flick and blink), at (17,19) at dusk and (12,12) in the morning | sprite |
 | `P` piano (2×2) | top `court_props:over_piano_nw/ne` (overhead: someone standing north of it is behind it); bottom `piano_sw/se` | overhead; objects |
 | `r` lower rooftops | row 24 `court:low_{flat,tiles}_edge(_l/_r)`; row 25 `low_{flat,tiles}(_l/_r)`, `low_flat_basin` | ground |
 | `v` the Squeeze | `court:squeeze_top_l/r` (y24), `squeeze_l/r` (y25); morning `_scraped` variants | ground |
@@ -93,6 +94,7 @@ Walks use the engine's names: `<dir>_0` stands, `<dir>_1`, `<dir>_2` step.
 | Sweaty Kid: hop | `sweaty_kid:hop_<dir>` (drawn 4 px up; hold it for the hop) |
 | Sweaty Kid: arms up | `sweaty_kid:arms_up` (2 frames) |
 | Sweat drop particle | `fx:sweat_drop` (2 frames) |
+| Ground shadow under any character | `fx:shadow` (a soft oval at the bottom of the frame; the engine draws it under the feet) |
 
 ## Items (`items.js`, sheet `items2`)
 
@@ -110,7 +112,7 @@ Walks use the engine's names: `<dir>_0` stands, `<dir>_1`, `<dir>_2` step.
 
 ## The moonrise vista (`vista.js`)
 
-Draw in this order, each frame:
+Cheryl's silhouette shows her bun with its coral tie and her coral cardigan. Draw in this order, each frame:
 
 1. `vista:bowl_dusk` at (0, 0).
 2. `vista_glow:glow_<n>` with its bottom center at (176, 90), so its top-left is (116, 42). Glow 0 from about 1 s, 1 from 2.2 s, 2 from 3.4 s.

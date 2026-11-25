@@ -75,8 +75,10 @@ export function SCENE(state = 'dusk') {
   set(ground, 7, 10, 'court:stair'); set(ground, 7, 11, 'court:stair');
 
   // ---------------- The court (rows 12–23) ----------------
-  const cob = ['court:cobble_a', 'court:cobble_b', 'court:cobble_c', 'court:cobble_a', 'court:cobble_b'];
-  for (let y = 12; y <= 23; y++) for (let x = 1; x <= 18; x++) ground[y][x] = cob[(x * 3 + y * 5 + (x * y) % 3) % cob.length];
+  // cobble variants all share their tile-edge stones, so any mix works; pick by a hash so no pattern shows
+  const cob = 'abcde'.split('').map(v => `court:cobble_${v}`);
+  const hash = (x, y) => ((((x * 73856093) ^ (y * 19349663)) >>> 0) % 9973);
+  for (let y = 12; y <= 23; y++) for (let x = 1; x <= 18; x++) ground[y][x] = cob[hash(x, y) % cob.length];
   set(ground, 7, 12, 'court:stair_foot');
   for (let y = 12; y <= 23; y++) { set(ground, 0, y, 'court:court_wall_w'); set(ground, 19, y, 'court:court_wall_e'); }
   set(ground, 0, 19, 'court:gate_w');
@@ -131,7 +133,8 @@ export function SCENE(state = 'dusk') {
     at('neighbor', 'smooth_left', px(17, 5));
     at('sweaty_kid', 'jog_down', px(13, 15));
   }
-  at('props', 'cat_sleep', px(17, 12), { y: 12 * 16 + 12 });
+  // the Pelletiers' cat, sitting: by their gate side of the court at dusk, by the bench in the morning
+  at('props', 'cat', morning ? px(12, 12) : px(17, 19));
 
   return {
     title: `Cistern Court — ${morning ? 'morning' : 'dusk'}`,

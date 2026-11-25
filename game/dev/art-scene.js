@@ -10,7 +10,11 @@ const W = 16, H = 14;
 const blank = () => Array.from({ length: H }, () => Array(W).fill(null));
 const ground = blank(), detail = blank(), overhead = blank();
 
-const pave = (x, y) => `street:pave_${y % 2 ? 's' : 'n'}${x % 2 ? 'e' : 'w'}`;
+// Two slab layouts, each a 2x2 block of tiles; a hash of the block position picks one.
+const quad = (x, y) => `${y % 2 ? 's' : 'n'}${x % 2 ? 'e' : 'w'}`;
+const blockHash = (x, y) => (((x >> 1) * 73856093) ^ ((y >> 1) * 19349663)) >>> 0;
+const pave = (x, y) => `street:${blockHash(x, y) % 3 === 0 ? 'pave2' : 'pave'}_${quad(x, y)}`;
+const water = (x, y) => `canal:water_${quad(x, y)}`;
 for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) ground[y][x] = pave(x, y);
 
 // A building: columns of frame names from the top row down to the base.
@@ -77,8 +81,8 @@ ground[9][14] = 'street:pave_nw_drain';
 // The canal along the bottom, with a stepped bridge.
 for (let x = 0; x < W; x++) {
   ground[10][x] = 'canal:bank_n';
-  ground[11][x] = 'canal:water';
-  ground[12][x] = 'canal:water';
+  ground[11][x] = water(x, 11);
+  ground[12][x] = water(x, 12);
   ground[13][x] = 'canal:bank_s';
 }
 const bx = 7;
