@@ -372,7 +372,20 @@ export function makeApi(world) {
       const want = world.clampCamera(world.camPan.x, world.camPan.y);
       await world.until(() => world.cam.x === want.x && world.cam.y === want.y);
     },
+    // Keep the camera on another character as they move (and across a
+    // cutscene changeMap); `speed` glides there first (px per frame), 0 snaps.
+    // followPlayer() returns it to Cheryl.
+    cameraFollow(id, speed = 0) {
+      world.camFollow = resolveEntity(id).id;
+      world.camFollowSpeed = speed;
+    },
+    // After changeMap(..., { cutscene: true }): back to Cheryl's own map and
+    // spot, visible again. { fade: false } cuts.
+    restorePlayer(opts) {
+      return world.restorePlayer(opts);
+    },
     async followPlayer(speed = 3) {
+      world.camFollow = null;
       const p = world.player;
       const t = { x: p.px + TILE / 2, y: p.py + TILE / 2 - 8 };
       world.camPan = { ...t, speed };
