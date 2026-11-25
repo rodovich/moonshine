@@ -68,7 +68,7 @@ const streetMap = {
   id: 'test_street',
   name: 'Test Street',
   tileset: testTileset,
-  music: 'neighborhood',
+  music: 'cistern_court',
   lighting: storyLight,
   spawn: [5, 7],
   legend: {
@@ -295,6 +295,8 @@ const shopMap = {
   // After the letter, the shop goes dark except around Cheryl.
   darkness: (g) => (g.flag('letter_delivered') ? 0.85 : 0),
   playerLight: 3,
+  // A lamp on the counter, lit by a flag (colored lights tint their pool).
+  lights: [{ x: 1, y: 3, radius: 2, color: 'lamp_warm', when: (g) => g.flag('counter_lamp') }],
   legend: { x: 'inwall_top', v: 'void', w: 'inwall', '.': 'floor', r: 'rug', c: 'counter', m: 'doormat' },
   ground: [
     'xxxxxxxxxx',
@@ -333,7 +335,7 @@ const laneMap = {
   id: 'test_lane',
   name: 'Test Lane',
   tileset: testTileset,
-  music: 'neighborhood',
+  music: 'cistern_court',
   lighting: storyLight,
   spawn: [8, 2],
   legend: {

@@ -55,11 +55,16 @@ export class Entity {
     this.pose = null;
   }
 
-  // Play a named animation (e.g. 'sit_right') instead of idle/walk frames;
-  // null returns to normal.
-  setPose(base) {
+  // Play a named animation instead of idle/walk frames; null returns to
+  // normal. A base like 'jog' plays jog_<facing> (or its mirror) when the
+  // sheet has it, so the pose follows the character's facing; a full name
+  // like 'sit_right' plays as is. `offset` [dx, dy] shifts the drawing while
+  // posed (Cheryl sitting on the tub's rim); the def's poseOffsets: { sit_right:
+  // [0, -4] } gives defaults.
+  setPose(base, offset = null) {
     this.pose = base || null;
     this.poseMs = 0;
+    this.poseOffset = offset || (base && this.def.poseOffsets && this.def.poseOffsets[base]) || null;
   }
 
   occupies(x, y) {
@@ -118,39 +123,80 @@ export class Entity {
     else this.walkPx = 0;
   }
 
+  // Does the sheet have a frame or an animation called `name`?
+  hasAnim(name) {
+    return this.art.has(name) || this.art.has(`${name}_0`);
+  }
+
+  // `fn(dir)` for the facing, else the mirrored facing (flipped), else down.
+  byFacing(fn) {
+    const dir = this.facing;
+    let r = fn(dir);
+    if (r) return { ...r, flip: false };
+    const mirror = { left: 'right', right: 'left' }[dir];
+    if (mirror && (r = fn(mirror))) return { ...r, flip: true };
+    r = fn('down');
+    return r ? { ...r, flip: false } : null;
+  }
+
+  // Character sheets come in two namings, and both work:
+  //   art names (docs/decisions.md): <dir>_0 stands, <dir>_1, <dir>_2 step
+  //     (walk 1, 0, 2, 0; longer cycles give sprite.walk, e.g. [1, 2, 3, 4]),
+  //     idle_<dir>_<n> an optional idle (blinks)
+  //   alternative: walk_<dir>_<n> and idle_<dir>_<n>
+  walkFrames(dir) {
+    const art = this.art;
+    if (art.has(`walk_${dir}_0`)) return art.anim(`walk_${dir}`);
+    if (!art.has(`${dir}_1`)) return null;
+    let cycle = this.sprite.walk;
+    if (!cycle) {
+      let n = 0;
+      while (art.has(`${dir}_${n}`)) n++;
+      cycle = n === 3 ? [1, 0, 2, 0] : n === 2 ? [1, 0] : Array.from({ length: n - 1 }, (_, i) => i + 1);
+    }
+    return cycle.filter((i) => art.has(`${dir}_${i}`)).map((i) => art.frame(`${dir}_${i}`));
+  }
+
+  idleFrame(dir, ms) {
+    const art = this.art;
+    if (this.hasAnim(`idle_${dir}`)) return art.frameAt(`idle_${dir}`, ms);
+    if (art.has(`${dir}_0`)) return art.frame(`${dir}_0`);
+    if (art.has(`walk_${dir}_0`)) return art.frame(`walk_${dir}_0`);
+    return null;
+  }
+
   currentFrame() {
     const art = this.art;
     if (!art) return null;
-    if (this.pose) return { img: art.frameAt(this.pose, this.poseMs), flip: false };
+    if (this.pose) {
+      // pose_<facing>, else the mirrored facing flipped, else the pose itself.
+      const p = this.pose;
+      const mirror = { left: 'right', right: 'left' }[this.facing];
+      let name = p;
+      let flip = false;
+      if (this.hasAnim(`${p}_${this.facing}`)) name = `${p}_${this.facing}`;
+      else if (mirror && this.hasAnim(`${p}_${mirror}`)) { name = `${p}_${mirror}`; flip = true; }
+      else if (!this.hasAnim(p) && this.hasAnim(`${p}_down`)) name = `${p}_down`;
+      return { img: art.frameAt(name, this.poseMs), flip };
+    }
     if (!this.directional) {
       const fallback = this.sprite.fps ? 1000 / this.sprite.fps : 200;
       return { img: art.frameAt(this.sprite.frame, this.animMs + this.phase, fallback), flip: false };
     }
-    const kind = this.moving || this.walkPx > 0 ? 'walk' : 'idle';
-    const pick = (k, dir) => (art.has(`${k}_${dir}_0`) ? `${k}_${dir}` : null);
-    const dir = this.facing;
-    let flip = false;
-    let base = pick(kind, dir);
-    if (!base) {
-      const mirror = { left: 'right', right: 'left' }[dir];
-      if (mirror && pick(kind, mirror)) {
-        base = pick(kind, mirror);
-        flip = true;
-      } else if (kind === 'idle' && pick('walk', dir)) {
-        // No idle frames: stand on the first walk frame.
-        return { img: art.frame(`walk_${dir}_0`), flip: false };
-      } else {
-        base = pick(kind, 'down') || pick('walk', 'down');
-      }
+    if (this.moving || this.walkPx > 0) {
+      // Walk frames advance with distance (one per 8 px), so feet stay
+      // planted at any walking speed.
+      const r = this.byFacing((d) => {
+        const frames = this.walkFrames(d);
+        return frames && frames.length ? { frames } : null;
+      });
+      if (r) return { img: r.frames[Math.floor(this.walkPx / WALK_PX_PER_FRAME) % r.frames.length], flip: r.flip };
     }
-    if (!base) return null;
-    if (kind === 'walk') {
-      // Walk frames advance with distance (one per 8 px, a full 4-frame cycle
-      // every two tiles), so feet stay planted at any walking speed.
-      const frames = art.anim(base);
-      return { img: frames[Math.floor(this.walkPx / WALK_PX_PER_FRAME) % frames.length], flip };
-    }
-    return { img: art.frameAt(base, this.animMs + this.phase), flip };
+    const r = this.byFacing((d) => {
+      const img = this.idleFrame(d, this.animMs + this.phase);
+      return img ? { img } : null;
+    });
+    return r ? { img: r.img, flip: r.flip } : null;
   }
 
   draw(ctx, camX, camY) {
@@ -159,8 +205,9 @@ export class Entity {
     if (!f) return;
     const { img, flip } = f;
     if (!img) return;
-    const x = this.px + (this.w * TILE - img.width) / 2 + this.offset[0] - camX;
-    const y = this.py + this.h * TILE - img.height + this.offset[1] - camY;
+    const po = (this.pose && this.poseOffset) || [0, 0];
+    const x = this.px + (this.w * TILE - img.width) / 2 + this.offset[0] + po[0] - camX;
+    const y = this.py + this.h * TILE - img.height + this.offset[1] + po[1] - camY;
     const rx = Math.round(x);
     const ry = Math.round(y);
     this.lastDrawn = { x: rx + camX, y: ry + camY, w: img.width, h: img.height, img, flip };

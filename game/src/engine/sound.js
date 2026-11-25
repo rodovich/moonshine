@@ -10,7 +10,6 @@ import * as audio from '../audio/index.js';
 const SFX_ALIASES = {
   text: 'blip',
   text_cheryl: 'blip_cheryl',
-  cursor: 'blip',
   select: 'confirm',
   item: 'item_get',
 };
@@ -41,17 +40,44 @@ export function playCue(id, opts) {
   try { audio.playCue(id, opts); } catch (err) { warnOnce('cue', id, err); }
 }
 
+/** The current music runs down like a music box over `ms` and stops (the moonrise). */
+export function windDownMusic(ms) {
+  try { audio.windDownMusic(ms); } catch (err) { warnOnce('wind', '', err); }
+}
+
 export function sfx(id) {
   const real = SFX_ALIASES[id] ?? id;
   if (!audio.SFX_IDS.includes(real)) return warnOnce('sfx', id, 'unknown id');
   try { audio.sfx(real); } catch (err) { warnOnce('sfx', id, err); }
 }
 
-// Looping ambience beds for a map (town murmur, canal and gulls). Passed on
-// to the audio module's setAmbience if it has one; otherwise ignored.
+/** Start a looping sound (crowd, wind, water_pour, timer_tick). Already running: no change. */
+export function startLoop(id, opts) {
+  if (!audio.LOOP_IDS.includes(id)) return warnOnce('loop', id, 'unknown id');
+  try { audio.startLoop(id, opts); } catch (err) { warnOnce('loop', id, err); }
+}
+
+/** Stop a looping sound over `fadeMs` (0 for a dead stop). */
+export function stopLoop(id, fadeMs) {
+  try { audio.stopLoop(id, fadeMs); } catch (err) { warnOnce('loop', id, err); }
+}
+
+export function stopAllLoops(fadeMs) {
+  try { audio.stopAllLoops(fadeMs); } catch (err) { warnOnce('loop', '', err); }
+}
+
+// Looping ambience beds for a map (crowd, wind): starts the map's loops and
+// fades out the previous map's. Loops a script started itself are left alone.
+let ambienceLoops = [];
 export function setAmbience(ids) {
-  if (typeof audio.setAmbience !== 'function') return;
-  try { audio.setAmbience(ids || []); } catch (err) { warnOnce('ambience', String(ids), err); }
+  const next = (ids || []).filter((id) => {
+    if (audio.LOOP_IDS && audio.LOOP_IDS.includes(id)) return true;
+    warnOnce('ambience', id, 'unknown loop id');
+    return false;
+  });
+  for (const id of ambienceLoops) if (!next.includes(id)) stopLoop(id, 800);
+  for (const id of next) startLoop(id);
+  ambienceLoops = next;
 }
 
 // A filter over the music ('muffled' indoors, null for none). Passed on to

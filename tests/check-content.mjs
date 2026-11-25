@@ -73,7 +73,7 @@ function mapInfo(id, def) {
   const ts = def.tileset || {};
   const cache = new Map();
   for (const layer of ['ground', 'detail', 'overhead']) {
-    const rows = def[layer];
+    const rows = layer === 'detail' ? def.detail || def.objects : def[layer];
     if (!rows) continue;
     if (rows.length !== h) err(where, `${layer} has ${rows.length} rows; ground has ${h}`);
     rows.forEach((row, y) => {
@@ -204,8 +204,8 @@ for (const [key, def] of Object.entries(maps)) {
     if (!info.inBounds(e.x, e.y)) err(ewh, `(${e.x},${e.y}) is off the map`);
     if (e.sprite && typeof e.sprite === 'object') {
       checkSheetRef(ewh, e.sprite.sheet, e.sprite.frame, e.sprite.palette);
-      if (!e.sprite.frame && !frameExists(e.sprite.sheet, 'walk_down') && !frameExists(e.sprite.sheet, 'idle_down')) {
-        err(ewh, 'character sheet has no idle_down_0 or walk_down_0 frame');
+      if (!e.sprite.frame && !['down_0', 'walk_down_0', 'idle_down_0'].some((f) => e.sprite.sheet.frames?.[f])) {
+        err(ewh, 'character sheet has no down_0 (or walk_down_0 / idle_down_0) frame');
       }
     }
     if (e.facing && !DIRS.includes(e.facing)) err(ewh, `facing "${e.facing}"`);

@@ -3,7 +3,7 @@
 // in script.js.
 
 import { WIDTH, HEIGHT } from './display.js';
-import { TileMap, TILE } from './tilemap.js';
+import { TileMap, TILE, layerName, layerRows } from './tilemap.js';
 import { Entity, DIR_VEC, dirBetween } from './entity.js';
 import { findPath, nearestReachable } from './pathfind.js';
 import { makeApi } from './script.js';
@@ -204,7 +204,7 @@ export class World {
 
   originalTile(layer, x, y) {
     const def = this.layerDef();
-    const ch = def[layer]?.[y]?.[x];
+    const ch = layerRows(def, layerName(layer))?.[y]?.[x];
     return ch && ch !== ' ' ? def.legend[ch] : null;
   }
 
@@ -459,7 +459,13 @@ export class World {
     } else if (!this.busy) {
       this.control.update(input);
     } else {
-      input.taps(); // discard taps during cutscenes
+      // During cutscenes, input only matters to g.waitForInput().
+      const any = input.taps().length > 0 || input.pressed('confirm') || input.pressed('cancel');
+      if (any && this.inputWaiters?.length) {
+        const ws = this.inputWaiters;
+        this.inputWaiters = [];
+        ws.forEach((r) => r());
+      }
     }
 
     for (const e of this.entities) {
@@ -691,18 +697,26 @@ export class World {
   // or (g) => number, on the map or the content). Holes fade in three bands.
   drawDarkness(ctx, cx, cy) {
     const def = this.mapDef;
-    let dark = def.darkness;
+    let dark = def.darkness ?? def.dark;
     if (typeof dark === 'function') dark = safeCall(dark, this.api);
     if (!dark) return;
-    const lights = [...(safeCall(def.lights || (() => []), this.api) || [])].map((l) => ({
-      px: l.x * TILE + TILE / 2, py: l.y * TILE + TILE / 2, r: l.radius,
+    // A light is a radius in tiles, or { radius, color }.
+    const asLight = (l) => (typeof l === 'number' ? { radius: l } : l);
+    let mapLights = def.lights || [];
+    if (typeof mapLights === 'function') mapLights = safeCall(mapLights, this.api) || [];
+    const lights = mapLights.filter((l) => !l.when || safeCall(l.when, this.api)).map((l) => ({
+      px: l.x * TILE + TILE / 2, py: l.y * TILE + TILE / 2, r: l.radius, color: l.color,
     }));
     for (const e of this.entities) {
-      if (e.def.light && e.visible) lights.push({ px: e.px + (e.w * TILE) / 2, py: e.py + (e.h * TILE) / 2 - 8, r: e.def.light });
+      const l = e.visible && e.def.light && asLight(e.def.light);
+      if (l) lights.push({ px: e.px + (e.w * TILE) / 2, py: e.py + (e.h * TILE) / 2 - 8, r: l.radius, color: l.color });
     }
     let pl = def.playerLight ?? this.content.playerLight;
     if (typeof pl === 'function') pl = safeCall(pl, this.api);
-    if (pl) lights.push({ px: this.player.px + TILE / 2, py: this.player.py, r: pl });
+    if (pl) {
+      pl = asLight(pl);
+      lights.push({ px: this.player.px + TILE / 2, py: this.player.py, r: pl.radius, color: pl.color });
+    }
     const layer = this.layer('dark');
     layer.fillStyle = colorOf(def.darkColor || 'void');
     layer.fillRect(0, 0, WIDTH, HEIGHT);
@@ -718,6 +732,23 @@ export class World {
     ctx.save();
     ctx.globalAlpha = Math.min(1, dark);
     ctx.drawImage(layer.canvas, 0, 0);
+    // Colored lights tint their pool (inner bands a little more).
+    ctx.globalCompositeOperation = 'screen';
+    for (const l of lights) {
+      if (!l.color) continue;
+      const tint = this.layer('tint');
+      for (const [k, a] of [[1, 0.12], [0.5, 0.12]]) {
+        const d = Math.round(l.r * TILE * k);
+        tint.globalAlpha = a;
+        tint.drawImage(discImage(d), Math.round(l.px - cx - d), Math.round(l.py - cy - d));
+      }
+      tint.globalAlpha = 1;
+      tint.globalCompositeOperation = 'source-in';
+      tint.fillStyle = colorOf(l.color);
+      tint.fillRect(0, 0, WIDTH, HEIGHT);
+      tint.globalCompositeOperation = 'source-over';
+      ctx.drawImage(tint.canvas, 0, 0);
+    }
     ctx.restore();
   }
 

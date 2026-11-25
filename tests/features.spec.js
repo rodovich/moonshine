@@ -156,3 +156,42 @@ test('content validator passes', async () => {
   const out = execFileSync(process.execPath, ['tests/check-content.mjs'], { encoding: 'utf8' });
   expect(out).toContain('0 error(s)');
 });
+
+test('character frames: art names walk and idle; poses follow facing', async ({ page }) => {
+  await boot(page, `${STREET}&x=12&y=8`);
+  await waitIdle(page);
+  // Sample frames over a walk: never missing.
+  await page.keyboard.down('ArrowLeft');
+  const missing = await page.evaluate(async () => {
+    const w = window.moonshine.world;
+    let n = 0;
+    for (let i = 0; i < 30; i++) {
+      await new Promise((r) => requestAnimationFrame(r));
+      for (const e of [w.player, w.byId.get('kid')]) if (e && !e.currentFrame()?.img) n++;
+    }
+    return n;
+  });
+  await page.keyboard.up('ArrowLeft');
+  expect(missing).toBe(0);
+  // A pose base follows facing; an offset applies while posed.
+  const r = await runScript(page, `
+    const p = g.player;
+    p.facing = 'left';
+    g.pose('player', 'reach', { offset: [0, -3] });
+    const a = p.currentFrame().img;
+    g.pose('player', 'reach_left');
+    const b = p.currentFrame().img;
+    g.pose('player', null);
+    return a === b && a !== null;
+  `);
+  expect(r.v).toBe(true);
+});
+
+test('waitForInput resolves on a key', async ({ page }) => {
+  await boot(page, `${STREET}&x=12&y=8`);
+  await waitIdle(page);
+  const pending = page.evaluate(() => window.moonshine.world.run(async (g) => { await g.waitForInput(); return 'ok'; }));
+  await page.waitForTimeout(300);
+  await press(page, 'z');
+  expect(await pending).toBe('ok');
+});

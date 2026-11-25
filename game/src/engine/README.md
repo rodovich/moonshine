@@ -62,7 +62,7 @@ export default {
     '^': 'cloth:over_awning_m',               // an art reference: 'sheet:frame' or 'sheet:frame@palette'
   },                                          // ' ' is always empty
   ground:   [ '....', ... ],     // one character per 16×16 tile; opaque
-  detail:   [ ' #  ', ... ],     // optional: transparent tiles on the ground, under characters
+  detail:   [ ' #  ', ... ],     // optional: transparent tiles on the ground, under characters (`objects` works too)
   overhead: [ ' ^  ', ... ],     // optional: drawn over characters (over_* frames)
   collision: [ '  # ', ... ],    // optional override: '#' solid, 'o' open, anything else = from tiles
   patches: (g) => [ ... ],       // optional: tile changes that follow the story (see below)
@@ -81,11 +81,11 @@ All layers are the same size as `ground`. The legend is shared by all layers, so
 
 **Variants** replace whole layers for big changes (the canals drained, the fountain dry, the Teeth in three stages): `variants: [{ when, ground, detail, overhead, collision, legend }]`. The first variant whose `when` holds is used; layers it leaves out come from the base map, and its `legend` adds to the base legend. Patches apply on top. The map re-checks its variant whenever patches are re-applied, so a scene can drain a canal mid-script with `g.setFlag`.
 
-**Darkness** (the Lamp Halls): `darkness: 0.9` (or a function of the state) covers the map in near-black (`darkColor`, default `void`) with holes around lights: `lights: (g) => [{ x, y, radius }]` (tiles), entities with `light: radius`, and `playerLight` (a number or a function, on the map or the content; e.g. `(g) => g.hasItem('disc') && 3`). Light fades out in three bands.
+**Darkness** (the Lamp Halls): `darkness: 0.9` (or `dark`; a number or a function of the state) covers the map in near-black (`darkColor`, default `void`) with holes around lights. Light sources: the map's `lights: [{ x, y, radius, color, when }]` (tiles; or a function returning such a list; `when` lets a flag relight a lamp), entities with `light: radius` or `light: { radius, color }`, and `playerLight` on the map or the content (a radius, `{ radius, color }`, or a function, e.g. `(g) => g.hasItem('moonglass_disc') && { radius: 3, color: 'relic_cyan' }`). Each light cuts a pool that fades out in three bands; a `color` tints the pool.
 
 **Ambient events** happen on a timer without stopping the player: `ambient: [{ every: [18, 24], when, run: (g) => ... }]` (seconds, a random interval in the range). `run` is a plain callback, not a script, so use non-blocking calls there: `g.bark`, `g.emote`, `g.spawnEffect`, `g.sfx`, `g.setTile`. Timers pause while a script runs.
 
-**Audio per map:** `ambience: ['town_murmur', 'gulls']` (looping beds), `musicFilter: 'muffled'`, and `step: 'step_stone'` (footstep sound; a tile's own `step` property wins). These pass through `engine/sound.js` to the audio module if it provides `setAmbience`, `setMusicFilter`, and the step sounds; until then they're quietly ignored.
+**Audio per map:** `ambience: ['crowd', 'wind']` starts those looping sounds when the map loads and fades out the previous map's (ids from the audio module's loops). `musicFilter: 'muffled'` and `step: 'step_stone'` (footstep sound; a tile's own `step` property wins) pass to the audio module if it supports them, and are quietly ignored until then. Scripts can also `g.startLoop(id)` / `g.stopLoop(id, fadeMs)`.
 
 **Exits** fire when the player finishes a step onto them by walking. An exit whose `when` fails but has `blocked: 'line'` (a line, a list of lines, or an async function) explains itself in Cheryl's voice and steps her back. `confirm: 'Go down?'` asks first (options `choices`, default Yes / Not yet; anything but the first steps her back). Exits don't fire during a script: `movePlayer` onto a door does nothing, so call `changeMap` yourself. Click-to-walk paths never cross an exit on the way to somewhere else, and an exit is never chosen as "the nearest reachable tile" for an unreachable click.
 
@@ -165,10 +165,10 @@ Shortcuts instead of `interact`:
 **Look counters.** Every interaction (not item use) bumps a counter saved in the game state, keyed by map and entity id. `interact` gets the count before this look as its third argument, and `g.looks(id)` reads it. Entities with the same `lookKey` share a counter (all the windows on a facade). Hotspots for wall features or groups of tiles are entities with no sprite: give them a footprint (`w`, `h`) over the tiles and `look`/`looks`.
 
 **Sprites.**
-- *Character sheets* (no `frame`): frames `idle_<dir>_<n>` and `walk_<dir>_<n>` for `down`, `up`, `left`, `right`, as in `src/art/cheryl.js` and `npcs.js`. Idles play with the sheet's `durations`; walk frames advance with distance walked (one frame per 8 px, a 4-frame cycle every two tiles), so feet stay planted at any speed. A missing `left` mirrors `right` (and vice versa); missing idles stand on `walk_<dir>_0`. Frames may be up to 16×32, drawn bottom-centered on the footprint.
+- *Character sheets* (no `frame`), named as in `docs/decisions.md` and `src/art/cheryl.js`: `<dir>_0` stands, `<dir>_1`, `<dir>_2` are the steps (the walk plays 1, 0, 2, 0), for `down`, `up`, `left`, `right`. Longer cycles give `sprite.walk`, e.g. `[1, 2, 3, 4]` for the Kid's run. An optional `idle_<dir>_<n>` animation (a blink) plays while standing, with the sheet's `durations`. The alternative naming `walk_<dir>_<n>` / `idle_<dir>_<n>` also works. Walk frames advance with distance walked (one frame per 8 px), so feet stay planted at any speed. A missing `left` mirrors `right` (and vice versa). Frames may be up to 16×32, drawn bottom-centered on the footprint.
 - *Static sprites*: `sprite: { sheet, frame: 'cat' }`. Numbered frames animate with the sheet's `durations`.
 - `sprite` may also be a function `(g) => sprite`, re-checked after every script (a chessboard that changes with the game).
-- *Poses*: `g.pose(id, 'sit_right')` plays any animation instead of idle/walk until `g.pose(id, null)`. `talkPose: 'jog_down'` plays one while the entity is being talked to.
+- *Poses*: `g.pose(id, 'jog')` plays `jog_<facing>` (or the mirrored side, or `jog` itself) instead of idle/walk until `g.pose(id, null)`, so a pose follows the character's facing; a full name like `'sit_right'` plays as is. `g.pose(id, 'sit_right', { offset: [0, -4] })` shifts the drawing while posed, and `poseOffsets: { sit_right: [0, -4] }` on the entity sets defaults. `talkPose: 'jog'` plays while the entity is being talked to, and a patrol's `nearPose` / `blockedPose` work the same way.
 - `offset: [dx, dy]` nudges the drawing; `layer: 'ground'` draws it under everything that sorts (things lying on the floor).
 
 **Behaviors.**
@@ -274,6 +274,7 @@ Time, camera, and screen effects (all resolve when done; durations in seconds):
 | `panCamera(x, y, speed)` / `followPlayer(speed)` | Glide the camera to a tile and back to Cheryl. |
 | `setLighting(name, seconds)`, `lighting` | Crossfade the scene lighting to `'day'`, `'dusk'`, `'night'`, a preset from `content.lighting`, or `null`; 0 seconds is a hard cut. Lasts until the next map load, which applies that map's own `lighting`. |
 | `showPicture(spec, { fade })` / `hidePicture({ fade })` | Replace the map with a full-screen 256×224 picture (a vista): `{ sheet, frame, palette }` or a function `(ctx, ms)` that draws it, `ms` since it appeared. Text boxes, shake, and effects still work over it. `fade` is in seconds; 0 is a hard cut. |
+| `waitForInput()` | Resolves on the next key or tap. For a picture the player dismisses: `await g.showPicture(plan, { fade: 0 }); await g.waitForInput(); await g.hidePicture({ fade: 0 });` (the Ship Plan, as an item's `examine`). |
 | `card(text, seconds)` | Centered text on black ("Cheryl did not sleep well."), drawn above fades. |
 | `bark(speaker, text, { seconds })` | One line of speech at the top of the screen that doesn't stop the player or the script (a chant, a voice from a window). |
 | `say(speaker, line, { position: 'top' })` | A normal (blocking) line with its box at the top of the screen: an off-screen voice, the Clockmaker in his belfry. `'bottom'` and `'auto'` (the default) also work. |
@@ -297,16 +298,14 @@ Maps, audio, misc:
 |---|---|
 | `changeMap(id, x, y, facing, { fade, seconds })` | Fades out, loads, fades in, then runs the map's `onEnter`, all before it resolves: `await g.changeMap('b'); await g.say(...)` shows the say after b's intro. |
 | `map` | Current map id. |
-| `playMusic(id)`, `stopMusic(fadeMs)`, `sfx(id)` | Audio (see below). |
-| `playCue(id, { resume })` | A one-shot music cue; the current track dips and comes back (unless `resume: false`). |
-| `setWrongness(amount)` | How far the Wrongness has crept into the music, 0–1. |
+| `playMusic(id)`, `stopMusic(fadeMs)`, `sfx(id)`, `playCue(id, { resume })`, `windDownMusic(ms)`, `startLoop(id)`, `stopLoop(id, fadeMs)`, `setWrongness(0..1)` | Audio (see below and `src/audio/README.md`). |
 | `save()` | Save now (saving also happens automatically). |
 | `toTitle()` | Save and return to the title screen (end of a slice). |
 | `random(min, max)` | Integer from the game's RNG (seedable with `?seed=`). |
 
 ## Audio boundary
 
-The engine calls audio only through `src/engine/sound.js`, a bridge to the audio module (`src/audio/index.js`, documented in `src/audio/README.md`). It exports `unlockAudio()` (first key press or tap), `playMusic(id)`, `stopMusic(fadeMs)`, `playCue(id, opts)`, `sfx(id)`, and `setWrongness(0..1)`, all also on the script API. The bridge maps the engine's generic sound ids (`text`, `text_cheryl`, `cursor`, `select`, `item`) to the audio ids and ignores unknown ids with a one-time console warning, so content can name music or sounds before they exist. Maps play their `music` on entry.
+The engine calls audio only through `src/engine/sound.js`, a bridge to the audio module (`src/audio/index.js`, documented in `src/audio/README.md`). It exports `unlockAudio()` (first key press or tap), `playMusic(id)`, `stopMusic()`, `playCue(id, { resume })`, `windDownMusic(ms)`, `sfx(id)`, `startLoop(id)`, `stopLoop(id, fadeMs)`, `stopAllLoops()`, and `setWrongness(0..1)`. The bridge maps the engine's generic sound ids (`text`, `text_cheryl`, `select`, `item`) to the audio ids (`cursor` has its own sound) and ignores unknown ids with a one-time console warning, so content can name music or sounds before they exist. Maps play their `music` on entry.
 
 ## Debug parameters
 

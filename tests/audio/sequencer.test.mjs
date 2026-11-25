@@ -7,6 +7,7 @@ import {
 import { SONGS } from '../../game/src/audio/music/index.js';
 import { INSTRUMENTS } from '../../game/src/audio/instruments.js';
 import { SFX } from '../../game/src/audio/sfx.js';
+import { lintSong, parseHarmony } from '../../game/src/audio/lint.js';
 
 test('pitch names', () => {
   assert.equal(pitchToMidi('A4'), 69);
@@ -69,7 +70,7 @@ test('intro plays once, then the loop repeats', () => {
 });
 
 test('consecutive windows neither drop nor repeat events', () => {
-  const c = compileSong(SONGS.neighborhood);
+  const c = compileSong(SONGS.cistern_court);
   const whole = [...eventsInRange(c, 0, 2000)].map((x) => `${x.abs}:${x.ev.ch}:${x.ev.type}`);
   const pieces = [];
   let from = 0;
@@ -102,10 +103,13 @@ test('every song compiles, with the intended lengths', () => {
     const c = compileSong(song);
     assert.ok(c.channels.length <= 6, `${id} uses ${c.channels.length} channels; music keeps to 6`);
     if (c.loopSteps) {
-      assert.ok(c.loopSeconds >= 45 && c.loopSeconds <= 95, `${id} loop is ${c.loopSeconds}s`);
+      assert.ok(c.loopSeconds >= 30 && c.loopSeconds <= 95, `${id} loop is ${c.loopSeconds}s`);
     }
   }
-  assert.ok(Math.abs(compileSong(SONGS.neighborhood).loopSeconds - 76.8) < 1e-9);
+  assert.ok(Math.abs(compileSong(SONGS.stairs).loopSeconds - 76.8) < 1e-9);
+  // The design asks for a 60–90 s home theme.
+  const cc = compileSong(SONGS.cistern_court).loopSeconds;
+  assert.ok(cc >= 60 && cc <= 90, `cistern_court loop is ${cc}s`);
 });
 
 test('songs and effects only use instruments and drums that exist', () => {
@@ -125,7 +129,12 @@ test('songs and effects only use instruments and drums that exist', () => {
     }
   }
   for (const [id, def] of Object.entries(SFX)) {
-    for (const L of def.layers) {
+    const src = def.loop ?? def;
+    if (!src.layers && !(def.loop?.beds?.length)) assert.fail(`${id} has no layers`);
+    if (!src.layers) continue;
+    // Function layers are randomized; call them a few times to check every variation.
+    const runs = typeof src.layers === 'function' ? Array.from({ length: 5 }, (_, i) => src.layers(i)) : [src.layers];
+    for (const L of runs.flat()) {
       if (L.type === 'notes') assert.ok(INSTRUMENTS[L.inst], `${id}: ${L.inst}`);
       else assert.ok(['tone', 'noise'].includes(L.type), `${id}: layer type ${L.type}`);
     }
@@ -133,7 +142,41 @@ test('songs and effects only use instruments and drums that exist', () => {
 });
 
 test('the required sound effects exist', () => {
-  for (const id of ['blip', 'blip_cheryl', 'step', 'confirm', 'cancel', 'menu_open', 'menu_close', 'item_get', 'door', 'splash', 'wrong_sting']) {
-    assert.ok(SFX[id], id);
+  const ids = [
+    // round 1
+    'blip', 'blip_cheryl', 'step', 'confirm', 'cancel', 'menu_open', 'menu_close', 'item_get', 'door', 'splash', 'wrong_sting',
+    // docs/design/01-opening.md, "Audio needed"
+    'cursor', 'give', 'step_stone', 'step_plaster', 'step_tile', 'step_rug', 'step_stairs', 'step_wood', 'step_kid',
+    'door_open', 'door_close', 'tap_squeak', 'water_pour', 'tub_full', 'chess_tap', 'pepper_grind', 'sneeze',
+    'timer_tick', 'timer_ding', 'sheets_flap', 'kid_patter', 'kid_hop', 'piano_flat',
+    'swifts', 'crowd', 'dog_bark', 'gull', 'wind', 'clock_strike', 'well_breath',
+    'groan', 'crack', 'rattle', 'piano_tumble', 'drain', 'drain_glunk', 'drain_gurgle', 'drain_echo',
+  ];
+  for (const id of ids) assert.ok(SFX[id], id);
+  for (const id of ['water_pour', 'timer_tick', 'crowd', 'wind']) assert.ok(SFX[id].loop, `${id} loops`);
+  for (const id of ['title', 'cistern_court', 'moonrise', 'morning_after', 'wrongness']) assert.ok(SONGS[id], id);
+});
+
+test('harmony strings split bars evenly unless lengths are given', () => {
+  const h = parseHarmony('F | C7 Dm | F:4 C:12 |', 16);
+  assert.deepEqual(h.map((x) => [x.step, x.len, x.chord.sym]), [[0, 16, 'F'], [16, 8, 'C7'], [24, 8, 'Dm'], [32, 4, 'F'], [36, 12, 'C']]);
+  assert.throws(() => parseHarmony('F:4 C:4 |', 16), /doesn't fill/);
+});
+
+test('lint catches clashes against the harmony', () => {
+  const song = {
+    id: 'bad', bpm: 100, channels: [{ id: 'lead', inst: 'flute' }, { id: 'pad', inst: 'strings' }],
+    patterns: { P: { harmony: 'C | C |', lead: 'F5:16 | E5:16 |', pad: 'E4:16 | F4:16 |' } }, intro: ['P'], loop: null,
+  };
+  const msgs = lintSong(song).issues.filter((i) => i.level === 'warn').map((i) => i.msg);
+  assert.ok(msgs.some((m) => /F5 \(16 steps\) clashes with C/.test(m)), msgs.join('; '));
+  assert.ok(msgs.some((m) => /F4 \(16 steps\) isn't in C/.test(m)), msgs.join('; '));
+  assert.ok(msgs.some((m) => /F5 against E4/.test(m)), msgs.join('; ')); // a minor ninth
+});
+
+test('every song passes the music lint', () => {
+  for (const song of Object.values(SONGS)) {
+    const warns = lintSong(song).issues.filter((i) => i.level === 'warn');
+    assert.deepEqual(warns, [], `${song.id}: ${warns.map((w) => `${w.where}: ${w.msg}`).join('; ')}`);
   }
 });

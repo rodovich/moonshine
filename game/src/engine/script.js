@@ -7,7 +7,7 @@
 
 import { DIR_VEC, dirBetween } from './entity.js';
 import { pathToDirs } from './world.js';
-import { playMusic, stopMusic, sfx, playCue, setWrongness } from './sound.js';
+import { playMusic, stopMusic, sfx, playCue, windDownMusic, startLoop, stopLoop, setWrongness } from './sound.js';
 import { loadSheet } from './art.js';
 import { TILE } from './tilemap.js';
 
@@ -205,8 +205,10 @@ export function makeApi(world) {
     },
     // Play a named animation on an entity instead of its idle/walk frames
     // (e.g. 'sit_right'); null returns to normal.
-    pose(id, anim) {
-      resolveEntity(id).setPose(anim);
+    // A base like 'jog' follows facing (jog_<dir>); { offset: [dx, dy] }
+    // shifts the drawing while posed.
+    pose(id, anim, { offset } = {}) {
+      resolveEntity(id).setPose(anim, offset);
     },
     // How many times the player has looked at / talked to this entity before
     // (0 the first time). Also passed to `interact` as its third argument.
@@ -297,6 +299,14 @@ export function makeApi(world) {
       world.picture = null;
       if (fade) await fx.fade('in', fade / 2);
     },
+    // Resolves on the next key (Z/X and friends) or tap: for a full-screen
+    // picture the player dismisses (the Ship Plan).
+    waitForInput() {
+      return new Promise((resolve) => {
+        world.inputWaiters = world.inputWaiters || [];
+        world.inputWaiters.push(resolve);
+      });
+    },
     // Centered text over a black screen for `seconds` (e.g. "Cheryl did not
     // sleep well."). Draws above fades, so fade out first if you like.
     async card(text, seconds = 2.5) {
@@ -381,17 +391,25 @@ export function makeApi(world) {
     stopMusic(fadeMs) {
       stopMusic(fadeMs);
     },
+    sfx(id) {
+      sfx(id);
+    },
     // A one-shot music cue over the current track (which dips and returns,
     // unless { resume: false }).
     playCue(id, opts) {
       playCue(id, opts);
     },
-    // How far the Wrongness has crept into the music, 0..1.
+    windDownMusic(ms) {
+      windDownMusic(ms);
+    },
+    startLoop(id, opts) {
+      startLoop(id, opts);
+    },
+    stopLoop(id, fadeMs) {
+      stopLoop(id, fadeMs);
+    },
     setWrongness(amount) {
       setWrongness(amount);
-    },
-    sfx(id) {
-      sfx(id);
     },
 
     // ---- Misc ----
