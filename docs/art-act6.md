@@ -60,3 +60,29 @@ The Act 1 composition made right. Draw in this order:
 5. `vista_twinkle:twinkle` on the `VISTA_BASINS` points (as in Act 1), if wanted.
 6. `vista_cheryl:cheryl_tub` at (0, 128).
 7. The title, once the moon has settled and the music has landed: `vista_title:title_0` (a half-dissolved first step) and then `title_1` (full), at (0, 0). MOONSHINE in cream with a dark outline and a soft violet glow, with a thin rule and a small moon-in-a-notch ornament beneath. The dev scene shows it at 10.5 s and 11.3 s. The credits roll over this picture.
+
+## Underground
+
+New sheets are in `game/src/art/act6_under.js`. On the dev page: `/dev/art.html?only=scene:act6_under&state=sighting` (also `sighting_dry`, `sighting_fill`, `sighting_full`, `sighting_plug`, `sighting_lit`, `basins` for every Basin state side by side, `keel`, `keel_open`, `windlass_night`). `<q>` is `nw`, `ne`, `sw`, `se` of a 2×2 piece.
+
+| Design (position) | Frames | Layer |
+| --- | --- | --- |
+| The Basin (7–8, 5–6): dry with the plug glinting at the bottom | `basin:basin_dry_plug_<q>` | objects |
+| …dry and empty | `basin:basin_dry_<q>` | objects |
+| …filling | `basin:basin_fill_<q>_0..3` (350 ms; hold the last frame, then switch to full) | objects |
+| …full and still | `basin:basin_full_<q>_0/1` (900 ms, the moon's reflection shivers a pixel) | objects |
+| …full, the plug visible under the water | `basin:basin_plug_water_<q>_0/1` | objects |
+| …full, the rim lit cyan | `basin:basin_lit_<q>_0/1` (260 ms) | objects |
+| The moonlight column down the shaft, landing in the Basin | `moonbeam:over_moon_x<0-1>y<0-3>_0..2` (280 ms) over (7–8, 2–5) | overhead |
+| The trim wheel (3–4, 1–2) | `sight_wall:trim_still_<q>`; turning `trim_<q>_0..3` (200 ms) | ground |
+| The lift cage (6–7, 1–2), with its counterweight chain | `sight_wall:lift_closed_<q>`, `lift_open_<q>` | ground |
+| The master stop (9, 6), the three-bars emblem with the Middle picked out | `master_stop:stop_locked`, `stop_risen` (the collar glowing), `stop_pulled` (16×32) | sprite |
+| The sighting log on its stone stand (14, 4) | `sight_props:log_stand` | objects |
+| Cheryl's shoes, side by side (beside the Basin, e.g. 6, 7) | `sight_props:shoes` | objects |
+| Long Keel floor: the middle row's two worn grooves (y4) and the rows beside them (y3, y5) | `keel:keel_groove`, `keel_groove_b` (vary every few tiles); `keel_n` (y3), `keel_s` (y5) | ground |
+| Long Keel lamps (2, 7, …, 37, upper wall row y1) waking | the existing `keel_hatch:lamp_dead`, `lamp_wake_0..4` (hold the last frame), `lamp_lit`, with `hull:floor_glow` under each lit one | ground |
+| Long Keel ribs (every four tiles) | the existing `hull:face_rib_top/base` and `over_rib_v` | ground; overhead |
+| The Sighting Room's door at the Keel's west end (0, 3–4), sliding up, the moon-in-bowl carving on its lintel | `keel:keel_door_closed_top/bot`, `keel_door_opening_top/bot_0..2` (260 ms), `keel_door_open_top/bot` | ground |
+| Windlass Room at night: the chain coming in through the moonlit hawse (21, 3–4) | `windlass_night:hawse_in_top/bot_0..3` (220 ms, one link-length per loop) | ground |
+| The drum turning; the brake thrown | the existing `windlass_drum:drum_x<c>y<r>_0..3` and `brake:brake_thrown` | objects; sprite |
+| The Long Keel hatch's emblem lighting (7–8, 1–2), then open | `keel_lit:keel_lit_<q>_0/1` (500 ms), then the existing `keel_hatch:keel_open_<q>` | ground |
