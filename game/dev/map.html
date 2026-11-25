@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Moonshine map viewer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  html, body { margin: 0; background: #1c1824; color: #e8e0d0; font: 13px/1.4 monospace; }
+  main { padding: 12px 20px 40px; }
+  h1 { font-size: 16px; margin: 0 0 6px; }
+  .bar { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; margin-bottom: 8px; }
+  .bar label { white-space: nowrap; }
+  select, input, button { font: inherit; background: #2c2838; color: inherit; border: 1px solid #4a4458; padding: 2px 6px; }
+  input[type=text] { width: 22em; }
+  #wrap { position: relative; display: inline-block; }
+  canvas { image-rendering: pixelated; image-rendering: crisp-edges; display: block; outline: 1px solid #3a3448; }
+  #tip { position: fixed; pointer-events: none; background: #000c; padding: 3px 6px; border: 1px solid #4a4458; white-space: pre; display: none; }
+  .note { color: #9890a8; max-width: 70em; }
+  .errors { color: #ff8080; white-space: pre-wrap; }
+  .legend span { margin-right: 12px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Map viewer</h1>
+  <p class="note">Renders a map from <code>src/content</code> with its collision and scripting overlaid. Hover a tile for its coordinates, tiles, and anything defined there. <b>Flags</b> and <b>items</b> set the story state for <code>when</code>s, variants, patches, sprites, and lighting. <b>Play here</b> opens the game at the hovered tile (click a tile).</p>
+  <div class="bar">
+    <label>Map <select id="map"></select></label>
+    <label>Zoom <select id="zoom"><option>1</option><option selected>2</option><option>3</option><option>4</option></select></label>
+    <label>Flags <input id="flags" type="text" placeholder="act1.moonrise,kid.hasTimer"></label>
+    <label>Items <input id="items" type="text" placeholder="bath_plug,soap"></label>
+  </div>
+  <div class="bar">
+    <label><input type="checkbox" id="o-solid" checked> solid</label>
+    <label><input type="checkbox" id="o-exits" checked> exits</label>
+    <label><input type="checkbox" id="o-triggers" checked> triggers</label>
+    <label><input type="checkbox" id="o-entities" checked> entities</label>
+    <label><input type="checkbox" id="o-grid"> grid</label>
+    <label><input type="checkbox" id="o-overhead" checked> overhead layer</label>
+    <label><input type="checkbox" id="o-light"> lighting</label>
+  </div>
+  <p class="legend note"><span style="color:#f05050">■ solid</span><span style="color:#40e0e0">■ exit</span><span style="color:#f0d040">□ trigger</span><span style="color:#f080f0">□ entity footprint</span><span style="color:#80f080">● spawn / start</span></p>
+  <div id="info" class="note"></div>
+  <div id="errors" class="errors"></div>
+  <div id="wrap"><canvas id="c"></canvas></div>
+  <div id="tip"></div>
+</main>
+<script type="module" src="map-view.js"></script>
+</body>
+</html>

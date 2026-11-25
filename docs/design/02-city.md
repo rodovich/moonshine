@@ -971,7 +971,7 @@ The hat, moon chart, and soap carry over from the opening. The soap stays on the
 
 ### Reading the guidebook
 
-Examining the guidebook in the inventory reads one entry per look, cycling in this order. The first look always lands on the Steps entry, which is what the Count thread needs. The fourth entry plants the Act 4 Clockmaker lure.
+Examining the guidebook in the inventory (the bag's Look button) reads one entry per look, cycling in this order. In the engine this is the item's `looks: [...]` list with `looksRepeat: 'cycle'`; each numbered entry below is one look, and its two quoted parts are two boxes. The first look always lands on the Steps entry, which is what the Count thread needs. The fourth entry plants the Act 4 Clockmaker lure.
 
 1. "'The Hundred Steps (there are, in fact, 99). A charming climb.'" / "In fact. In print. Somebody's going to be upset about that."
 2. "'The Bell: rung at random by a local eccentric.'" / "Ambrose would like a word."

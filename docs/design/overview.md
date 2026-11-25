@@ -75,7 +75,7 @@ North is uphill (the Crown); south is downhill (the harbor). The Prow points sou
  │ mosaic, Keeper's│            │ light shafts,     │
  │ chair & ledger  │            │ mirror, moon-lock │
  └───┬─────────▲───┘            └───┬─────────▲─────┘
-     │         │ P3 up to crypt     │ chute    │ ladder (kick down from B;
+     │         │ P3 up to crypt     │ chute    │ ladder (drop it from B;
      │                              │ (1-way)  │  two-way after that)
  ┌───┴──────────────────────────────▼──────────┴─────┐
  │ B. LAMP HALLS — moonglass corridors, fountain     │
@@ -100,7 +100,7 @@ North is uphill (the Crown); south is downhill (the harbor). The Prow points sou
 
 | # | Passage | Direction | Opens | Closes / changes |
 | --- | --- | --- | --- | --- |
-| P1 | The hundredth step (Hundred Steps) ↔ Step Gallery | Two-way | End of Act 2 | Never. But the chute from A to B is one-way until the ladder is kicked down. |
+| P1 | The hundredth step (Hundred Steps) ↔ Step Gallery | Two-way | End of Act 2 | Never. But the chute from A to B is one-way until the ladder is dropped. |
 | P2 | Fountain basin hatch ↔ Pump Hall | Two-way | Act 4: the Fountain is drained (the required valve in B, Act 3) and the Mayor has left (bell thread) | **Closed for good at the reveal:** the flooded Pump Hall backs up through the Fountain's feed, and the Fountain refills over the hatch. |
 | P3 | Founders' Door (Archive crypt) ↔ Chart Room | One-way up at first (bolted from below) | Act 3, when Cheryl unbolts it | Two-way from then on. |
 | P4 | Pump Hall → Fishmonger's ice cellar | **One-way up** (the hatch can't be lifted from above) | The escape at the end of Act 4 | Pump Hall unreachable afterward (flooded). |
@@ -222,11 +222,11 @@ flowchart TD
 - *Ottilie* gives **paper and charcoal** to anyone investigating the Founders ("Primary sources! Take rubbings of everything"). If the player meets her only after Act 3, she gives them then. The Founders' Door makes the return trip short.
 - *Seeds (optional in Act 2, required later):* Ambrose under the bell; Mott on the quay ("A hand to the left."); the Skipping Girls; the Clockmaker and his letters to the observatory; the sea cave on the Back, where Mott's grandfather "found the copper."
 
-**Act 3**
-- *Step Gallery.* A jammed bronze lid over a light shaft (opened with the **crowbar**) lets a beam of daylight in. A pivoting bronze mirror (two positions are wrong, one is right, and the wrong ones light up wall inlays) puts the beam on a moon-lock. A sealed hatch opens onto the **moonglass disc** (a light source and, later, a key).
+**Act 3** (build-ready in [03-downstairs.md](03-downstairs.md))
+- *Step Gallery.* A seized wall lever (worked with the **crowbar**) opens a lid over a light shaft and lets daylight in. A pivoting bronze mirror (two positions are wrong, one is right, and the wrong ones light up wall inlays) puts the beam on a moon-lock. A sealed hatch opens onto the **moonglass disc** (a light source and, later, a key).
 - *Chute.* A smooth hullstone slide behind the hatch drops Cheryl one-way into the Lamp Halls. Internal monologue on landing.
-- *Lamp Halls.* Dark except near light-pipes; the disc lights a radius around Cheryl. Contents: the ladder up to the Step Gallery (kick it down to make a shortcut), the flooded corridor downhill ("I'm brave, not stupid."), and, required, the passage north to the Chart Room, flooded knee-deep by a gushing pipe. A big valve wheel beside it diverts the flow: turning it drains the passage, causes a faraway gurgle, and brings a distant voice down a speaking tube shouting "The FOUNTAIN!" The wheel then jams and can't be turned back.
-- *Chart Room.* The Keeper's chair, cup, and ledger; the mosaic, lit through the Dome's floor-eye. With paper and charcoal, Cheryl takes a rubbing: the **Ship Plan**, which works as the underground map. The Founders' Door is bolted from this side.
+- *Lamp Halls.* Dark except near light-pipes; the disc lights a radius around Cheryl. Contents: the ladder up to the Step Gallery (pull its chain to drop it and make a shortcut), a Keepers' bunk room, the flooded corridor downhill ("I'm brave, not stupid."), and, required, the passage north to the Chart Room, flooded knee-deep by a gushing pipe. A big seized valve wheel beside it diverts the flow: turning it (with the crowbar through its spokes) drains the passage, causes a faraway gurgle, and brings a distant voice down a speaking tube shouting "The FOUNTAIN!" The wheel then jams and can't be turned back.
+- *Chart Room.* The Keeper's chair, cup, and ledger; the mosaic, lit through the Dome's floor-eye. With paper and charcoal, Cheryl takes a rubbing: the **Ship Plan**, which works as the underground map. The Founders' Door is bolted from this side; unbolting it leads to the crypt, where Ottilie hands over paper and charcoal if Cheryl doesn't have them yet. Surfacing on the Crown at dusk, every moon-eye is glowing.
 
 **Act 4** (starts when Cheryl first surfaces after seeing the mosaic)
 - *Bell thread.* The Clockmaker never leaves the belfry. The guidebook claims "Tessel keeps its own time, eleven minutes behind the mainland." Showing it to him sends him running to the sundial to prove it wrong. In the belfry, a lever marked DO NOT TOUCH (in his handwriting) lifts the clock's drive off the old bell linkage. Ambrose climbs up and waits for the turn, then rings. The Tide Wheel starts turning (visible through the sea-cave grate). The Mayor, mid-speech in front of the roped-off Fountain, storms up to the Crown about the clock ringing "at TWENTY PAST."
@@ -288,7 +288,7 @@ Following the process in [../decisions.md](../decisions.md): build and polish **
 
 1. Act 1, Cistern Court.
 2. Act 2, the surface city (all surface areas in their day state): [02-city.md](02-city.md).
-3. Act 3, Downstairs: Step Gallery, Lamp Halls, Chart Room.
+3. Act 3, Downstairs: Step Gallery, Lamp Halls, Chart Room: [03-downstairs.md](03-downstairs.md).
 4. Act 4, the bell, Mott, the rhyme, the Pump Hall, and the reveal.
 5. Act 5, the dry Bilge, the lighthouse, the bow decks.
 6. Act 6, the climax and the ending.

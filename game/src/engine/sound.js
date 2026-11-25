@@ -71,6 +71,34 @@ export function stopAllLoops(fadeMs) {
   try { audio.stopAllLoops(fadeMs); } catch (err) { warnOnce('loop', '', err); }
 }
 
+// Looping ambience beds for a map (crowd, wind): starts the map's loops and
+// fades out the previous map's. Loops a script started itself are left alone.
+let ambienceLoops = [];
+export function setAmbience(ids) {
+  const next = (ids || []).filter((id) => {
+    if (audio.LOOP_IDS && audio.LOOP_IDS.includes(id)) return true;
+    warnOnce('ambience', id, 'unknown loop id');
+    return false;
+  });
+  for (const id of ambienceLoops) if (!next.includes(id)) stopLoop(id, 800);
+  for (const id of next) startLoop(id);
+  ambienceLoops = next;
+}
+
+// A filter over the music ('muffled' indoors, null for none). Passed on to
+// the audio module's setMusicFilter if it has one; otherwise ignored.
+export function setMusicFilter(name) {
+  if (typeof audio.setMusicFilter !== 'function') return;
+  try { audio.setMusicFilter(name || null); } catch (err) { warnOnce('filter', String(name), err); }
+}
+
+// Footsteps: quiet unless the audio module defines the id.
+export function step(id) {
+  const real = SFX_ALIASES[id] ?? id;
+  if (!audio.SFX_IDS.includes(real)) return;
+  try { audio.sfx(real); } catch { /* ignore */ }
+}
+
 export function currentMusic() {
   return audio.currentMusic();
 }

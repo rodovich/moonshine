@@ -29,7 +29,7 @@ export const uiIcons = {
 
 export const uiSmall = {
   name: 'uiSmall',
-  palette: { a: 'ui_select', b: 'ui_text_shadow', m: 'ui_marker', n: 'ui_marker_shade' },
+  palette: { a: 'ui_select', b: 'ui_text_shadow', m: 'ui_marker', n: 'ui_marker_shade', k: 'ui_ink' },
   size: [8, 8],
   frames: {
     arrow_0: [
@@ -91,6 +91,37 @@ export const uiSmall = {
       '.nnnnnn.',
       '........',
       '........',
+    ],
+    // Emote icons, shown over a character's head (g.emote).
+    note: [
+      '...kkk..',
+      '...kmmk.',
+      '...kmkmk',
+      '...kmk.k',
+      '.kkkmk..',
+      'kmmmmk..',
+      'kmmmk...',
+      '.kkk....',
+    ],
+    exclaim: [
+      '..kkk...',
+      '..kmk...',
+      '..kmk...',
+      '..kmk...',
+      '..kkk...',
+      '..kmk...',
+      '..kkk...',
+      '........',
+    ],
+    question: [
+      '.kkkkk..',
+      'kmmmmmk.',
+      'kkk.kmk.',
+      '..kkmmk.',
+      '..kmkk..',
+      '..kkk...',
+      '..kmk...',
+      '..kkk...',
     ],
   },
 };

@@ -232,6 +232,7 @@ Lines are Cheryl's descriptions unless labeled otherwise. Each line is one text 
 - First: "Her Next Door's sheets. Strung right across my view of the Gate. Every year they creep a little further over."
 - Then: "I could unpeg them. I could also move to the mainland. Neither is happening tonight."
 - Use **clothes prop** on them: "It's her prop and her sheets. She can do the honors."
+- After the move (the bare lines; only the posts stay solid): "Her empty lines. Looking at my view instead of blocking it. Much better."
 
 **Back line** (hooks at 11,1 and 18,1)
 - Before: "The back line. Without the prop it sags right into her geraniums."
@@ -306,7 +307,7 @@ Lines are Cheryl's descriptions unless labeled otherwise. Each line is one text 
 
 **Window** (5–6, 1): "My window looks at the Pelletiers' wall. I didn't buy this house for the window. I bought it for the roof."
 
-**Bookshelf** (9–10, 1): "Twenty-nine years of lesson plans. In case anyone ever needs the water cycle explained in a hurry."
+**Bookshelf** (9–10, 1; looked at from 8, 2, since the bed blocks the tiles below it): "Twenty-nine years of lesson plans. In case anyone ever needs the water cycle explained in a hurry."
 
 **Bed** (9–10, 2–3): Dusk: "My bed. Later. Moon first." Morning: "I didn't sleep. The house creaked all night. Houses settle. This one felt like it was unsettling."
 
@@ -315,11 +316,13 @@ Lines are Cheryl's descriptions unless labeled otherwise. Each line is one text 
 **Moon chart** (table, 4–5, 4)
 - Dusk: First: "My moon chart. Thirty-one Moonshine Nights, a tick for every moonrise. Every one of them in the Gate." Second: "The first nineteen years are in two hands. The neat ticks are mine." Then: "The last few ticks have crept a little to the right. My eyes, probably. Everything creeps right after fifty."
 - Morning: First: "Last night's tick. I put it where the moon really was: outside the Gate. It looks like a mistake. It isn't." / "I'm taking it with me. I have questions for it." → take **moon chart**.
+- The table, after the chart is taken: "The kitchen table. The chart left a clean rectangle in the crumbs."
 
 **Kitchen chairs** (3, 4 and 6, 4): "Kitchen chairs. One wobbles. I know which one, and I sit in the other."
 
 **Wardrobe** (10, 5–6)
 - Dusk: First: "My good cardigan, my other good cardigan, and my hat." Then: "The hat's for daytime. It isn't daytime."
+- After the hat is taken: "My good cardigan, and my other good cardigan. The hat is out seeing the world."
 - Morning: "My hat. It's daytime, and I'm going out." → take **hat** (used in Act 2; harmless in this slice).
 
 **Washstand** (1, 6)
@@ -495,7 +498,7 @@ Each NPC has its own "Anything else" decline (listed with their dialog), so givi
 13. **The drain.** *Glunk.* The plug is yanked out of sight (tub anim: plug gone), a whirlpool spins in the tub, and the water drains in about 1.5 seconds with a gurgle. Then, from the drain, a long hollow echo falls away and away, and about 2.5 seconds later there's a tiny, faraway splash.
 14. Silence for 1.5 seconds. A gull. Wind.
 15. Cheryl stands. Internal monologue: *That drain goes to the gutter. The gutter goes to the lane.* / *That sound went somewhere else entirely.*
-16. NEIGHBOR: Did you FEEL that? The whole house went sideways! / NEIGHBOR: It's the bleach. I've overdone the bleach.
+16. The Neighbor walks to the low wall at (10, 4) and says this over it: NEIGHBOR: Did you FEEL that? The whole house went sideways! / NEIGHBOR: It's the bleach. I've overdone the bleach.
 17. Internal monologue: *Something's wrong.* / *Not wrong like a dropped stitch. Wrong like a step that isn't there.*
 18. Fade to black over two seconds. Text card, centered: **Morning.** (2 seconds.)
 19. Set `act1.moonrise` and the morning state. Fade in on the flat under the **day** tint, with Cheryl standing at (8,4) by the bed. Music: **Morning After**.
@@ -596,6 +599,16 @@ The tints (dusk, night, day) are global color treatments by the engine, not sepa
 - [ ] First-time players finish in 8–12 minutes (up to about 20 if they look at everything).
 - [ ] The item hint appears on the first pickup and stays until the bag is opened.
 - [ ] The Kid stops for Cheryl when she's within two tiles, and when he's clicked.
+
+## As built
+
+The opening content task (WCVWR8hxu8) built this slice on `content/opening`; its full list of build decisions is in `game/src/content/opening/README.md`. These details were settled there and this document now follows them:
+
+- Row 2 under the back line (x10–18) is never walkable, before or after the sheets move.
+- Once the sheets move, the N–S lines are walkable; only their posts stay solid.
+- The sheet move is staged: she unpegs the x15 sheets from (16, 4) and the x12 sheets from (13, 4), props the back line from (14, 3), the sheets go up in three beats, and she returns to (16, 3).
+- The blocked-Squeeze line fires when Cheryl steps down onto (15–16, 22). In the morning, the Squeeze's line plays on her first step onto the stair top (15–16, 24), and the exit is row 25.
+- The end card reads **Moonshine** in the title style, over "End of the opening." and "Tessel continues soon."
 
 ## Decisions
 
