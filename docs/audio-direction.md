@@ -2,7 +2,7 @@
 
 Moonshine should sound like a well-loved SNES adventure: warm, slightly soft "sampled" instruments, a little echo, and melodies you hum after you stop playing. Everything is synthesized at runtime with Web Audio ([decisions.md](decisions.md)); there are no audio files. The code is in `game/src/audio/` and its API is documented in [game/src/audio/README.md](../game/src/audio/README.md). Listen to everything on the dev page, `game/dev/audio.html`, which also plays the opening's moonrise sequence in order.
 
-The story and places come from [story-bible.md](story-bible.md) and the slice designs in [design/](design/): the "Audio needed" lists of [01-opening.md](design/01-opening.md), [02-city.md](design/02-city.md), [03-downstairs.md](design/03-downstairs.md), and 04-the-list.md (Act 4) are all delivered.
+The story and places come from [story-bible.md](story-bible.md) and the slice designs in [design/](design/): the "Audio needed" lists of [01-opening.md](design/01-opening.md), [02-city.md](design/02-city.md), [03-downstairs.md](design/03-downstairs.md), 04-the-list.md (Act 4), and 05-high-and-dry.md (Act 5) are all delivered.
 
 ## Sonic identity
 
@@ -74,6 +74,7 @@ Defined in `game/src/audio/instruments.js`.
 | `reveal_last` | We're a Boat (last phrase) | as `reveal`, softer | 2-bar one-shot | 7.5 s plus echo | under the dusk vista at the end of Act 3 |
 | `pumps` | The Sisters Wake | D-flat pedal, 76 bpm | 8-bar scene loop | 25.3 s loop | Act 4: from the moment all three Sisters run until the burst (`stopMusic(0)`) |
 | `climb` | The Climb | a heartbeat, 52 bpm | 1-bar scene loop | 4.6 s loop | Act 4: the emergency shaft; raise it with `bendMusic`, fade it out by row 7 |
+| `relay` | Beat the Egg | B♭ major, 4/4, 152 bpm | one-shot: intro, A, B, A2, coda | 48.9 s, ending on the egg timer's ding | Act 5: the Kid's run (`playMusic('relay', { fadeMs: 0 })`) |
 | `neighborhood_thin` | Stairs to the Water (thin) | as `neighborhood`, 86 bpm, flute alone | A A2 B A3 | 89.3 s loop | Act 4's reveal in the dry Bilge, at Wrongness 0.5 |
 
 - **Cistern Court** is an unhurried waltz: an accordion over a nylon guitar's oom-pah-pah. Each time round it changes: A is guitar and accordion; A2 swaps the guitar for rippling harp; B hands the tune to the flute in G minor while the accordion holds long notes; A3 brings it all back with a soft flute descant.
@@ -88,6 +89,7 @@ Defined in `game/src/audio/instruments.js`.
 - **Downstairs**: moonglass sings the rhyme upside down over choir and bowed bass, with a slow two-beat pulse. It is the quietest looping track on purpose (about −21 dB A-weighted, against −18 to −20 for the surface) so the hull's creak can be heard. The loop ends on the raised G, glowing and unresolved.
 - **We're a Boat** (reveal): the rhyme's first couplet on glass bells, doubled an octave down on moonglass, over a held D-flat chord.
 - **The Sisters Wake** (pumps): the one place Downstairs has a beat. The three Sisters' thumps make the rhythm: the stout one on every beat, the thin one in a 3-3-2 roll, the middle one on the off-beats. Bowed bass holds D-flat. Two moonglass voices an octave apart climb the D-flat Lydian scale a step a bar, the lower fading in as the upper fades out, so the line seems to rise forever past the D-flat where it should rest (a Shepard-tone illusion). As the city rises, the game calls `bendMusic` to creep it sharp. The burst cuts it off.
+- **Beat the Egg** (relay): the Kid's run. Cheryl's home phrase in double time on the flute, harp racing in sixteenths, a bouncing bass, tambourine. A middle section climbs in G minor, the phrase returns, and a coda races up broken chords. Then everything stops for the last bar and the egg timer's DING is the final note. It's pitched on D, the third of B-flat, so it lands as a resolution; the `timer_ding` sound effect stays on E as in Act 1.
 - **The Climb**: nothing but a slow heartbeat under the shaft's sounds, raised in pitch as Cheryl climbs.
 - **Stairs to the Water (thin)**: the upper town's tune on its flute alone, slower, with a long echo, every note sagging. Home, after you've broken it.
 
@@ -112,6 +114,8 @@ Defined in `game/src/audio/sfx.js` (interface) and `game/src/audio/sfx-world.js`
 | Downstairs ambience (loops) | `hull` (a low drone and a slow, deep creak every 20 s or so), `drips`, `moonglass_hum` (faint, near moonglass) |
 | Act 4: the belfry and the Fountain (`sfx-rise.js`) | `belfry_tick` (loop: the clock up close), `clock_rundown`, `lever_clank`, `clamp_lift`, `bell_stroke` and `bell_strokes` (the great bell, once or three times, each with a long bloom; in D-flat), `thrum_rise` and `thrum` (loop: the Tide Wheel felt from above), `hull_far` (loop: a faint creak every 40 s or so), `coins_rattle`, `ring_hatch` |
 | Act 4: the Pump Hall and the rise | `valve_squeal`, `pump_cough` (two variants), `pump_stall`, `thump_thin`, `thump_stout`, `thump_middle`, `pump_thin` and `pump_stout` (loops, in time with the pumps cue), `shaft_hum` (loop), `grate_drain`, `hull_creak_long`, `valve_hiss` (loop), `ear_pop` (dips the whole mix), `groan_great`, `burst`, `spray` (loop), `roar` (loop), `water_spread` (loop), `hatch_bang`, `air_whistle` (loop); at the Tide Wheel, `slack_lap` and `channel_rush` (loops) with `tide_wheel` |
+| Act 5: the risen city (`sfx-high.js`) | `laundry` (loop), `surf` (loop: the Teeth; raise it at each stage), `bucket_fill`, `bucket_lower`, `pour`, `splash_small`, `rope_throw`, `rope_creak`, `tin_lid`, `lamp_hum` (loop), `disc_drink`, `disc_fade`, `timer_wind`, `leap`, `mud_splat` |
+| Act 5: the bronze door and the Windlass | `barnacles_crack`, `door_grind`, `light_spill`, `bronze_door` (all three in order), `lamp_wake`, `lamps_wake`, `chain_creak` (loop), `hawse_wind` (loop), `drum_creak`, `drum_strain` (loop), `stump_lever`, `clapper_seat`, `tube_wind` (loop: wind, gulls, the Mayor far off) |
 | Act 4: the climb, the cellar, the reveal | `gull_close`, `slab_scrape`, `slab_close`, `shouting` (loop: muffled through the floor), `bell_low` (one soft D-flat at the bronze door), `town_rush`, `crabs` (loop), `fish_flop`, `runoff` (loop: the last water running out of the dry Bilge) |
 
 The dev page's "moonrise sequence" button plays these in the design's order with suggested timings (see `MOONRISE` in `game/dev/audio.html`): fade Cistern Court and start the crowd and clock; 5 s later the music box; at the moon, stop the crowd dead, wind the music down over about 4.5 s, and bark the dog; after the cut, the groan with the rattle, the crack, the piano, the drain, then a gull and the wind.
@@ -133,6 +137,14 @@ In Act 4 (04-the-list.md; the scripts decide):
 - **The climb:** `playMusic('climb', { fadeMs: 500 })` and `bendMusic(300, 20000)`; `step_rung` per rung; `setLoopVolume('roar', 0.4, 3000)` at row 22, `0.1` at row 14, `stopLoop('roar', 3000)` and `stopMusic(3000)` by row 7 with `drips` and `gull_close`; `slab_scrape` at the top.
 - **The ice cellar:** `slab_close`, `drips`, and the `shouting` loop.
 - **The reveal:** stop everything but `wind`, and give the dry Bilge no `canal` lapping at all: its absence is the first thing the ear should notice. Add the faint `runoff` loop near the east end, where the last water runs out (raise it with `setLoopVolume` as Cheryl nears it, if wanted); `gull`; at the door `bell_low`; then `playMusic('neighborhood_thin')`, `town_rush` with the `crowd` loop, `crabs` (loop), and `fish_flop`.
+
+In Act 5 (05-high-and-dry.md; the scripts decide):
+
+- **Every surface map:** `setWrongness(0.5)`; the `wind` loop under the music, and `laundry` where there's laundry. At the Harbor, the `surf` loop on the Teeth: `setLoopVolume('surf', 0.35)` at stage 1, `0.65` at stage 2, `1` at stage 3.
+- **The bucket and the boat:** `bucket_fill`, `bucket_lower`, `pour` (ends in a small splash; `splash_small` on its own if needed), then `rope_throw` and a `rope_creak` per step of the climb.
+- **The lamp:** the `lamp_hum` loop in the lamp room; `tin_lid` for the polish; `disc_drink` when the disc goes into the lamp, `disc_fade` when it dims a step.
+- **The run:** `timer_wind`, the `timer_tick` loop, then `playMusic('relay', { fadeMs: 0 })`; `kid_patter` or `step_kid` along the quay, `leap` and `mud_splat` off the quay. The relay's last note is the ding: time the slap into the eye so `bronze_door` (or `barnacles_crack`, `door_grind`, `light_spill`) plays in the last bars, and stop `timer_tick` there. "I BEAT THE EGG!" follows the ding.
+- **Downstairs:** `downstairs` music; `lamps_wake` as the Bow Passage lights (or `lamp_wake` per lamp), the `chain_creak` loop (louder near the Windlass with `setLoopVolume`); in the Windlass Room `hawse_wind` and `drum_strain` (loops), `stump_lever`, then `clapper_seat` and `stopLoop('drum_strain', 0)`: the creaking stops. Then the `tube_wind` loop for the speaking tube.
 
 ## Mixing levels
 
