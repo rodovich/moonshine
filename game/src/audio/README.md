@@ -37,7 +37,7 @@ The engine calls these through its bridge, `src/engine/sound.js`, which also for
 - the Wrongness: `wrong_sting`, `groan`, `crack`, `rattle`, `piano_tumble`, `drain` (or its parts `drain_glunk`, `drain_gurgle`, `drain_echo`)
 
 - the wider city: `knock`, `shop_bell`, `stone_scrape`, `scrub`, `skip_rope`, `slab_lift`, `piano_slide`, `sink_gurgle`, `step_splash`, `goat`, `boatman_sing`, `girls_chant`
-- downstairs: `step_hullstone`, `step_rung`, `lever_pull`, `lid_open`, `lid_pry`, `mirror_turn`, `light_beam`, `moonlock_open`, `hatch_open`, `disc_get`, `disc_glow`, `lamp_relight`, `chute_slide`, `ladder_drop`, `tube_voice`, `bolt_draw`, `founders_door`, `rubbing`
+- downstairs: `step_hullstone`, `step_rung`, `lever_pull`, `lid_open`, `shutters`, `lid_pry`, `mirror_turn`, `light_beam`, `moonlock_open`, `hatch_open`, `disc_get`, `disc_glow`, `lamp_relight`, `chute_slide`, `ladder_drop`, `tube_voice`, `bolt_draw`, `founders_door`, `rubbing`
 - machines and water: `valve_turn`, `valve_jam`, `far_gurgle`, `chain_rattle`
 - Act 4: `clock_rundown`, `lever_clank`, `clamp_lift`, `bell_stroke`, `bell_strokes`, `thrum_rise`, `coins_rattle`, `ring_hatch`, `valve_squeal`, `pump_cough`, `pump_stall`, `thump_thin`, `thump_stout`, `thump_middle`, `grate_drain`, `hull_creak_long`, `ear_pop`, `groan_great`, `burst`, `hatch_bang`, `gull_close`, `slab_scrape`, `slab_close`, `bell_low`, `town_rush`, `fish_flop`
 

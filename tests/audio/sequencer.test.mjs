@@ -158,7 +158,7 @@ test('the required sound effects exist', () => {
     'knock', 'shop_bell', 'stone_scrape', 'scrub', 'skip_rope', 'slab_lift', 'piano_slide', 'trickle', 'sink_gurgle', 'step_splash',
     'door_hum', 'town', 'canal', 'gulls', 'goat', 'goats', 'clock_tick', 'boatman_sing', 'girls_chant',
     'step_hullstone', 'step_rung', 'lid_pry', 'hatch_open', 'light_beam', 'mirror_turn', 'moonlock_open', 'disc_glow',
-    'chute_slide', 'ladder_drop', 'tube_voice', 'lever_pull', 'lid_open', 'beam_hum', 'moonglass_hum', 'disc_get', 'lamp_relight', 'tube_murmur', 'bolt_draw', 'founders_door', 'rubbing', 'glow_shimmer', 'valve_turn', 'valve_jam', 'water_gush', 'far_gurgle', 'drips', 'hull',
+    'chute_slide', 'ladder_drop', 'tube_voice', 'lever_pull', 'lid_open', 'shutters', 'beam_hum', 'moonglass_hum', 'disc_get', 'lamp_relight', 'tube_murmur', 'bolt_draw', 'founders_door', 'rubbing', 'glow_shimmer', 'valve_turn', 'valve_jam', 'water_gush', 'far_gurgle', 'drips', 'hull',
     'pump_run', 'pump_cough', 'chain_rattle', 'chain_haul', 'tide_wheel',
     // docs/design/04-the-list.md, "Audio needed"
     'belfry_tick', 'clock_rundown', 'lever_clank', 'clamp_lift', 'bell_stroke', 'bell_strokes', 'thrum_rise', 'thrum',

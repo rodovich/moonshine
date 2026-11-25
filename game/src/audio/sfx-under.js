@@ -155,6 +155,29 @@ export const UNDER_SFX = {
       { type: 'noise', at: 1.3, dur: 1.2, gain: 0.04, filter: { type: 'highpass', freq: 4000 }, env: { a: 0.4, d: 0.8, s: 0.3, r: 0.3 } },
     ],
   },
+  // After the lid: every light-pipe shutter under Tessel's doorsteps opening for the first time in
+  // three hundred years, a long run of clunks going away up the hill, each fainter, duller, and
+  // farther off than the last (about 4 s). It tells the player they lit the doorsteps, so the first
+  // few are close and clear, and each carries a tiny glint of moonglass.
+  shutters: {
+    gain: 0.8, echo: 0.55, duck: 0.35, duckFor: 3.5,
+    layers: () => {
+      const out = [];
+      let t = 0;
+      for (let i = 0; i < 22; i++) {
+        const k = Math.pow(0.86, i); // each farther away
+        const f = rand(170, 230);
+        out.push(
+          { type: 'tone', wave: 'sine', at: t, freq: [f, f * 0.55], dur: 0.12, gain: 0.55 * k },
+          { type: 'tone', wave: 'triangle', at: t, freq: rand(560, 720), dur: 0.05, gain: 0.14 * k, filter: { freq: 700 + 2500 * k } },
+          { type: 'noise', at: t, dur: 0.03, gain: 0.12 * k, filter: { type: 'bandpass', freq: 600 + 1800 * k, q: 1.5 } },
+          { type: 'tone', wave: 'sine', at: t + 0.02, freq: rand(2200, 3300), dur: 0.25, gain: 0.025 * k, env: { a: 0.002, d: 0.24, s: 0, r: 0.05 } },
+        );
+        t += rand(0.15, 0.3) * (1 - i / 40); // quickening a little as they spread out
+      }
+      return out;
+    },
+  },
   // A soft, sustained glassy tone while a beam of light is lit (loop).
   beam_hum: {
     gain: 0.7,
