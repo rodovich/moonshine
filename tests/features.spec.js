@@ -372,3 +372,24 @@ test('click-to-use waits when the only free side is briefly blocked, then uses t
   await page.mouse.click(at.x, at.y);
   await waitFor(page, () => (window.moonshine.snapshot().text || '').includes('SPEED'), null, 8000);
 });
+
+test('a thing reachable only diagonally: Z reaches it, and a click walks to the diagonal', async ({ page }) => {
+  await boot(page, `${STREET}&x=12&y=9&facing=up`);
+  await waitIdle(page);
+  await page.evaluate(() => {
+    const w = window.moonshine.world;
+    // A plaque at (14,7) with walls on all four sides.
+    for (const [x, y] of [[14, 6], [13, 7], [15, 7], [14, 8]]) w.map.setTile('ground', x, y, { tile: 'street:retain_top', solid: true });
+    w.mapDef.entities.push({ id: 'plaque', x: 14, y: 7, look: 'A plaque, wedged in a corner.' });
+    w.refreshEntities();
+  });
+  // Pointer: click it, and Cheryl walks to a diagonal tile and reads it.
+  await clickTile(page, 14, 7);
+  await waitFor(page, () => (window.moonshine.snapshot().text || '').includes('plaque'), null, 10000);
+  await readAll(page);
+  await waitIdle(page);
+  // Keyboard: from (13,8), diagonal below-left, facing up with nothing ahead.
+  await runScript(page, "g.place('player', 13, 8, 'up');");
+  await press(page, 'z');
+  await waitFor(page, () => (window.moonshine.snapshot().text || '').includes('plaque'), null, 5000);
+});
