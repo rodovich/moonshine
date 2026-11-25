@@ -120,7 +120,7 @@ Cheryl's silhouette, from behind on the tub's rim, wears her bathing costume (ba
 1. `vista:bowl_dusk` at (0, 0).
 2. `vista_glow:glow_<n>` with its bottom center at (176, 90), so its top-left is (116, 42). Glow 0 from about 1 s, 1 from 2.2 s, 2 from 3.4 s.
 3. `vista_moon` (2-frame shimmer, 500 ms) centered on x = 176. Its center starts at y = 104, hidden behind the cliffs, and stops at y = 56. About half of it is up at center y ≈ 86. It whitens as it climbs: draw `moon` (pale peach-gold) while its center is below y = 80, `moon_mid` from y = 80, and `moon_high` from y = 64.
-4. `vista_rim:rim` at (0, 0), over the moon.
+4. `vista_rim:rim` at (0, 0), over the moon. The Gate is a V: its walls slope in through the Rim's dark lower band to a narrow cleft at y 114 (a flat-bottomed notch with sheer walls read as a lighter box in playtest). The glow's outer ring fades out in a checker, so no hard edge shows where the V opens onto it, and `vista_gate_cold` only recolors the cleft.
 5. The moon's path on the Bowl, at (0, 0), after the rim: `vista_path:path_faint` once the moon is half up, then the `path` shimmer (3 frames, 260 ms) about 2 s later. It's pale peach-gold, broken into streaks, and stops at the roofs.
 6. `vista_twinkle:twinkle` at each point in `VISTA_BASINS` (exported by `vista.js`), offset by (−3, −3), each with its own phase.
 7. `vista_cheryl:cheryl_tub` at (0, 128).
