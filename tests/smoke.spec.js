@@ -76,8 +76,8 @@ test('keyboard: walk, bump, talk, choose, receive an item', async ({ page }) => 
 test('keyboard: holding a direction walks continuously', async ({ page }) => {
   await boot(page, STREET);
   await waitIdle(page);
-  // From (5,7) hold down, down the stairs: 8 ticks per tile, about 133 ms.
-  await hold(page, 'ArrowDown', 560);
+  // From (5,7) hold down, down the stairs: 12 ticks per tile, 200 ms.
+  await hold(page, 'ArrowDown', 760);
   await waitIdle(page);
   const s = await snap(page);
   expect(s.x).toBe(5);

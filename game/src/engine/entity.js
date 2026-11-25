@@ -30,7 +30,7 @@ export class Entity {
     this.h = def.h || 1;
     this.facing = def.facing || 'down';
     this.solid = def.solid !== undefined ? def.solid : true;
-    this.stepTicks = def.stepTicks || (isPlayer ? 8 : 16);
+    this.stepTicks = def.stepTicks || (isPlayer ? 12 : 16);
     this.layer = def.layer || 'sprites'; // 'ground' draws under everything that sorts
     this.offset = def.offset || [0, 0];
     this.visible = def.visible !== undefined ? def.visible : true;

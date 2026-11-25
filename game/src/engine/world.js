@@ -546,20 +546,56 @@ export class World {
     const cx = this.cam.x - sx;
     const cy = this.cam.y - sy;
     const ms = (this.tick * 1000) / 60;
+    // Lighting is applied per layer: the map at full strength, characters at
+    // SPRITE_LIGHT (as SNES color math often spared sprites), so they stay
+    // the most saturated things on screen at dusk and night.
     this.map.draw(ctx, 'ground', cx, cy, WIDTH, HEIGHT, ms);
     this.map.draw(ctx, 'detail', cx, cy, WIDTH, HEIGHT, ms);
     this.drawMarker(ctx, cx, cy);
+    const lit = this.effects.hasLight();
+    if (lit) this.effects.applyLight(ctx, 1);
     const sorted = [...this.entities].sort((a, b) => {
       const la = a.layer === 'ground' ? 0 : 1;
       const lb = b.layer === 'ground' ? 0 : 1;
       return la - lb || a.sortY - b.sortY || a.px - b.px;
     });
-    for (const e of sorted) e.drawShadow(ctx, cx, cy);
-    for (const e of sorted) e.draw(ctx, cx, cy);
-    this.map.draw(ctx, 'overhead', cx, cy, WIDTH, HEIGHT, ms);
-    this.effects.applyLight(ctx);
+    const sprites = lit ? this.layer('sprites') : ctx;
+    for (const e of sorted) e.drawShadow(sprites, cx, cy);
+    for (const e of sorted) e.draw(sprites, cx, cy);
+    if (lit) this.compositeLit(ctx, sprites, this.content.spriteLight ?? SPRITE_LIGHT);
+    const over = lit ? this.layer('overhead') : ctx;
+    this.map.draw(over, 'overhead', cx, cy, WIDTH, HEIGHT, ms);
+    if (lit) this.compositeLit(ctx, over, 1);
     if (this.game.debug.debug) this.drawDebug(ctx, cx, cy);
     this.effects.applyWorld(ctx);
+  }
+
+  // A cleared, transparent offscreen layer the size of the screen.
+  layer(name) {
+    this.layers = this.layers || {};
+    let c = this.layers[name];
+    if (!c) {
+      c = document.createElement('canvas');
+      c.width = WIDTH;
+      c.height = HEIGHT;
+      this.layers[name] = c.getContext('2d');
+      c = this.layers[name];
+      c.imageSmoothingEnabled = false;
+    }
+    c.clearRect(0, 0, WIDTH, HEIGHT);
+    return c;
+  }
+
+  // Light a transparent layer at `strength` (keeping its transparency) and
+  // draw it onto ctx.
+  compositeLit(ctx, layerCtx, strength) {
+    const scratch = this.layer('scratch');
+    scratch.drawImage(layerCtx.canvas, 0, 0);
+    this.effects.applyLight(scratch, strength);
+    scratch.globalCompositeOperation = 'destination-in';
+    scratch.drawImage(layerCtx.canvas, 0, 0);
+    scratch.globalCompositeOperation = 'source-over';
+    ctx.drawImage(scratch.canvas, 0, 0);
   }
 
   // Full-screen picture (a vista): `draw(ctx, ms)` or { sheet, frame }.
@@ -652,18 +688,24 @@ function sameSprite(a, b) {
   return a.sheet === b.sheet && a.palette === b.palette && a.frame === b.frame;
 }
 
+// How strongly scene lighting tints characters, relative to the map.
+// content.spriteLight overrides it.
+export const SPRITE_LIGHT = 0.5;
+
 // Built-in lighting presets: lists of passes drawn over the world. Content
 // may override or add presets with `content.lighting`.
 export const LIGHTING = {
   day: [],
-  // Warm and dimming: everything leans apricot, shadows toward violet.
+  // Warm and dimming. A soft multiply keeps lights and darks apart (white
+  // walls stay brighter than paving), and a small violet lift in the shadows.
   dusk: [
-    { color: '#e89070', mode: 'multiply', amount: 0.75 },
-    { color: '#602858', mode: 'screen', amount: 0.12 },
+    { color: '#f8c0a0', mode: 'multiply', amount: 0.8 },
+    { color: '#d898a0', mode: 'multiply', amount: 0.35 },
+    { color: '#382048', mode: 'screen', amount: 0.15 },
   ],
   // Moonlit: dark and blue, with lifted blacks so detail survives.
   night: [
-    { color: '#3040a0', mode: 'multiply', amount: 0.85 },
+    { color: '#5060b0', mode: 'multiply', amount: 0.85 },
     { color: '#182850', mode: 'screen', amount: 0.3 },
   ],
 };

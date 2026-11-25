@@ -83,7 +83,7 @@ test('script API edge cases', async ({ page }) => {
   await waitIdle(page);
   // A move's speed lasts only for that move.
   await runScript(page, "await g.movePlayer('r', { speed: 32 });");
-  expect(await page.evaluate(() => window.moonshine.world.player.stepTicks)).toBe(8);
+  expect(await page.evaluate(() => window.moonshine.world.player.stepTicks)).toBe(12);
   // setFlag updates entities right away.
   const r = await runScript(page, "g.setFlag('door_unlocked'); return !!g.player && (() => { try { g.npc('shop_door'); return 'still there'; } catch { return 'gone'; } })();");
   expect(r.v).toBe('gone');

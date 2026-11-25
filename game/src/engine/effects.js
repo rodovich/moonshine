@@ -65,10 +65,15 @@ export class Effects {
     return this.tween('lightMix', 1, seconds);
   }
 
-  applyLight(ctx) {
+  hasLight() {
+    return (this.lightTo.length && this.lightMix > 0) || (this.lightFrom.length && this.lightMix < 1);
+  }
+
+  // Draw the lighting passes over everything on `ctx`, at `strength` (0..1).
+  applyLight(ctx, strength = 1) {
     const draw = (passes, k) => {
       for (const p of passes) {
-        const a = (p.amount ?? 1) * k;
+        const a = (p.amount ?? 1) * k * strength;
         if (a <= 0.001) continue;
         ctx.save();
         ctx.globalCompositeOperation = p.mode || 'source-over';
