@@ -894,11 +894,16 @@ export class World {
     layer.fillStyle = colorOf(def.darkColor || 'void');
     layer.fillRect(0, 0, WIDTH, HEIGHT);
     // Light pools stay inside the map: no glow over the void around a room.
-    const mapRect = [-cx, -cy, this.map.w * TILE, this.map.h * TILE];
+    // Clipped to the map, or to the map's lightArea rectangles (tiles), so a
+    // small room's light doesn't spill past its walls into the void.
+    const areas = def.lightArea ? def.lightArea.map(([x, y, w, h]) => [x * TILE - cx, y * TILE - cy, w * TILE, h * TILE]) : [[-cx, -cy, this.map.w * TILE, this.map.h * TILE]];
+    const clipTo = (c) => {
+      c.beginPath();
+      for (const r of areas) c.rect(...r);
+      c.clip();
+    };
     layer.save();
-    layer.beginPath();
-    layer.rect(...mapRect);
-    layer.clip();
+    clipTo(layer);
     layer.globalCompositeOperation = 'destination-out';
     for (const l of lights) {
       for (const [k, a] of [[1, 0.4], [0.75, 0.6], [0.5, 1]]) {
@@ -911,9 +916,7 @@ export class World {
     ctx.globalAlpha = Math.min(1, dark);
     ctx.drawImage(layer.canvas, 0, 0);
     // Colored lights tint their pool (inner bands a little more).
-    ctx.beginPath();
-    ctx.rect(...mapRect);
-    ctx.clip();
+    clipTo(ctx);
     ctx.globalCompositeOperation = 'screen';
     for (const l of lights) {
       if (!l.color) continue;

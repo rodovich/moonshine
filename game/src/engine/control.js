@@ -221,9 +221,12 @@ export class Control {
     } else if (this.nearEnough(e)) {
       // A moving character ended up next to her (or on her tile): talk anyway.
       this.act(e, pend.item);
-    } else if ((pend.tries || 0) < 3) {
-      // The target moved (a wandering NPC) or was blocked: try again.
-      this.pending = { ...pend, tries: (pend.tries || 0) + 1 };
+    } else if ((pend.tries || 0) < 3 || ((e.x !== pend.at[0] || e.y !== pend.at[1]) && (pend.chases || 0) < 40)) {
+      // The target moved (a running Kid) or was blocked: try again. Chasing
+      // someone who keeps moving doesn't use up the three tries (up to 40
+      // re-plans), so when he finally stops she still takes the last step.
+      const moved = e.x !== pend.at[0] || e.y !== pend.at[1];
+      this.pending = { ...pend, tries: (pend.tries || 0) + (moved ? 0 : 1), chases: (pend.chases || 0) + (moved ? 1 : 0) };
       this.repath();
       if (!this.path.length) this.pending = null;
     }
