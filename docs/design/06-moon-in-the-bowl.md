@@ -474,6 +474,19 @@ All of this is built (audio/foundation, 865415c); ids and a step-by-step order f
 - [ ] Every line fits in its box.
 - [ ] First-time players finish the act in 15–25 minutes.
 
+## As built
+
+The Act 6 builder (A7CXb-ur4K) built the Long Keel, the Sighting Room, the dawn, the epilogue on the opening's and Act 2's maps, the final scene, the vista, and the credits on `content/act6` (the Windlass climax, the montages, and the Bilge and Harbor epilogue wait for Acts 4–5's maps). Its full list is in `game/src/content/act6/README.md`. This document follows it:
+
+- The Long Keel's grooves are a line Cheryl says the first time she walks in them, not a hotspot.
+- The Sighting Room has two moonglass lamps on its north wall (x5, x10), dark until the moon is true, so the lamps have something to flare.
+- Looking into the full Basin shows the Basin view at the current trim, with one line per position: "The moon, off to the right of the Gate." / "Closer to the Gate. Not there yet." / "Dead in the Gate. But it isn't Moonshine Night. 'Allow two fingers.'" / after true, "Moon in the Gate, and moon in the bowl."
+- The lift before the bath: "Not yet. Not with the moon off to one side like that." (repeat: "'Up,' says the arrow. Not yet.").
+- Cheryl's shoes stay at (6, 6) while she bathes.
+- The Stair Race's finish is a tape across flight 3 at row 21, just below the open step, with the Counting Woman at (7, 18). The rope round the open step can be walked through (a solid barrier would cut the Steps in two).
+- The title on the final vista fades out before the credits roll; MOONSHINE is still the first credit line.
+- Lines the builder added, adopted as written: the signed log; the master stop afterward; the shaft and walls; the Keel's lamps; the drum, hawse, coil, sealed hatch, and speaking tube before the hauling; the Old Man after the piano ("Play it when you're ready. Gerald's in no hurry."); the tub with the new plug ("Next year. On Moonshine Night. With the moon in the Gate."); the Movers ("Delivered."); the Stair Race runners and crowd; the Tourist's luggage; and the epilogue declines for the Clockmaker, Ambrose, Ottilie, and the Shopkeeper.
+
 ## Decisions
 
 - **Act 6 begins with the clapper already seated** (moved to the end of Act 5), so the climax starts with the bell.
