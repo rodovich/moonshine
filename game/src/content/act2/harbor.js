@@ -257,6 +257,11 @@ const lampObjects = [
     id: 'telescope', x: 6, y: 5, when: (g) => !telescopeGone(g),
     look: 'A brass telescope under a dust sheet, facing the wall. Like it\'s being punished.',
   },
+  {
+    // The empty dust sheet once the telescope is gone (Act 4's lamp room has its own).
+    id: 'empty_sheet', x: 6, y: 5, when: (g) => telescopeGone(g) && !g.flag('act4.started'),
+    look: 'The dust sheet, in a heap. Nothing under it now but a clean patch of floor.',
+  },
   { id: 'windows', x: 1, y: 1, w: 6, look: 'From up here: the whole Bowl, the Rim, the mouth, the Teeth. She only has eyes for the lamp.' },
 ].map((o) => ({ solid: false, use: { '*': cherylDeclines }, ...o }));
 
