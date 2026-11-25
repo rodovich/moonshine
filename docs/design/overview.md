@@ -4,7 +4,7 @@ This document sets the game's structure: the areas, how they connect, what is ga
 
 ## Target
 
-- **Length:** 2½–3½ hours for a first-time player (Act 1: 8–12 min, Act 2: 30–40, Act 3: 18–25, Act 4: 35–50, Act 5: 30–40, Act 6: 15–25 including the epilogue walk).
+- **Length:** 2¾–3¾ hours for a first-time player (Act 1: 8–12 min, Act 2: 40–50, Act 3: 18–25, Act 4: 35–50, Act 5: 30–40, Act 6: 15–25 including the epilogue walk).
 - **Size:** about 35 surface screens and 17 underground screens (one screen is 16×14 tiles), 17 NPCs, about 25 inventory items.
 
 ## Design rules
@@ -26,44 +26,38 @@ These apply to every slice.
 
 ### Surface (Tessel)
 
-North is uphill (the Crown); south is downhill (the harbor). The Prow points southeast; the Back is the steep west end.
+North is uphill (the Crown); south is downhill (the harbor). The Prow points southeast; the Back is the steep west end. The Goat Path comes down the Back into the west end of the Bilge; the Harbor is east of the Bilge, a spur off the long loop. (Structure pass, from client feedback: [structure-pass.md](structure-pass.md).)
 
 ```
-                                ┌──────────────────────────────┐
-                                │ THE CROWN                    │
-                                │ Bell Tower (belfry)          │
-                                │ Blue Dome (Archive, crypt)◄──┼── P3 Founders' Door
-                                │ sundial · Clockmaker's shop  │
-                                └──────────────┬───────────────┘
- ┌──────────────────┐   Squeeze   ┌────────────┴──────────────┐
- │ CISTERN COURT    ├─────────────┤ LAMP STREET               │
- │ (opening)        │             │ Little School yard        │
- │ No. 9 (flat)     │             │ (Skipping Girls)          │
- │ the well ◄───────┼── P6 (end)  └──┬──────────────────────┬─┘
- └──────────────────┘                │                      │
-                          ┌──────────┴───────────┐   ┌──────┴────────────┐
-                          │ THE HUNDRED STEPS    │   │ THE BACK          │
-                          │ 3 landings           │   │ Goat Path         │
-                          │ hundredth step ◄─────┼─P1│ Mott's shack      │
-                          │ (piano jams the foot │   │ sea cave (view of │
-                          │  arch in Act 2)      │   │  the Tide Wheel)  │
-                          └──────────┬───────────┘   └──────┬────────────┘
-                          ┌──────────┴───────────┐          │
-                          │ FOUNTAIN SQUARE      │          │
-                          │ Fountain ◄───────────┼─ P2      │
-                          │ Shop · Mayor · café  │          │
-                          │ (Tourist)            │          │
-                          └──────────┬───────────┘          │
-                          ┌──────────┴───────────┐          │
-                          │ THE BILGE            │          │
-                          │ canals · bridges     │          │
-                          │ fish market ◄────────┼─ P4      │
-                          │ Water Stairs ◄───────┼─ P5      │
-                          └──────────┬───────────┘          │
-                          ┌──────────┴──────────────────────┴─┐
-                          │ THE HARBOR — quay, ferry          │
-                          │ road out to THE PROW (lighthouse) │
-                          └───────────────────────────────────┘
+   ┌────────────────┐               ┌───────────────────────────┐
+   │ CISTERN COURT  │               │ THE CROWN                 │
+   │ No. 9 · the    │               │ belfry · Blue Dome ◄── P3 │
+   │ well ◄── P6    │               │ sundial · Clockmaker      │
+   └───────┬────────┘               └─────────────┬─────────────┘
+           │ the Squeeze                          │
+   ┌───────┴──────────────────────────────────────┴─────────────┐
+   │ LAMP STREET  Little School yard · the bench                │
+   └──┬──────────────────────────────────────────────────┬──────┘
+      │ west gate                                         │
+   ┌──┴─────────────────┐                      ┌──────────┴──────────┐
+   │ THE BACK           │                      │ THE HUNDRED STEPS   │
+   │ Goat Path: a cliff │                      │ hundredth step ◄ P1 │
+   │ path, 3 screens of │                      │ (the piano jams the │
+   │ switchbacks        │                      │  foot arch, Act 2)  │
+   │ Mott's shack       │                      └──────────┬──────────┘
+   │ sea cave           │                      ┌──────────┴──────────┐
+   │                    │                      │ FOUNTAIN SQUARE     │
+   │                    │                      │ Fountain ◄ P2 · Shop│
+   └──┬─────────────────┘                      └──────────┬──────────┘
+      │ east, onto the south quay                         │
+   ┌──┴───────────────────────────────────────────────────┴───────────┐
+   │ THE BILGE  canals · fish market ◄ P4 · Water Stairs ◄ P5          │
+   └───────────────────────────────────────────────────────┬──────────┘
+                                                           │ east, along the canal
+                                       ┌───────────────────┴──────────────┐
+                                       │ THE HARBOR  quay · ferry         │
+                                       │ the Prow road · lighthouse       │
+                                       └──────────────────────────────────┘
 ```
 
 ### Underground ("Downstairs," the hull)
@@ -140,8 +134,11 @@ flowchart TD
   end
 
   subgraph A2["Act 2 — The Morning After"]
-    a2hat[Take hat from wardrobe] --> a2guide[Give hat to Tourist → guidebook]
-    a2guide --> a2count[Show guidebook to Counting Woman → she leaves]
+    a2tele[Keeper gives telescope] --> a2window[Telescope into Shop window → straw hat]
+    a2window --> a2guide[Straw hat to Tourist → guidebook]
+    a2glasses[Spot the glasses in her hair → he reads] --> a2sheet[Tide-Sheet]
+    a2guide --> a2count[Show both printed 99s to Counting Woman → she leaves]
+    a2sheet --> a2count
     a2piano[Soap the piano → it slides; take crowbar]
     a2count --> a2seam[See water vanish into the step]
     a2seam --> a2open[Pry up the hundredth step]
@@ -176,7 +173,7 @@ flowchart TD
 
   subgraph A5["Act 5 — High and Dry"]
     a5bucket[Fishmonger's bucket → fill at Fountain] --> a5boat[Give to Boatman: AFLOAT → rope]
-    a5polish[Swap guidebook to Shopkeeper → polish] --> a5lamp[Give polish to Keeper → charge disc in lamp]
+    a5polish[Swap guidebook to Shopkeeper → telescope back] --> a5lamp[Telescope to Keeper → charge disc in lamp]
     a5lamp --> a5relay[Kid runs disc to the Water Stairs]
     a5boat --> a5door[Water Stairs door opens → Bow Decks]
     a5relay --> a5door
@@ -192,7 +189,6 @@ flowchart TD
     a6stop --> a6bath[The bath] --> a6lift[Lift up the well → epilogue]
   end
 
-  a1morn --> a2hat
   a1morn --> a2piano
   a1soap --> a2piano
   a2open --> a3lid
@@ -218,10 +214,11 @@ flowchart TD
 
 **Act 2**
 - *Piano.* It came down the Squeeze in the night and is now jammed in the arch at the foot of the Hundred Steps; the Movers can't shift it. Using the **soap** on its runners sends it sliding into Fountain Square with the Movers in pursuit. They leave the **crowbar**. This also opens the direct route from the Steps to Fountain Square.
-- *Hat and guidebook.* The **Tourist** in Fountain Square is sunburnt and will trade anything for a hat. Cheryl's **hat** is in her wardrobe (it's described in Act 1 but can't be taken until morning). The Tourist gives the **guidebook**, *Tessel: A Pocket Companion*.
-- *Counting Woman.* She sits on the hollow step and won't move. Showing her the guidebook ("The Hundred Steps (there are, in fact, 99)") sends her storming off to complain to the Mayor. Cheryl keeps the guidebook.
+- *Telescope, hat, and guidebook.* The **Tourist** in Fountain Square is sunburnt and will trade anything for a hat. The Shop's window hat is display stock: the Shopkeeper won't leave a gap, and says what would fill it ("Something brass. Something nautical. Never used."). The Lighthouse Keeper gives away the **telescope** she keeps under a dust sheet ("it keeps pointing at the sea"). Cheryl sets it in the window herself and takes the **straw hat**; the Tourist gives the **guidebook**, *Tessel: A Pocket Companion*. Cheryl's own hat stays in her wardrobe.
+- *Glasses and the Tide-Sheet.* The Man on Bench can't read the **Tide-Sheet** without his glasses, which are pushed up in his wife's hair (the Woman with Watering Can). Once she gives them back, he hands Cheryl the paper. Its letters page, written by the Tourist, says the Steps number ninety-nine.
+- *Counting Woman.* She sits on the hollow step and won't move. One printed "ninety-nine" shakes her, and she names the other source; the second sends her storming off to the Mayor. She keeps the Tide-Sheet as evidence; Cheryl keeps the guidebook. Then the camera holds on her step as the Moonshine water vanishes into it, and the step goes "bonk" underfoot.
 - *The seam.* On the vacated step, morning Moonshine water (tipped down the Steps for luck) runs into the joint and disappears. "Steps don't drink." The Kid's "step that went bonk" and Ottilie's saying both point here.
-- *Ottilie* gives **paper and charcoal** to anyone investigating the Founders ("Primary sources! Take rubbings of everything"). If the player meets her only after Act 3, she gives them then. The Founders' Door makes the return trip short.
+- *Ottilie* gives **paper and charcoal** to anyone investigating the Founders, with one instruction: the Founders put their best work on floors, "where the light falls." If the player meets her only after Act 3, she gives them then. The Founders' Door makes the return trip short.
 - *Seeds (optional in Act 2, required later):* Ambrose under the bell; Mott on the quay ("A hand to the left."); the Skipping Girls; the Clockmaker and his letters to the observatory; the sea cave on the Back, where Mott's grandfather "found the copper."
 
 **Act 3** (build-ready in [03-downstairs.md](03-downstairs.md))
@@ -238,7 +235,7 @@ flowchart TD
 
 **Act 5**
 - *Boatman.* Beached at the foot of the Water Stairs, blocking the last broken flight. The Fishmonger lends a **bucket**; the refilled Fountain fills it; he pours it into his boat ("AFLOAT!") and hands over his **rope**, which lets Cheryl down the broken flight.
-- *Charging the disc.* The Water Stairs door's moon-lock needs a full charge, and only the lighthouse lamp is bright enough. The Keeper has polished in a frenzy since she saw the reef and run out of polish; she won't let anyone near the lamp without it. The Shopkeeper, whose window display fell over in the rise ("there's a GAP"), swaps **brass polish** for the guidebook. Charged, the disc fades in under a minute, and the door is the length of the town away: it needs someone to run it flat out and jump off the quay. She gives it to the Kid, who still has her egg timer from Act 1 and winds it himself. The run is a fully scripted scene that always succeeds.
+- *Charging the disc.* The Water Stairs door's moon-lock needs a full charge, and only the lighthouse lamp is bright enough. The Keeper has turned round at last and wants her **telescope** back to watch the reef; for it, she'll let Cheryl have the lamp. The Shopkeeper, whose window display fell over in the rise, swaps the telescope back for the guidebook ("Twice in one week. I'm practically a merchant."). He declines the guidebook in Acts 2 and 4, because the Clockmaker needs it. Charged, the disc fades in under a minute, and the door is the length of the town away: it needs someone to run it flat out and jump off the quay. She gives it to the Kid, who still has her egg timer from Act 1 and winds it himself. The run is a fully scripted scene that always succeeds.
 - *Clapper.* The Clockmaker's doorstop is the bell's old clapper. He swaps it for Mott's square jug.
 - *Escalation.* The Teeth grow on the risen Harbor's horizon and in the lighthouse window (three art stages).
 - *Windlass.* Through the bronze door and the Bow Passage: lever out the sheared Tooth's stump with the crowbar and seat the **clapper**. Then wait for moonrise. (Build-ready in [05-high-and-dry.md](05-high-and-dry.md).)
@@ -255,11 +252,11 @@ What the player can be working on at each stage. "Seed" means talking to an NPC 
 | Stage | Open threads |
 | --- | --- |
 | Act 1 | Plug (Old Man); view (Neighbor → Kid). Two threads, either order. |
-| Act 2, early | Piano/crowbar; hat → guidebook → Counting Woman; exploring and seeds (Ambrose, Ottilie, Mott, Girls, Clockmaker). |
-| Act 2, late | Whichever of piano or Counting Woman remains; the seam. |
+| Act 2, early | Piano/crowbar; the guidebook chain (the Shop and the Tourist send the player east to the Harbor spur); the Tide-Sheet (Lamp Street); Ottilie (optional). Three required threads. |
+| Act 2, late | Whichever of the three remain; then the step, shown by the staged beat. |
 | Act 3 | Light puzzle → disc; then in the Lamp Halls: ladder, valve, Chart Room, rubbing (needs paper; can return via the Founders' Door). |
-| Act 4 | Bell (Clockmaker → Ambrose); Mott; the rhyme order. Three threads, any order. The Pump Hall needs all three plus the valve. |
-| Act 5 | Boatman → rope; polish → lamp → Kid relay; clapper. Three threads. |
+| Act 4 | Bell (Clockmaker → Ambrose); Mott; the rhyme order. Three threads, any order; Ottilie's reading of the Ship Plan points at each. The Pump Hall needs all three plus the valve. |
+| Act 5 | Boatman → rope; telescope → lamp → Kid relay; clapper. Three threads. |
 | Act 6 | Linear by design: it's the climax and runs about ten minutes. |
 
 ## Inventory across the game
@@ -272,7 +269,9 @@ What the player can be working on at each stage. "Seed" means talking to an NPC 
 | Bath plug | Act 1, Old Man | Tub; lost down the drain; found in the Basin in Act 6 |
 | Soap | Act 1, flat | Piano (Act 2) |
 | Moon chart | Act 1 morning, flat | Shown to Mott (Act 4) |
-| Hat | Act 2, flat wardrobe | Tourist |
+| Telescope | Act 2, Lighthouse Keeper | Set in the Shop window (Act 2); back from the Shopkeeper and given to the Keeper (Act 5) |
+| Straw hat (`shop_hat`) | Act 2, Shop window | Tourist |
+| Tide-Sheet | Act 2, Man on Bench | Shown to the Counting Woman, who keeps it |
 | Guidebook | Act 2, Tourist | Shown to Counting Woman (Act 2) and Clockmaker (Act 4); given to Shopkeeper (Act 5) |
 | Crowbar | Act 2, Movers | Shaft lid (Act 3); broken Tooth (Act 6) |
 | Paper & charcoal | Act 2/3, Ottilie | Rubbing in the Chart Room |
@@ -283,7 +282,6 @@ What the player can be working on at each stage. "Seed" means talking to an NPC 
 | Square jug | Act 4, Mott | Clockmaker (Act 5) |
 | Bucket | Act 5, Fishmonger | Filled at the Fountain → Boatman |
 | Rope | Act 5, Boatman | Broken flight of the Water Stairs |
-| Brass polish | Act 5, Shopkeeper | Lighthouse Keeper |
 | Clapper | Act 5, Clockmaker | The windlass Tooth (Act 6) |
 
 ## Build order
@@ -305,3 +303,4 @@ Following the process in [../decisions.md](../decisions.md): build and polish **
 - **Six passages, three of them one-way at some point (P3 at first, P4, P6, plus the internal chute),** and the Fountain passage closes permanently at the reveal (brief: some one-way passages; some areas become inaccessible as the city changes).
 - **The Pump Hall is reached only through the surface,** because the Lamp Halls' corridor down is flooded. This forces a back-and-forth trip (brief).
 - **Hints are in-world:** repeat-talk lines and "blocked" descriptions. No hint menu.
+- **Structure pass after client feedback (Acts 2–5):** every character has a job; Act 2 runs three required threads; fewer puzzles hand over Cheryl's belongings; the Goat Path comes down the west side into the Bilge. The proposal, its review, and the reasons are in [structure-pass.md](structure-pass.md).
