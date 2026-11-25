@@ -52,10 +52,11 @@ function compose() {
   }
 
   // ---- Fish stalls on the north quay ----
-  for (const x0 of STALLS) {
-    L.set('overhead', x0, 4, 'square_props:over_stall_nw'); L.set('overhead', x0 + 1, 4, 'square_props:over_stall_ne');
-    L.set('detail', x0, 5, 'square_props:stall_sw', true); L.set('detail', x0 + 1, 5, 'square_props:stall_se', true);
-  }
+  STALLS.forEach((x0, i) => {
+    const pal = ['', '@blue', '@green'][i];
+    L.set('overhead', x0, 4, `fish_stall:over_stall_l${pal}`); L.set('overhead', x0 + 1, 4, `fish_stall:over_stall_r${pal}`);
+    L.set('detail', x0, 5, 'fish_stall:stall_l', true); L.set('detail', x0 + 1, 5, 'fish_stall:stall_r', true);
+  });
   for (const [x, y] of POSTS) L.set('detail', x, y, 'canal:mooring_post', true);
 
   // ---- The canal, the stepped bridge, and the Water Stairs ----

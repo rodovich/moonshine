@@ -303,7 +303,8 @@ async function showGuidebook(g, self) {
   g.sfx('step_stairs');
   await g.moveNpc(self, 'd d d d d d d d', { ghost: true, speed: 11 }); // down flight 3 to landing 3
   const pianoThere = !slid(g);
-  if (pianoThere) await g.panCamera(6, 36, 3);
+  // Down to the bottom landing, so the arch, the piano and the Movers are in frame for the climb.
+  if (pianoThere) await g.panCamera(7, 41, 3);
   await g.moveNpc(self, 'l l l l d d d d d d d d d d d d r', { ghost: true, speed: 11 }); // along, down flight 4, to (6,39)
   if (pianoThere) {
     g.faceNpc('big_mover', 'right'); g.faceNpc('other_mover', 'left');
@@ -515,7 +516,7 @@ export const stepsMap = composedMap(compose, {
       when: (g) => !slid(g) && g.player.facing === 'down' && !pianoLineShown,
       run: async (g) => {
         pianoLineShown = true;
-        await g.describe("I'm not climbing over a piano at my age. The Goat Path goes round the long way.");
+        await g.describe("I'm not climbing over a piano that isn't mine. The Goat Path goes round the long way.");
       },
     },
   ],

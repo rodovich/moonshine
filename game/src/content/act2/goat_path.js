@@ -1,17 +1,14 @@
 // The Goat Path (16 × 24): a switchback down the steep back of the island,
 // through terrace gardens and goats, past Mott's shack, to a sea cave and the
 // Harbor. From docs/design/02-city.md.
-//
-// Terrain is STAND-IN (sand paths, herb beds, sea-cave rock) until the art
-// task's Goat Path tiles land; see README.md.
+// Art: game/src/art/act2b_goat.js (index in docs/art-act2b.md).
 
 import { composedMap, blankGrid } from '../opening/grid.js';
 import { act2Tiles } from './tiles.js';
-import { layout, house, bump, firstMeet, cherylDeclines, actWrongness } from './common.js';
-import { props } from '../../art/props.js';
+import { layout, bump, firstMeet, cherylDeclines, actWrongness } from './common.js';
+import { goat } from '../../art/act2b_goat.js';
 
 const W = 16, H = 24;
-const q = (x, y) => `${y % 2 ? 's' : 'n'}${x % 2 ? 'e' : 'w'}`;
 
 const GRID = [
   '~~~~~~~~~~~~~::~', //  0 top: from Lamp Street (13-14)
@@ -40,23 +37,42 @@ const GRID = [
   '~::~~~~~~~~~~~~~', // 23 bottom: down to the Harbor (1-2)
 ];
 
+const at = (x, y) => (GRID[y] || '')[x] || '~';
+const isLand = (c) => c !== '~' && c !== '%' && c !== 'O';
+
 function compose() {
   const L = layout(W, H, blankGrid);
   GRID.forEach((row, y) => [...row].forEach((c, x) => {
-    const sand = `seacave:${(x * 3 + y * 5) % 4 === 0 ? 'sand_b' : 'sand'}`;
-    if (c === ':' || c === 'j' || c === 'S') L.set('ground', x, y, sand, c !== ':');
-    else if (c === 'g') {
-      L.set('ground', x, y, sand, true);
-      L.set('detail', x, y, (x + y) % 2 ? 'roof_props:herb_basil' : 'roof_props:herb_rosemary');
-    } else if (c === '=') L.set('ground', x, y, 'street:retain_top', true);
-    else if (c === '%') L.set('ground', x, y, `sea:sea_${q(x, y)}`, true);
-    else if (c === 'O') L.set('ground', x, y, 'seacave:mouth_l', true);
-    else L.set('ground', x, y, y === 0 || x === 0 || x === W - 1 || y === H - 1 ? 'seacave:rock' : 'seacave:rock_face_a', true);
+    if (c === ':' || c === 'j') {
+      const v = ['path_a', 'path_b', 'path_c'][(x * 7 + y * 13) % 3];
+      L.set('ground', x, y, `goatpath:${v}`, c === 'j');
+    } else if (c === 'g') {
+      L.set('ground', x, y, `goatpath:${(x + y) % 2 ? 'beans_b' : 'beans_a'}`, true);
+    } else if (c === '=') {
+      let f = 'wall';
+      if (y === 19) f = 'wall_cove';
+      else if (x === 11 && y <= 3) f = 'wall_v';
+      else if (at(x + 1, y) === ':') f = 'wall_end_r';
+      else if (at(x - 1, y) === ':') f = 'wall_end_l';
+      L.set('ground', x, y, `goatpath:${f}`, true);
+    } else if (c === '%') {
+      L.set('ground', x, y, `goatpath:${x === 3 ? 'cove_w' : 'cove'}`, true);
+    } else if (c === 'O') {
+      L.set('ground', x, y, 'goatpath:cave_mouth', true);
+    } else if (c === '~') {
+      // The sea far below; where it meets land, the tile with the cliff lip on that side.
+      let f = 'sea';
+      if (isLand(at(x + 1, y))) f = 'cliff_e';
+      else if (isLand(at(x - 1, y))) f = 'cliff_w';
+      else if (isLand(at(x, y + 1))) f = 'cliff_s';
+      else if (isLand(at(x, y - 1))) f = 'cliff_n';
+      L.set('ground', x, y, `goatpath:${f}`, true);
+    }
   }));
-  // Mott's shack: a weathered little house with a window onto the still.
-  house(L, 1, 9, { roofRows: 2, top: '#ww#', base: '#D##', palette: 'ochre' });
+  // Mott's shack (1–4, 9–12): the still glints in its window; the door has his sign.
+  for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) L.set('ground', 1 + c, 9 + r, `mott_shack:shack_x${c}y${r}`, true);
   // Empty square jugs, stacked.
-  L.set('detail', 3, 14, 'props:crate', true); L.set('detail', 4, 14, 'props:crate', true);
+  L.set('detail', 3, 14, 'mott_jugs:jugs_l', true); L.set('detail', 4, 14, 'mott_jugs:jugs_r', true);
   return L.done();
 }
 
@@ -88,18 +104,16 @@ const objects = [
 objects.find((o) => o.id === 'sea_cave').use = { '*': (g) => g.describe("The tide's in. I'm not swimming. Not today.") };
 
 // ---------------------------------------------------------------------------
-// Goats (STAND-IN look: the cat, whitewashed, until the goats are drawn).
-
-const GOAT_LOOK = { sheet: props, frame: 'cat', palette: { t: 'white_light', T: 'white', u: 'white_shade', o: 'white_light', O: 'white', p: 'white_shade' } };
+// Goats.
 
 const goats = [
   // They wander only where the path is wide enough to walk round them:
   // the yard by Mott's shack, and the four-wide stretch between the lower beds.
-  { id: 'goat_1', x: 8, y: 11, area: [5, 10, 9, 3] },
-  { id: 'goat_2', x: 8, y: 16, area: [7, 16, 4, 2] },
+  { id: 'goat_1', x: 8, y: 11, area: [5, 10, 9, 3], sprite: { sheet: goat } },
+  { id: 'goat_2', x: 8, y: 16, area: [7, 16, 4, 2], sprite: { sheet: goat, palette: 'brown' } },
 ].map((d) => ({
   id: d.id, name: 'Goat', x: d.x, y: d.y,
-  sprite: GOAT_LOOK, kind: 'npc',
+  sprite: d.sprite, kind: 'npc',
   behavior: { type: 'wander', area: d.area, pause: [1.5, 4] },
   interact: async (g, self) => {
     g.sfx('goat');
@@ -131,5 +145,20 @@ export const goatPathMap = composedMap(compose, {
     { x: 1, y: 23, w: 2, to: 'harbor', at: [2, 4], facing: 'down', sfx: 'step_stairs' },
   ],
   onEnter: async (g) => { actWrongness(g); },
+  ambient: [
+    // Now and then a goat stops to eat (the beans, mostly).
+    {
+      every: [4, 8],
+      run: (g) => {
+        const id = g.random(0, 1) ? 'goat_1' : 'goat_2';
+        const e = g.npc(id);
+        if (!e || e.moving || e.pose) return;
+        if (e.facing === 'up') e.facing = 'down';
+        g.pose(e, 'eat');
+        if (g.random(0, 2) === 0) g.sfx('goat', { volume: 0.4 });
+        setTimeout(() => { if (e.pose) e.setPose(null); }, 2200);
+      },
+    },
+  ],
   entities: [...objects, ...goats],
 });
