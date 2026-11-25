@@ -263,7 +263,13 @@ export class World {
   blocked(x, y, mover = null) {
     if (this.map.solid(x, y)) return true;
     const e = this.entityAt(x, y, mover);
-    return !!e;
+    if (e) return true;
+    // Cheryl never walks onto a character, even one marked solid: false
+    // (that only keeps it from blocking other characters' paths).
+    if (mover && mover.isPlayer) {
+      return this.entities.some((o) => o !== mover && o.directional && o.visible && o.occupies(x, y));
+    }
+    return false;
   }
 
   // Can `mover` (with its footprint) step into x,y?
