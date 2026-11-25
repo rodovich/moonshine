@@ -3,6 +3,7 @@
 // Moonrise sequence". Input is locked for the whole thing (it's one script).
 
 import { fx } from '../../art/fx.js';
+import { vista_pins } from '../../art/pins.js';
 import { vista, vista_gate_cold, vista_rim, vista_glow, vista_moon, vista_path, vista_twinkle, vista_cheryl, VISTA_BASINS } from '../../art/vista.js';
 import { cheryl, cheryl_swim } from '../../art/cheryl.js';
 
@@ -11,7 +12,7 @@ import { cheryl, cheryl_swim } from '../../art/cheryl.js';
 function makeVista(g) {
   const art = {
     bowl: g.sheet(vista), cold: g.sheet(vista_gate_cold), rim: g.sheet(vista_rim), glow: g.sheet(vista_glow),
-    moon: g.sheet(vista_moon), path: g.sheet(vista_path), twinkle: g.sheet(vista_twinkle), cheryl: g.sheet(vista_cheryl),
+    moon: g.sheet(vista_moon), path: g.sheet(vista_path), twinkle: g.sheet(vista_twinkle), cheryl: g.sheet(vista_cheryl), pins: g.sheet(vista_pins),
   };
   const scene = { now: 0, glowAt: null, moonAt: null };
   const phases = VISTA_BASINS.map((_, i) => (i * 677) % 1180);
@@ -34,7 +35,9 @@ function makeVista(g) {
       const cy = Math.max(56, t < 6 ? 104 - t * 3 : 86 - (t - 6) * 6);
       // It whitens as it climbs.
       const moon = cy < 64 ? 'moon_high' : cy < 80 ? 'moon_mid' : 'moon';
-      ctx.drawImage(art.moon.frameAt(moon, ms), 176 - 16, Math.round(cy) - 16);
+      // It climbs on a slant, up and to the right, away from the pins and the Gate.
+      const cx = 176 + (104 - cy) * 0.35;
+      ctx.drawImage(art.moon.frameAt(moon, ms), Math.round(cx) - 16, Math.round(cy) - 16);
     }
     ctx.drawImage(art.rim.frame('rim'), 0, 0);
     // Its path across the Bowl: faint once it's half up, then shimmering.
@@ -44,6 +47,8 @@ function makeVista(g) {
       else if (t >= 6) ctx.drawImage(art.path.frame('path_faint'), 0, 0);
     }
     VISTA_BASINS.forEach(([x, y], i) => ctx.drawImage(art.twinkle.frameAt('twinkle', ms + phases[i]), x - 3, y - 3));
+    // The pins in the foreground, lined up on the Gate (over the twinkles on her roof).
+    ctx.drawImage(art.pins.frame('pins'), 0, 0);
     ctx.drawImage(art.cheryl.frame('cheryl_tub'), 0, 128);
   };
   return scene;
@@ -86,7 +91,11 @@ export async function moonrise(g) {
   const scene = makeVista(g);
   await g.showPicture(scene.draw, { fade: 1 });
   g.playMusic('moonrise');
-  await g.wait(1.5);
+  await g.wait(1.2);
+
+  // 5a. The pins, lined up on the Gate, before any glow.
+  await g.think('Pins lined up. The Gate, dead between them.', 'Any second now.');
+  await g.wait(0.6);
 
   // 6. A glow behind the Rim, to the right of the Gate.
   scene.glowAt = scene.now;

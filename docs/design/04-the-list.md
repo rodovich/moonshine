@@ -2,7 +2,7 @@
 
 This is the build-ready design for Act 4 ([overview](overview.md), [story bible](../story-bible.md)). It picks up the morning after [03-downstairs.md](03-downstairs.md) ends, with the Fountain stopped and the doorsteps glowing at night. It ends with the act's big moment and the game's changed-surface reveal: Cheryl climbs out of the Fishmonger's ice cellar into a Bilge where every canal has run dry, because she made the city rise six feet out of the sea.
 
-> **Structure pass (client feedback).** [structure-pass.md](structure-pass.md) adds to this act: Ottilie's reading of the Ship Plan names four leads (the bell, Mott's copper, the Fountain, the Girls; see "Ottilie Brask" below); the Man on Bridge is the Man on Bench (on his bench on Lamp Street until the reveal, then on the Bilge bridge); the Shop window shows the Keeper's telescope, and the Tourist wears the Shop's straw hat; the Goat Path is rebuilt, with Mott's shack and the sea cave on the new path; and the Bilge has a west exit to the Goat Path (on `bilge_dry`, (0, 12–14), declining until the act ends). The Shopkeeper declines the guidebook in this act ("My window is complete."), because the Clockmaker needs it.
+> **Structure pass (client feedback).** [structure-pass.md](structure-pass.md) adds to this act: Ottilie's reading of the Ship Plan names four leads (the bell, Mott's copper, the Fountain, the Girls; see "Ottilie Brask" below); the Man on Bridge is the Man on Bench (on his bench on Lamp Street until the reveal, then on the Bilge bridge); the Shop window shows the Keeper's telescope, and the Tourist wears the Shop's straw hat; the Goat Path is rebuilt, with Mott's shack and the sea cave on the new path; and the Bilge has a west exit to the Goat Path (on `bilge_dry`, (0, 12–14); like the other exits, walking into it after the reveal ends the act). **From Act 4 on, the hundredth step is boarded over** (client feedback: no refusals that gate nothing): a plank lid with a painted MIND THE STEP, walkable, with the step's "bonk". Look: "Somebody's boarded over the hundredth step. MIND THE STEP. BY ORDER." / "The Mayor's handwriting. He's never forgiven a step." This replaces the open hole and its "Not now" line in Acts 4–6; nothing Downstairs is needed by that route after Act 3. The Tide Wheel stays reachable after the burst (as built; nothing gains by closing it). The Shopkeeper declines the guidebook in this act ("My window is complete."), because the Clockmaker needs it. The Man on Bench, with his glasses on, has the 04 first line, then alternates (as built): "New Tide-Sheet. Glasses on. It says the Bilge is 'a little damp.' I can read every word. I liked it better blurred." / "Low tide 'a little lower than usual,' it says. Printed. In ink. I can read every word of it."
 
 ## The slice in brief
 
@@ -132,7 +132,7 @@ The Act 2 map, in three flood stages, then the dry reveal state.
 
 **Dry-state entities:** boats on their sides in the mud at (3–4, 10), (8–9, 10), (19–20, 10), keels toward the camera, hulls tilted, oars spilled. The Boatman sitting upright in his boat at (22–23, 10), at the foot of the broken stairs. The piano at (15–16, 10) on the mud, upright, lid open. The Piano Movers at (14, 10) and (17, 10), on the mud beside it. Two or three crabs wandering the mud. The Sweaty Kid running laps along the mud (x2–30, y10). The Fishmonger at (5, 4), behind her stall. A **Man on Bridge** at (13, 9), on the bridge, looking down. A stranded fish flopping on the north quay at (10, 5).
 
-**Exits on `bilge_dry`:** north (11–12, 0) → Fountain Square; east (31, 12–14) → Harbor (1, 6–8). **Until the act ends, both decline**, and so does the Fishmonger's door: "Not yet. That door." The act ends in the Bilge. (Act 5 opens these exits and specifies the risen Harbor.) The Harbor's west edge leads to `bilge_dry` (30, 12–14) once `act4.risen`. The Fishmonger's door (4, 3) is where the reveal begins.
+**Exits on `bilge_dry`:** north (11–12, 0) → Fountain Square; east (31, 12–14) → Harbor (1, 6–8). **Until the act ends, walking into any exit (or the Fishmonger's door) ends the act** instead of refusing (see "Free roam in the dry Bilge"). The act ends in the Bilge. (Act 5 opens these exits and specifies the risen Harbor.) The Harbor's west edge leads to `bilge_dry` (30, 12–14) once `act4.risen`. The Fishmonger's door (4, 3) is where the reveal begins.
 
 ### Pump Hall (26 × 12), under Fountain Square
 
@@ -709,12 +709,12 @@ At the top (row 0), the map changes to the Ice Cellar.
 - **The canal** (from the quay): "Six feet down, to mud. The canal walls aren't stone, under the old waterline. They're slate, fitted, like Downstairs." / "Barnacles, all the way up to a line. The line where the sea used to be. On us."
 - **The boats**: "Boats, lying on their sides like dogs asleep in the sun."
 - **The stranded fish**: "A fish, on the quay. It's looking at me. I look away first."
-- **The Kid jumping down**: "He jumped. I could. I'm not landing in six feet of mud in my good skirt."
+- **The Kid jumping down**: "He jumped. I could. Getting back up six feet of slime is another matter." (The drop gates Act 5's rope puzzle; the line gives the real reason, the climb back, rather than her skirt.)
 - **The trickle at the canal mouth**: "The last of the canal, running out to the Bowl. And the Bowl's down there. Lower. Of course it's lower."
 - **The laundry**: "Every line of washing on the quay is streaming out sideways, hard. The wind's got more of us to push now."
-- **The exits** (north, east, the Fishmonger's door): "Not yet. That door."
+- **The exits** (north, east, west, the Fishmonger's door): no refusal (client feedback). Walking into any of them ends the act: "Before I go anywhere: that door." The camera pans to the bronze door at the foot of the Water Stairs, and the ending below plays.
 
-**Ending the act:** looking at the bronze door from anywhere on the north quay, or at the Water Stairs:
+**Ending the act:** looking at the bronze door from anywhere on the north quay, or at the Water Stairs, or walking into any exit:
 1. "At the bottom of the Water Stairs, where the sea used to be: a door." / "Bronze, barnacled, as big as a cart. A glass eye in the middle." / "The last flight of stairs is broken. Of course it is."
 2. "A door at the bottom of the sea. Well. The bottom of the canal." / "Same thing, this week."
 3. Fade to black. Card: **MOONSHINE** over **End of Act 4. Tessel continues soon.** Back to the title until Act 5 exists.

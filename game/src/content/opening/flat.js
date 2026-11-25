@@ -95,15 +95,16 @@ const entities = [
     id: 'egg_timer', x: 2, y: 2, when: (g) => !g.flag('got.egg_timer'),
     interact: (g) => take(g, 'egg_timer', "My egg timer. It ticks like it's furious about something. Then it dings, and it's over it."),
   },
-  { id: 'shelf', x: 1, y: 1, w: 2, look: "Tins, a jar of capers I've been meaning to open since spring, and a teapot that drips." },
+  // Behind the mill and the timer on the counter: reachable across the counter once either is taken.
+  { id: 'shelf', x: 1, y: 1, w: 2, unreachable: (g) => !g.flag('got.pepper_mill') && !g.flag('got.egg_timer') && 'behind the pepper mill and the egg timer', look: "Tins, a jar of capers I've been meaning to open since spring, and a teapot that drips." },
   { id: 'stove', x: 3, y: 2, look: "The stove. No kettle tonight. Cold baths only on Moonshine Night. That's the rule." },
   {
     id: 'clock', x: 4, y: 1,
     interact: (g) => g.describe(morning(g) ? 'Half past something.' : "Nearly moonrise. Roughly. That clock has never once been right, but it's always been confident."),
   },
   { id: 'window', x: 5, y: 1, w: 2, look: "My window looks at the Pelletiers' wall. I didn't buy this house for the window. I bought it for the roof." },
-  // The bookshelf sits above the bed; the hotspot reaches one tile west so it can be looked at from (8,2).
-  { id: 'bookshelf', x: 8, y: 1, w: 3, look: 'Twenty-nine years of lesson plans. In case anyone ever needs the water cycle explained in a hurry.' },
+  // The bookshelf sits above the bed; Z reaches it diagonally from (8, 2).
+  { id: 'bookshelf', x: 9, y: 1, w: 2, look: 'Twenty-nine years of lesson plans. In case anyone ever needs the water cycle explained in a hurry.' },
   {
     id: 'bed', x: 9, y: 2, w: 2, h: 2,
     interact: (g) => g.describe(morning(g)
