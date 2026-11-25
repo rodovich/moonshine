@@ -730,7 +730,7 @@ When Cheryl next visits Fountain Square: the Fountain is full and flowing again,
 | Item | Icon idea | Inventory description |
 | --- | --- | --- |
 | Copper throat | A coil of copper pipe, green at the ends | "Mott's grandfather's copper. A coil of pipe that hums when the tide turns. It came off 'the greedy one.'" |
-| Square jug | A stoneware jug with square shoulders | "Mott's square jug. Empty. Doesn't roll. Smells like a mistake." |
+| Square jug | A stoneware jug with square shoulders | "Mott's square jug. Empty. Doesn't roll. Put it down and it stays put. Smells like a mistake." (The middle clause added after the first-time playtest, to point at the Clockmaker's doorstop.) |
 
 ## Art needed
 
