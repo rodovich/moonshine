@@ -45,6 +45,16 @@ export function windDownMusic(ms) {
   try { audio.windDownMusic(ms); } catch (err) { warnOnce('wind', '', err); }
 }
 
+/** Bend the current music's pitch to `cents` over `ms` (notes from now on). */
+export function bendMusic(cents, ms) {
+  try { audio.bendMusic(cents, ms); } catch (err) { warnOnce('bend', '', err); }
+}
+
+/** Change a running loop's level (0..1 of normal) over `fadeMs`. */
+export function setLoopVolume(id, v, fadeMs) {
+  try { audio.setLoopVolume(id, v, fadeMs); } catch (err) { warnOnce('loopvol', id, err); }
+}
+
 /** Muffle the music as if heard from outside (the Shop); muffleMusic(false) to undo. */
 export function muffleMusic(on, opts) {
   try { audio.muffleMusic(on, opts); } catch (err) { warnOnce('muffle', '', err); }

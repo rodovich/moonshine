@@ -7,7 +7,7 @@
 
 import { DIR_VEC, dirBetween } from './entity.js';
 import { pathToDirs } from './world.js';
-import { playMusic, stopMusic, sfx, playCue, windDownMusic, startLoop, stopLoop, setWrongness, muffleMusic } from './sound.js';
+import { playMusic, stopMusic, sfx, playCue, windDownMusic, startLoop, stopLoop, setWrongness, muffleMusic, bendMusic, setLoopVolume } from './sound.js';
 import { loadSheet } from './art.js';
 import { TILE } from './tilemap.js';
 
@@ -404,6 +404,12 @@ export function makeApi(world) {
     },
     muffleMusic(on, opts) {
       muffleMusic(on, opts);
+    },
+    bendMusic(cents, ms) {
+      bendMusic(cents, ms);
+    },
+    setLoopVolume(id, v, fadeMs) {
+      setLoopVolume(id, v, fadeMs);
     },
     startLoop(id, opts) {
       startLoop(id, opts);

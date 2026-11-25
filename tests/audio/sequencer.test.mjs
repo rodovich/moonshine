@@ -102,7 +102,7 @@ test('every song compiles, with the intended lengths', () => {
     assert.equal(song.id, id);
     const c = compileSong(song);
     assert.ok(c.channels.length <= 6, `${id} uses ${c.channels.length} channels; music keeps to 6`);
-    if (c.loopSteps) {
+    if (c.loopSteps && !song.scene) {
       assert.ok(c.loopSeconds >= 30 && c.loopSeconds <= 95, `${id} loop is ${c.loopSeconds}s`);
     }
   }
@@ -160,12 +160,18 @@ test('the required sound effects exist', () => {
     'step_hullstone', 'step_rung', 'lid_pry', 'hatch_open', 'light_beam', 'mirror_turn', 'moonlock_open', 'disc_glow',
     'chute_slide', 'ladder_drop', 'tube_voice', 'lever_pull', 'lid_open', 'beam_hum', 'moonglass_hum', 'disc_get', 'lamp_relight', 'tube_murmur', 'bolt_draw', 'founders_door', 'rubbing', 'glow_shimmer', 'valve_turn', 'valve_jam', 'water_gush', 'far_gurgle', 'drips', 'hull',
     'pump_run', 'pump_cough', 'chain_rattle', 'chain_haul', 'tide_wheel',
+    // docs/design/04-the-list.md, "Audio needed"
+    'belfry_tick', 'clock_rundown', 'lever_clank', 'clamp_lift', 'bell_stroke', 'bell_strokes', 'thrum_rise', 'thrum',
+    'hull_far', 'coins_rattle', 'ring_hatch', 'valve_squeal', 'pump_stall', 'thump_thin', 'thump_stout', 'thump_middle',
+    'pump_thin', 'pump_stout', 'shaft_hum', 'grate_drain', 'hull_creak_long', 'valve_hiss', 'ear_pop', 'groan_great',
+    'burst', 'roar', 'water_spread', 'hatch_bang', 'air_whistle', 'slack_lap', 'channel_rush', 'gull_close',
+    'slab_scrape', 'slab_close', 'shouting', 'bell_low', 'town_rush', 'crabs', 'fish_flop',
   ];
   for (const id of act2) assert.ok(SFX[id], id);
   const loops = ['water_pour', 'timer_tick', 'crowd', 'wind', 'trickle', 'door_hum', 'town', 'canal', 'gulls', 'goats',
     'clock_tick', 'water_gush', 'drips', 'hull', 'pump_run', 'chain_haul', 'tide_wheel', 'beam_hum', 'moonglass_hum', 'tube_murmur', 'glow_shimmer'];
   for (const id of loops) assert.ok(SFX[id].loop, `${id} loops`);
-  for (const id of ['title', 'cistern_court', 'moonrise', 'morning_after', 'wrongness', 'neighborhood', 'harbor', 'archive', 'discovery', 'downstairs', 'reveal', 'reveal_last']) assert.ok(SONGS[id], id);
+  for (const id of ['title', 'cistern_court', 'moonrise', 'morning_after', 'wrongness', 'neighborhood', 'harbor', 'archive', 'discovery', 'downstairs', 'reveal', 'reveal_last', 'pumps', 'neighborhood_thin', 'climb']) assert.ok(SONGS[id], id);
 });
 
 test('harmony strings split bars evenly unless lengths are given', () => {

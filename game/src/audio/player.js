@@ -48,6 +48,7 @@ export class MusicTrack {
     this.nextStep = 0;
     this.stopAt = Infinity;
     this.rundown = null;
+    this.pitch = { from: 0, to: 0, t0: 0, t1: 0 }; // bendMusic: a ramp of cents over time
     this.disposed = false;
   }
 
@@ -95,12 +96,14 @@ export class MusicTrack {
       return;
     }
     if (strip.voice && strip.voice.end > time) strip.voice.choke(time);
+    const shift = this.pitchAt(time);
     if (ev.drum !== undefined) {
       const layers = strip.inst.kit?.[ev.drum];
       if (!layers) throw new Error(`${this.id}/${strip.ch.id}: unknown drum "${ev.drum}"`);
-      strip.voice = playLayers(this.ctx, layers, time, { dest: strip.vol, vel: ev.vel });
+      strip.voice = playLayers(this.ctx, layers, time, { dest: strip.vol, vel: ev.vel, pitch: Math.pow(2, shift / 1200) });
       return;
     }
+    detune += shift;
     const wrong = Math.max(this.getWrongness(), this.song.wrongness ?? 0);
     if (wrong > 0) {
       detune += (Math.random() * 2 - 1) * wrong * 30;
@@ -110,6 +113,20 @@ export class MusicTrack {
       time, dur: Math.max(dur - 0.012, 0.02), midi: ev.midi + (strip.ch.transpose ?? 0),
       vel: ev.vel, detune, bend, dest: strip.vol,
     });
+  }
+
+  /** The bendMusic offset (cents) at context time t. */
+  pitchAt(t) {
+    const p = this.pitch;
+    if (t >= p.t1) return p.to;
+    if (t <= p.t0) return p.from;
+    return p.from + ((p.to - p.from) * (t - p.t0)) / (p.t1 - p.t0);
+  }
+
+  /** Shift every note from now on, ramping to `cents` over `sec` seconds (notes already sounding stay put). */
+  bendTo(cents, sec) {
+    const now = this.ctx.currentTime;
+    this.pitch = { from: this.pitchAt(now), to: cents, t0: now, t1: now + Math.max(sec, 0) };
   }
 
   /**

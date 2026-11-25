@@ -2,7 +2,7 @@
 
 Moonshine should sound like a well-loved SNES adventure: warm, slightly soft "sampled" instruments, a little echo, and melodies you hum after you stop playing. Everything is synthesized at runtime with Web Audio ([decisions.md](decisions.md)); there are no audio files. The code is in `game/src/audio/` and its API is documented in [game/src/audio/README.md](../game/src/audio/README.md). Listen to everything on the dev page, `game/dev/audio.html`, which also plays the opening's moonrise sequence in order.
 
-The story and places come from [story-bible.md](story-bible.md) and the slice designs in [design/](design/): the "Audio needed" lists of [01-opening.md](design/01-opening.md), [02-city.md](design/02-city.md), and [03-downstairs.md](design/03-downstairs.md) are all delivered.
+The story and places come from [story-bible.md](story-bible.md) and the slice designs in [design/](design/): the "Audio needed" lists of [01-opening.md](design/01-opening.md), [02-city.md](design/02-city.md), [03-downstairs.md](design/03-downstairs.md), and 04-the-list.md (Act 4) are all delivered.
 
 ## Sonic identity
 
@@ -72,6 +72,9 @@ Defined in `game/src/audio/instruments.js`.
 | `downstairs` | Downstairs | D-flat Lydian, 4/4, 54 bpm | A B (8 bars each) | 71.1 s loop | the underground: the Step Gallery, the Lamp Halls, the Bunk Room, the Chart Room |
 | `reveal` | We're a Boat | D-flat (Founders' voice), 64 bpm | 4-bar one-shot cue | 15 s plus echo | `playCue` after "Oh, we're a boat." in the Chart Room |
 | `reveal_last` | We're a Boat (last phrase) | as `reveal`, softer | 2-bar one-shot | 7.5 s plus echo | under the dusk vista at the end of Act 3 |
+| `pumps` | The Sisters Wake | D-flat pedal, 76 bpm | 8-bar scene loop | 25.3 s loop | Act 4: from the moment all three Sisters run until the burst (`stopMusic(0)`) |
+| `climb` | The Climb | a heartbeat, 52 bpm | 1-bar scene loop | 4.6 s loop | Act 4: the emergency shaft; raise it with `bendMusic`, fade it out by row 7 |
+| `neighborhood_thin` | Stairs to the Water (thin) | as `neighborhood`, 86 bpm, flute alone | A A2 B A3 | 89.3 s loop | Act 4's reveal in the dry Bilge, at Wrongness 0.5 |
 
 - **Cistern Court** is an unhurried waltz: an accordion over a nylon guitar's oom-pah-pah. Each time round it changes: A is guitar and accordion; A2 swaps the guitar for rippling harp; B hands the tune to the flute in G minor while the accordion holds long notes; A3 brings it all back with a soft flute descant.
 - **Moonrise** is three music-box voices (tune, a broken-chord comb, low notes) with a long echo. At the moment the moon appears, the game calls `windDownMusic(ms)`: from the next note on, each step takes longer than the last and every note is flatter, until the box stops wherever it has got to and the last notes ring out. This is the design's "slows, drifts flat, and stops mid-phrase".
@@ -84,6 +87,9 @@ Defined in `game/src/audio/instruments.js`.
 - **The Hundredth Step** (discovery sting): bells and choir on D-flat, the bass climbing D♭–E♭–F to F major with A on top. Wonder, with a chill.
 - **Downstairs**: moonglass sings the rhyme upside down over choir and bowed bass, with a slow two-beat pulse. It is the quietest looping track on purpose (about −21 dB A-weighted, against −18 to −20 for the surface) so the hull's creak can be heard. The loop ends on the raised G, glowing and unresolved.
 - **We're a Boat** (reveal): the rhyme's first couplet on glass bells, doubled an octave down on moonglass, over a held D-flat chord.
+- **The Sisters Wake** (pumps): the one place Downstairs has a beat. The three Sisters' thumps make the rhythm: the stout one on every beat, the thin one in a 3-3-2 roll, the middle one on the off-beats. Bowed bass holds D-flat. Two moonglass voices an octave apart climb the D-flat Lydian scale a step a bar, the lower fading in as the upper fades out, so the line seems to rise forever past the D-flat where it should rest (a Shepard-tone illusion). As the city rises, the game calls `bendMusic` to creep it sharp. The burst cuts it off.
+- **The Climb**: nothing but a slow heartbeat under the shaft's sounds, raised in pitch as Cheryl climbs.
+- **Stairs to the Water (thin)**: the upper town's tune on its flute alone, slower, with a long echo, every note sagging. Home, after you've broken it.
 
 The game can also turn up a global Wrongness amount (`setWrongness(0..1)`) as the threat grows: notes in every track then drift slightly out of tune and some sag flat. At 0.1–0.2 it should only feel faintly off; 0.5 is clearly sick. The story bible sets it by act: about 0.1 after Act 1, rising to 0.5 in Act 5, and 0 at the ending. A track's own `wrongness` (Morning After's 0.12, the cue's 0.5) is a floor: the track uses whichever is higher.
 
@@ -104,6 +110,9 @@ Defined in `game/src/audio/sfx.js` (interface) and `game/src/audio/sfx-world.js`
 | Downstairs: moving about (Act 3, `sfx-under.js`) | `step_hullstone`, `step_rung`, `lever_pull` (seized grind, then release), `lid_open` (the ceiling lid scraping open), `lid_pry`, `mirror_turn` (pivot and clunk), `light_beam` (daylight arriving), `beam_hum` (loop, while a beam is lit), `moonlock_open` (rising chime, then the hatch's stone grind), `hatch_open` (bronze), `disc_get` (taking the disc: the item jingle's shape on glass, in D-flat), `disc_glow`, `lamp_relight` (a soft "drink," then a shimmer), `chute_slide` (falling whoosh, two bumps, a thump), `ladder_drop` (chain rattle, then a crash), `tube_voice` (a shout down the speaking tube), `tube_murmur` (loop: the far-off crowd through the tube, under FAR-OFF VOICE lines), `bolt_draw`, `founders_door`, `rubbing` (charcoal on paper) |
 | Downstairs: machines and water | `valve_turn` (a groaning wheel and its ratchet), `valve_jam`, `water_gush` (loop: the gushing pipe; stop it over about 2 s so the rush slows to a stop), `far_gurgle` (draining far off), `pump_run` (loop), `pump_cough` (the wrong order: ragged chugs, a hiss, a clunk), `chain_rattle`, `chain_haul` (loop), `tide_wheel` (loop) |
 | Downstairs ambience (loops) | `hull` (a low drone and a slow, deep creak every 20 s or so), `drips`, `moonglass_hum` (faint, near moonglass) |
+| Act 4: the belfry and the Fountain (`sfx-rise.js`) | `belfry_tick` (loop: the clock up close), `clock_rundown`, `lever_clank`, `clamp_lift`, `bell_stroke` and `bell_strokes` (the great bell, once or three times, each with a long bloom; in D-flat), `thrum_rise` and `thrum` (loop: the Tide Wheel felt from above), `hull_far` (loop: a faint creak every 40 s or so), `coins_rattle`, `ring_hatch` |
+| Act 4: the Pump Hall and the rise | `valve_squeal`, `pump_cough` (two variants), `pump_stall`, `thump_thin`, `thump_stout`, `thump_middle`, `pump_thin` and `pump_stout` (loops, in time with the pumps cue), `shaft_hum` (loop), `grate_drain`, `hull_creak_long`, `valve_hiss` (loop), `ear_pop` (dips the whole mix), `groan_great`, `burst`, `roar` (loop), `water_spread` (loop), `hatch_bang`, `air_whistle` (loop); at the Tide Wheel, `slack_lap` and `channel_rush` (loops) with `tide_wheel` |
+| Act 4: the climb, the cellar, the reveal | `gull_close`, `slab_scrape`, `slab_close`, `shouting` (loop: muffled through the floor), `bell_low` (one soft D-flat at the bronze door), `town_rush`, `crabs` (loop), `fish_flop` |
 
 The dev page's "moonrise sequence" button plays these in the design's order with suggested timings (see `MOONRISE` in `game/dev/audio.html`): fade Cistern Court and start the crowd and clock; 5 s later the music box; at the moon, stop the crowd dead, wind the music down over about 4.5 s, and bark the dog; after the cut, the groan with the rattle, the crack, the piano, the drain, then a gull and the wind.
 
@@ -113,6 +122,16 @@ Suggested use in Acts 2 and 3 (the scripts decide):
 - **The valve:** `valve_turn`, then `stopLoop('water_gush', 2000)` with `far_gurgle`, then `tube_voice` (with `tube_murmur` running under the FAR-OFF VOICE lines), then `valve_jam` when it won't go back.
 - **The Chart Room:** after "Oh, we're a boat.", `playCue('reveal', { resume: false })`; at the dusk vista, `playCue('reveal_last', { resume: false })` with `glow_shimmer` running.
 - **Downstairs maps:** `downstairs` music with the `hull` and `drips` loops; stop both on surfacing.
+
+In Act 4 (04-the-list.md; the scripts decide):
+
+- **The belfry:** `belfry_tick` (loop) until the lever (`lever_clank`), `clamp_lift`, then `stopLoop('belfry_tick', 0)` with `clock_rundown`. Ambrose rings: `bell_strokes`, then `thrum_rise` and the `thrum` loop (fade it out a few minutes later on the surface).
+- **The surface:** `hull_far` (loop) for the faint creak every 40 s or so; `setWrongness(0.35)` for the act and 0.5 from the reveal.
+- **Waking the Sisters:** `valve_squeal`, `pump_cough` twice, then the Sister's loop (`pump_thin`, `pump_stout`) or, for a single beat, `thump_*`. A wrong order: `pump_stall` and stop the loops. The third Sister: stop the `pump_*` loops and `playMusic('pumps', { fadeMs: 0 })` (the cue carries all three thumps), with `shaft_hum` and `grate_drain`.
+- **The rise:** `hull_creak_long` (step 3); `valve_hiss` loop at the stuck valve; `hull_creak_long` again and `bendMusic(60, 6000)` (step 9); `ear_pop` (step 10; it dips the whole mix by itself); `groan_great`, then `burst` with `stopMusic(0)`, `roar` and `water_spread` loops, `hatch_bang`, and the `air_whistle` loop (step 11).
+- **The climb:** `playMusic('climb', { fadeMs: 500 })` and `bendMusic(300, 20000)`; `step_rung` per rung; `setLoopVolume('roar', 0.4, 3000)` at row 22, `0.1` at row 14, `stopLoop('roar', 3000)` and `stopMusic(3000)` by row 7 with `drips` and `gull_close`; `slab_scrape` at the top.
+- **The ice cellar:** `slab_close`, `drips`, and the `shouting` loop.
+- **The reveal:** stop everything but `wind`; `gull`; at the door `bell_low`; then `playMusic('neighborhood_thin')`, `town_rush` with the `crowd` loop, `crabs` (loop), and `fish_flop`.
 
 ## Mixing levels
 
@@ -158,6 +177,8 @@ export default {
   swing: 0.06,                 // delay odd steps by this fraction of a step (0 = straight)
   gain: 1.2,                   // overall level of the song
   wrongness: 0,                // built-in detuning for this song (see setWrongness)
+  scene: false,                // true for a loop that underscores one scripted moment: it may be
+                               // short, and the spectrum checks skip it (a heartbeat is all bass)
   echo: { delay: 0.34, feedback: 0.3, wet: 0.26, lowpass: 2400, spread: 0.023 },
   channels: [                  // at most 6; each plays one note at a time
     { id: 'lead', inst: 'accordion', vol: 0.85, pan: 0.05, echo: 0.3, transpose: 0 },

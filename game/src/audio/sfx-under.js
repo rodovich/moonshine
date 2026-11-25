@@ -316,18 +316,6 @@ export const UNDER_SFX = {
       ],
     },
   },
-  // A pump coughing and stopping (the wrong order): a few ragged chugs, a hiss, a clunk.
-  pump_cough: {
-    gain: 0.8, echo: 0.35,
-    layers: [
-      ...[0, 0.55, 0.95, 1.5].flatMap((t, i) => [
-        { type: 'tone', wave: 'sine', at: t, freq: [95 - i * 8, 45], dur: 0.25, gain: 0.45 * (1 - i * 0.18) },
-        { type: 'noise', at: t + 0.1, dur: 0.25, gain: 0.1, filter: { type: 'bandpass', freq: 600, q: 1.5 } },
-      ]),
-      { type: 'noise', at: 1.8, dur: 0.9, gain: 0.1, filter: { type: 'highpass', freq: 3000 }, env: { a: 0.01, d: 0.8, s: 0, r: 0.1 } },
-      ...bronze(2.1, 180, 0.3, 0.8),
-    ],
-  },
   // A length of heavy chain rattling (about 1.2 s).
   chain_rattle: {
     gain: 0.75, echo: 0.35,

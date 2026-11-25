@@ -10,6 +10,9 @@ import archive from './archive.js';
 import discovery from './discovery.js';
 import downstairs from './downstairs.js';
 import { reveal, reveal_last } from './reveal.js';
+import pumps from './pumps.js';
+import neighborhood_thin from './neighborhood_thin.js';
+import climb from './climb.js';
 
 export const SONGS = {
   title,
@@ -24,4 +27,7 @@ export const SONGS = {
   downstairs,
   reveal,
   reveal_last,
+  pumps,
+  neighborhood_thin,
+  climb,
 };

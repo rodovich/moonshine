@@ -44,6 +44,7 @@ export function buildGraph(ctx, { limiter = true } = {}) {
   const muffleGain = ctx.createGain();
   const sfxBus = ctx.createGain();
   const master = ctx.createGain();
+  const dip = ctx.createGain(); // brief dips of the whole mix (an ear-pop)
   const tone = ctx.createBiquadFilter();
   tone.type = 'lowpass';
   tone.frequency.value = 11000;
@@ -53,7 +54,8 @@ export function buildGraph(ctx, { limiter = true } = {}) {
   muffle.connect(muffleGain);
   muffleGain.connect(master);
   sfxBus.connect(master);
-  master.connect(tone);
+  master.connect(dip);
+  dip.connect(tone);
   if (limiter) {
     const clip = ctx.createWaveShaper();
     clip.curve = softClipCurve();
@@ -63,7 +65,7 @@ export function buildGraph(ctx, { limiter = true } = {}) {
     tone.connect(ctx.destination);
   }
   const sfxEcho = makeEcho(ctx, { delay: 0.18, feedback: 0.3, wet: 0.35, lowpass: 2600, spread: 0.02 }, sfxBus);
-  return { music, musicDuck, muffle, muffleGain, sfx: sfxBus, master, sfxEcho };
+  return { music, musicDuck, muffle, muffleGain, sfx: sfxBus, master, dip, sfxEcho };
 }
 
 const compiled = new Map();
@@ -96,6 +98,16 @@ export function startSfx(ctx, graph, id, when, opts = {}) {
   if (def.loop) throw new Error(`"${id}" is a loop; use startLoop`);
   const layers = typeof def.layers === 'function' ? def.layers() : def.layers;
   const voice = playLayers(ctx, layers, when, { dest: g, pitch: Math.pow(2, cents / 1200) });
+  if (def.dipAll) {
+    // Dip everything (music and effects alike) briefly, as when ears pop.
+    const p = graph.dip.gain;
+    const { level = 0.15, sec = 0.5 } = def.dipAll;
+    p.cancelScheduledValues(when);
+    p.setValueAtTime(1, when);
+    p.linearRampToValueAtTime(level, when + 0.03);
+    p.setValueAtTime(level, when + sec);
+    p.linearRampToValueAtTime(1, when + sec + 0.25);
+  }
   if (def.duck !== undefined) {
     // Dip the music so jingles and stings don't clash with it, then bring it back.
     const p = graph.musicDuck.gain;
@@ -140,6 +152,13 @@ export function startLoopOn(ctx, graph, id, when, fadeSec = 0.3) {
   let count = 0;
   const handle = {
     stopped: false,
+    /** Ramp the loop's level to v (relative to its definition's gain) over sec seconds. */
+    setVolume(v, sec = 0.5) {
+      const now = ctx.currentTime;
+      g.gain.cancelScheduledValues(now);
+      g.gain.setValueAtTime(g.gain.value, now);
+      g.gain.linearRampToValueAtTime((def.gain ?? 1) * Math.max(0, v), now + Math.max(sec, 0.01));
+    },
     schedule(until) {
       if (handle.stopped || !L.layers) return;
       while (next < until) {
@@ -351,9 +370,27 @@ export function stopLoop(id, fadeMs = 300) {
   loops.delete(id);
 }
 
+/**
+ * Change a running loop's level to v (0..1, relative to its normal level) over `fadeMs`, without
+ * stopping it: the roar in the emergency shaft fading as Cheryl climbs.
+ */
+export function setLoopVolume(id, v, fadeMs = 500) {
+  loops.get(id)?.setVolume(v, fadeMs / 1000);
+}
+
 /** Stop every looping effect. */
 export function stopAllLoops(fadeMs = 300) {
   for (const id of [...loops.keys()]) stopLoop(id, fadeMs);
+}
+
+/**
+ * Bend the current music's pitch to `cents` (relative to normal) over `ms`, for notes from now on:
+ * the pumps cue creeping sharp as the city rises, the climb's heartbeat rising. A new track starts
+ * at normal pitch.
+ */
+export function bendMusic(cents, ms = 1000) {
+  if (!ctx || !current) return;
+  current.track.bendTo(cents, ms / 1000);
 }
 
 /**
