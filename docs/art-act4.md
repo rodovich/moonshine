@@ -135,3 +135,19 @@ Module `game/src/art/act4_under.js`. Composed on the dev page: `/dev/art.html?on
 | The Founder grate (4–5, 1) | `seagrate:fgrate_l` / `_r` (still: the wheel's rim behind the bars) / `fgrate_turn_l` / `_r` (3 frames: paddles passing, amber flickering through) | ground |
 
 No palette colors were added for the underground.
+
+## The hundredth step boarded over (Acts 4-6)
+
+From Act 4 on, the open hundredth step is boarded over: a plank lid flush with the stair, painted MIND THE
+STEP in rough municipal stencil letters, one word to a plank (structure pass, client feedback on blockers).
+It replaces the open hole and the Act 6 epilogue's rope barrier. Module: `game/src/art/hundredth.js`
+(draft `hundredth.py`). Dev page: `?only=scene:act6_surface&state=steps_lid` (and `steps_lid_chalk`).
+
+| Piece | Frames | Layer |
+|---|---|---|
+| The lid, Acts 4-6 | `steps_lid:boarded_l` at (9, 19), `steps_lid:boarded_r` at (10, 19) | ground, walkable |
+| The epilogue's lid, with 100! chalked over THE | `steps_lid:chalked_l` / `chalked_r`, same tiles | ground, walkable |
+
+The lid spans both halves of the step because the words don't fit legibly in one 16-px tile. The stair's
+side walls stay; only the treads are covered.
+
