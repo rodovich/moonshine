@@ -205,7 +205,7 @@ export function withAct4(maps) {
 
   // The Fountain's rims, east and west, so the basin, the hatch, and the fish keep their own clicks.
   const fountainRim = (x) => ({
-    id: `fountain_a4_${x}`, lookKey: 'fountain_a4', x, y: 7, w: 1, h: 4, solid: false, when: act4, unreachable: behindRope,
+    id: `fountain_a4_${x}`, lookKey: 'fountain_a4', x, y: 7, w: 1, h: 4, solid: false, when: act4,
     interact: async (g) => {
       if (g.flag('pumps.burst')) {
         return g.describe('Flowing again. Fuller than before. I shut its feed down there, and the pumps found it anyway.', "There's no getting to that hatch now.");
@@ -218,9 +218,11 @@ export function withAct4(maps) {
     use: { crowbar: (g) => g.describe('Not with the whole Square watching.'), '*': cherylDeclines },
   });
 
-  const behindRope = (g) => fountainDry(g) && mayorHere(g) && 'behind the rope, while the Mayor guards it';
+  // While he guards it, the rope is a counter: Cheryl can look across it at anything
+  // inside, from any side, but not reach the hatch.
+  const guarded = (g) => fountainDry(g) && mayorHere(g);
   const hatch = {
-    id: 'ring_hatch', x: 11, y: 8, w: 2, solid: false, when: (g) => fountainDry(g) && !g.flag('hatch.open'), unreachable: behindRope,
+    id: 'ring_hatch', x: 11, y: 8, w: 2, solid: false, when: (g) => fountainDry(g) && !mayorHere(g) && !g.flag('hatch.open'),
     interact: async (g) => {
       await g.describe('A bronze ring set in a square hatch, under the coins.', "On the Ship Plan, there's a shaft going down right here.");
       g.pose('player', 'reach_down');
@@ -228,14 +230,23 @@ export function withAct4(maps) {
       await g.shake(1, 0.4);
       g.setFlag('hatch.open');
       g.pose('player', null);
-      await g.describe('It lifts. A ladder, going down, and the sound of something big, breathing.');
+      await g.describe('It lifts. A ladder, going down a long way, and the sound of something big, breathing.');
     },
     use: { crowbar: (g) => g.describe("It's got a ring. Rings are for pulling."), '*': cherylDeclines },
   };
 
   const basin = {
-    id: 'basin', x: 11, y: 9, w: 2, solid: false, when: fountainDry, unreachable: behindRope,
+    id: 'basin', x: 11, y: 9, w: 2, h: 2, solid: false, when: (g) => fountainDry(g) && !mayorHere(g),
     look: 'Five hundred years of wishes in a heap. Mostly buttons. Somebody wished with a whole spoon.',
+  };
+  // The basin and the hatch under its coins, seen across the rope.
+  const basinGuarded = {
+    id: 'basin_guarded', x: 11, y: 8, w: 2, h: 3, solid: false, when: guarded,
+    interact: async (g) => {
+      await g.describe('Five hundred years of wishes in a heap, and something round and bronze under them. I\'d have to be inside the rope.');
+      await g.say('Mayor', 'Miss! Behind the rope, please. Pending an inquiry.');
+    },
+    use: { '*': (g) => g.say('Mayor', 'Miss! Behind the rope, please. Pending an inquiry.') },
   };
 
   const cordonSign = { id: 'cordon_sign', x: 13, y: 11, solid: false, when: fountainDry, look: 'PENDING AN INQUIRY. The inquiry is me.' };
@@ -255,16 +266,6 @@ export function withAct4(maps) {
     },
   };
 
-  // Walking into the cordon while he's guarding it: his line, and a step back.
-  const ropeTrigger = (x, y, w, h, facing, back) => ({
-    x, y, w, h,
-    when: (g) => fountainDry(g) && mayorHere(g) && g.player.facing === facing,
-    run: async (g) => {
-      await g.say('Mayor', 'Miss! Behind the rope, please. Pending an inquiry.');
-      await g.movePlayer(back);
-    },
-  });
-
   const square4 = overlayMap(square, {
     when: act4,
     tileset: act4Tiles,
@@ -283,13 +284,13 @@ export function withAct4(maps) {
       for (let x = x0 + 1; x < x1; x++) { T.set('detail', x, y0, 'square4:cordon_rope_h', true); T.set('detail', x, y1, x === 13 ? 'square4:cordon_rope_sign' : 'square4:cordon_rope_h', true); }
       for (let y = y0 + 1; y < y1; y++) { T.set('detail', x0, y, 'square4:cordon_rope_v', true); T.set('detail', x1, y, 'square4:cordon_rope_v', true); }
       if (!mayorHere(g)) { T.block(11, 11, false); T.block(12, 11, false); }
+      else {
+        for (let x = x0; x <= x1; x++) { T.counter(x, y0); T.counter(x, y1); }
+        for (let y = y0 + 1; y < y1; y++) { T.counter(x0, y); T.counter(x1, y); }
+      }
     },
     exits: [{ x: 11, y: 8, w: 2, to: 'pump_hall', at: [2, 3], facing: 'down', sfx: 'step_stairs', when: (g) => fountainDry(g) && !!g.flag('hatch.open') }],
     triggers: [
-      ropeTrigger(10, 12, 4, 1, 'up', [11, 13]),
-      ropeTrigger(10, 5, 4, 1, 'down', [11, 4]),
-      ropeTrigger(8, 7, 1, 4, 'right', [7, 8]),
-      ropeTrigger(15, 7, 1, 4, 'left', [16, 8]),
       {
         x: 11, y: 11, w: 2, stop: false,
         when: (g) => fountainDry(g) && !mayorHere(g) && !g.flag('stepped.rope'),
@@ -301,8 +302,8 @@ export function withAct4(maps) {
       { x: 11, y: 9, w: 2, stop: false, when: fountainDry, run: (g) => g.sfx('coins_rattle') },
     ],
     // The hatch and basin come before the whole-Fountain hotspot, so they win on their tiles.
-    entities: [hatch, basin, cordonSign, mayor4, fountainRim(10), fountainRim(13), {
-      id: 'fish_a4', x: 11, y: 7, w: 2, solid: false, kind: 'object', when: act4, unreachable: 'up on the Fountain, above the hatch (the rims answer for the Fountain)', offset: [0, 19], // on the rim row, drawn where Act 2 draws it
+    entities: [hatch, basin, basinGuarded, cordonSign, mayor4, fountainRim(10), fountainRim(13), {
+      id: 'fish_a4', x: 11, y: 7, w: 2, solid: false, kind: 'object', when: act4, unreachable: (g) => !guarded(g) && 'up on the Fountain, above the hatch (the rims answer for the Fountain)', offset: [0, 19], // on the rim row, drawn where Act 2 draws it
       sprite: (g) => ({ sheet: fishArt, frame: fountainDry(g) ? 'fish_dry' : 'fish' }),
       interact: (g) => g.describe(fountainDry(g) ? "The bronze fish, with nothing coming out of its mouth. It looks like it's waiting to be asked." : 'The fish, spouting again. Harder than before. It looks pleased with itself.'),
     }],

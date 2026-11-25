@@ -171,17 +171,23 @@ export function withAct4Part2(maps) {
         interact: async (g, self) => {
           if (g.flag('got.throat')) return g.say(self, cycle(g, 'a4.mottAfter', ["Whatever you're doing, Cheryl, do it before she tips any further.", "I'll stay off the moonshine. I'll want to remember this."]));
           if (bump(g, 'a4.mott') === 0) {
-            return g.say(self,
+            await g.say(self,
               "Cheryl. I haven't had a drop since the doorsteps lit up. Didn't seem right, drinking, with the steps looking at me.",
               "The Bilge is going under. A hand to the left, and now a foot down. She's tipping, Cheryl. The whole island's tipping.",
               "And nobody'll listen. Because it's me. Because of the moonshine.",
               "If anyone else had seen it. Anyone. Written down, so they'd have to believe it.");
+            // Playtest: nothing sent the player home for the chart.
+            return g.think(g.hasItem('moon_chart')
+              ? "Written down. Thirty-one years of moonrises, ticked. It's in my bag."
+              : "Written down. Thirty-one years of moonrises, ticked. It's on my kitchen table.");
           }
-          return g.say(self, cycle(g, 'a4.mottRepeat', [
+          await g.say(self, cycle(g, 'a4.mottRepeat', [
             'If anyone had it written down. Just one other person.',
             'Tipping. A foot down on the Bilge side, and more every tide.',
             "Grandad's copper's in the still. Hums when the tide turns. Always has. Never knew why.",
           ]));
+          // Every other time, Cheryl thinks of the chart again.
+          if (bump(g, 'a4.mottHint') % 2 === 0) await g.think(g.hasItem('moon_chart') ? 'My moon chart. Show him.' : 'My moon chart. On the kitchen table.');
         },
         use: {
           moon_chart: (g, self) => (g.flag('got.throat') ? g.say(self, "I've seen it, Cheryl. I'll not forget it.") : giveThroat(g, self)),
@@ -223,6 +229,11 @@ export function withAct4Part2(maps) {
       tileset: act4Tiles,
       hide: ['keeper'],
       entities: [{
+        // The empty dust sheet Act 2 leaves where the telescope stood.
+        id: 'dust_sheet_a4', x: 6, y: 5, solid: false, when: (g) => act4(g) && !!(g.flag('got.telescope') || g.flag('telescope.migrated')),
+        look: "The dust sheet the telescope lived under. Folded, very square. She's polishing the spot where it stood.",
+        use: { '*': cherylDeclines },
+      }, {
         // Act 4's first talk, then her repeat (structure pass): the telescope she gave away in Act 2.
         ...find(room, 'keeper'), id: 'keeper_a4', when: act4,
         interact: (g, self) => (bump(g, 'a4.keeper') === 0
