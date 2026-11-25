@@ -33,7 +33,9 @@ A north wall face is two tiles tall: an upper row (`hull:face_top`) over a lower
 | The drop-ladder's chain on the wall (Lamp Halls, 7, 5) | `ds:wall_chain` (lower row) | ground |
 | Floor grate (Step Gallery, 6, 8): closed / open with the ladder top | `ds:grate_closed` / `grate_open` | ground |
 | Speaking tube, a bronze horn (Lamp Halls, 22) | `ds:horn` (upper row); also `machines:speaking_tube` | ground; objects |
-| Valve wheel: seized / turned (Lamp Halls, 23) | `machines:valve_big_nw/ne/sw/se` frame `_0` (seized) / `_1` (turned), 2×2; or the 1×1 `machines:valve_0` / `valve_1` | objects |
+| Fountain valve (Lamp Halls, 23), 2×2 | bare square spindle (no key) `machines:valve_spindle_nw/ne/sw/se`; key fitted `valve_key_*`; key turned `valve_key_turned_*`; jammed `valve_key_jammed_<q>` (2 frames, a strained shake). The older handwheel `machines:valve_big_*` is still there for other valves | objects |
+| Bunk Room tool rack, with / without the valve key | `ds:tool_rack_key` / `tool_rack` (upper wall row); it reads once the lamp is relit | ground |
+| Valve key icon | `items3:valve_key` (bronze T-handle with a square socket) | inventory |
 | Gushing pipe (27, 2) / stopped | `ds_water:gush` (4 frames) / `gush_stopped`, over `hull:face_base` | objects |
 | Flooded fast water (north passage 25–26, 1–6) | `ds_water:flood` (4 frames); where it meets dry floor `flood_edge_n`; under the pipe `flood_splash` | ground |
 | Drained wet floor (after the valve) | `ds_water:floor_drained`, `floor_soaked` | ground |
