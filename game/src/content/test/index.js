@@ -179,7 +179,7 @@ const streetMap = {
     g.setFlag('street_intro');
     await g.wait(0.3);
     await g.think('Right. The engine test street. Everything here is pretend, including me.');
-    g.hint(g.usingTouch ? 'Tap to walk · Tap things to look' : 'Arrows: walk · Z: look / talk · X: bag');
+    g.hint(g.usingTouch ? 'Tap to walk   Tap things to look' : 'Arrows: walk   Z: look/talk   X: bag');
   },
   entities: [
     {
@@ -215,7 +215,8 @@ const streetMap = {
       name: 'Sweaty Kid',
       x: 14, y: 6,
       sprite: { sheet: kid },
-      behavior: { type: 'patrol', route: [[14, 6], [19, 6], [19, 9], [14, 9]] },
+      // Stops and faces Cheryl when she's within 2 tiles or walking over to him.
+      behavior: { type: 'patrol', route: [[14, 6], [19, 6], [19, 9], [14, 9]], stopNear: 2 },
       talk: ["I'm not running. I'm walking really fast in a square.", "Don't tell my mum."],
     },
     {
@@ -246,6 +247,11 @@ const streetMap = {
         g.setFlag('got_key');
         await g.giveItem('brass_key');
         await g.describe('A little brass key, warm from the sun.');
+        // A one-time hint that stays until the bag is opened.
+        if (!g.flag('bag_hint')) {
+          g.setFlag('bag_hint');
+          g.hint(g.usingTouch ? 'Tap the bag, pick something, then tap where it goes.' : 'X: bag. Pick something, then use it on someone or something.', Infinity, { untilBag: true });
+        }
       },
     },
     {

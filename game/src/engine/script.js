@@ -280,10 +280,12 @@ export function makeApi(world) {
       await world.waitTicks(secs(seconds));
       world.game.card = null;
     },
-    // A small hint at the bottom of the screen for `seconds`. Doesn't block
-    // the player or the script.
-    hint(text, seconds = 6) {
-      world.hintState = { text, t: 0, ticks: secs(seconds) };
+    // A small hint at the bottom of the screen for `seconds` (time spent in
+    // dialog or the bag doesn't count). Doesn't block the player or the
+    // script. { untilBag: true } keeps it up until the player opens the bag
+    // (use seconds = Infinity for no time limit).
+    hint(text, seconds = 6, { untilBag = false } = {}) {
+      world.hintState = { text, t: 0, ticks: seconds === Infinity ? Infinity : secs(seconds), untilBag };
     },
     // True when the player is using touch (choose hint wording with this).
     get usingTouch() {

@@ -162,7 +162,7 @@ Shortcuts instead of `interact`:
 - `'idle'` (default): stands still; after a conversation turns back to its original facing.
 - `'face'` (or `{ type: 'face', range: 3 }`): turns to watch the player when within range.
 - `{ type: 'wander', area: [x, y, w, h], pause: [1, 3] }`: takes random steps inside the area, pausing 1–3 s. Never steps onto exits.
-- `{ type: 'patrol', route: [[7, 14], [13, 14], [13, 19], [7, 19]], pause, ghost, blockedPose, onWaypoint }`: walks the waypoints in a loop. With `ghost: true` tiles don't block it (it hops the hurdle) but characters do; when someone is in the way it waits, playing `blockedPose` if given. `onWaypoint(g, self, index)` is called at each waypoint (a ding every third lap); it's a plain callback, not a script, so it shouldn't await anything.
+- `{ type: 'patrol', route: [[7, 14], [13, 14], [13, 19], [7, 19]], pause, ghost, blockedPose, stopNear, nearPose, onWaypoint }`: walks the waypoints in a loop. With `ghost: true` tiles don't block it (it hops the hurdle) but characters do; when someone is in the way it waits, playing `blockedPose` if given. With `stopNear: 2` it stops and faces Cheryl while she's within 2 tiles, or while she's walking over to it after a click or tap, playing `nearPose` (or `blockedPose`), then resumes its route. `onWaypoint(g, self, index)` is called at each waypoint (a ding every third lap); it's a plain callback, not a script, so it shouldn't await anything.
 - Scripted moves: `g.moveNpc(...)` at any time.
 
 Characters turn to face the player when talked to (`turnToTalk: false` to prevent it), and wandering and patrols pause while any script runs.
@@ -258,7 +258,7 @@ Time, camera, and screen effects (all resolve when done; durations in seconds):
 | `setLighting(name, seconds)`, `lighting` | Crossfade the scene lighting to `'day'`, `'dusk'`, `'night'`, a preset from `content.lighting`, or `null`; 0 seconds is a hard cut. Lasts until the next map load, which applies that map's own `lighting`. |
 | `showPicture(spec, { fade })` / `hidePicture({ fade })` | Replace the map with a full-screen 256×224 picture (a vista): `{ sheet, frame, palette }` or a function `(ctx, ms)` that draws it, `ms` since it appeared. Text boxes, shake, and effects still work over it. `fade` is in seconds; 0 is a hard cut. |
 | `card(text, seconds)` | Centered text on black ("Cheryl did not sleep well."), drawn above fades. |
-| `hint(text, seconds = 6)` | A small box at the bottom that fades in and out without blocking anything (control hints). |
+| `hint(text, seconds = 6, { untilBag })` | A small box at the bottom (wrapped if long) that fades in and out without blocking anything (control hints). It hides, and its clock stops, while dialog or the bag is open. `untilBag: true` removes it when the player opens the bag; pass `Infinity` seconds to keep it until then. |
 | `usingTouch` | True when the player is on a touch screen (to word hints). |
 
 Effects persist across map changes until cleared, so a scene can carry its mood through a door.

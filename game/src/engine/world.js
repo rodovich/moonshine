@@ -11,7 +11,7 @@ import { Control } from './control.js';
 import { writeSave } from './save.js';
 import { colorOf, loadSheet } from './art.js';
 import { uiSmall } from '../art/ui.js';
-import { drawText, measure } from './text.js';
+import { drawText, measure, wrap, LINE_HEIGHT } from './text.js';
 import { STYLES, drawBox } from './ui.js';
 import { playMusic, stopMusic } from './sound.js';
 
@@ -381,7 +381,8 @@ export class World {
     else this.control.afterMove(null);
     for (const e of this.entities) e.tickAnim();
     if (this.picture) this.picture.ms += 1000 / 60;
-    if (this.hintState) this.hintState.t++;
+    // Hints wait (and stay hidden) while a text box or the bag is open.
+    if (this.hintState && !this.textbox.open && !this.inventory.open) this.hintState.t++;
 
     // Waiters
     if (this.waiters.length) {
@@ -425,9 +426,25 @@ export class World {
   }
 
   // Walk a loop of waypoints: { type: 'patrol', route: [[x, y], ...], pause,
-  // ghost, blockedPose }. With ghost, tiles don't block (hurdles, low walls)
-  // but characters still do; when someone is in the way the patroller waits.
+  // ghost, blockedPose, stopNear, nearPose }. With ghost, tiles don't block
+  // (hurdles, low walls) but characters still do; when someone is in the way
+  // the patroller waits. With stopNear: n, it stops and faces Cheryl while
+  // she's within n tiles or walking over to it (clicked), then carries on.
   patrol(e, b) {
+    const p = this.player;
+    const near = b.stopNear && Math.abs(p.x - e.x) + Math.abs(p.y - e.y) <= b.stopNear;
+    const approached = this.control.pending && this.control.pending.entity === e;
+    if (near || approached) {
+      e.facing = dirBetween(e.x, e.y, p.x, p.y) || e.facing;
+      const pose = b.nearPose || b.blockedPose;
+      if (pose && e.pose !== pose) e.setPose(pose);
+      e.patrolHeld = true;
+      return;
+    }
+    if (e.patrolHeld) {
+      e.patrolHeld = false;
+      if (e.pose === (b.nearPose || b.blockedPose)) e.setPose(null);
+    }
     if (e.patrolWait > 0) {
       e.patrolWait--;
       return;
@@ -565,18 +582,22 @@ export class World {
   // A small, non-blocking hint box at the bottom of the screen.
   drawHint(ctx) {
     const h = this.hintState;
-    if (!h) return;
+    if (!h || this.textbox.open || this.inventory.open) return;
     if (h.t > h.ticks) {
       this.hintState = null;
       return;
     }
     const fade = 20;
     const a = Math.min(1, h.t / fade, (h.ticks - h.t) / fade);
-    const w = measure(h.text) + 16;
+    const lines = wrap(h.text, WIDTH - 32);
+    const w = Math.max(...lines.map((l) => measure(l))) + 16;
+    const bh = lines.length * LINE_HEIGHT + 6;
+    const x = Math.round((WIDTH - w) / 2);
+    const y = HEIGHT - 7 - bh;
     ctx.save();
     ctx.globalAlpha = Math.round(a * 8) / 8;
-    drawBox(ctx, Math.round((WIDTH - w) / 2), HEIGHT - 24, w, 17, STYLES.npc);
-    drawText(ctx, h.text, Math.round((WIDTH - w) / 2) + 8, HEIGHT - 20, { color: 'ui_text' });
+    drawBox(ctx, x, y, w, bh, STYLES.npc);
+    lines.forEach((l, i) => drawText(ctx, l, x + 8, y + 4 + i * LINE_HEIGHT, { color: 'ui_text' }));
     ctx.restore();
   }
 

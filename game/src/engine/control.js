@@ -264,6 +264,7 @@ export class Control {
     const w = this.world;
     this.cancelMove();
     this.holding = null;
+    if (w.hintState && w.hintState.untilBag) w.hintState = null;
     w.run(async () => {
       const r = await w.inventory.show(w.state.inventory, this.lastItem);
       if (r && r.use) {

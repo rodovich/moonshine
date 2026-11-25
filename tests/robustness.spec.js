@@ -94,3 +94,37 @@ test('script API edge cases', async ({ page }) => {
   expect((await snap(page)).text.startsWith('This is a long question.')).toBe(true);
   expect(await page.evaluate(() => window.moonshine.textbox.active.choice.cancelIndex)).toBe(null);
 });
+
+test('bag hint stays until the bag is opened', async ({ page }) => {
+  await boot(page, STREET);
+  await waitIdle(page);
+  await clickTile(page, 3, 12); // the key
+  await waitFor(page, () => !!window.moonshine.snapshot().text);
+  for (let i = 0; i < 10 && (await snap(page)).text; i++) await press(page, 'z');
+  await waitIdle(page);
+  await page.waitForTimeout(1500);
+  expect((await snap(page)).hint).toContain('X: bag');
+  await page.screenshot({ path: 'tests/screenshots/19-bag-hint.png' });
+  await press(page, 'x');
+  await waitFor(page, () => window.moonshine.snapshot().inventoryOpen);
+  await press(page, 'x');
+  await waitIdle(page);
+  expect((await snap(page)).hint).toBe(null);
+});
+
+test('patrolling kid stops while Cheryl is near', async ({ page }) => {
+  await boot(page, `${STREET}&x=16&y=8`);
+  await waitIdle(page);
+  await page.waitForTimeout(4000);
+  const k = (await snap(page)).entities.find((e) => e.id === 'kid');
+  const p = await snap(page);
+  expect(Math.abs(k.x - p.x) + Math.abs(k.y - p.y)).toBeLessThanOrEqual(2);
+  await page.waitForTimeout(1000);
+  expect((await snap(page)).entities.find((e) => e.id === 'kid')).toMatchObject({ x: k.x, y: k.y });
+  // Walk away: he carries on.
+  await clickTile(page, 8, 8);
+  await waitIdle(page);
+  await page.waitForTimeout(1500);
+  const k2 = (await snap(page)).entities.find((e) => e.id === 'kid');
+  expect(k2.x !== k.x || k2.y !== k.y).toBe(true);
+});
