@@ -20,6 +20,8 @@ export const SCENE = {
     const img = (sheet, frame) => frameCanvas(sheet, SHEETS[sheet], frame);
     if (!SHEETS.vista) return;
     ctx.drawImage(img('vista', 'bowl_dusk'), 0, 0);
+    // As the moon clears the ridge, the Gate's apricot light drains cold (half at 7 s, full at 8 s).
+    if (SHEETS.vista_gate_cold && t > 7000) ctx.drawImage(img('vista_gate_cold', t > 8000 ? 'cold_1' : 'cold_0'), 0, 0);
     // 0–4 s: the glow gathers behind the Rim, right of the Gate.
     const glowStep = t < 1000 ? -1 : t < 2200 ? 0 : t < 3400 ? 1 : 2;
     if (glowStep >= 0) ctx.drawImage(img('vista_glow', `glow_${glowStep}`), MOON_X - 60, 90 - 48);
