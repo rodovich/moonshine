@@ -13,7 +13,14 @@ const START = '?map=flat&x=8&y=4&seed=1'
   + '&flags=act1.moonrise,act2.started,act2.done,piano.slid,counter.left,step.open,act3.surfaced,halls.valve,moonEyes.glow,got.moon_chart'
   + '&items=moon_chart,guidebook,crowbar,ship_plan,copper_throat&run=act4_start';
 
-const mapIs = (page, id) => waitFor(page, (id) => window.moonshine.snapshot().map === id && window.moonshine.snapshot().idle, id, 15000);
+async function mapIs(page, id) {
+  try {
+    await waitFor(page, (id) => window.moonshine.snapshot().map === id && window.moonshine.snapshot().idle, id, 15000);
+  } catch (err) {
+    const s = await snap(page);
+    throw new Error(`expected to be idle on ${id}; at ${s.map} (${s.x},${s.y}) busy=${s.busy} text=${s.text}`);
+  }
+}
 
 // Keyboard: walk onto an exit tile (or the first tile of an exit to `to`) and wait for the new map.
 async function kbExit(page, to, at = null) {

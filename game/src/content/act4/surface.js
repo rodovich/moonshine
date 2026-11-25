@@ -272,8 +272,9 @@ export function withAct4(maps) {
       },
       { x: 11, y: 9, w: 2, stop: false, when: fountainDry, run: (g) => g.sfx('coins_rattle') },
     ],
-    entities: [fountain4, hatch, basin, cordonSign, mayor4, {
-      id: 'fish_a4', x: 11, y: 8, w: 2, solid: false, kind: 'object', when: act4, offset: [0, 3],
+    // The hatch and basin come before the whole-Fountain hotspot, so they win on their tiles.
+    entities: [hatch, basin, cordonSign, mayor4, fountain4, {
+      id: 'fish_a4', x: 11, y: 7, w: 2, solid: false, kind: 'object', when: act4, offset: [0, 19], // on the rim row, drawn where Act 2 draws it
       sprite: (g) => ({ sheet: fishArt, frame: fountainDry(g) ? 'fish_dry' : 'fish' }),
       interact: (g) => g.describe(fountainDry(g) ? "The bronze fish, with nothing coming out of its mouth. It looks like it's waiting to be asked." : 'The fish, spouting again. Harder than before. It looks pleased with itself.'),
     }],
