@@ -210,6 +210,7 @@ export const cryptMap = composedMap(composeCrypt, {
   background: 'ink',
   step: 'step_stone',
   darkness: 0.45,
+  lightArea: [[1, 0, 8, 6]], // light pools stay inside the side and south walls (the stair at (1, 5) included)
   lights: [
     { x: 1.5, y: 4.5, radius: 1.8, color: 'lamp_warm' },
     { x: 3, y: 3, radius: 2.5, color: 'lamp_glow' },
