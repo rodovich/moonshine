@@ -160,7 +160,9 @@ export function withAct4Part2(maps) {
       hide: ['sea_cave'],
       tiles: (g, T) => {
         T.set('detail', 2, 16, 'props:crate', true); // Mott's crates, in the yard just below and left of his door (3, 15)
-        T.set('ground', 1, 37, 'cave_low:cave_mouth_low', false); // the sea cave's mouth, open at low tide
+        // The sea cave's mouth, open at low tide, and the bared rock below it.
+        T.set('ground', 1, 37, 'cliff_low:x1y37_low', false);
+        T.set('ground', 1, 38, 'cliff_low:x1y38_low', true);
       },
       exits: [{ x: 1, y: 37, to: 'sea_cave', at: [4, 6], facing: 'up', sfx: 'step_stone', when: act4 }],
       entities: [{
