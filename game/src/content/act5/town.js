@@ -174,9 +174,14 @@ async function shopkeeperTalk(g, self) {
       'Miss. Look. The window. It went over in the night. When the whole shop lifted.',
       'The telescope\'s lying in it like a fallen soldier. Best thing I\'ve ever displayed.');
   }
-  if (asked(g)) return g.say(self, 'Give it BACK? Then there\'s a GAP, Miss. I need something local. Something that says Tessel.');
+  if (asked(g)) await g.say(self, 'Give it BACK? Then there\'s a GAP, Miss. I need something local. Something that says Tessel.');
   // Before the Keeper has asked, he still names his price, so the swap can come first.
-  return g.say(self, 'If it goes, there\'s a GAP, Miss. I\'d need something local. Something that says Tessel.');
+  else await g.say(self, 'If it goes, there\'s a GAP, Miss. I\'d need something local. Something that says Tessel.');
+  // Asked for something abstract that she has, Cheryl thinks one line toward it (overview rule 11), once.
+  if (g.hasItem('guidebook') && !g.flag('n.thinkGuidebook5')) {
+    g.setFlag('n.thinkGuidebook5', 1);
+    await g.think('Something local that says Tessel. The guidebook says nothing else, wrongly, on every page.');
+  }
 }
 
 async function giveGuidebook(g, self) {
