@@ -27,7 +27,7 @@ import { boatman } from '../../art/act4_sprites.js';
 const W = 32, H = 16;
 const q = (x, y) => `${y % 2 ? 's' : 'n'}${x % 2 ? 'e' : 'w'}`;
 const STALLS = [2, 5, 8];
-const POSTS = [[1, 6], [17, 6], [28, 6]];
+const POSTS = [[10, 6], [17, 6], [28, 6]];
 const DOORS = [1, 4, 7, 16, 19, 22, 25, 28];
 
 function compose() {
@@ -104,14 +104,15 @@ const objects = [
   })),
   ...STALLS.map((x) => ({ id: `stall_${x}`, x, y: 5, w: 2, lookKey: 'fish_stalls', look: "Yesterday's catch, today's price, tomorrow's smell." })),
   ...POSTS.map(([x, y]) => ({ id: `post_${x}`, x, y, lookKey: 'mooring_posts', look: 'A mooring post, worn smooth by ropes. Older than the houses, somebody told me once.' })),
-  ...DOORS.map((x) => ({ id: `door_${x}`, x, y: 2, h: 2, lookKey: 'bilge_doors', look: 'Not my door. Wet doorstep, though.' })),
+  // (The Fishmonger stands in front of her own door at (4, 3).)
+  ...DOORS.filter((x) => x !== 4).map((x) => ({ id: `door_${x}`, x, y: 2, h: 2, lookKey: 'bilge_doors', look: 'Not my door. Wet doorstep, though.' })),
 ].map((o) => ({ solid: false, use: { '*': cherylDeclines }, ...o }));
 
 // ---------------------------------------------------------------------------
 // People
 
 const fishmongerNpc = {
-  id: 'fishmonger', name: 'Fishmonger', x: 5, y: 4, facing: 'down',
+  id: 'fishmonger', name: 'Fishmonger', x: 4, y: 4, facing: 'down',
   sprite: { sheet: fishmonger },
   behavior: { type: 'face', range: 3 },
   interact: async (g, self) => {

@@ -303,7 +303,7 @@ async function showGuidebook(g, self) {
   g.sfx('step_stairs');
   await g.moveNpc(self, 'd d d d d d d d', { ghost: true, speed: 11 }); // down flight 3 to landing 3
   const pianoThere = !slid(g);
-  if (pianoThere) await g.panCamera(6, 34, 3);
+  if (pianoThere) await g.panCamera(6, 36, 3);
   await g.moveNpc(self, 'l l l l d d d d d d d d d d d d r', { ghost: true, speed: 11 }); // along, down flight 4, to (6,39)
   if (pianoThere) {
     g.faceNpc('big_mover', 'right'); g.faceNpc('other_mover', 'left');
@@ -311,8 +311,8 @@ async function showGuidebook(g, self) {
     g.setSprite(self, { sheet: LOOKS.counting_woman.sheet, frame: 'climb_up' });
     await g.moveNpc(self, 'd', { ghost: true, speed: 14 });
     await g.tween(self, { offset: [0, -10], seconds: 0.25 });
-    await g.say('Big Mover', "Madam! That's a PIANO!");
-    await g.say(self, 'And these are MY STEPS.');
+    await g.say('Big Mover', "Madam! That's a PIANO!", { position: 'top' });
+    await g.say(self, 'And these are MY STEPS.', { position: 'top' });
     await g.tween(self, { offset: [0, -6], seconds: 0.3 });
     await g.moveNpc(self, 'd', { ghost: true, speed: 14 });
     await g.tween(self, { offset: [0, 0], seconds: 0.15 });
