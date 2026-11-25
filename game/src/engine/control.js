@@ -132,6 +132,17 @@ export class Control {
 
   followPath() {
     const p = this.player;
+    // Walking to a character who has moved since: re-route to where they are.
+    const pend = this.pending;
+    if (pend && (pend.entity.x !== pend.at[0] || pend.entity.y !== pend.at[1])) {
+      if (this.nearEnough(pend.entity)) {
+        this.path = [];
+        this.pathDone();
+        return;
+      }
+      this.repath();
+      if (!this.path.length) return;
+    }
     const [nx, ny] = this.path[0];
     const dir = dirBetween(p.x, p.y, nx, ny);
     if (Math.abs(nx - p.x) + Math.abs(ny - p.y) !== 1) {
@@ -164,6 +175,9 @@ export class Control {
     if (spot) {
       p.facing = spot.facing;
       this.act(e, pend.item);
+    } else if (this.nearEnough(e)) {
+      // A moving character ended up next to her (or on her tile): talk anyway.
+      this.act(e, pend.item);
     } else if ((pend.tries || 0) < 3) {
       // The target moved (a wandering NPC) or was blocked: try again.
       this.pending = { ...pend, tries: (pend.tries || 0) + 1 };
@@ -172,10 +186,19 @@ export class Control {
     }
   }
 
+  // Is Cheryl beside (or on) entity e's footprint?
+  nearEnough(e) {
+    const p = this.player;
+    const nx = Math.max(e.x, Math.min(e.x + e.w - 1, p.x));
+    const ny = Math.max(e.y, Math.min(e.y + e.h - 1, p.y));
+    return Math.abs(nx - p.x) + Math.abs(ny - p.y) <= 1;
+  }
+
   repath() {
     const p = this.player;
     const w = this.world;
     if (this.pending) {
+      this.pending.at = [this.pending.entity.x, this.pending.entity.y];
       const spots = w.interactSpots(this.pending.entity);
       let path = w.pathFor(p, spots.map((s) => [s.x, s.y]));
       if (!path) path = w.pathFor(p, [[this.pending.entity.x, this.pending.entity.y]], { closest: true });
@@ -202,7 +225,13 @@ export class Control {
 
   approach(e, item) {
     this.goal = null;
-    this.pending = { entity: e, item };
+    this.pending = { entity: e, item, at: [e.x, e.y] };
+    // Already beside a character who moves (or sharing her tile): no walk.
+    if (e.directional && this.nearEnough(e) && !this.player.moving) {
+      this.pending = null;
+      this.act(e, item);
+      return;
+    }
     this.repath();
     if (this.world.marker) this.world.marker.t = 0;
   }
@@ -215,8 +244,12 @@ export class Control {
     const ty = Math.floor(wy / TILE);
     const list = w.entities.filter((e) => !e.isPlayer && e.visible && isInteractable(e)).sort((a, b) => b.sortY - a.sortY);
     for (const e of list) if (e.hit(wx, wy)) return e;
-    for (const e of list) if (tx >= e.x && ty >= e.y && tx < e.x + e.w && ty < e.y + e.h) return e;
-    return null;
+    const at = (x, y) => w.pickEntity(list.filter((e) => x >= e.x && y >= e.y && x < e.x + e.w && y < e.y + e.h));
+    let e = at(tx, ty);
+    // A click on something tall drawn on the overhead layer (a tree's canopy,
+    // a lamp's top) reaches a hotspot one or two tiles below it.
+    for (let k = 1; !e && k <= 2 && w.map.tile('overhead', tx, ty + k - 1); k++) e = at(tx, ty + k);
+    return e;
   }
 
   tap(t) {
@@ -256,6 +289,10 @@ export class Control {
     const [dx, dy] = DIR_VEC[p.facing];
     let e = w.interactableAt(p.x + dx, p.y + dy);
     if (!e && w.map.counter(p.x + dx, p.y + dy)) e = w.interactableAt(p.x + 2 * dx, p.y + 2 * dy);
+    // A character that doesn't block (solid: false) may be standing on her
+    // tile; he beats anything in front of her but another character.
+    const here = w.pickEntity(w.entities.filter((o) => !o.isPlayer && o.visible && o.directional && isInteractable(o) && o.x === p.x && o.y === p.y));
+    if (here && (!e || !e.directional)) e = here;
     if (e) {
       this.act(e, this.holding);
     } else if (this.holding) {
