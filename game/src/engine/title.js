@@ -8,7 +8,10 @@ import { inRect } from './ui.js';
 import { sfx } from './sound.js';
 
 export class Title {
-  constructor(game, { canContinue }) {
+  // finished: the saved game reached the end (flag game.complete); the title
+  // marks Continue with a small gold moon.
+  constructor(game, { canContinue, finished = false }) {
+    this.finished = finished;
     this.game = game;
     this.tick = 0;
     this.small = loadSheet(uiSmall);
@@ -126,6 +129,7 @@ export class Title {
       const sel = i === this.index;
       if (sel) ctx.drawImage(this.small.frame('cursor'), x - 12, y);
       drawText(ctx, o, x, y, { color: sel ? 'ui_select' : 'ui_text' });
+      if (o === 'Continue' && this.finished) drawFinishedMark(ctx, x + w + 5, y);
     });
   }
 }
@@ -137,4 +141,14 @@ function renderLarge(text) {
   tmp.height = 11;
   drawText(tmp.getContext('2d'), text, 0, 0, { color: 'ui_select', shadow: 'ui_cheryl_box' });
   return tmp;
+}
+
+// A tiny full moon with a glint, after "Continue" once the game is finished.
+function drawFinishedMark(ctx, x, y) {
+  const rows = ['.ggg.', 'ggggg', 'gggwg', 'ggggg', '.ggg.'];
+  rows.forEach((r, j) => [...r].forEach((c, i) => {
+    if (c === '.') return;
+    ctx.fillStyle = c === 'w' ? '#f8f0c8' : '#f8d870';
+    ctx.fillRect(x + i, y + 1 + j, 1, 1);
+  }));
 }

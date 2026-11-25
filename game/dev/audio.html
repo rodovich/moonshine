@@ -5,14 +5,15 @@
 <title>Moonshine — audio</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-  :root { --bg: #181828; --panel: #242440; --edge: #5868a8; --text: #e8e0c8; --dim: #a8a090; --hi: #f8d070; --bad: #f87858; }
+  :root { --bg: #181828; --panel: #242440; --edge: #5868a8; --text: #e8e0c8; --dim: #a8a090; --hi: #f8d070; --bad: #f87858; --ok: #88d888; }
   html { background: var(--bg); color: var(--text); font: 14px/1.4 ui-monospace, Menlo, monospace; }
-  body { max-width: 900px; margin: 0 auto; padding: 16px; }
+  body { max-width: 960px; margin: 0 auto; padding: 16px; }
   h1 { font-size: 20px; color: var(--hi); margin: 0 0 4px; }
   h2 { font-size: 15px; margin: 0 0 8px; color: var(--hi); }
+  h3 { font-size: 13px; margin: 10px 0 2px; color: var(--dim); font-weight: normal; }
   p { color: var(--dim); margin: 4px 0 12px; }
   section { background: var(--panel); border: 2px solid var(--edge); border-radius: 6px; padding: 12px; margin: 12px 0; }
-  button { font: inherit; background: #303060; color: var(--text); border: 2px solid var(--edge); border-radius: 4px; padding: 6px 10px; margin: 3px; cursor: pointer; }
+  button { font: inherit; background: #303060; color: var(--text); border: 2px solid var(--edge); border-radius: 4px; padding: 5px 9px; margin: 3px; cursor: pointer; }
   button:hover { background: #404080; }
   button.playing { border-color: var(--hi); color: var(--hi); }
   label { display: inline-flex; align-items: center; gap: 6px; margin: 4px 16px 4px 0; }
@@ -20,10 +21,12 @@
   table { border-collapse: collapse; width: 100%; margin-top: 8px; }
   td, th { text-align: right; padding: 2px 6px; border-bottom: 1px solid #383860; }
   td:first-child, th:first-child { text-align: left; }
-  td.bad { color: var(--bad); }
+  .bad { color: var(--bad); }
+  .ok { color: var(--ok); }
   canvas.wave { width: 160px; height: 28px; vertical-align: middle; }
-  #text { min-height: 2.8em; background: #101020; border: 2px solid var(--edge); padding: 8px; margin-top: 8px; white-space: pre-wrap; }
+  #text, #moon-log { min-height: 2.8em; background: #101020; border: 2px solid var(--edge); padding: 8px; margin-top: 8px; white-space: pre-wrap; }
   .note { font-size: 12px; color: var(--dim); }
+  pre { white-space: pre-wrap; margin: 4px 0; }
 </style>
 </head>
 <body>
@@ -35,20 +38,32 @@
   <div id="music"></div>
   <div>
     <button id="stop">■ Stop (fade)</button>
-    <label>Crossfade <input id="fade" type="number" value="800" min="0" step="100" style="width:6em"> ms</label>
+    <button id="muffle">🧱 Muffle (as heard from the Shop)</button>
+    <button id="wind">⏬ Wind down (music box runs down)</button>
+    <label>Crossfade / wind-down <input id="fade" type="number" value="800" min="0" step="100" style="width:6em"> ms</label>
   </div>
   <p>Now playing: <span class="now" id="now">—</span></p>
-  <p class="note">Cues (one-shot pieces like the Wrongness motif) interrupt the current track, then let it come back.</p>
+  <p class="note">⚡ marks a cue: it interrupts the current track, then lets it come back. Wind-down slows the current track and lets it sag flat and stop mid-phrase (it uses 4000 ms if the box says less than 1000).</p>
+</section>
+
+<section>
+  <h2>The moonrise, as scripted</h2>
+  <p>Plays the audio of the opening's moonrise sequence (docs/design/01-opening.md, steps 3–14) with the timings it suggests, so you can hear the whole thing in order. About 32 seconds.</p>
+  <button id="moonrise-demo">▶ Play the moonrise sequence</button>
+  <div id="moon-log"></div>
 </section>
 
 <section>
   <h2>Sound effects</h2>
   <div id="sfx"></div>
+  <h3>Loops (click to start, again to stop)</h3>
+  <div id="loops"></div>
+  <h3>Demos</h3>
   <div>
     <button id="talk">Text: a resident talks</button>
     <button id="think">Text: Cheryl's narration</button>
-    <button id="walk">Walk 12 steps</button>
   </div>
+  <div id="walks"></div>
   <div id="text"></div>
 </section>
 
@@ -64,19 +79,28 @@
 </section>
 
 <section>
-  <h2>Level check</h2>
-  <p>Renders everything offline at full volume and measures it. Peaks are before the safety limiter; anything above −1 dBFS is flagged.</p>
-  <button id="check">Render and measure</button>
+  <h2>Checks</h2>
+  <p><b>Levels</b> renders everything offline at full volume and measures it; peaks are before the safety clipper, and anything above −1 dBFS is flagged.
+  <b>Balance</b> plays each voice of each section alone and measures its A-weighted level; the melody should lead every other voice by 3 dB or more.
+  <b>Spectrum</b> shows each track's energy by band, relative to its total.
+  <b>Lint</b> checks the scores against their chords (docs/audio-direction.md, "Checking the music").</p>
+  <button id="check">Levels</button>
+  <button id="balance">Balance</button>
+  <button id="spectrum">Spectrum</button>
+  <button id="lint">Lint</button>
   <div id="report"></div>
 </section>
 
 <script type="module">
 import * as audio from '../src/audio/index.js';
-import { renderMusic, renderSfx, analyze } from '../src/audio/offline.js';
+import { renderMusic, renderSfx, renderLoop, analyze, balanceReport, spectrumReport, BANDS } from '../src/audio/offline.js';
+import { lintSong } from '../src/audio/lint.js';
 import { SONGS } from '../src/audio/music/index.js';
+import { SFX } from '../src/audio/sfx.js';
 
 const $ = (id) => document.getElementById(id);
 const compiled = (id) => audio.getCompiledSong(id);
+const el = (tag, props = {}, ...kids) => { const e = Object.assign(document.createElement(tag), props); e.append(...kids); return e; };
 
 // First input anywhere starts audio.
 addEventListener('pointerdown', () => audio.initAudio(), { once: true });
@@ -90,10 +114,9 @@ function refreshNow() {
 
 for (const id of audio.MUSIC_IDS) {
   const c = compiled(id);
-  const b = document.createElement('button');
-  b.dataset.music = id;
   const len = c.loopSteps ? `loop ${c.loopSeconds.toFixed(1)} s` : `cue ${c.introSeconds.toFixed(1)} s`;
-  b.textContent = `${c.loopSteps ? '▶' : '⚡'} ${SONGS[id].title} — ${len}`;
+  const b = el('button', { textContent: `${c.loopSteps ? '▶' : '⚡'} ${SONGS[id].title} — ${len}` });
+  b.dataset.music = id;
   b.onclick = async () => {
     await audio.initAudio();
     if (c.loopSteps) audio.playMusic(id, { fadeMs: Number($('fade').value) });
@@ -103,12 +126,49 @@ for (const id of audio.MUSIC_IDS) {
   $('music').append(b);
 }
 $('stop').onclick = () => { audio.stopMusic(Number($('fade').value)); refreshNow(); };
+$('muffle').onclick = async () => { await audio.initAudio(); const on = !$('muffle').classList.contains('playing'); audio.muffleMusic(on); $('muffle').classList.toggle('playing', on); };
+$('wind').onclick = () => { const ms = Number($('fade').value); audio.windDownMusic(ms >= 1000 ? ms : 4000); refreshNow(); };
 
-for (const id of audio.SFX_IDS) {
-  const b = document.createElement('button');
-  b.textContent = id;
-  b.onclick = async () => { await audio.initAudio(); audio.sfx(id); };
-  $('sfx').append(b);
+// Effects, grouped as in the opening's design.
+const GROUPS = {
+  'Interface': ['blip', 'blip_cheryl', 'cursor', 'confirm', 'cancel', 'menu_open', 'menu_close', 'item_get', 'give'],
+  'Movement': ['step', 'step_stone', 'step_plaster', 'step_tile', 'step_rug', 'step_stairs', 'step_wood', 'step_kid', 'bump', 'door', 'door_open', 'door_close'],
+  'Puzzle and characters': ['tap_squeak', 'tub_full', 'chess_tap', 'pepper_grind', 'sneeze', 'timer_ding', 'sheets_flap', 'kid_patter', 'kid_hop', 'piano_flat', 'splash'],
+  'Ambience': ['swifts', 'dog_bark', 'gull', 'clock_strike', 'well_breath'],
+  'The Wrongness': ['wrong_sting', 'groan', 'crack', 'rattle', 'piano_tumble', 'drain', 'drain_glunk', 'drain_gurgle', 'drain_echo'],
+  'The wider city (Act 2)': ['knock', 'shop_bell', 'stone_scrape', 'scrub', 'skip_rope', 'step_bonk', 'telescope', 'slab_lift', 'piano_slide', 'sink_gurgle', 'step_splash', 'goat', 'boatman_sing', 'girls_chant'],
+  'Downstairs: moving about': ['step_hullstone', 'step_rung', 'lid_pry', 'hatch_open', 'light_beam', 'mirror_turn', 'moonlock_open', 'disc_glow', 'chute_slide', 'ladder_drop', 'tube_voice', 'lever_pull', 'lid_open', 'shutters', 'disc_get', 'lamp_relight', 'bolt_draw', 'founders_door', 'rubbing'],
+  'Downstairs: machines and water': ['valve_turn', 'valve_jam', 'far_gurgle', 'chain_rattle'],
+  'Act 4: the bell and the Fountain': ['clock_rundown', 'lever_clank', 'clamp_lift', 'bell_stroke', 'bell_strokes', 'thrum_rise', 'coins_rattle', 'ring_hatch'],
+  'Act 4: the Pump Hall and the rise': ['valve_squeal', 'pump_cough', 'pump_stall', 'thump_thin', 'thump_stout', 'thump_middle', 'grate_drain', 'hull_creak_long', 'ear_pop', 'groan_great', 'burst', 'hatch_bang'],
+  'Act 5: the risen city': ['bucket_fill', 'bucket_lower', 'pour', 'splash_small', 'rope_throw', 'rope_creak', 'tin_lid', 'disc_drink', 'disc_fade', 'timer_wind', 'leap', 'mud_splat'],
+  'Act 5: the door and the Windlass': ['barnacles_crack', 'door_grind', 'light_spill', 'bronze_door', 'lamp_wake', 'lamps_wake', 'drum_creak', 'stump_lever', 'clapper_seat'],
+  'Act 6: the hauling and the montage': ['bell_tube', 'brake_clack', 'brake_throw', 'wheel_bite', 'link_boom', 'lurch', 'crowd_oof', 'piano_boat', 'chess_scatter', 'sheets_crack', 'emblem_hatch'],
+  'Act 6: the Sighting Room and the bath': ['door_slide_up', 'plug_glint', 'basin_fill', 'moon_settle', 'trim_turn', 'rim_light', 'lamps_blaze', 'master_stop', 'sisters_sleep', 'canal_rush', 'crowd_cheer', 'bath_enter', 'ripples'],
+  'Act 6: the dawn and the epilogue': ['lift_gate', 'lift_ride', 'well_grate', 'race_feet', 'pen_scratch', 'piano_c', 'piano_rhyme'],
+  'Act 4: the climb and the reveal': ['gull_close', 'slab_scrape', 'slab_close', 'bell_low', 'town_rush', 'fish_flop'],
+};
+const listed = new Set(Object.values(GROUPS).flat());
+const other = audio.SFX_IDS.filter((id) => !listed.has(id));
+if (other.length) GROUPS.Other = other;
+for (const [name, ids] of Object.entries(GROUPS)) {
+  $('sfx').append(el('h3', { textContent: name }));
+  for (const id of ids) {
+    if (!audio.SFX_IDS.includes(id)) continue;
+    const b = el('button', { textContent: id });
+    b.onclick = async () => { await audio.initAudio(); audio.sfx(id); };
+    $('sfx').append(b);
+  }
+}
+for (const id of audio.LOOP_IDS) {
+  const b = el('button', { textContent: `⟳ ${id}` });
+  b.onclick = async () => {
+    await audio.initAudio();
+    const on = !b.classList.contains('playing');
+    if (on) audio.startLoop(id); else audio.stopLoop(id, id === 'crowd' ? 0 : 300);
+    b.classList.toggle('playing', on);
+  };
+  $('loops').append(b);
 }
 
 let typing = null;
@@ -120,30 +180,54 @@ async function typeText(text, blip) {
   typing = setInterval(() => {
     const ch = text[i++];
     $('text').textContent += ch;
-    if (/[A-Za-z0-9]/.test(ch) && i % 2 === 1) audio.sfx(blip);
+    if (/[A-Za-z0-9]/.test(ch) && i % 3 === 1) audio.sfx(blip);
     if (i >= text.length) clearInterval(typing);
   }, 33);
 }
-$('talk').onclick = () => typeText("Mind the third step, it wobbles. Has done since my grandmother's day. We like it that way.", 'blip');
-$('think').onclick = () => typeText('A lemon tree in a blue pot. Somebody here waters it every morning, and talks to it, I bet.', 'blip_cheryl');
-$('walk').onclick = async () => {
+$('talk').onclick = () => typeText("Piano went down the Squeeze in the night. Took the Pelletiers' geraniums with it.", 'blip');
+$('think').onclick = () => typeText("Something's wrong. Not wrong like a dropped stitch. Wrong like a step that isn't there.", 'blip_cheryl');
+for (const [surface, ms] of [['step_stone', 270], ['step_plaster', 270], ['step_tile', 270], ['step_rug', 270], ['step_stairs', 330], ['step_wood', 270], ['step_kid', 110], ['step_splash', 300], ['step_hullstone', 300], ['step_rung', 380]]) {
+  const b = el('button', { textContent: `Walk: ${surface.replace('step_', '')}` });
+  b.onclick = async () => {
+    await audio.initAudio();
+    for (let i = 0; i < 10; i++) setTimeout(() => audio.sfx(surface), i * ms);
+  };
+  $('walks').append(b);
+}
+
+// The moonrise sequence (design steps 3–14), with suggested timings in seconds.
+const MOONRISE = [
+  [0, 'Cistern Court fades out over 2 s; the festival murmur rises; the Crown clock strikes', () => { audio.stopMusic(2000); audio.startLoop('crowd', { fadeMs: 2000 }); audio.sfx('clock_strike'); }],
+  [5, 'The vista: the music box plays the rhyme', () => audio.playMusic('moonrise', { fadeMs: 1000 })],
+  [13, 'The moon appears to the right of the Gate: the murmur stops dead, a dog barks, the music box runs down', () => { audio.stopLoop('crowd', 0); audio.windDownMusic(4500); setTimeout(() => audio.sfx('dog_bark'), 700); }],
+  [21, 'Hard cut to the roof. The groan; chimney pots rattle', () => { audio.sfx('groan'); setTimeout(() => audio.sfx('rattle'), 600); }],
+  [24.5, 'The CRACK', () => audio.sfx('crack')],
+  [26, 'The piano goes down the Squeeze', () => audio.sfx('piano_tumble')],
+  [30, 'The drain: glunk, gurgle, falling away… a far splash', () => audio.sfx('drain')],
+  [36.5, 'Silence. A gull. Wind.', () => { audio.sfx('gull'); audio.startLoop('wind', { fadeMs: 1500 }); }],
+  [42, '(end of demo)', () => audio.stopLoop('wind', 2000)],
+];
+let moonTimers = [];
+$('moonrise-demo').onclick = async () => {
   await audio.initAudio();
-  for (let i = 0; i < 12; i++) setTimeout(() => audio.sfx('step'), i * 270);
+  moonTimers.forEach(clearTimeout);
+  audio.stopAllLoops(0);
+  audio.playMusic('cistern_court', { fadeMs: 0 });
+  $('moon-log').textContent = 'Cistern Court plays for a moment first…\n';
+  moonTimers = MOONRISE.map(([t, what, fn]) => setTimeout(() => { fn(); $('moon-log').textContent += `${t.toFixed(1).padStart(5)} s  ${what}\n`; refreshNow(); }, (t + 3) * 1000));
 };
 
 for (const k of ['master', 'music', 'sfx']) {
-  const el = $(`vol-${k}`);
-  el.value = audio.getVolume(k);
-  el.oninput = () => audio.setVolume(k, Number(el.value));
+  const s = $(`vol-${k}`);
+  s.value = audio.getVolume(k);
+  s.oninput = () => audio.setVolume(k, Number(s.value));
 }
 $('mute').checked = audio.isMuted();
 $('mute').onchange = () => audio.setMuted($('mute').checked);
 $('wrong').oninput = () => { audio.setWrongness(Number($('wrong').value)); $('wrong-val').textContent = $('wrong').value; };
 
 function drawWave(buffer) {
-  const cv = document.createElement('canvas');
-  cv.className = 'wave';
-  cv.width = 320; cv.height = 56;
+  const cv = el('canvas', { className: 'wave', width: 320, height: 56 });
   const g = cv.getContext('2d');
   g.fillStyle = '#101020'; g.fillRect(0, 0, cv.width, cv.height);
   g.fillStyle = '#88a8f8';
@@ -158,43 +242,111 @@ function drawWave(buffer) {
   return cv;
 }
 
-/** Render and measure every track and effect. Also used by tests/audio/check-audio.mjs. */
+/** Render and measure every track, effect, and loop, plus the moonrise wind-down. */
 async function checkAll() {
   const rows = [];
   for (const id of audio.MUSIC_IDS) {
     const c = compiled(id);
-    // Long enough to cross the loop point once (or to let a cue's echo die away).
     const seconds = c.loopSteps ? c.introSeconds + c.loopSeconds + 4 : c.introSeconds + 6;
     const raw = await renderMusic(id, seconds, { limiter: false });
     const lim = await renderMusic(id, Math.min(seconds, 20));
     rows.push({ kind: 'music', id, raw: analyze(raw), limited: analyze(lim), buffer: raw, length: c.loopSteps ? c.loopSeconds : c.introSeconds });
   }
+  {
+    // The moonrise winding down 8 s in over 4.5 s: it should fall silent by itself.
+    const raw = await renderMusic('moonrise', 22, { limiter: false, windDownAt: 8, windDownSec: 4.5 });
+    const a = analyze(raw);
+    rows.push({ kind: 'music', id: 'moonrise (wind-down)', raw: a, limited: a, buffer: raw, length: a.soundUntil });
+  }
   for (const id of audio.SFX_IDS) {
-    const raw = await renderSfx(id, 3.5, { limiter: false });
-    const lim = await renderSfx(id, 3.5);
+    const raw = await renderSfx(id, 6, { limiter: false });
+    const lim = await renderSfx(id, 6);
     const a = analyze(raw);
     rows.push({ kind: 'sfx', id, raw: a, limited: analyze(lim), buffer: raw, length: a.soundUntil });
   }
+  for (const id of audio.LOOP_IDS) {
+    // Render past the loop's first event (some, like hull_far, wait a while before sounding).
+    const raw = await renderLoop(id, Math.max(6, (SFX[id].loop.offset ?? 0) + 5), { limiter: false });
+    const a = analyze(raw);
+    rows.push({ kind: 'loop', id, raw: a, limited: a, buffer: raw, length: a.soundUntil });
+  }
   return rows;
 }
+
+async function balanceAll() {
+  const out = {};
+  for (const id of audio.MUSIC_IDS) out[id] = await balanceReport(id, 3);
+  return out;
+}
+
+async function spectrumAll() {
+  const out = {};
+  for (const id of audio.MUSIC_IDS) out[id] = await spectrumReport(id);
+  return out;
+}
+
+function lintAll() {
+  return Object.fromEntries(Object.entries(SONGS).map(([id, s]) => [id, lintSong(s)]));
+}
+
 window.audioDev = {
   checkAll: async () => (await checkAll()).map(({ buffer, ...r }) => r),
+  balanceAll, spectrumAll, lintAll,
 };
+
+const f1 = (x) => (Number.isFinite(x) ? x.toFixed(1) : '—');
 
 $('check').onclick = async () => {
   $('report').textContent = 'Rendering…';
   const rows = await checkAll();
-  const t = document.createElement('table');
-  t.innerHTML = '<tr><th>id</th><th>length s</th><th>peak dB</th><th>RMS dB</th><th>loudest 0.3 s</th><th>after limiter</th><th></th></tr>';
+  const t = el('table');
+  t.innerHTML = '<tr><th>id</th><th>length s</th><th>peak dB</th><th>RMS dB</th><th>loudest 0.3 s</th><th>after clipper</th><th></th></tr>';
   for (const r of rows) {
-    const tr = document.createElement('tr');
-    const f = (x) => x.toFixed(1);
+    const tr = el('tr');
     const bad = r.raw.peakDb > -1 ? ' class="bad"' : '';
-    tr.innerHTML = `<td>${r.kind}: ${r.id}</td><td>${f(r.length)}</td><td${bad}>${f(r.raw.peakDb)}</td><td>${f(r.raw.rmsDb)}</td><td>${f(r.raw.loudestWindowDb)}</td><td>${f(r.limited.peakDb)}</td><td></td>`;
+    tr.innerHTML = `<td>${r.kind}: ${r.id}</td><td>${f1(r.length)}</td><td${bad}>${f1(r.raw.peakDb)}</td><td>${f1(r.raw.rmsDb)}</td><td>${f1(r.raw.loudestWindowDb)}</td><td>${f1(r.limited.peakDb)}</td><td></td>`;
     tr.lastChild.append(drawWave(r.buffer));
     t.append(tr);
   }
   $('report').replaceChildren(t);
+};
+
+$('balance').onclick = async () => {
+  $('report').textContent = 'Rendering each voice alone…';
+  const all = await balanceAll();
+  const t = el('table');
+  t.innerHTML = '<tr><th>track / section</th><th>melody</th><th style="text-align:left">A-weighted level of each voice alone (dB)</th><th></th></tr>';
+  for (const [id, sections] of Object.entries(all)) {
+    for (const s of sections) {
+      const tr = el('tr');
+      const levels = Object.entries(s.levels).map(([k, v]) => (k === s.melody ? `<b>${k} ${f1(v)}</b>` : `${k} ${f1(v)}`)).join(', ');
+      tr.innerHTML = `<td>${id} / ${s.pattern}</td><td>${s.melody ?? '—'}</td><td style="text-align:left">${levels}</td><td class="${s.ok ? 'ok' : 'bad'}">${s.ok ? 'ok' : `too close: ${s.rivals.join(', ')}`}</td>`;
+      t.append(tr);
+    }
+  }
+  $('report').replaceChildren(t);
+};
+
+$('spectrum').onclick = async () => {
+  $('report').textContent = 'Rendering…';
+  const all = await spectrumAll();
+  const t = el('table');
+  t.innerHTML = `<tr><th>track</th>${BANDS.map(([n, lo, hi]) => `<th>${n}<br><span class="note">${lo}–${hi} Hz</span></th>`).join('')}<th>A-weighted</th></tr>`;
+  for (const [id, s] of Object.entries(all)) {
+    const tr = el('tr');
+    tr.innerHTML = `<td>${id}</td>${BANDS.map(([n]) => `<td>${f1(s.bands[n])}</td>`).join('')}<td>${f1(s.aWeightedDb)}</td>`;
+    t.append(tr);
+  }
+  $('report').replaceChildren(t, el('p', { className: 'note', textContent: 'Band energy in dB relative to the whole track. Bass and mid carry most of the energy in all of them; sub below −12 and low-mid no more than 3 dB above mid keep things from getting muddy.' }));
+};
+
+$('lint').onclick = () => {
+  const out = [];
+  for (const [id, { issues, stats }] of Object.entries(lintAll())) {
+    out.push(`== ${id}  ${Object.entries(stats).map(([k, v]) => `${k} ${v}`).join(', ')}`);
+    for (const i of issues) out.push(`  ${i.level.padEnd(4)} ${i.where}: ${i.msg}`);
+  }
+  $('report').replaceChildren(el('pre', { textContent: out.join('\n') }));
 };
 
 setInterval(refreshNow, 500);

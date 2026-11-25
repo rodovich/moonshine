@@ -1,10 +1,45 @@
 // Registry of music tracks, by id. Add new songs here.
-import neighborhood from './neighborhood.js';
 import title from './title.js';
+import cistern_court from './cistern_court.js';
+import moonrise from './moonrise.js';
+import morning_after from './morning_after.js';
 import wrongness from './wrongness.js';
+import neighborhood from './neighborhood.js';
+import harbor from './harbor.js';
+import archive from './archive.js';
+import discovery from './discovery.js';
+import downstairs from './downstairs.js';
+import { reveal, reveal_last } from './reveal.js';
+import pumps from './pumps.js';
+import neighborhood_thin from './neighborhood_thin.js';
+import climb from './climb.js';
+import relay from './relay.js';
+import hauling from './hauling.js';
+import keel from './keel.js';
+import moon_true from './moon_true.js';
+import bath from './bath.js';
+import ending from './ending.js';
 
 export const SONGS = {
   title,
-  neighborhood,
+  cistern_court,
+  moonrise,
+  morning_after,
   wrongness,
+  neighborhood,
+  harbor,
+  archive,
+  discovery,
+  downstairs,
+  reveal,
+  reveal_last,
+  pumps,
+  neighborhood_thin,
+  climb,
+  relay,
+  hauling,
+  keel,
+  moon_true,
+  bath,
+  ending,
 };

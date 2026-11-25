@@ -32,6 +32,7 @@ export default {
   items: { brass_key: { ... }, ... },                        // by id
   scripts: { intro: async (g) => { ... } },                  // runnable with ?run=intro
   onNewGame: async (g) => { ... },                           // optional, once per new game
+  onLoad: [async (g) => { ... }, ...],                       // optional, once per loaded game (see Old saves)
   lighting: { dusk: [ ... ] },                               // optional: add or replace lighting presets
   defaults: {
     useFail: async (g, target, itemId) => g.describe("That won't help."), // item has no effect
@@ -42,7 +43,15 @@ export default {
 
 Game state is `{ flags, inventory, looks, map, x, y, facing }` (`looks` counts how often each thing has been looked at). It saves to `localStorage` whenever a script finishes (walking through a door is a script), never in the middle of one, so a reload can't land halfway through a cutscene. The title screen offers Continue when a save exists.
 
-**Old saves.** `main` deploys on every push, so players will load saves from older builds. On load the engine fills in missing fields, drops unknown item ids, falls back to `content.start` if the saved map no longer exists, and moves the player to the map's `spawn` (or the nearest open tile) if they'd stand inside something solid or off the map. For renamed flags or items, give the content a `migrate: (state) => state` function; it runs first. Characters' positions after `moveNpc` aren't saved: they reset to the map's layout when it reloads, so put lasting moves in the entity's `x`/`y` behind a `when`, or `g.place` them in `onEnter`.
+**Old saves.** `main` deploys on every push, so players will load saves from older builds. On load the engine fills in missing fields, drops unknown item ids, falls back to `content.start` if the saved map no longer exists, and moves the player to the map's `spawn` (or the nearest open tile) if they'd stand inside something solid or off the map. For renamed flags or items, give the content a `migrate: (state) => state` function; it runs first, on the raw saved state. For fixes that need the script API, list functions in `content.onLoad`: each runs once, in order, every time a game is loaded (Continue, `?start=continue`, or a debug start with `?map=`), before the first map's `onEnter`, and never on a new game. Write them so they do nothing on a save that doesn't need them, and keep them until no player could still hold such a save. One that throws is logged and skipped. For example, retiring an item:
+
+```js
+onLoad: [
+  (g) => { if (g.hasItem('hat') && !g.flag('tourist.hasHat')) g.takeItem('hat'); },
+],
+```
+
+Item ids missing from `content.items` are dropped before `onLoad` runs, so to test for a retired item, keep its entry until the rule is gone. Characters' positions after `moveNpc` aren't saved: they reset to the map's layout when it reloads, so put lasting moves in the entity's `x`/`y` behind a `when`, or `g.place` them in `onEnter`.
 
 ## Maps
 
@@ -52,7 +61,7 @@ A map is a JS object; put each in its own module under `src/content/maps/`.
 export default {
   id: 'harbor_steps',
   tileset: townTiles,            // see Tilesets
-  music: 'harbor',               // played on entry; null stops music; omit to leave it alone
+  music: 'harbor',               // played on entry; null stops music; omit to leave it alone; or (g) => id
   lighting: 'dusk',              // 'day', 'dusk', 'night', or (g) => one of them; see Lighting
   background: 'sea_dark',        // palette color shown outside small maps (default black)
   spawn: [5, 6],                 // default position for ?map= debug starts
@@ -62,7 +71,7 @@ export default {
     '^': 'cloth:over_awning_m',               // an art reference: 'sheet:frame' or 'sheet:frame@palette'
   },                                          // ' ' is always empty
   ground:   [ '....', ... ],     // one character per 16×16 tile; opaque
-  detail:   [ ' #  ', ... ],     // optional: transparent tiles on the ground, under characters
+  detail:   [ ' #  ', ... ],     // optional: transparent tiles on the ground, under characters (`objects` works too)
   overhead: [ ' ^  ', ... ],     // optional: drawn over characters (over_* frames)
   collision: [ '  # ', ... ],    // optional override: '#' solid, 'o' open, anything else = from tiles
   patches: (g) => [ ... ],       // optional: tile changes that follow the story (see below)
@@ -77,9 +86,19 @@ All layers are the same size as `ground`. The legend is shared by all layers, so
 
 **Layering rule (3/4 view).** Ground, then detail, then characters sorted by their feet, then overhead (frames named `over_*`; the engine warns if one lands on another layer). Use the overhead layer only for things that are always above anyone walking there: roof eaves, arch tops, awnings, canopies, lamp tops. A lamp post is a detail tile with its top on the overhead layer. Anything a character can stand both in front of and behind (statues, people) should be an entity with a sprite, so it sorts by y.
 
-**Patches** change tiles as the story moves on: a taken pepper mill leaves a bare counter, the piano's tiles clear from the Squeeze. `patches(g)` returns `[layer, x, y, value]` entries for the current state (`value` as in the legend, or `null` to clear); the engine re-applies them on map load and after every script, restoring tiles whose patch no longer applies. `g.setTile(...)` makes a one-off change that lasts until the map reloads.
+**Patches** change tiles as the story moves on: a taken pepper mill leaves a bare counter, the piano's tiles clear from the Squeeze. `patches(g)` returns `[layer, x, y, value]` entries for the current state (`value` as in the legend, or `null` to clear), or `[layer, x, y, value, w, h]` to fill a rectangle; the engine re-applies them on map load, after every script, and on `setFlag`, restoring tiles whose patch no longer applies. `g.setTile(...)` makes a one-off change that lasts until the map reloads.
 
-**Exits** fire when the player finishes a step onto them by walking (not during a script: `movePlayer` onto a door does nothing, so call `changeMap` yourself). Click-to-walk paths never cross an exit on the way to somewhere else, and an exit is never chosen as "the nearest reachable tile" for an unreachable click.
+**Variants** replace whole layers for big changes (the canals drained, the fountain dry, the Teeth in three stages): `variants: [{ when, ground, detail, overhead, collision, legend }]`. The first variant whose `when` holds is used; layers it leaves out come from the base map, and its `legend` adds to the base legend. Patches apply on top. The map re-checks its variant whenever patches are re-applied, so a scene can drain a canal mid-script with `g.setFlag`.
+
+**Darkness** (the Lamp Halls): `darkness: 0.9` (or `dark`; a number or a function of the state) covers the map in near-black (`darkColor`, default `void`) with holes around lights. Light sources: the map's `lights: [{ x, y, radius, color, when }]` (tiles; or a function returning such a list; `when` lets a flag relight a lamp), entities with `light: radius` or `light: { radius, color }`, and `playerLight` on the map or the content (a radius, `{ radius, color }`, or a function, e.g. `(g) => g.hasItem('moonglass_disc') && { radius: 3, color: 'relic_cyan' }`). Each light cuts a pool that fades out in three bands; a `color` tints the pool. Pools are clipped to the map; give a small room `lightArea: [[x, y, w, h], ...]` (tiles, usually the room including its walls) so light doesn't spill past its walls into the void around it.
+
+**Ambient events** happen on a timer without stopping the player: `ambient: [{ every: [18, 24], when, run: (g) => ... }]` (seconds, a random interval in the range). `run` is a plain callback, not a script, so use non-blocking calls there: `g.bark`, `g.emote`, `g.spawnEffect`, `g.sfx`, `g.setTile`. Timers pause while a script runs. With `script: true`, `run` is queued as a full script instead (it takes control and may `say`, `changeMap`, and so on): a bell that rings on its own after 15 seconds. From any plain callback, `g.runScript(fn)` does the same.
+
+**Audio per map:** `music`, `ambience`, and `musicFilter` may each be a function of the state, like `lighting`, evaluated as the map loads (so the morning's music starts with the fade-in, not after). `ambience: ['crowd', 'wind']` starts those looping sounds when the map loads and fades out the previous map's (ids from the audio module's loops). `musicFilter: 'muffled'` and `step: 'step_stone'` (footstep sound; a tile's own `step` property wins) pass to the audio module if it supports them, and are quietly ignored until then. Scripts can also `g.startLoop(id)` / `g.stopLoop(id, fadeMs)`.
+
+**What Z reaches.** Facing a tile, Z reaches the thing there (any tile of a multi-tile hotspot counts); across a `counter` tile, the thing beyond it; if nothing is ahead, a character standing on Cheryl's own tile, else something diagonally ahead (left or right of the tile in front). So a thing with no free side can still be reached from a diagonal, by keyboard and by click (the walk goes to a diagonal tile when no side is reachable).
+
+**Exits** fire when the player finishes a step onto them by walking. An exit whose `when` fails but has `blocked: 'line'` (a line, a list of lines, or an async function) explains itself in Cheryl's voice and steps her back. `confirm: 'Go down?'` asks first (options `choices`, default Yes / Not yet; anything but the first steps her back). Exits don't fire during a script: `movePlayer` onto a door does nothing, so call `changeMap` yourself. Click-to-walk paths never cross an open exit (or a closed one with `blocked`) on the way to somewhere else; a closed exit without `blocked` is ordinary floor until it opens, and an exit is never chosen as "the nearest reachable tile" for an unreachable click.
 
 ```js
 exits: [
@@ -145,17 +164,22 @@ Everything you can talk to, look at, or bump into that isn't a plain tile is an 
 ```
 
 Shortcuts instead of `interact`:
+- `talks: [first, second, ..., then]`: what it says each time (each entry a line or a list of lines); `talksRepeat: 'cycle'` cycles through the entries after the first instead of repeating the last.
 - `talk: ['line', 'line']`: the entity says them.
 - `look: 'text'` or `look: ['box', 'box']`: Cheryl describes it, the same every time.
-- `looks: [first, second, …, then]`: a different description each time it's looked at; the last repeats. Each entry is a line or a list of lines (boxes).
+- `looks: [first, second, …, then]`: a different description each time it's looked at; the last repeats (`looksRepeat: 'cycle'` cycles). Each entry is a line or a list of lines (boxes).
+- `decline: 'line'`: the catch-all for items with no handler (said by a character, described for an object); see Items for the full order.
+- `bark: { lines, range: 3, every: [4, 8], once, speaker }`: says lines at the top of the screen, without stopping anything, while Cheryl is within `range` (chanting girls, a busker).
+- `emote: { frame: 'note', every: [3, 6], seconds }`: an icon over its head now and then (`note`, `exclaim`, `question`, or a frame from `sheet`).
+- `light: radius`: lights up darkness around it (see Maps).
 
 **Look counters.** Every interaction (not item use) bumps a counter saved in the game state, keyed by map and entity id. `interact` gets the count before this look as its third argument, and `g.looks(id)` reads it. Entities with the same `lookKey` share a counter (all the windows on a facade). Hotspots for wall features or groups of tiles are entities with no sprite: give them a footprint (`w`, `h`) over the tiles and `look`/`looks`.
 
 **Sprites.**
-- *Character sheets* (no `frame`): frames `idle_<dir>_<n>` and `walk_<dir>_<n>` for `down`, `up`, `left`, `right`, as in `src/art/cheryl.js` and `npcs.js`. Idles play with the sheet's `durations`; walk frames advance with distance walked (one frame per 8 px, a 4-frame cycle every two tiles), so feet stay planted at any speed. A missing `left` mirrors `right` (and vice versa); missing idles stand on `walk_<dir>_0`. Frames may be up to 16×32, drawn bottom-centered on the footprint.
+- *Character sheets* (no `frame`), named as in `docs/decisions.md` and `src/art/cheryl.js`: `<dir>_0` stands, `<dir>_1`, `<dir>_2` are the steps (the walk plays 1, 0, 2, 0), for `down`, `up`, `left`, `right`. Longer cycles give `sprite.walk`, e.g. `[1, 2, 3, 4]` for the Kid's run. An optional `idle_<dir>_<n>` animation (a blink) plays while standing, with the sheet's `durations`. The alternative naming `walk_<dir>_<n>` / `idle_<dir>_<n>` also works. Walk frames advance with distance walked (one frame per 8 px), so feet stay planted at any speed. A missing `left` mirrors `right` (and vice versa). Frames may be up to 16×32, drawn bottom-centered on the footprint.
 - *Static sprites*: `sprite: { sheet, frame: 'cat' }`. Numbered frames animate with the sheet's `durations`.
 - `sprite` may also be a function `(g) => sprite`, re-checked after every script (a chessboard that changes with the game).
-- *Poses*: `g.pose(id, 'sit_right')` plays any animation instead of idle/walk until `g.pose(id, null)`. `talkPose: 'jog_down'` plays one while the entity is being talked to.
+- *Poses*: `g.pose(id, 'jog')` plays `jog_<facing>` (or the mirrored side, or `jog` itself) instead of idle/walk until `g.pose(id, null)`, so a pose follows the character's facing; a full name like `'sit_right'` plays as is. `g.pose(id, 'sit_right', { offset: [0, -4] })` shifts the drawing while posed, and `poseOffsets: { sit_right: [0, -4] }` on the entity sets defaults. `talkPose: 'jog'` plays while the entity is being talked to, and a patrol's `nearPose` / `blockedPose` work the same way.
 - `offset: [dx, dy]` nudges the drawing; `layer: 'ground'` draws it under everything that sorts (things lying on the floor).
 
 **Behaviors.**
@@ -165,7 +189,11 @@ Shortcuts instead of `interact`:
 - `{ type: 'patrol', route: [[7, 14], [13, 14], [13, 19], [7, 19]], pause, ghost, blockedPose, stopNear, nearPose, onWaypoint }`: walks the waypoints in a loop. With `ghost: true` tiles don't block it (it hops the hurdle) but characters do; when someone is in the way it waits, playing `blockedPose` if given. With `stopNear: 2` it stops and faces Cheryl while she's within 2 tiles, or while she's walking over to it after a click or tap, playing `nearPose` (or `blockedPose`), then resumes its route. `onWaypoint(g, self, index)` is called at each waypoint (a ding every third lap); it's a plain callback, not a script, so it shouldn't await anything.
 - Scripted moves: `g.moveNpc(...)` at any time.
 
+**Nobody overlaps Cheryl, and nobody traps her.** She can't walk onto a visible character, and no character walks onto her. Her routes go around characters when a way around exists. When characters are the only thing in the way, the route goes through them, and whoever is in the way steps aside when she reaches him: to a tile off her route, walking out of a one-tile corridor ahead of her if he must. Idle characters then walk back to their spot once she's gone by. With the keyboard, one bump just turns her to face him (so she can talk); pushing on (three presses, or holding half a second) asks him to move. Patrollers blocked by her turn round and run their route the other way. Mark a character `blocks: true` if he must hold his tile (a guard in a doorway); routes then treat him like a wall. `solid: false` on a moving character (a patroller or wanderer) means routes may pass through his tile; give such patrols a loop route that leaves any narrow part.
+
 Characters turn to face the player when talked to (`turnToTalk: false` to prevent it), and wandering and patrols pause while any script runs.
+
+**Characters who move between maps.** Define a person once in `content.characters`, with `at: (g) => ({ map, x, y, facing, behavior })` (or `null` when they're nowhere): the Kid in Cistern Court during Act 1 and at the Steps in Act 2. The engine places them on whichever map is loaded and moves them when `at` changes (after a script or a `setFlag`). Everything else on a character is the same as a map entity. A map entity with the same id wins, if you need a one-off.
 
 **Things that change.** To make something disappear for good (a picked-up item), give it `when: (g) => !g.flag('got_key')` and set the flag. To swap an object's look, use a sprite function, two entities with opposite `when`s, or `g.setSprite(id, sprite)`. Entities are re-checked after every script.
 
@@ -181,7 +209,9 @@ items: {
 }
 ```
 
-The player opens the inventory with X/Escape or the bag button (top right), picks an item, and chooses **Use**. They are then "holding" it (a banner shows `Use Brass Key on…`). Keyboard: Z uses it on whatever Cheryl faces; X cancels. Pointer: click a character or object to walk over and use it there; click the banner to cancel. The target's `use[itemId]` handler runs, else `use['*']`, else `defaults.useFail`.
+The player opens the inventory with X/Escape or the bag button (top right), picks an item, and chooses **Use**. They are then "holding" it (a banner shows `Use Brass Key on…`). Keyboard: Z uses it on whatever Cheryl faces; X cancels. Pointer: click a character or object to walk over and use it there; click the banner to cancel. The order: the target's `use[itemId]`; else the item's own `useOn.npc` or `useOn.object` (a line, lines, or a function: "Crowbar on any NPC: No. Absolutely not."); else the target's `use['*']`; else its `decline`; else `defaults.useFail`. An entity counts as an NPC if it has a character sprite; `kind: 'npc'` or `'object'` overrides.
+
+**Look** (a button in the bag; keyboard: Down from the last row to the buttons) examines the selected item: `examine: async (g, looks) => ...`, or `looks: [first, ..., then]` (with `looksRepeat`), or else its `description`. Looks are counted in the save like object looks, and the bag reopens afterwards. `g.trade(take, give)` swaps one item for another.
 
 ## Scripts
 
@@ -249,15 +279,28 @@ Time, camera, and screen effects (all resolve when done; durations in seconds):
 | `wait(seconds)` | Pause. |
 | `fade('out' \| 'in' \| alpha, seconds, color)` | Fade to/from a color (default black), in 8 brightness steps. |
 | `shake(pixels, seconds)` | Screen shake. |
+| `tilt(dx, dy, seconds)` | Eases the whole screen to a steady offset of a pixel or two and holds it (a hull over-tilting), unlike a jittery shake; `tilt(0, 0, seconds)` eases back. Shakes add on top. |
 | `tint(color, amount, seconds, mode)` | Color wash over the world. `mode` is a canvas blend: `'source-over'` (default), `'multiply'`, `'screen'`, `'color'`, `'hue'`, `'saturation'`, `'difference'`. Amount 0 removes it. |
 | `hueShift(degrees, seconds)` | Rotates every color's hue (palette-shift look), snapped to 15-bit color. 0 restores. |
 | `distort(pixels, seconds, { freq, speed })` | Per-scanline wobble. 0 removes it. |
 | `flicker(seconds, { color, rate })` | Rapid inverted flashes. |
-| `clearEffects(seconds)` | Removes tint, hue shift, and distortion. |
+| `clearEffects(seconds)` | Removes tint, hue shift, distortion, and tilt. |
 | `panCamera(x, y, speed)` / `followPlayer(speed)` | Glide the camera to a tile and back to Cheryl. |
 | `setLighting(name, seconds)`, `lighting` | Crossfade the scene lighting to `'day'`, `'dusk'`, `'night'`, a preset from `content.lighting`, or `null`; 0 seconds is a hard cut. Lasts until the next map load, which applies that map's own `lighting`. |
 | `showPicture(spec, { fade })` / `hidePicture({ fade })` | Replace the map with a full-screen 256×224 picture (a vista): `{ sheet, frame, palette }` or a function `(ctx, ms)` that draws it, `ms` since it appeared. Text boxes, shake, and effects still work over it. `fade` is in seconds; 0 is a hard cut. |
+| `waitForInput()` | Resolves on the next key or tap. For a picture the player dismisses: `await g.showPicture(plan, { fade: 0 }); await g.waitForInput(); await g.hidePicture({ fade: 0 });` (the Ship Plan, as an item's `examine`). |
+| `credits(lines, { picture, speed, skipAfter, hold, fade })` | A credits roll: centered lines rising over a full-screen picture (`{ sheet, frame }`, a draw function, or black) at `speed` px per second (default 14). A line is a string (`''` for a gap) or `{ text, heading: true }` in gold. The last line stops mid-screen and holds `hold` seconds; after `skipAfter` seconds any key or tap jumps to it. Then usually `await g.toTitle()`. |
+| `markComplete()` | Marks the game finished (flag `game.complete`, saved at the end of the script or by `toTitle`). Put Cheryl where the epilogue should reopen first: Continue returns her there with the flag set. |
 | `card(text, seconds)` | Centered text on black ("Cheryl did not sleep well."), drawn above fades. |
+| `bark(speaker, text, { seconds })` | One line of speech at the top of the screen that doesn't stop the player or the script (a chant, a voice from a window). |
+| `say(speaker, line, { position: 'top' })` | A normal (blocking) line with its box at the top of the screen: an off-screen voice, the Clockmaker in his belfry. `'bottom'` and `'auto'` (the default) also work. |
+| `emote(id, frame, { seconds })` | An icon over a character's head (`'note'`, `'exclaim'`, `'question'`). |
+| `spawnEffect({ sprite, path or at, speed, seconds, offset, layer })` | A short-lived sprite moving along tiles (a trickle into a joint, a puff of mist); resolves when it's gone. `layer: 'top'` draws it among the characters instead of on the ground. |
+| `tween(id, { offset, seconds, clipBelow })` | Slides an entity's drawing by `offset` pixels; `clipBelow` hides whatever goes below its footprint (lowering into a hole). |
+| `cycle(flag, values)` | Steps a flag to the next value in a list and returns it (a mirror's three positions, a valve). Pair it with a sprite function. |
+| `talk([[speaker, line], [null, line], ...])` | A conversation with several speakers; `null` (or a plain string) is Cheryl's description. |
+| `trade(takeId, giveId)` | Take one item and give another. |
+| `refresh()` | Re-check entities, characters, variants, and patches now. |
 | `hint(text, seconds = 6, { untilBag })` | A small box at the bottom (wrapped if long) that fades in and out without blocking anything (control hints). It hides, and its clock stops, while dialog or the bag is open. `untilBag: true` removes it when the player opens the bag; pass `Infinity` seconds to keep it until then. |
 | `usingTouch` | True when the player is on a touch screen (to word hints). |
 
@@ -269,18 +312,20 @@ Maps, audio, misc:
 
 | Call | What it does |
 |---|---|
-| `changeMap(id, x, y, facing, { fade, seconds })` | Fades out, loads, fades in, then runs the map's `onEnter`, all before it resolves: `await g.changeMap('b'); await g.say(...)` shows the say after b's intro. |
+| `changeMap(id, x, y, facing, { fade, seconds })` | Fades out, loads, fades in, then runs the map's `onEnter`, all before it resolves: `await g.changeMap('b'); await g.say(...)` shows the say after b's intro. `fade: false` is a hard cut (montages). |
+| `changeMap(id, x, y, facing, { cutscene: true })` | Visits a map without Cheryl: her real map, spot, and facing are kept; she's hidden; the map's `onEnter` doesn't run (`onEnter: true` runs it); nothing is saved. `x`/`y` may be `null` (the map's spawn). Several visits in a row are fine. |
+| `restorePlayer({ fade })` | Ends a cutscene visit: back to Cheryl's own map and spot, visible. If a script ends without it, the engine restores her (with a console warning). |
+| `cameraFollow(id, speed)` | Keeps the camera on another character as they move, also across cutscene visits (the Kid's relay run); `speed` glides (px per frame), 0 snaps. `followPlayer()` returns to Cheryl. |
 | `map` | Current map id. |
-| `playMusic(id)`, `stopMusic(fadeMs)`, `sfx(id)` | Audio (see below). |
-| `playCue(id, { resume })` | A one-shot music cue; the current track dips and comes back (unless `resume: false`). |
-| `setWrongness(amount)` | How far the Wrongness has crept into the music, 0–1. |
+| `playMusic(id, { fadeMs })`, `stopMusic(fadeMs)`, `sfx(id)`, `playCue(id, { resume })`, `windDownMusic(ms)`, `startLoop(id)`, `stopLoop(id, fadeMs)`, `setWrongness(0..1)` | Audio (see below and `src/audio/README.md`). |
+| `sfx(id, { at, range, volume })` | A sound placed in the world: `at` is a tile `[x, y]` or an entity id, and the volume falls off with Cheryl's distance, silent beyond `range` tiles (default 12). Use it for map-wide ambient sounds (a chess tap, the Kid's hop). |
 | `save()` | Save now (saving also happens automatically). |
 | `toTitle()` | Save and return to the title screen (end of a slice). |
 | `random(min, max)` | Integer from the game's RNG (seedable with `?seed=`). |
 
 ## Audio boundary
 
-The engine calls audio only through `src/engine/sound.js`, a bridge to the audio module (`src/audio/index.js`, documented in `src/audio/README.md`). It exports `unlockAudio()` (first key press or tap), `playMusic(id)`, `stopMusic(fadeMs)`, `playCue(id, opts)`, `sfx(id)`, and `setWrongness(0..1)`, all also on the script API. The bridge maps the engine's generic sound ids (`text`, `text_cheryl`, `cursor`, `select`, `item`) to the audio ids and ignores unknown ids with a one-time console warning, so content can name music or sounds before they exist. Maps play their `music` on entry.
+The engine calls audio only through `src/engine/sound.js`, a bridge to the audio module (`src/audio/index.js`, documented in `src/audio/README.md`). It exports `unlockAudio()` (first key press or tap), `playMusic(id)`, `stopMusic()`, `playCue(id, { resume })`, `windDownMusic(ms)`, `sfx(id)`, `startLoop(id)`, `stopLoop(id, fadeMs)`, `stopAllLoops()`, and `setWrongness(0..1)`. The bridge maps the engine's generic sound ids (`text`, `text_cheryl`, `select`, `item`) to the audio ids (`cursor` has its own sound) and ignores unknown ids with a one-time console warning, so content can name music or sounds before they exist. Maps play their `music` on entry.
 
 ## Debug parameters
 
@@ -311,8 +356,15 @@ Examples:
 npm install
 npx playwright install chromium
 npm test                 # desktop and phone smoke tests (own server on port 8131); screenshots in tests/screenshots/
+npm run check            # content validator (also part of npm test)
 node tests/shot.js "?map=test_street" out.png 800 ArrowRight z   # one screenshot after some keys
 ```
+
+## Authoring aids
+
+- **`npm run check`** (`node tests/check-content.mjs`) loads the content in Node and reports errors: legend characters without entries, layers of different sizes, tile references to missing sheets, frames, or palettes, exits to unknown maps or arriving on solid tiles (an exit's `checkFlags: ['act1.moonrise']` checks the arrival with those flags set, through the destination's variants and patches, for exits only usable later in the story), `changeMap` calls to unknown maps or solid tiles, unknown item ids in scripts and `use` handlers, entity ids that aren't on any map, characters placed on solid tiles, unknown lighting. It warns about flags read but never set (typos), flags set but never read, music and sounds that don't exist yet, and `over_*` frames off the overhead layer. Script checks read each function's source, so they see literal ids only.
+- **`npm run check:keyboard`** (`node tests/check-keyboard.mjs`, also a suite test) checks that every interactable thing can be reached by keyboard alone: for every map in every story state listed in the file, a reachable tile beside it (or diagonal to it) from which facing it and pressing Z reaches that thing under the engine's own rules (priority, counters, diagonals). Add a line to its `STATES` when an act adds a state. Something meant to be out of reach in some state (the Fountain behind the Mayor's rope) sets `unreachable: 'reason'` or `(g) => reason or null`. The suite test only lists failures until `KEYBOARD_STRICT=1`.
+- **The map viewer** at `/dev/map.html` draws any map whole, with solid tiles, exits (faint when closed), triggers, entity footprints, and spawn points overlaid. Enter flags and items to see a story state (variants, patches, `when`s, sprite functions, and characters' `at` all follow). Hover a tile for its coordinates, tiles, and anything defined there; click to open the game there with those flags and items.
 
 ## Engine decisions
 
@@ -328,6 +380,11 @@ node tests/shot.js "?map=test_street" out.png 800 ArrowRight z   # one screensho
 - **Display scaling.** The 256×224 frame is scaled by a whole number of *device* pixels when that uses at least 80% of the possible size; otherwise (very small screens) by the exact fit, with nearest-neighbor sampling. On a typical phone in portrait this gives a crisp 4× in device pixels. On tall portrait screens the frame sits near the top, leaving room below for thumbs.
 - **Text** is a variable-width bitmap font (`src/art/font.js`, 7 px caps, 9 px cell, 12 px lines), revealed at about 42 characters per second with short pauses after punctuation. Any key or tap reveals the rest; the next press advances. The box sits at the bottom, or the top when Cheryl is in the lower part of the screen. NPC lines have a navy box and a speaker tab; Cheryl's descriptions a warm brown box; her thoughts the warm box in italics with a dashed frame.
 - **One script at a time**, queued; the world pauses player control while scripts run. Autosave after each script and map change.
+
+- **Text boxes unfold** over 4 frames when they open, like SNES windows, but not between back-to-back boxes in a conversation. A key or tap during the unfold isn't lost; it reveals the text as soon as the box is open.
+- **Feel targets** (checked against SNES-era adventures): walking 80 px/s; text about 42 characters a second with punctuation pauses; door fades a quarter second each way in 8 brightness steps; click-to-walk starts on the next frame, and a new click mid-walk re-routes from the tile being entered.
+- **Browsers.** The suite runs in Chromium and WebKit, plus Pixel 7 and iPhone 13 touch profiles (`npx playwright test --project=webkit`, `--project=iphone`). Audio unlocking is retried on every key and pointer gesture (down and up) until it succeeds, since iOS Safari only honors some gestures. Known limit: on iPhones with the ringer switch on silent, Web Audio is muted by the system.
+- **Performance.** `tests/perf.spec.js` walks the 64×48 stress map (`?map=test_big`, 40 wandering people, night lighting with lamps) and measures our CPU time per frame: about 1 ms in Chromium and 0.3 ms in WebKit; 2-2.5 ms with darkness, a hue shift, and the wobble all on; and 6 ms walking (9 ms with effects) with Chromium's CPU throttled 6× (roughly a low-end phone), against a 16.7 ms budget. `?debug=1` shows live update and draw times.
 
 ## Module map
 

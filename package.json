@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "serve": "node tests/serve.js",
-    "test": "playwright test"
+    "test": "playwright test",
+    "check": "node tests/check-content.mjs && node tests/check-art.mjs",
+    "check:keyboard": "node tests/check-keyboard.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.49.0"

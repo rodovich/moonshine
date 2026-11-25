@@ -44,6 +44,8 @@ export class Effects {
     this.wavePhase = 0;
     this.shakeAmp = 0;
     this.shakeTicks = 0;
+    this.tiltX = 0;
+    this.tiltY = 0;
     this.flickerTicks = 0;
     this.flickerColor = '#ffffff';
     this.flickerRate = 4;
@@ -157,6 +159,8 @@ export class Effects {
       this.tween('tintAmount', 0, seconds),
       this.tween('hue', 0, seconds),
       this.tween('waveAmp', 0, seconds),
+      this.tween('tiltX', 0, seconds),
+      this.tween('tiltY', 0, seconds),
     ]);
   }
 
@@ -182,10 +186,19 @@ export class Effects {
     this.wavePhase += this.waveSpeed;
   }
 
+  // Ease the whole screen to a steady offset of (dx, dy) pixels over
+  // `seconds` and hold it there (a hull listing); tilt(0, 0, s) eases back.
+  tilt(dx, dy, seconds = 1) {
+    return Promise.all([this.tween('tiltX', dx, seconds), this.tween('tiltY', dy, seconds)]);
+  }
+
+  // Screen offset this frame: the held tilt (whole pixels) plus any shake.
   shakeOffset() {
-    if (!this.shakeAmp) return [0, 0];
+    const tx = Math.round(this.tiltX || 0);
+    const ty = Math.round(this.tiltY || 0);
+    if (!this.shakeAmp) return [tx, ty];
     const a = this.shakeAmp * Math.min(1, this.shakeTicks / 10 + 0.3);
-    return [Math.round((Math.random() * 2 - 1) * a), Math.round((Math.random() * 2 - 1) * a)];
+    return [tx + Math.round((Math.random() * 2 - 1) * a), ty + Math.round((Math.random() * 2 - 1) * a)];
   }
 
   // Effects on the world image (before UI).
@@ -226,8 +239,19 @@ export class Effects {
 }
 
 // Rotate hue of every pixel, then snap to 15-bit color.
+// The frame is copied through its own CPU-side canvas, so the main buffer
+// stays GPU-backed (fast to draw) and only this effect pays for readback.
+let hueCtx = null;
 function applyHue(ctx, degrees) {
-  const img = ctx.getImageData(0, 0, WIDTH, HEIGHT);
+  if (!hueCtx) {
+    const c = document.createElement('canvas');
+    c.width = WIDTH;
+    c.height = HEIGHT;
+    hueCtx = c.getContext('2d', { willReadFrequently: true });
+  }
+  hueCtx.clearRect(0, 0, WIDTH, HEIGHT);
+  hueCtx.drawImage(ctx.canvas, 0, 0);
+  const img = hueCtx.getImageData(0, 0, WIDTH, HEIGHT);
   const d = img.data;
   const a = (degrees * Math.PI) / 180;
   const c = Math.cos(a);
@@ -244,5 +268,9 @@ function applyHue(ctx, degrees) {
     d[i + 1] = Math.min(248, Math.max(0, m[3] * r + m[4] * g + m[5] * b)) & 0xf8;
     d[i + 2] = Math.min(248, Math.max(0, m[6] * r + m[7] * g + m[8] * b)) & 0xf8;
   }
-  ctx.putImageData(img, 0, 0);
+  hueCtx.putImageData(img, 0, 0);
+  ctx.save();
+  ctx.globalCompositeOperation = 'copy';
+  ctx.drawImage(hueCtx.canvas, 0, 0);
+  ctx.restore();
 }

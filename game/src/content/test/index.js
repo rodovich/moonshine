@@ -44,11 +44,20 @@ export const testItemDefs = {
     name: 'Brass Key',
     icon: { sheet: items, frame: 'key' },
     description: "Warm from the sun. Somebody lost it, and somebody's going to want it back.",
+    // Used on any character with no handler of their own for it.
+    useOn: { npc: "I'm not handing my keys to strangers. Even someone else's keys." },
   },
   letter: {
     name: 'Sealed Letter',
     icon: { sheet: items, frame: 'letter' },
     description: 'Addressed to "The Shop." The wax seal has a little crescent moon pressed into it. I\'m not going to open it. Probably.',
+    // Look (in the bag): a different line each time, then cycling after the first.
+    looks: [
+      'I hold it up to the light. Nothing. Good paper.',
+      'It smells faintly of cedar.',
+      'The moon on the seal has a crack in it. Probably the wax.',
+    ],
+    looksRepeat: 'cycle',
   },
 };
 
@@ -59,7 +68,7 @@ const streetMap = {
   id: 'test_street',
   name: 'Test Street',
   tileset: testTileset,
-  music: 'neighborhood',
+  music: 'cistern_court',
   lighting: storyLight,
   spawn: [5, 7],
   legend: {
@@ -163,7 +172,11 @@ const streetMap = {
     { x: 12, y: 4, to: 'test_shop', at: [4, 8], facing: 'up' },
     // A two-tile edge exit: the player keeps their offset across it.
     { x: 16, y: 17, w: 2, to: 'test_lane', at: [8, 1], facing: 'down' },
+    // A closed exit that explains itself, then steps Cheryl back.
+    { x: 0, y: 5, h: 5, to: 'test_lane', at: [2, 2], when: () => false, blocked: "The west end's closed off for repairs. It has been since spring." },
   ],
+  // Every few seconds the cat wonders about something (non-blocking).
+  ambient: [{ every: [6, 10], run: (g) => g.emote('cat', 'question') }],
   triggers: [
     {
       x: 0, y: 12, w: 24,
@@ -188,6 +201,8 @@ const streetMap = {
       x: 9, y: 7, facing: 'down',
       sprite: { sheet: old_man },
       behavior: 'face',
+      emote: { frame: 'note', every: [5, 9] }, // hums now and then
+      decline: "No, no. I've got everything I need. Except my key.",
       interact: async (g, self, looks) => {
         if (g.flag('letter_delivered')) {
           await g.say(self, 'Getting dark early tonight. Darker than it ought to.');
@@ -209,15 +224,6 @@ const streetMap = {
           await g.say(self, 'My key! Keep it, keep it. The shop door, with the awning. My knees won\'t do it.');
         },
       },
-    },
-    {
-      id: 'kid',
-      name: 'Sweaty Kid',
-      x: 14, y: 6,
-      sprite: { sheet: kid },
-      // Stops and faces Cheryl when she's within 2 tiles or walking over to him.
-      behavior: { type: 'patrol', route: [[14, 6], [19, 6], [19, 9], [14, 9]], stopNear: 2 },
-      talk: ["I'm not running. I'm walking really fast in a square.", "Don't tell my mum."],
     },
     {
       id: 'cat',
@@ -286,6 +292,11 @@ const shopMap = {
   name: 'Test Shop',
   tileset: testTileset,
   spawn: [4, 8],
+  // After the letter, the shop goes dark except around Cheryl.
+  darkness: (g) => (g.flag('letter_delivered') ? 0.85 : 0),
+  playerLight: 3,
+  // A lamp on the counter, lit by a flag (colored lights tint their pool).
+  lights: [{ x: 1, y: 3, radius: 2, color: 'lamp_warm', when: (g) => g.flag('counter_lamp') }],
   legend: { x: 'inwall_top', v: 'void', w: 'inwall', '.': 'floor', r: 'rug', c: 'counter', m: 'doormat' },
   ground: [
     'xxxxxxxxxx',
@@ -324,7 +335,7 @@ const laneMap = {
   id: 'test_lane',
   name: 'Test Lane',
   tileset: testTileset,
-  music: 'neighborhood',
+  music: 'cistern_court',
   lighting: storyLight,
   spawn: [8, 2],
   legend: {
@@ -345,6 +356,28 @@ const laneMap = {
     '....................',
     '--------------------',
     '~~~~~~~~~~~~~~~~~~~~',
+  ],
+  // After the letter, the canal has drained: a whole-map variant replaces the
+  // ground layer (placeholder: shaded paving for the canal bed).
+  variants: [
+    {
+      when: (g) => g.flag('letter_delivered'),
+      legend: { ',': 'street:pave_se_shade' },
+      ground: [
+        '========<>==========',
+        '________<>__________',
+        '....................',
+        '....................',
+        '....................',
+        '....................',
+        '..............!.....',
+        '....................',
+        '....................',
+        '....................',
+        '--------------------',
+        ',,,,,,,,,,,,,,,,,,,,',
+      ],
+    },
   ],
   // The lane's sides are walls the art doesn't show yet.
   collision: [
@@ -467,7 +500,80 @@ async function moonrise(g) {
   g.hint('Lighting returns to the map\'s own on the next map load.', 3);
 }
 
-export const testMaps = { test_street: streetMap, test_shop: shopMap, test_lane: laneMap };
+// A character defined once and placed by story state: the Sweaty Kid laps the
+// street until the letter is delivered, then waits in the lane.
+export const testCharacters = {
+  kid: {
+    name: 'Sweaty Kid',
+    sprite: { sheet: kid },
+    // Stops and faces Cheryl when she's within 2 tiles or walking over to him.
+    behavior: { type: 'patrol', route: [[14, 6], [19, 6], [19, 9], [14, 9]], stopNear: 2 },
+    talks: ["I'm not running. I'm walking really fast in a square.", "Don't tell my mum.", 'Forty laps! Or thirty.'],
+    talksRepeat: 'cycle',
+    decline: "Nah. I need SPEED, not stuff.",
+    bark: { lines: ['Faster! Faster!', 'Lap... a lot!'], range: 4, every: [5, 9] },
+    at: (g) => (g.flag('letter_delivered')
+      ? { map: 'test_lane', x: 12, y: 5, facing: 'down', behavior: 'face' }
+      : { map: 'test_street', x: 14, y: 6 }),
+  },
+};
+
+// A stress map for performance checks (?map=test_big&debug=1 shows frame
+// times): 64×48 tiles of street with building blocks, lamps, and 40
+// wandering people, lit for night.
+function bigMap() {
+  const W = 64;
+  const H = 48;
+  const ground = [];
+  const detail = [];
+  const overhead = [];
+  for (let y = 0; y < H; y++) {
+    let g = '';
+    let d = '';
+    let o = '';
+    for (let x = 0; x < W; x++) {
+      const bx = x % 16;
+      const by = y % 12;
+      const inBlock = bx >= 2 && bx < 10 && by >= 1 && by < 6;
+      if (inBlock) g += by < 3 ? 'r' : by === 3 ? 'f' : by === 4 ? (bx % 3 ? 'w' : 'n') : 'b';
+      else g += '.';
+      d += !inBlock && bx === 12 && by === 8 ? '|' : ' ';
+      o += !inBlock && bx === 12 && by === 7 ? '8' : ' ';
+    }
+    ground.push(g);
+    detail.push(d);
+    overhead.push(o);
+  }
+  const people = [];
+  const sheets = [kid, old_man, shopkeeper];
+  for (let i = 0; i < 40; i++) {
+    const x = 1 + ((i * 7) % 60);
+    const y = 7 + ((i * 5) % 4) + 12 * (i % 4);
+    people.push({
+      id: `walker_${i}`, name: 'Passer-by', x, y,
+      sprite: { sheet: sheets[i % 3] },
+      behavior: { type: 'wander', area: [x - 3, y - 1, 7, 3], pause: [0.5, 2] },
+      talk: 'Lovely evening.',
+      emote: i % 5 === 0 ? { frame: 'note', every: [3, 6] } : undefined,
+    });
+  }
+  return {
+    id: 'test_big',
+    name: 'Test Big',
+    tileset: testTileset,
+    lighting: 'night',
+    spawn: [12, 9],
+    legend: {
+      '.': 'pave', r: solid('buildings:roof@ochre'), f: solid('buildings:roof_front@ochre'),
+      w: solid('buildings:window@ochre'), n: solid('buildings:window_closed@ochre'), b: solid('buildings:wall_base@ochre'),
+      '|': solid('props:lamp_post'), 8: 'props:over_lamp_top',
+    },
+    ground, detail, overhead,
+    entities: people,
+  };
+}
+
+export const testMaps = { test_street: streetMap, test_shop: shopMap, test_lane: laneMap, test_big: bigMap() };
 
 export const testScripts = {
   // ?map=test_shop&x=2&y=5&facing=up&items=letter&run=wrongness

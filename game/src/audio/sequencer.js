@@ -26,7 +26,7 @@ export const VELOCITY = { normal: 0.8, accent: 1, ghost: 0.45 };
  * Returns { length, events } where events are
  *   { type: 'note', step, len, midi | drum, vel }, { type: 'vol', step, vol },
  *   or { type: 'inst', step, name }.
- * `where` labels errors (e.g. "neighborhood/A/lead").
+ * `where` labels errors (e.g. "cistern_court/A/lead").
  */
 export function parseChannel(text, { barSteps = 16, where = '?' } = {}) {
   const tokens = text.match(TOKEN_RE) || [];
@@ -110,6 +110,7 @@ export function compileSong(song) {
     let length = null;
     const events = [];
     for (const [chId, text] of Object.entries(pat)) {
+      if (chId === 'harmony' || chId === 'melody') continue; // annotations for lint.js
       const ch = chIndex.get(chId);
       if (ch === undefined) throw new Error(`${song.id}/${name}: unknown channel "${chId}"`);
       const where = `${song.id}/${name}/${chId}`;

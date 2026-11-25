@@ -6,6 +6,7 @@ const W = 20, H = 26;
 
 export function SCENE(state = 'dusk') {
   const morning = state === 'morning';
+  const moonrise = state === 'moonrise';   // Cheryl seated on the full tub's edge, under the night tint
   const blank = () => Array.from({ length: H }, () => Array(W).fill(null));
   const ground = blank(), objects = blank(), overhead = blank();
   const set = (layer, x, y, ref) => { layer[y][x] = ref; };
@@ -35,10 +36,12 @@ export function SCENE(state = 'dusk') {
   set(overhead, 7, 1, 'roof:over_chimney_l'); set(overhead, 8, 1, 'roof:over_chimney_r');
   // herbs, tub, tap, chairs
   set(objects, 1, 2, 'roof_props:herb_basil'); set(objects, 2, 2, 'roof_props:herb_rosemary');
-  const tub = morning ? 'tub_empty' : 'tub_empty';
+  const tub = moonrise ? 'tub_full' : 'tub_empty';
   set(objects, 3, 4, `tub:${tub}_l`); set(objects, 4, 4, `tub:${tub}_r`);
   set(objects, 2, 4, 'tub:tap');
-  set(objects, 2, 7, 'roof_props:chair_fold'); set(objects, 3, 7, 'roof_props:chair_fold');
+  // the sighting pins, in line with the tub on the Gate
+  set(objects, 9, 4, 'sight_pin:wall'); set(objects, 19, 4, 'sight_pin:parapet');
+  set(objects, 2, 7, moonrise ? 'roof_props:chair_cardigan' : 'roof_props:chair_fold'); set(objects, 3, 7, 'roof_props:chair_fold');
   // clotheslines: posts at y3 and y7 on x12 and x15
   for (const x of [12, 15]) {
     set(objects, x, 3, 'laundry:post'); set(objects, x, 7, 'laundry:post');
@@ -60,16 +63,21 @@ export function SCENE(state = 'dusk') {
   // ---------------- Facades (rows 10–11) and the stair at x7 ----------------
   const cheryl = ['wall_l', 'window_box', 'wall', 'door_top', 'wall', 'window', 'wall_r'];
   const cherylBase = ['wall_base_l', 'wall_base', 'wall_base', 'door_bot', 'wall_base', 'wall_base', 'wall_base_r'];
+  // The facades take the dimmer 'facade' plaster so the drop below the roof's coping reads.
+  // At dusk a few windows are lit (the _lit swaps put warm glass in them).
+  const litC = morning ? [] : [5], litN = morning ? [] : [3, 8];
   cheryl.forEach((f, x) => {
-    set(ground, x, 10, f.startsWith('door') ? `facade:${f}` : `buildings:${f}`);
-    set(ground, x, 11, cherylBase[x].startsWith('door') ? `facade:${cherylBase[x]}` : `buildings:${cherylBase[x]}`);
+    const pal = litC.includes(x) ? 'facade_lit' : 'facade';
+    set(ground, x, 10, f.startsWith('door') ? `facade:${f}@dim` : `buildings:${f}@${pal}`);
+    set(ground, x, 11, cherylBase[x].startsWith('door') ? `facade:${cherylBase[x]}@dim` : `buildings:${cherylBase[x]}@facade`);
   });
   const nb = ['wall_l', 'wall', 'wall', 'window', 'wall', 'window_box', 'door_top', 'wall', 'window', 'wall', 'window_box', 'wall_r'];
   const nbBase = ['wall_base_l', 'wall_base', 'wall_base', 'wall_base', 'wall_base', 'wall_base', 'door_bot', 'wall_base', 'wall_base', 'wall_base', 'wall_base', 'wall_base_r'];
   nb.forEach((f, i) => {
     const x = 8 + i;
-    set(ground, x, 10, f.startsWith('door') ? 'facade:door_top@sage' : `buildings:${f}@white_sage`);
-    set(ground, x, 11, nbBase[i].startsWith('door') ? 'facade:door_bot@sage' : `buildings:${nbBase[i]}@white_sage`);
+    const pal = litN.includes(i) ? 'facade_sage_lit' : 'facade_sage';
+    set(ground, x, 10, f.startsWith('door') ? 'facade:door_top@sage_dim' : `buildings:${f}@${pal}`);
+    set(ground, x, 11, nbBase[i].startsWith('door') ? 'facade:door_bot@sage_dim' : `buildings:${nbBase[i]}@facade_sage`);
   });
   set(ground, 7, 8, 'court:stair_head'); set(ground, 7, 9, 'court:stair_cut');
   set(ground, 7, 10, 'court:stair'); set(ground, 7, 11, 'court:stair');
@@ -133,14 +141,19 @@ export function SCENE(state = 'dusk') {
     at('neighbor', 'smooth_left', px(17, 5));
     at('sweaty_kid', 'jog_down', px(13, 15));
   }
+  // the moonrise: Cheryl, in her bathing costume, sits on the tub's west-end rim, facing east, shins
+  // in the water, her cardigan folded on the chair. She stands on (3,5) and the content draws her
+  // sit_tub_right frame 2 px west and 25 px up (offset [-2, -25]), so her back hangs just outside
+  // the tub's west end.
+  if (moonrise) at('cheryl_swim', 'sit_tub_right', [3 * 16 + 8 - 2, 5 * 16 + 16 - 25]);
   // the Pelletiers' cat, sitting: by their gate side of the court at dusk, by the bench in the morning
   at('props', 'cat', morning ? px(12, 12) : px(17, 19));
 
   return {
     title: `Cistern Court — ${morning ? 'morning' : 'dusk'}`,
     ground, objects, overhead, sprites,
-    tint: morning ? 'day' : 'dusk',
-    hero: [3 * 16 + 8, 6 * 16 + 16, 'right'],
+    tint: morning ? 'day' : moonrise ? 'night' : 'dusk',
+    hero: moonrise ? null : [3 * 16 + 8, 6 * 16 + 16, 'right'],
     scale: 2,
   };
 }

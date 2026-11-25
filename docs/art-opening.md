@@ -19,6 +19,7 @@ Modules: `roof.js` (sheets `roof`, `tub`, `roof_props`, `laundry`) and `court.js
 | `=` west / east parapets | `roof:parapet_w`, `parapet_e` | ground |
 | `=` south roof edge | `roof:roof_edge_s`, `roof_edge_sw`, `roof_edge_se` | ground |
 | `=` low wall (x9) | `roof:lowwall`; `lowwall_end_s` (y4), `lowwall_gap` (y5), `lowwall_end_n` (y6) | ground |
+| Sighting pins | `sight_pin:wall` at (9, 4), standing on the low wall's south end; `sight_pin:parapet` at (19, 4), on the east parapet (module `pins.js`). Small bronze pins with a ring on top, green with age, in line with the tub on the Gate | objects |
 | `.` roof floor | `roof:roof_floor_{nw,ne,sw,se}` (2×2 block, like street paving); `roof_floor_ne_patch`, `roof_floor_sw_cracked` | ground |
 | `C` chimney (7–8, 2) | `roof:chimney_l/r`; pots and hats `over_chimney_l/r` on row 1; rattling `over_chimney_rattle_l/r` | ground; overhead |
 | `h` herb pots | `roof_props:herb_basil`, `herb_rosemary` | objects |
@@ -29,7 +30,8 @@ Modules: `roof.js` (sheets `roof`, `tub`, `roof_props`, `laundry`) and `court.js
 | `s` sheets on the N–S lines | `laundry:over_line` (y3); `over_sheet_n`, `over_sheet_m`, `over_sheet_s` (y4–6, flutter) | overhead |
 | Bare N–S lines (after the move) | `laundry:over_line` (y4–5), `over_line_s` (y6) | overhead |
 | Back line, (11,1)–(18,1) | `laundry:backline_<state>_<a–h>_<n\|s>`: columns a–h are x11–18, `n` row 1, `s` row 2. States `sag`, `prop`, `one`, `two` (sheets going up one per beat), `sheets` (flutter), `swung` (the groan). `@grey` for the morning | objects |
-| `D` doors (3 and 14, rows 10–11) | `facade:door_top`, `door_bot` (blue moon-eye studs in the step); the Neighbor's `@sage` | ground |
+| `D` doors (3 and 14, rows 10–11) | `facade:door_top`, `door_bot` (blue moon-eye studs in the step) `@dim`; the Neighbor's `@sage_dim` | ground |
+| `#` `w` facade walls and windows (rows 10–11) | `buildings:` wall, window, and window-box tiles `@facade` (Cheryl's) and `@facade_sage` (the Neighbor's): the wall face a step dimmer than the roof above, so the drop reads. For lit windows at dusk and night use `@facade_lit` / `@facade_sage_lit` (warm glass) on a few of them. | ground |
 | `^` outside stair (x7) | `court:stair_head` (y8), `stair_cut` (y9), `stair` (y10–11), `stair_foot` (y12) | ground |
 | `,` cobbles | `court:cobble_a` … `cobble_e` (pick by a hash of the position so no pattern repeats), `cobble_drain` | ground |
 | `#` court side walls | `court:court_wall_w`, `court_wall_e` | ground |
@@ -81,7 +83,9 @@ Walks use the engine's names: `<dir>_0` stands, `<dir>_1`, `<dir>_2` step.
 | --- | --- |
 | Cheryl: walk and idle, 4 directions | `cheryl:<dir>_0..2`; blink `idle_<dir>` (2 frames) |
 | Cheryl: reach / interact (up, side, down) | `cheryl:reach_up`, `reach_left`, `reach_right`, `reach_down` |
-| Cheryl: sit on the tub edge facing east; stand up | `cheryl:sit_right` (and `sit_left`); `rise_right` is the half-way frame between `sit_right` and `right_0` |
+| Cheryl: sit on the tub edge facing east; stand up | `cheryl:sit_tub_right`: she sits on the tub's west-end rim, facing east, with her shins down in the water (the frame stops them at a pale ring on the waterline, and the tub's own water shows around her, so it works over `tub_full`, `tub_slosh`, and `tub_whirl_wrong`). For the moonrise she stands on (3,5) and the frame is drawn with offset `[-2, -25]` (frame spans world x 46–61, y 39–70 over the tub's left tile at (3,4)), so her back hangs just past the tub's west end, the white rim shows under her seat, and the ring sits in the water. Hide her ground shadow while she sits. `rise_right` is still the half-way frame between sitting and `right_0`; `sit_right`/`sit_left` remain for ledges. See `?only=scene:court&state=moonrise` |
+| Cheryl in her bathing costume (moonrise only): walk left, right, down; stand; sit on the tub edge facing east, feet in the water; stand up | A character sheet of its own, `cheryl_swim` (exported by `cheryl.js`): navy and cream stripes to just above the knee, bare arms and feet, a navy cap with a cream band over her bun. It has the full set of character frames (`<dir>_0..2` in all four directions and the `idle_<dir>` blink), so swap it in with `g.setSprite('cheryl', { sheet: cheryl_swim })` when she steps out from behind the chimney and back with `{ sheet: cheryl }` afterwards; walking works as usual. Poses: `sit_tub_right`, the same geometry as `cheryl:sit_tub_right` (stand on (3,5), offset `[-2, -25]`, no shadow), and `rise_right`/`rise_left` (half-way up). |
+| Her cardigan folded on the nearer chair (2,7) | `roof_props:chair_cardigan`, in place of `chair_fold` on the objects layer: the cardigan folded on the seat, a sleeve over the side |
 | Old Man: seated idle (thinking, reaching for a piece) | `old_man_seated:think_right` (frame 0 chin on hand, frame 1 reaching; durations 2600/900 ms) |
 | Old Man: turning the pepper mill | `old_man_seated:mill_right` (2 frames) |
 | Old Man: sneeze | `old_man_seated:sneeze_right_0` (head back), `sneeze_right_1` (achoo) |
@@ -98,7 +102,7 @@ Walks use the engine's names: `<dir>_0` stands, `<dir>_1`, `<dir>_2` step.
 
 ## Items (`items.js`, sheet `items2`)
 
-`items2:pepper_mill`, `egg_timer`, `clothes_prop`, `bath_plug`, `soap`, `moon_chart`, `hat`.
+`items2:pepper_mill` (black, as the Look text says, with an iron-light rim and gleam down the left so it reads on the navy bag panel), `egg_timer`, `clothes_prop`, `bath_plug`, `soap`, `moon_chart`, `hat`.
 
 ## Effects (`fx.js`)
 
@@ -112,13 +116,21 @@ Walks use the engine's names: `<dir>_0` stands, `<dir>_1`, `<dir>_2` step.
 
 ## The moonrise vista (`vista.js`)
 
-Cheryl's silhouette shows her bun with its coral tie and her coral cardigan. Draw in this order, each frame:
+Cheryl's silhouette, from behind on the tub's rim, wears her bathing costume (bare shoulders and arms, two straps, navy and cream stripes) and the navy cap with its cream band over her bun. Draw in this order, each frame:
 
 1. `vista:bowl_dusk` at (0, 0).
 2. `vista_glow:glow_<n>` with its bottom center at (176, 90), so its top-left is (116, 42). Glow 0 from about 1 s, 1 from 2.2 s, 2 from 3.4 s.
-3. `vista_moon:moon` (2-frame shimmer) centered on x = 176. Its center starts at y = 104, hidden behind the cliffs, rises about 3 px/s, and stops at y = 56. About half of it is up at center y ≈ 86.
-4. `vista_rim:rim` at (0, 0), over the moon.
-5. `vista_twinkle:twinkle` at each point in `VISTA_BASINS` (exported by `vista.js`), offset by (−3, −3), each with its own phase.
-6. `vista_cheryl:cheryl_tub` at (0, 128).
+3. `vista_moon` (2-frame shimmer, 500 ms) centered on x = 176. Its center starts at y = 104, hidden behind the cliffs, and stops at y = 56. About half of it is up at center y ≈ 86. It whitens as it climbs: draw `moon` (pale peach-gold) while its center is below y = 80, `moon_mid` from y = 80, and `moon_high` from y = 64.
+4. `vista_rim:rim` at (0, 0), over the moon. The Gate is a V: its walls slope in through the Rim's dark lower band to a narrow cleft at y 114 (a flat-bottomed notch with sheer walls read as a lighter box in playtest). The glow's outer ring fades out in a checker, so no hard edge shows where the V opens onto it, and `vista_gate_cold` only recolors the cleft.
+5. The moon's path on the Bowl, at (0, 0), after the rim: `vista_path:path_faint` once the moon is half up, then the `path` shimmer (3 frames, 260 ms) about 2 s later. It's pale peach-gold, broken into streaks, and stops at the roofs.
+6. `vista_twinkle:twinkle` at each point in `VISTA_BASINS` (exported by `vista.js`), offset by (−3, −3), each with its own phase.
+7. `vista_pins:pins` at (0, 0) (module `pins.js`): the sighting pins lined up on the Gate. Our low wall runs across the bottom (lit coping at y 214), Her Next Door's dusk-dark roof lies beyond it with her bare clothes posts, and her east parapet's lit top is at y 186. The far pin is small on the parapet at x 128. The near pin is large on our wall at x 128, and its peep ring frames the far pin, so the pair reads as a gunsight pointing straight up the screen at the notch. Draw it after the twinkles so it covers the ones on her roof. In Act 1 the moon rises at x 176, well outside the pins.
+8. `vista_cheryl:cheryl_tub` at (0, 128).
 
-`game/dev/scene-vista.js` plays the sequence in a loop; `?still` holds the moment the moon is half up.
+The Gate goes cold: as the moon clears the ridge off to the side, draw `vista_gate_cold:cold_0` (half) and then `cold_1` (full) over the background, after step 1 and before the glow. The Earth's shadow in the notch deepens a step while the silver glow stays on the moon, so the wrongness is unmistakable.
+
+The picture looks east, opposite the sunset (see [art-direction.md](art-direction.md), Skies): the Earth's shadow on the horizon, the pink Belt of Venus above it, then blue and indigo. The Rim's cliffs catch rose alpenglow, and the glow before the moon is cool silver. The moon itself is pale and faintly peach-gold as it clears the Rim, whitening as it climbs. The dev scene switches at 7 s and 8 s.
+
+`game/dev/scene-vista.js` plays the sequence in a loop, with the moon's height as `content/opening/moonrise.js` has it; `?still` holds the moment the moon is half up, and `?still=<ms>` any moment of the loop.
+
+The QA description sweep added or changed art for this act: see [art-sweep.md](art-sweep.md).

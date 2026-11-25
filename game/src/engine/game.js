@@ -5,6 +5,9 @@
 
 import { Display, WIDTH, HEIGHT } from './display.js';
 import { wrap, drawTextCentered, LINE_HEIGHT } from './text.js';
+import { drawBox, STYLES } from './ui.js';
+import { loadSheet } from './art.js';
+import { uiIcons } from '../art/ui.js';
 import { Input } from './input.js';
 import { Effects } from './effects.js';
 import { TextBox } from './textbox.js';
@@ -37,11 +40,14 @@ export class Game {
     this.rng = makeRng(this.debug.seed ?? Date.now());
     this.display = new Display(parent);
     this.input = new Input(this.display);
-    this.input.onFirstInput = unlockAudio;
+    this.input.onGesture = unlockAudio;
     this.effects = new Effects();
     this.textbox = new TextBox();
     this.inventory = new Inventory(content.items || {});
     this.ticks = 0;
+    // Smoothed milliseconds per update tick and per rendered frame (CPU time
+    // in our code; the browser's compositing comes on top). ?debug=1 shows it.
+    this.perf = { update: 0, render: 0, worstRender: 0 };
     this.scene = null;
 
     if (this.debug.start) {
@@ -52,7 +58,7 @@ export class Game {
         else console.warn(`[debug] no script "${this.debug.run}" in content.scripts`);
       }
     } else {
-      this.scene = new Title(this, { canContinue: hasSave() && !!loadSave() });
+      this.scene = new Title(this, titleState());
       this.effects.fadeAlpha = 1;
       this.effects.fade('in', 0.6);
     }
@@ -84,7 +90,7 @@ export class Game {
     this.input.flush();
     this.card = null;
     this.world = null;
-    this.scene = new Title(this, { canContinue: hasSave() && !!loadSave() });
+    this.scene = new Title(this, titleState());
     this.effects.setLight([], 0);
     await this.effects.clear(0);
     await this.effects.fade('in', 0.6);
@@ -94,6 +100,21 @@ export class Game {
     this.world = new World(this, state);
     this.scene = this.world;
     if (runNewGame && this.content.onNewGame) this.world.run(this.content.onNewGame);
+    // A loaded game (Continue, or a debug start) runs content.onLoad first:
+    // old-save fixes that need the script API. Each runs once, in order, and
+    // one that throws is logged and skipped so the game still loads.
+    const onLoad = [this.content.onLoad || []].flat();
+    if (!runNewGame && onLoad.length) {
+      this.world.run(async (g) => {
+        for (const fn of onLoad) {
+          try {
+            await fn(g);
+          } catch (err) {
+            console.error('[save] an onLoad function failed; skipping it', err);
+          }
+        }
+      });
+    }
     if (this.world.mapDef.onEnter) this.world.run(this.world.mapDef.onEnter);
   }
 
@@ -109,19 +130,62 @@ export class Game {
     this.acc += dt;
     let n = 0;
     while (this.acc >= STEP - 0.01 && n < 8) {
+      const t0 = performance.now();
       guard('update', () => this.update());
+      this.perf.update = this.perf.update * 0.95 + (performance.now() - t0) * 0.05;
       this.acc -= STEP;
       n++;
     }
     if (n === 8) this.acc = 0;
+    const t1 = performance.now();
     guard('render', () => this.render());
+    const ms = performance.now() - t1;
+    this.perf.render = this.perf.render * 0.95 + ms * 0.05;
+    this.perf.worstRender = Math.max(this.perf.worstRender * 0.999, ms);
   }
 
   update() {
     this.ticks++;
+    // Dialogue goes below the frame on tall phones (set before boxes open).
+    const area = this.display.dialogArea;
+    const below = !!(area && this.world && this.scene === this.world);
+    this.textbox.below = below ? { w: area.w, h: area.h } : null;
+    this.textbox.toLocal = below ? (t) => (t.cx == null ? t : this.display.dialogLocal(t.cx, t.cy)) : null;
     this.input.tick();
     this.scene.update(this.input);
     this.effects.update();
+  }
+
+  // Dialogue drawn below the frame on tall phones (null when not in use).
+  dialogImage() {
+    const tb = this.textbox;
+    if (!tb.below || !tb.open) return null;
+    if (!this.dialogCanvas || this.dialogCanvas.width !== tb.below.w || this.dialogCanvas.height !== tb.below.h) {
+      this.dialogCanvas = document.createElement('canvas');
+      this.dialogCanvas.width = tb.below.w;
+      this.dialogCanvas.height = tb.below.h;
+    }
+    const ctx = this.dialogCanvas.getContext('2d');
+    ctx.clearRect(0, 0, tb.below.w, tb.below.h);
+    tb.draw(ctx);
+    return this.dialogCanvas;
+  }
+
+  // The big bag button under the frame on portrait phones (null to hide).
+  touchBarImage() {
+    const w = this.world;
+    if (!this.display.touchBar || !w || this.scene !== w || w.busy || w.textbox.open || w.inventory.open || w.picture) return null;
+    if (!this.barCanvas) {
+      const c = document.createElement('canvas');
+      c.width = 48;
+      c.height = 48;
+      const ctx = c.getContext('2d');
+      ctx.imageSmoothingEnabled = false;
+      drawBox(ctx, 0, 0, 48, 48, STYLES.npc);
+      ctx.drawImage(loadSheet(uiIcons).frame('bag'), 8, 8, 32, 32);
+      this.barCanvas = c;
+    }
+    return this.barCanvas;
   }
 
   // A snapshot for tests and the console.
@@ -165,8 +229,13 @@ export class Game {
     this.scene.draw(ctx);
     this.effects.applyFade(ctx);
     if (this.card) drawCard(ctx, this.card.text);
-    this.display.present(this.effects.waveParams());
+    this.display.present(this.effects.waveParams(), this.touchBarImage(), this.dialogImage());
   }
+}
+
+function titleState() {
+  const save = hasSave() ? loadSave() : null;
+  return { canContinue: !!save, finished: !!(save && save.flags && save.flags['game.complete']) };
 }
 
 function guard(what, fn) {

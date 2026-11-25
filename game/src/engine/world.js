@@ -3,18 +3,19 @@
 // in script.js.
 
 import { WIDTH, HEIGHT } from './display.js';
-import { TileMap, TILE } from './tilemap.js';
+import { TileMap, TILE, layerName, layerRows } from './tilemap.js';
 import { Entity, DIR_VEC, dirBetween } from './entity.js';
 import { findPath, nearestReachable } from './pathfind.js';
 import { makeApi } from './script.js';
 import { Control } from './control.js';
+import { Ambient } from './ambient.js';
 import { writeSave } from './save.js';
 import { colorOf, loadSheet, rgbSetOf } from './art.js';
 import { uiSmall } from '../art/ui.js';
 import { TINTS, EMISSIVE } from '../art/tints.js';
 import { drawText, measure, wrap, LINE_HEIGHT } from './text.js';
 import { STYLES, drawBox } from './ui.js';
-import { playMusic, stopMusic } from './sound.js';
+import { playMusic, stopMusic, setAmbience, setMusicFilter } from './sound.js';
 
 export class World {
   constructor(game, state) {
@@ -34,6 +35,7 @@ export class World {
     this.marker = null;
     this.api = makeApi(this);
     this.control = new Control(this);
+    this.ambient = new Ambient(this);
     this.small = loadSheet(uiSmall);
     this.player = new Entity({ id: 'player', x: state.x, y: state.y, facing: state.facing, ...this.content.player }, true);
     this.player.name = this.content.player.name || 'Cheryl';
@@ -46,7 +48,8 @@ export class World {
     const def = this.content.maps[id];
     if (!def) throw new Error(`no map "${id}"`);
     this.mapDef = def;
-    this.map = new TileMap(def);
+    this.variant = this.pickVariant(def);
+    this.map = new TileMap(this.layerDef());
     this.state.map = id;
     const p = this.player;
     p.x = p.fromX = x;
@@ -62,11 +65,19 @@ export class World {
     this.refreshEntities();
     this.placeSafely(def);
     this.control.reset();
+    this.ambient.reset();
     this.camPan = null;
     this.snapCamera();
     this.applyLighting(0);
-    if (def.music !== undefined) {
-      if (def.music) playMusic(def.music);
+    // Audio: ambience beds and a music filter per map (see sound.js).
+    // music, ambience, and musicFilter may be functions of the state, like
+    // lighting, so a later act can change a map's mood before it fades in.
+    const val = (v) => (typeof v === 'function' ? safeCall(v, this.api) : v);
+    setAmbience(val(def.ambience) || []);
+    setMusicFilter(val(def.musicFilter) || null);
+    const music = val(def.music);
+    if (music !== undefined) {
+      if (music) playMusic(music);
       else stopMusic();
     }
   }
@@ -121,27 +132,84 @@ export class World {
         if (!sameSprite(sprite, e.sprite)) e.setSprite(sprite);
       }
     }
+    this.placeCharacters();
     this.applyPatches();
   }
 
-  // A map's `patches(g)` returns [layer, x, y, tile] changes for the current
-  // state (a taken item leaves a bare counter, a moved piano clears the stair).
+  // content.characters: people defined once, placed by story state.
+  //   kid: { name, sprite, talks, ..., at: (g) => ({ map, x, y, facing, behavior }) or null }
+  // When `at` changes (after a script, or setFlag), the character appears,
+  // leaves, or moves to the new spot.
+  placeCharacters() {
+    for (const [id, ch] of Object.entries(this.content.characters || {})) {
+      const at = ch.at ? safeCall(ch.at, this.api) : null;
+      let e = this.byId.get(id);
+      const here = at && at.map === this.state.map;
+      const key = here ? `${at.x},${at.y},${at.facing || ''},${JSON.stringify(at.behavior || null)}` : null;
+      if (!here) {
+        if (e && e.character) this.removeEntity(e);
+        continue;
+      }
+      if (e && !e.character) continue; // a map entity with the same id wins
+      if (e && e.atKey === key) continue;
+      const def = { ...ch, id, x: at.x, y: at.y, facing: at.facing || ch.facing, behavior: at.behavior !== undefined ? at.behavior : ch.behavior };
+      delete def.at;
+      if (e) this.removeEntity(e);
+      e = new Entity(def);
+      e.character = true;
+      e.atKey = key;
+      e.home = { x: def.x, y: def.y, facing: e.facing };
+      this.entities.push(e);
+      this.byId.set(id, e);
+    }
+  }
+
+  // Map variants: `variants: [{ when, ground, detail, overhead, collision,
+  // legend }]` replace whole layers while `when` holds (the first match wins):
+  // the canals drained, the fountain dry. Layers a variant leaves out come
+  // from the base map; its legend adds to the base legend.
+  pickVariant(def) {
+    const list = def.variants || [];
+    return list.findIndex((v) => !v.when || safeCall(v.when, this.api));
+  }
+
+  layerDef() {
+    const def = this.mapDef;
+    const v = this.variant >= 0 ? def.variants[this.variant] : null;
+    if (!v) return def;
+    return { ...def, ...v, legend: { ...def.legend, ...(v.legend || {}) }, id: def.id, tileset: def.tileset };
+  }
+
+  // A map's `patches(g)` returns [layer, x, y, value] changes for the current
+  // state (a taken item leaves a bare counter, a moved piano clears the
+  // stair). [layer, x, y, value, w, h] fills a rectangle.
   applyPatches() {
+    // A different variant now? Rebuild the tiles first.
+    const v = this.pickVariant(this.mapDef);
+    if (v !== this.variant) {
+      this.variant = v;
+      this.map = new TileMap(this.layerDef());
+      this.patched = [];
+    }
     const fn = this.mapDef.patches;
     if (!fn) return;
     // Undo previous patches, then apply the current list.
     for (const [layer, x, y, tile] of [...(this.patched || [])].reverse()) this.map.setTile(layer, x, y, tile);
     this.patched = [];
-    for (const [layer, x, y, value] of safeCall(fn, this.api) || []) {
-      this.patched.push([layer, x, y, this.originalTile(layer, x, y)]);
-      this.map.setTile(layer, x, y, value);
+    for (const [layer, x0, y0, value, w = 1, h = 1] of safeCall(fn, this.api) || []) {
+      for (let y = y0; y < y0 + h; y++) {
+        for (let x = x0; x < x0 + w; x++) {
+          this.patched.push([layer, x, y, this.originalTile(layer, x, y)]);
+          this.map.setTile(layer, x, y, value);
+        }
+      }
     }
   }
 
   originalTile(layer, x, y) {
-    const rows = this.mapDef[layer];
-    const ch = rows?.[y]?.[x];
-    return ch && ch !== ' ' ? this.mapDef.legend[ch] : null;
+    const def = this.layerDef();
+    const ch = layerRows(def, layerName(layer))?.[y]?.[x];
+    return ch && ch !== ' ' ? def.legend[ch] : null;
   }
 
   // The map's lighting: `lighting` is a preset name ('dusk', 'night', 'day')
@@ -180,17 +248,29 @@ export class World {
 
   // Interactable entity at a tile (solid or not).
   interactableAt(x, y) {
-    for (const e of this.entities) {
-      if (e.isPlayer || !e.visible) continue;
-      if (e.x <= x && e.y <= y && x < e.x + e.w && y < e.y + e.h && isInteractable(e)) return e;
-    }
-    return null;
+    return this.pickEntity(this.entities.filter((e) => !e.isPlayer && e.visible
+      && e.x <= x && e.y <= y && x < e.x + e.w && y < e.y + e.h && isInteractable(e)));
+  }
+
+  // When several interactable things share a tile: solid things win over
+  // non-solid ones (the solid broken edge over the Boatman drawn on it), and
+  // among equals characters win over objects with sprites, which win over
+  // sprite-less hotspots (the Kid standing on the hollow step).
+  pickEntity(list) {
+    const rank = (e) => (e.solid ? 0 : 3) + (e.directional ? 0 : e.art ? 1 : 2);
+    return list.length ? list.reduce((a, b) => (rank(b) < rank(a) ? b : a)) : null;
   }
 
   blocked(x, y, mover = null) {
     if (this.map.solid(x, y)) return true;
     const e = this.entityAt(x, y, mover);
-    return !!e;
+    if (e) return true;
+    // Cheryl never walks onto a character, even one marked solid: false
+    // (that only keeps it from blocking other characters' paths).
+    if (mover && mover.isPlayer) {
+      return this.entities.some((o) => o !== mover && o.directional && o.visible && o.occupies(x, y));
+    }
+    return false;
   }
 
   // Can `mover` (with its footprint) step into x,y?
@@ -203,6 +283,65 @@ export class World {
     return true;
   }
 
+  // Like canEnter for Cheryl's route planning: characters don't count (they
+  // step aside or turn back when she reaches them), unless they're marked
+  // `blocks: true` (a guard who holds a doorway). Objects still block.
+  canPlan(mover, x, y) {
+    for (let dy = 0; dy < mover.h; dy++) {
+      for (let dx = 0; dx < mover.w; dx++) {
+        const tx = x + dx;
+        const ty = y + dy;
+        if (this.map.solid(tx, ty)) return false;
+        for (const o of this.entities) {
+          if (o === mover || !o.visible || !o.occupies(tx, ty)) continue;
+          if (o.directional ? o.def.blocks : o.solid) return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  // Ask character `e`, standing in Cheryl's way, to step aside: to the nearest
+  // tile (within 5 steps) that isn't in `avoid` (her route) and isn't an exit.
+  // In a one-tile corridor that means walking out of it ahead of her. Idle
+  // characters go back to their spot once she's gone by. Returns whether he moves.
+  yieldTo(e, avoid) {
+    if (!e.directional || e.def.blocks || e.moving || e.talking || (e.route && e.route.length)) return false;
+    const start = `${e.x},${e.y}`;
+    const seen = new Map([[start, null]]);
+    const queue = [[e.x, e.y, 0]];
+    let goal = null;
+    for (let i = 0; i < queue.length && !goal; i++) {
+      const [x, y, d] = queue[i];
+      if (d >= 5) continue;
+      for (const [dx, dy] of Object.values(DIR_VEC)) {
+        const nx = x + dx;
+        const ny = y + dy;
+        const k = `${nx},${ny}`;
+        if (seen.has(k) || !this.canEnter(e, nx, ny) || this.isExit(nx, ny)) continue;
+        seen.set(k, `${x},${y}`);
+        if (!avoid.has(k)) {
+          goal = [nx, ny];
+          break;
+        }
+        queue.push([nx, ny, d + 1]);
+      }
+    }
+    if (!goal) {
+      if (!e.warnedYield) console.warn(`[world] ${e.id} is in Cheryl's way and has nowhere to step aside to`);
+      e.warnedYield = true;
+      return false;
+    }
+    const path = [];
+    for (let k = `${goal[0]},${goal[1]}`; k !== start; k = seen.get(k)) path.unshift(k.split(',').map(Number));
+    const b = e.def.behavior;
+    const type = b && (typeof b === 'string' ? b : b.type);
+    if (!e.yieldHome && (!type || type === 'idle' || type === 'face')) e.yieldHome = { x: e.x, y: e.y, facing: e.facing };
+    e.route = pathToDirs([e.x, e.y], path);
+    e.routeGoal = null;
+    return true;
+  }
+
   // Path for an entity to any of `goals`, avoiding solid tiles and entities.
   // If none is reachable and `closest` is set, path to the nearest reachable
   // tile. The player's paths never cross an exit unless it's the goal, so a
@@ -210,17 +349,49 @@ export class World {
   pathFor(mover, goals, { closest = false, ignoreEntities = false } = {}) {
     const goalKeys = new Set(goals.map(([x, y]) => `${x},${y}`));
     const avoidExits = mover.isPlayer;
-    const blocked = (x, y) => {
-      if (ignoreEntities ? this.map.solid(x, y) : !this.canEnter(mover, x, y)) return true;
-      return avoidExits && !goalKeys.has(`${x},${y}`) && this.isExit(x, y);
-    };
+    const exits = avoidExits ? this.activeExits() : null;
+    // Cheryl's routes go around characters when they can. Moving non-solid
+    // characters (patrollers, wanderers) never count, since they move on.
+    // If characters are the only thing in the way, a second pass plans
+    // through them: whoever is in the way steps aside when she gets there.
     const start = [mover.x, mover.y];
-    let path = findPath(start, goals, blocked, this.map.w, this.map.h);
-    if (path || !closest || !goals.length) return path;
-    const target = goals[0];
-    const near = nearestReachable(start, target, blocked, this.map.w, this.map.h);
-    path = findPath(start, [near], blocked, this.map.w, this.map.h);
-    return path;
+    const attempt = (mode) => {
+      const blocked = (x, y) => {
+        let bad;
+        if (mode === 'raw') bad = this.map.solid(x, y);
+        else if (mode === 'enter') bad = !this.canEnter(mover, x, y);
+        else if (mode === 'around') bad = !this.canEnterAround(mover, x, y);
+        else bad = !this.canPlan(mover, x, y);
+        if (bad) return true;
+        return avoidExits && !goalKeys.has(`${x},${y}`) && this.isExit(x, y, exits);
+      };
+      let path = findPath(start, goals, blocked, this.map.w, this.map.h);
+      if (path || !closest || !goals.length) return path;
+      const near = nearestReachable(start, goals[0], blocked, this.map.w, this.map.h);
+      return findPath(start, [near], blocked, this.map.w, this.map.h);
+    };
+    if (ignoreEntities) return attempt('raw');
+    if (!mover.isPlayer) return attempt('enter');
+    const around = findPath(start, goals, (x, y) => !this.canEnterAround(mover, x, y) || (avoidExits && !goalKeys.has(`${x},${y}`) && this.isExit(x, y, exits)), this.map.w, this.map.h);
+    if (around) return around;
+    return attempt('through');
+  }
+
+  // canEnter for Cheryl's first planning pass: everyone blocks except moving
+  // non-solid characters.
+  canEnterAround(mover, x, y) {
+    for (let dy = 0; dy < mover.h; dy++) {
+      for (let dx = 0; dx < mover.w; dx++) {
+        const tx = x + dx;
+        const ty = y + dy;
+        if (this.map.solid(tx, ty)) return false;
+        for (const o of this.entities) {
+          if (o === mover || !o.visible || !o.occupies(tx, ty)) continue;
+          if (o.directional ? o.def.blocks || o.solid || !movesOnItsOwn(o) : o.solid) return false;
+        }
+      }
+    }
+    return true;
   }
 
   // Tiles from which the player can interact with `e`, each with the facing
@@ -246,6 +417,45 @@ export class World {
       }
     }
     return spots;
+  }
+
+  // Fallback spots diagonal to `e`, for things whose sides can't be reached:
+  // Cheryl faces up or down, and Z reaches what's diagonally ahead of her
+  // when nothing is straight ahead (see Control.interactFront).
+  diagonalSpots(e) {
+    const spots = [];
+    const seen = new Set();
+    for (let fy = e.y; fy < e.y + e.h; fy++) {
+      for (let fx = e.x; fx < e.x + e.w; fx++) {
+        for (const [dx, dy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+          const sx = fx + dx;
+          const sy = fy + dy;
+          const k = `${sx},${sy}`;
+          if (seen.has(k) || e.occupies(sx, sy) || !this.map.inBounds(sx, sy) || this.map.solid(sx, sy) || this.isExit(sx, sy)) continue;
+          seen.add(k);
+          spots.push({ x: sx, y: sy, facing: dy > 0 ? 'up' : 'down', diagonal: true });
+        }
+      }
+    }
+    return spots;
+  }
+
+  // What Z reaches from tile (x, y) facing `facing`: the thing straight
+  // ahead (across a counter if need be), else a character on her own tile,
+  // else something diagonally ahead. Shared by the game and the keyboard
+  // reachability check (tests/check-keyboard).
+  zTarget(x, y, facing, self = this.player) {
+    const [dx, dy] = DIR_VEC[facing];
+    let e = this.interactableAt(x + dx, y + dy);
+    if (!e && this.map.counter(x + dx, y + dy)) e = this.interactableAt(x + 2 * dx, y + 2 * dy);
+    const here = this.pickEntity(this.entities.filter((o) => o !== self && !o.isPlayer && o.visible && o.directional && isInteractable(o) && o.x === x && o.y === y));
+    if (here && (!e || !e.directional)) e = here;
+    if (!e) {
+      // Nothing ahead: something diagonally ahead (left or right of the tile in front).
+      const [px, py] = [dy, dx]; // perpendicular
+      e = this.pickEntity([this.interactableAt(x + dx + px, y + dy + py), this.interactableAt(x + dx - px, y + dy - py)].filter(Boolean));
+    }
+    return e;
   }
 
   // ---- Scripts ---------------------------------------------------------
@@ -275,6 +485,11 @@ export class World {
       } catch (err) {
         console.error('[world] refresh after script', err);
       }
+      // A script that ended mid-visit without restorePlayer(): bring Cheryl back.
+      if (this.cutscene && !this.queue.length) {
+        console.warn('[world] a script ended during a cutscene visit; restoring the player');
+        this.run(() => this.restorePlayer({ fade: false }));
+      }
       if (!this.queue.length) this.save();
       this.next();
     }
@@ -292,6 +507,7 @@ export class World {
 
   save() {
     if (this.game.debug.nosave) return;
+    if (this.cutscene) return; // Cheryl is away from her real spot; restorePlayer() first
     const p = this.player;
     this.state.x = p.x;
     this.state.y = p.y;
@@ -302,12 +518,34 @@ export class World {
   // Always called from inside a script (changeMap), so the new map's onEnter
   // runs inline: `await g.changeMap(...)` returns after it. No save here:
   // saves happen only between scripts, so a reload never lands mid-cutscene.
-  async transition(mapId, x, y, facing, { fade = true, seconds = 0.25 } = {}) {
+  // { cutscene: true } visits a map without Cheryl: her real map and spot are
+  // kept, she's hidden, the map's onEnter doesn't run (unless onEnter: true),
+  // and restorePlayer() brings her back. Point the camera with
+  // g.cameraFollow(id) or g.panCamera.
+  async transition(mapId, x, y, facing, { fade = true, seconds = 0.25, cutscene = false, onEnter: runEnter } = {}) {
     if (fade) await this.effects.fade('out', seconds);
-    this.loadMap(mapId, x, y, facing);
+    const p = this.player;
+    if (cutscene && !this.cutscene) this.cutscene = { map: this.state.map, x: p.x, y: p.y, facing: p.facing };
+    const spawn = this.content.maps[mapId]?.spawn || [0, 0];
+    this.loadMap(mapId, x ?? spawn[0], y ?? spawn[1], facing);
+    if (this.cutscene) {
+      p.visible = false;
+      p.solid = false;
+    }
     const onEnter = this.mapDef.onEnter;
     if (fade) await this.effects.fade('in', seconds);
-    if (onEnter) await onEnter(this.api);
+    if (onEnter && (runEnter ?? !this.cutscene)) await onEnter(this.api);
+  }
+
+  // Back from a cutscene visit: Cheryl's map, spot, and facing, visible again.
+  async restorePlayer({ fade = true, seconds = 0.25 } = {}) {
+    const c = this.cutscene;
+    if (!c) return;
+    this.cutscene = null;
+    this.camFollow = null;
+    await this.transition(c.map, c.x, c.y, c.facing, { fade, seconds, onEnter: false });
+    this.player.visible = true;
+    this.player.solid = true;
   }
 
   // Interact with or use an item on an entity (player already in place).
@@ -347,14 +585,41 @@ export class World {
     }
   }
 
+  // Using an item on something. Precedence: the target's use[item]; the
+  // item's own useOn.npc / useOn.object (e.g. "Crowbar on any NPC: No.");
+  // the target's use['*']; the target's `decline` line(s); defaults.useFail.
   async useItemOn(e, itemId) {
     const g = this.api;
     const use = e.def.use || {};
     if (use[itemId]) return use[itemId](g, e, itemId);
+    const kind = e.def.kind || (e.directional ? 'npc' : 'object');
+    const itemUse = this.content.items?.[itemId]?.useOn?.[kind];
+    if (itemUse) return typeof itemUse === 'function' ? itemUse(g, e, itemId) : this.sayOrDescribe(e, itemUse);
     if (use['*']) return use['*'](g, e, itemId);
+    if (e.def.decline) return this.sayOrDescribe(e, e.def.decline);
     const fallback = this.content.defaults?.useFail;
     if (fallback) return fallback(g, e, itemId);
     return g.describe("That doesn't do anything.");
+  }
+
+  // Characters say a line in their own voice; objects get Cheryl's description.
+  sayOrDescribe(e, lines) {
+    const list = Array.isArray(lines) ? lines : [lines];
+    return e.directional && e.name ? this.api.say(e, ...list) : this.api.describe(...list);
+  }
+
+  // Looking at an item in the bag: items.x.examine(g, looks) or items.x.looks
+  // ([first, second, ..., then]; `looksRepeat: 'cycle'` cycles after the first).
+  async examineItem(id) {
+    const def = this.content.items?.[id];
+    if (!def) return;
+    const key = `item:${id}`;
+    this.state.looks = this.state.looks || {};
+    const n = this.state.looks[key] || 0;
+    this.state.looks[key] = n + 1;
+    if (def.examine) return def.examine(this.api, n);
+    const entry = pickByCount(def.looks || [def.description || def.name], n, def.looksRepeat);
+    return this.api.describe(...(Array.isArray(entry) ? entry : [entry]));
   }
 
   // ---- Per-tick update ------------------------------------------------
@@ -368,7 +633,13 @@ export class World {
     } else if (!this.busy) {
       this.control.update(input);
     } else {
-      input.taps(); // discard taps during cutscenes
+      // During cutscenes, input only matters to g.waitForInput().
+      const any = input.taps().length > 0 || input.pressed('confirm') || input.pressed('cancel');
+      if (any && this.inputWaiters?.length) {
+        const ws = this.inputWaiters;
+        this.inputWaiters = [];
+        ws.forEach((r) => r());
+      }
     }
 
     for (const e of this.entities) {
@@ -381,6 +652,7 @@ export class World {
     if (!this.textbox.open && !this.inventory.open && !this.busy) this.control.afterMove(input);
     else this.control.afterMove(null);
     for (const e of this.entities) e.tickAnim();
+    this.ambient.update();
     if (this.picture) this.picture.ms += 1000 / 60;
     // Hints wait (and stay hidden) while a text box or the bag is open.
     if (this.hintState && !this.textbox.open && !this.inventory.open) this.hintState.t++;
@@ -400,6 +672,19 @@ export class World {
   updateNpc(e) {
     if (e.moving) return;
     if (this.busy || e.talking) return;
+    // Stepped aside for Cheryl: go back once she's well past.
+    if (e.yieldHome) {
+      const h = e.yieldHome;
+      const p = this.player;
+      if (e.x === h.x && e.y === h.y) {
+        e.facing = h.facing;
+        e.yieldHome = null;
+      } else if (Math.abs(p.x - h.x) + Math.abs(p.y - h.y) > 2 && !(this.control.path && this.control.path.length)) {
+        const path = this.pathFor(e, [[h.x, h.y]]);
+        if (path) e.route = pathToDirs([e.x, e.y], path);
+        return;
+      } else return;
+    }
     const b = e.def.behavior;
     if (!b || b === 'idle') return;
     const type = typeof b === 'string' ? b : b.type;
@@ -435,7 +720,9 @@ export class World {
     const p = this.player;
     const near = b.stopNear && Math.abs(p.x - e.x) + Math.abs(p.y - e.y) <= b.stopNear;
     const approached = this.control.pending && this.control.pending.entity === e;
-    if (near || approached) {
+    // noStop: [[x, y, w, h], ...] areas where he finishes the stretch first.
+    const mayStop = !(b.noStop || []).some(([ax, ay, aw, ah]) => e.x >= ax && e.y >= ay && e.x < ax + aw && e.y < ay + ah);
+    if ((near || approached) && mayStop) {
       e.facing = dirBetween(e.x, e.y, p.x, p.y) || e.facing;
       const pose = b.nearPose || b.blockedPose;
       if (pose && e.pose !== pose) e.setPose(pose);
@@ -453,8 +740,9 @@ export class World {
     const route = b.route;
     e.patrolIdx = e.patrolIdx ?? 0;
     let [tx, ty] = route[e.patrolIdx % route.length];
+    const step = e.patrolReverse ? route.length - 1 : 1;
     if (e.x === tx && e.y === ty) {
-      e.patrolIdx = (e.patrolIdx + 1) % route.length;
+      e.patrolIdx = (e.patrolIdx + step) % route.length;
       e.patrolWait = Math.round((b.pause || 0) * 60);
       // A plain callback, not a script: it mustn't take control from the player.
       if (b.onWaypoint) b.onWaypoint(this.api, e, e.patrolIdx);
@@ -477,16 +765,38 @@ export class World {
     } else {
       e.facing = dir;
       if (b.blockedPose && e.pose !== b.blockedPose) e.setPose(b.blockedPose);
+      // Cheryl in the way (a narrow flight): after a moment he turns round and
+      // runs his lap the other way, so neither waits on the other for ever.
+      const [nx, ny] = [e.x + dx, e.y + dy];
+      if (p.occupies(nx, ny) || (this.control.path && this.control.path.some(([px, py]) => px === nx && py === ny))) {
+        e.patrolBlockedT = (e.patrolBlockedT || 0) + 1;
+        if (e.patrolBlockedT > 30) {
+          e.patrolBlockedT = 0;
+          e.patrolReverse = !e.patrolReverse;
+          e.patrolIdx = (e.patrolIdx + (e.patrolReverse ? route.length - 1 : 1)) % route.length;
+        }
+      }
+      return;
     }
+    e.patrolBlockedT = 0;
   }
 
-  isExit(x, y) {
-    return (this.mapDef.exits || []).some((ex) => inArea(ex, x, y));
+  // Exits that count for pathing: open ones (no `when`, or `when` holds) and
+  // closed ones that explain themselves (`blocked`). A closed exit without
+  // `blocked` is just floor until it opens.
+  activeExits() {
+    return (this.mapDef.exits || []).filter((ex) => !ex.when || ex.blocked || safeCall(ex.when, this.api));
+  }
+
+  isExit(x, y, exits = null) {
+    return (exits || this.activeExits()).some((ex) => inArea(ex, x, y));
   }
 
   // ---- Camera ---------------------------------------------------------
 
   cameraTarget() {
+    const f = this.camFollow && this.byId.get(this.camFollow);
+    if (f) return { x: f.px + (f.w * TILE) / 2, y: f.py + TILE / 2 - 8, speed: this.camFollowSpeed };
     if (this.camPan) return this.camPan;
     const p = this.player;
     return { x: p.px + TILE / 2, y: p.py + TILE / 2 - 8 };
@@ -511,9 +821,10 @@ export class World {
   updateCamera() {
     const t = this.cameraTarget();
     const want = this.clampCamera(t.x, t.y);
-    if (this.camPan && this.camPan.speed) {
+    const glide = (this.camFollow && this.camFollowSpeed) || (this.camPan && this.camPan.speed);
+    if (glide) {
       // Glide toward the pan target.
-      const s = this.camPan.speed;
+      const s = glide;
       const dx = want.x - this.camF.x;
       const dy = want.y - this.camF.y;
       const dist = Math.hypot(dx, dy);
@@ -534,9 +845,11 @@ export class World {
       this.drawWorld(ctx);
     }
     if (!this.busy && !this.textbox.open && !this.inventory.open && !this.picture) this.control.drawHud(ctx);
+    if (!this.picture) this.ambient.drawBark(ctx);
     this.drawHint(ctx);
     this.inventory.draw(ctx);
-    this.textbox.draw(ctx, this.picture ? 0 : this.player.py - this.cam.y);
+    // On tall phones the game draws the box below the frame instead.
+    if (!this.textbox.below) this.textbox.draw(ctx, this.picture ? 0 : this.player.py - this.cam.y);
   }
 
   drawWorld(ctx) {
@@ -553,6 +866,7 @@ export class World {
     this.map.draw(ctx, 'ground', cx, cy, WIDTH, HEIGHT, ms);
     this.map.draw(ctx, 'detail', cx, cy, WIDTH, HEIGHT, ms);
     this.drawMarker(ctx, cx, cy);
+    this.ambient.drawEffects(ctx, cx, cy, 'ground');
     const lit = this.effects.hasLight();
     if (lit) {
       this.effects.applyLight(ctx, 1);
@@ -568,6 +882,7 @@ export class World {
     const sprites = lit ? this.layer('sprites') : ctx;
     for (const e of sorted) e.drawShadow(sprites, cx, cy);
     for (const e of sorted) e.draw(sprites, cx, cy);
+    this.ambient.drawEffects(sprites, cx, cy, 'top');
     if (lit) this.compositeLit(ctx, sprites, this.content.spriteLight ?? SPRITE_LIGHT);
     const over = lit ? this.layer('overhead') : ctx;
     this.map.draw(over, 'overhead', cx, cy, WIDTH, HEIGHT, ms);
@@ -575,6 +890,8 @@ export class World {
       this.compositeLit(ctx, over, 1);
       this.map.drawGlow(ctx, 'overhead', cx, cy, WIDTH, HEIGHT, ms, this.emissive());
     }
+    this.drawDarkness(ctx, cx, cy);
+    this.ambient.drawEmotes(ctx, cx, cy);
     if (this.game.debug.debug) this.drawDebug(ctx, cx, cy);
     this.effects.applyWorld(ctx);
   }
@@ -583,6 +900,79 @@ export class World {
   emissive() {
     if (!this.emissiveSet) this.emissiveSet = rgbSetOf(this.content.emissive || EMISSIVE);
     return this.emissiveSet;
+  }
+
+  // Darkness with light sources (the Lamp Halls). A map's `darkness` (0..1, or
+  // a function of the state) covers the screen in near-black, with holes
+  // around lights: the map's `lights(g)` ([{ x, y, radius }] in tiles),
+  // entities with `light: radius`, and the player's `playerLight` (a number
+  // or (g) => number, on the map or the content). Holes fade in three bands.
+  drawDarkness(ctx, cx, cy) {
+    const def = this.mapDef;
+    let dark = def.darkness ?? def.dark;
+    if (typeof dark === 'function') dark = safeCall(dark, this.api);
+    if (!dark) return;
+    // A light is a radius in tiles, or { radius, color }.
+    const asLight = (l) => (typeof l === 'number' ? { radius: l } : l);
+    let mapLights = def.lights || [];
+    if (typeof mapLights === 'function') mapLights = safeCall(mapLights, this.api) || [];
+    const lights = mapLights.filter((l) => !l.when || safeCall(l.when, this.api)).map((l) => ({
+      px: l.x * TILE + TILE / 2, py: l.y * TILE + TILE / 2, r: l.radius, color: l.color,
+    }));
+    for (const e of this.entities) {
+      const l = e.visible && e.def.light && asLight(e.def.light);
+      if (l) lights.push({ px: e.px + (e.w * TILE) / 2, py: e.py + (e.h * TILE) / 2 - 8, r: l.radius, color: l.color });
+    }
+    let pl = def.playerLight ?? this.content.playerLight;
+    if (typeof pl === 'function') pl = safeCall(pl, this.api);
+    if (pl) {
+      pl = asLight(pl);
+      lights.push({ px: this.player.px + TILE / 2, py: this.player.py, r: pl.radius, color: pl.color });
+    }
+    const layer = this.layer('dark');
+    layer.fillStyle = colorOf(def.darkColor || 'void');
+    layer.fillRect(0, 0, WIDTH, HEIGHT);
+    // Light pools stay inside the map: no glow over the void around a room.
+    // Clipped to the map, or to the map's lightArea rectangles (tiles), so a
+    // small room's light doesn't spill past its walls into the void.
+    const areas = def.lightArea ? def.lightArea.map(([x, y, w, h]) => [x * TILE - cx, y * TILE - cy, w * TILE, h * TILE]) : [[-cx, -cy, this.map.w * TILE, this.map.h * TILE]];
+    const clipTo = (c) => {
+      c.beginPath();
+      for (const r of areas) c.rect(...r);
+      c.clip();
+    };
+    layer.save();
+    clipTo(layer);
+    layer.globalCompositeOperation = 'destination-out';
+    for (const l of lights) {
+      for (const [k, a] of [[1, 0.4], [0.75, 0.6], [0.5, 1]]) {
+        layer.globalAlpha = a;
+        layer.drawImage(discImage(Math.round(l.r * TILE * k)), Math.round(l.px - cx - l.r * TILE * k), Math.round(l.py - cy - l.r * TILE * k));
+      }
+    }
+    layer.restore();
+    ctx.save();
+    ctx.globalAlpha = Math.min(1, dark);
+    ctx.drawImage(layer.canvas, 0, 0);
+    // Colored lights tint their pool (inner bands a little more).
+    clipTo(ctx);
+    ctx.globalCompositeOperation = 'screen';
+    for (const l of lights) {
+      if (!l.color) continue;
+      const tint = this.layer('tint');
+      for (const [k, a] of [[1, 0.12], [0.5, 0.12]]) {
+        const d = Math.round(l.r * TILE * k);
+        tint.globalAlpha = a;
+        tint.drawImage(discImage(d), Math.round(l.px - cx - d), Math.round(l.py - cy - d));
+      }
+      tint.globalAlpha = 1;
+      tint.globalCompositeOperation = 'source-in';
+      tint.fillStyle = colorOf(l.color);
+      tint.fillRect(0, 0, WIDTH, HEIGHT);
+      tint.globalCompositeOperation = 'source-over';
+      ctx.drawImage(tint.canvas, 0, 0);
+    }
+    ctx.restore();
   }
 
   // A cleared, transparent offscreen layer the size of the screen.
@@ -678,8 +1068,27 @@ export class World {
     for (const [x, y] of this.control.path || []) ctx.fillRect(x * TILE + 6 - cx, y * TILE + 6 - cy, 4, 4);
     ctx.restore();
     const p = this.player;
-    drawText(ctx, `${this.state.map} ${p.x},${p.y}`, 4, HEIGHT - 12, { color: 'ui_select' });
+    const perf = this.game.perf;
+    drawText(ctx, `${this.state.map} ${p.x},${p.y}  upd ${perf.update.toFixed(2)}ms  draw ${perf.render.toFixed(2)}ms`, 4, HEIGHT - 12, { color: 'ui_select' });
   }
+}
+
+// A filled pixel disc of radius r (crisp edges, no anti-aliasing), cached.
+const discs = new Map();
+function discImage(r) {
+  let c = discs.get(r);
+  if (c) return c;
+  c = document.createElement('canvas');
+  c.width = c.height = Math.max(1, r * 2);
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#000';
+  for (let y = 0; y < r * 2; y++) {
+    const dy = y - r + 0.5;
+    const half = Math.floor(Math.sqrt(Math.max(0, r * r - dy * dy)));
+    ctx.fillRect(r - half, y, half * 2, 1);
+  }
+  discs.set(r, c);
+  return c;
 }
 
 // Call a content callback (a `when`, a sprite or lighting function); a throw
@@ -693,9 +1102,24 @@ export function safeCall(fn, ...args) {
   }
 }
 
+// A character that walks on its own (a patroller or wanderer).
+function movesOnItsOwn(e) {
+  const b = e.def.behavior;
+  const t = b && (typeof b === 'string' ? b : b.type);
+  return t === 'patrol' || t === 'wander';
+}
+
 export function isInteractable(e) {
   const d = e.def;
-  return !!(d.interact || d.use || d.look || d.looks || d.talk);
+  return !!(d.interact || d.use || d.look || d.looks || d.talk || d.talks);
+}
+
+// Entry `n` (0-based) of a first/second/.../then list. repeat: 'last' (the
+// last entry repeats) or 'cycle' (after the first, cycle through the rest).
+export function pickByCount(list, n, repeat = 'last') {
+  if (n < list.length) return list[n];
+  if (repeat === 'cycle' && list.length > 1) return list[1 + ((n - 1) % (list.length - 1))];
+  return list[list.length - 1];
 }
 
 function sameSprite(a, b) {
@@ -720,8 +1144,13 @@ async function runInteract(g, e, looks) {
   if (d.interact) return d.interact(g, e, looks);
   if (d.looks) {
     // looks: [first, second, ..., then]; each entry a line or a list of lines.
-    const entry = d.looks[Math.min(looks, d.looks.length - 1)];
+    const entry = pickByCount(d.looks, looks, d.looksRepeat);
     return g.describe(...(Array.isArray(entry) ? entry : [entry]));
+  }
+  if (d.talks) {
+    // talks: the same for things the entity says.
+    const entry = pickByCount(d.talks, looks, d.talksRepeat);
+    return g.say(e, ...(Array.isArray(entry) ? entry : [entry]));
   }
   if (d.talk) {
     const lines = Array.isArray(d.talk) ? d.talk : [d.talk];
@@ -748,10 +1177,19 @@ function nearestTileOf(e, x, y) {
 // list of directions; e.routeGoal (optional) lets us re-path around obstacles.
 export function followRoute(world, e) {
   const dir = e.route[0];
+  if (!DIR_VEC[dir]) {
+    // Never let a bad step hang a scene: skip it.
+    console.warn(`[world] ${e.id}: skipping a route step that isn't a direction:`, dir);
+    e.route.shift();
+    return;
+  }
   const [dx, dy] = DIR_VEC[dir];
   const nx = e.x + dx;
   const ny = e.y + dy;
-  if (e.routeGhost || e.routeForce || world.canEnter(e, nx, ny)) {
+  const p = world.player;
+  // Nobody ever walks into Cheryl: not ghosts, not forced steps.
+  const intoPlayer = !e.isPlayer && p.solid && p.visible && occupiesWithFootprint(p, e, nx, ny);
+  if (!intoPlayer && (e.routeGhost || e.routeForce || world.canEnter(e, nx, ny))) {
     e.route.shift();
     e.startStep(dir);
     e.routeBlocked = 0;
@@ -764,8 +1202,76 @@ export function followRoute(world, e) {
     const path = world.pathFor(e, [e.routeGoal]);
     if (path) e.route = pathToDirs([e.x, e.y], path);
   }
-  // A scripted move must finish: after two seconds, walk through whatever is in the way.
+  if (intoPlayer) {
+    // Cheryl is in the way. In a cutscene she can't move herself, so after a
+    // moment she steps aside; otherwise the walker waits for her.
+    if (world.busy && e.routeBlocked > 90 && !p.moving && !(p.route && p.route.length)) nudgeAside(world, p, e, dir);
+    return;
+  }
+  // Cheryl's own scripted walk never passes through anyone: a character in
+  // the way is asked to step aside; after three seconds blocked, she stops
+  // where she is (and the script carries on).
+  if (e.isPlayer) {
+    if (e.routeBlocked % 30 === 12) {
+      const blocker = world.entities.find((o) => o !== e && o.directional && o.visible && o.occupies(nx, ny));
+      if (blocker) {
+        const avoid = new Set([`${e.x},${e.y}`]);
+        let [ax, ay] = [e.x, e.y];
+        for (const d of e.route) {
+          ax += DIR_VEC[d][0];
+          ay += DIR_VEC[d][1];
+          avoid.add(`${ax},${ay}`);
+        }
+        world.yieldTo(blocker, avoid);
+      }
+    }
+    if (e.routeBlocked > 180) {
+      console.warn(`[script] the player's walk is blocked at (${e.x},${e.y}); stopping it`);
+      e.route = [];
+    }
+    return;
+  }
+  // A scripted move must finish: after two seconds, walk through another
+  // character (never Cheryl, never a wall).
   if (e.routeBlocked > 120 && !world.map.solid(nx, ny)) e.routeForce = true;
+  // Into a wall (a step a script asked for that can never happen): skip it
+  // after two seconds rather than hang the scene.
+  if (e.routeBlocked > 120 && world.map.solid(nx, ny)) {
+    console.warn(`[world] ${e.id}: a scripted step ${dir} from (${e.x},${e.y}) runs into a wall; skipping it`);
+    e.route.shift();
+    e.routeBlocked = 0;
+  }
+}
+
+// Does `p` overlap mover `e`'s footprint if `e` stood at (x, y)?
+function occupiesWithFootprint(p, e, x, y) {
+  for (let fy = 0; fy < e.h; fy++) for (let fx = 0; fx < e.w; fx++) if (p.occupies(x + fx, y + fy)) return true;
+  return false;
+}
+
+// Step Cheryl one tile out of a walker's way: to the side if possible (not
+// along the walker's next steps), else back.
+function nudgeAside(world, p, e, dir) {
+  const [dx, dy] = DIR_VEC[dir];
+  const ahead = new Set();
+  let [x, y] = [e.x, e.y];
+  for (const d of e.route.slice(0, 4)) {
+    x += DIR_VEC[d][0];
+    y += DIR_VEC[d][1];
+    ahead.add(`${x},${y}`);
+  }
+  const sides = dx ? ['up', 'down'] : ['left', 'right'];
+  const back = Object.keys(DIR_VEC).find((d) => DIR_VEC[d][0] === dx && DIR_VEC[d][1] === dy);
+  for (const d of [...sides, back]) {
+    const tx = p.x + DIR_VEC[d][0];
+    const ty = p.y + DIR_VEC[d][1];
+    if (ahead.has(`${tx},${ty}`) || !world.canEnter(p, tx, ty) || world.isExit(tx, ty)) continue;
+    const facing = p.facing;
+    p.startStep(d);
+    p.facing = facing; // she steps aside without turning her back
+    e.routeBlocked = 0;
+    return;
+  }
 }
 
 export function pathToDirs(start, path) {
