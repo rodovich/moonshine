@@ -1,36 +1,32 @@
 // The game's content, handed to the engine at boot (see src/main.js).
-// Until the opening area exists, the game starts in the engine test street.
+// A new game starts the opening on Cheryl's roof. The engine test maps are
+// still here, reachable only through debug parameters (?map=test_street).
 
 import { testMaps, testItemDefs, testScripts } from './test/index.js';
+import { openingMaps, openingItems, openingScripts, openingIntro } from './opening/index.js';
+import { cherylDeclines, characterSheet } from './opening/common.js';
 import { cheryl } from '../art/cheryl.js';
 
 export default {
   title: 'Moonshine',
 
-  // Where a new game begins.
-  start: { map: 'test_street', x: 5, y: 7, facing: 'down' },
+  // Where a new game begins: Cheryl on her roof, facing the tub.
+  start: { map: 'cistern_court', x: 3, y: 6, facing: 'up' },
 
-  // Cheryl. Character sheets use idle_<dir>_<n> and walk_<dir>_<n> frames.
-  player: { name: 'Cheryl', sprite: { sheet: cheryl } },
+  player: { name: 'Cheryl', sprite: { sheet: characterSheet(cheryl) } },
 
-  maps: { ...testMaps },
-  items: { ...testItemDefs },
+  maps: { ...openingMaps, ...testMaps },
+  items: { ...openingItems, ...testItemDefs },
 
   // Named scripts, runnable with ?run=<name> for testing.
-  scripts: { ...testScripts },
+  scripts: { ...openingScripts, ...testScripts },
 
-  // Optional: runs once when a new game starts.
-  // onNewGame: async (g) => {},
-
-  // Optional: lighting presets added to (or replacing) the engine's 'day',
-  // 'dusk', and 'night'. Each is a list of { color, mode, amount } passes.
-  // lighting: { dusk: [{ color: 'coral', mode: 'multiply', amount: 0.5 }] },
+  // Runs once when a new game starts.
+  onNewGame: openingIntro,
 
   defaults: {
     // Using an item on something with no handler for it.
-    useFail: async (g, _target, _itemId) => {
-      await g.describe("I don't think that's going to help here.");
-    },
+    useFail: async (g) => cherylDeclines(g),
     // Using an item (keyboard) while facing nothing.
     nothingToUseOn: "There's nothing there to use it on.",
   },
