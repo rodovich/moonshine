@@ -45,6 +45,11 @@ export function windDownMusic(ms) {
   try { audio.windDownMusic(ms); } catch (err) { warnOnce('wind', '', err); }
 }
 
+/** Muffle the music as if heard from outside (the Shop); muffleMusic(false) to undo. */
+export function muffleMusic(on, opts) {
+  try { audio.muffleMusic(on, opts); } catch (err) { warnOnce('muffle', '', err); }
+}
+
 export function sfx(id) {
   const real = SFX_ALIASES[id] ?? id;
   if (!audio.SFX_IDS.includes(real)) return warnOnce('sfx', id, 'unknown id');

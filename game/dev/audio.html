@@ -38,6 +38,7 @@
   <div id="music"></div>
   <div>
     <button id="stop">■ Stop (fade)</button>
+    <button id="muffle">🧱 Muffle (as heard from the Shop)</button>
     <button id="wind">⏬ Wind down (music box runs down)</button>
     <label>Crossfade / wind-down <input id="fade" type="number" value="800" min="0" step="100" style="width:6em"> ms</label>
   </div>
@@ -124,6 +125,7 @@ for (const id of audio.MUSIC_IDS) {
   $('music').append(b);
 }
 $('stop').onclick = () => { audio.stopMusic(Number($('fade').value)); refreshNow(); };
+$('muffle').onclick = async () => { await audio.initAudio(); const on = !$('muffle').classList.contains('playing'); audio.muffleMusic(on); $('muffle').classList.toggle('playing', on); };
 $('wind').onclick = () => { const ms = Number($('fade').value); audio.windDownMusic(ms >= 1000 ? ms : 4000); refreshNow(); };
 
 // Effects, grouped as in the opening's design.
@@ -133,6 +135,9 @@ const GROUPS = {
   'Puzzle and characters': ['tap_squeak', 'tub_full', 'chess_tap', 'pepper_grind', 'sneeze', 'timer_ding', 'sheets_flap', 'kid_patter', 'kid_hop', 'piano_flat', 'splash'],
   'Ambience': ['swifts', 'dog_bark', 'gull', 'clock_strike', 'well_breath'],
   'The Wrongness': ['wrong_sting', 'groan', 'crack', 'rattle', 'piano_tumble', 'drain', 'drain_glunk', 'drain_gurgle', 'drain_echo'],
+  'The wider city (Act 2)': ['knock', 'shop_bell', 'stone_scrape', 'slab_lift', 'piano_slide', 'sink_gurgle', 'step_splash', 'goat', 'boatman_sing', 'girls_chant'],
+  'Downstairs: moving about': ['step_hullstone', 'step_rung', 'lid_pry', 'hatch_open', 'light_beam', 'mirror_turn', 'moonlock_open', 'disc_glow', 'chute_slide', 'ladder_kick', 'tube_voice'],
+  'Downstairs: machines and water': ['valve_turn', 'valve_jam', 'far_gurgle', 'pump_cough', 'chain_rattle'],
 };
 const listed = new Set(Object.values(GROUPS).flat());
 const other = audio.SFX_IDS.filter((id) => !listed.has(id));
@@ -172,7 +177,7 @@ async function typeText(text, blip) {
 }
 $('talk').onclick = () => typeText("Piano went down the Squeeze in the night. Took the Pelletiers' geraniums with it.", 'blip');
 $('think').onclick = () => typeText("Something's wrong. Not wrong like a dropped stitch. Wrong like a step that isn't there.", 'blip_cheryl');
-for (const [surface, ms] of [['step_stone', 270], ['step_plaster', 270], ['step_tile', 270], ['step_rug', 270], ['step_stairs', 330], ['step_wood', 270], ['step_kid', 110]]) {
+for (const [surface, ms] of [['step_stone', 270], ['step_plaster', 270], ['step_tile', 270], ['step_rug', 270], ['step_stairs', 330], ['step_wood', 270], ['step_kid', 110], ['step_splash', 300], ['step_hullstone', 300], ['step_rung', 380]]) {
   const b = el('button', { textContent: `Walk: ${surface.replace('step_', '')}` });
   b.onclick = async () => {
     await audio.initAudio();

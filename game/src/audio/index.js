@@ -36,6 +36,12 @@ function softClipCurve() {
 export function buildGraph(ctx, { limiter = true } = {}) {
   const music = ctx.createGain();
   const musicDuck = ctx.createGain(); // dips the music under jingles and stings
+  // Muffles the music as if heard through a wall (muffleMusic): wide open unless asked.
+  const muffle = ctx.createBiquadFilter();
+  muffle.type = 'lowpass';
+  muffle.frequency.value = Math.min(20000, ctx.sampleRate * 0.49);
+  muffle.Q.value = 0.6;
+  const muffleGain = ctx.createGain();
   const sfxBus = ctx.createGain();
   const master = ctx.createGain();
   const tone = ctx.createBiquadFilter();
@@ -43,7 +49,9 @@ export function buildGraph(ctx, { limiter = true } = {}) {
   tone.frequency.value = 11000;
   tone.Q.value = 0.5;
   music.connect(musicDuck);
-  musicDuck.connect(master);
+  musicDuck.connect(muffle);
+  muffle.connect(muffleGain);
+  muffleGain.connect(master);
   sfxBus.connect(master);
   master.connect(tone);
   if (limiter) {
@@ -55,7 +63,7 @@ export function buildGraph(ctx, { limiter = true } = {}) {
     tone.connect(ctx.destination);
   }
   const sfxEcho = makeEcho(ctx, { delay: 0.18, feedback: 0.3, wet: 0.35, lowpass: 2600, spread: 0.02 }, sfxBus);
-  return { music, musicDuck, sfx: sfxBus, master, sfxEcho };
+  return { music, musicDuck, muffle, muffleGain, sfx: sfxBus, master, sfxEcho };
 }
 
 const compiled = new Map();
@@ -213,6 +221,7 @@ export async function initAudio() {
     ctx = new AC({ latencyHint: 'interactive' });
     graph = buildGraph(ctx);
     applyLevels(0);
+    if (muffled) muffleMusic(true, { fadeMs: 0 });
     timer = setInterval(tick, TICK_MS);
     // Suspend while the tab is hidden so the timer's throttling can't cause stutters.
     document.addEventListener('visibilitychange', () => {
@@ -356,6 +365,23 @@ export function windDownMusic(ms = 4000) {
   current.track.windDown(ms / 1000);
   fading.add(current.track);
   current = null;
+}
+
+let muffled = false;
+/**
+ * Muffle the music as if it were playing outside and heard through a wall (the Shop), or bring
+ * it back. Affects music only, not sound effects. Stays muffled until called with false.
+ */
+export function muffleMusic(on = true, { fadeMs = 400 } = {}) {
+  muffled = !!on;
+  if (!ctx) return;
+  const now = ctx.currentTime;
+  const tc = Math.max(fadeMs, 10) / 1000 / 3;
+  const open = Math.min(20000, ctx.sampleRate * 0.49);
+  graph.muffle.frequency.cancelScheduledValues(now);
+  graph.muffle.frequency.setTargetAtTime(muffled ? 650 : open, now, tc);
+  graph.muffleGain.gain.cancelScheduledValues(now);
+  graph.muffleGain.gain.setTargetAtTime(muffled ? 0.6 : 1, now, tc);
 }
 
 /** Set 'master', 'music', or 'sfx' volume, 0..1. Saved in localStorage. */
