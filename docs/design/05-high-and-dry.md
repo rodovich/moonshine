@@ -156,7 +156,7 @@ The machine that holds Tessel to its anchor. A bronze drum the size of a chapel 
 | `bucket.full` | Bucket used on the Fountain | The bucket item becomes "bucket of water" |
 | `boatman.afloat` | Full bucket lowered to the Boatman | He's AFLOAT; Cheryl has the rope |
 | `rope.tied` | Rope used on the stair ring | The rope climb at (25, 8) |
-| `keeper.asked` | First talk with the Keeper | The Shopkeeper will now swap the telescope |
+| `keeper.asked` | First talk with the Keeper | The Shopkeeper's repeat line changes (he swaps the telescope for the guidebook either way) |
 | `telescope.back` | Guidebook given to the Shopkeeper | Guidebook gone; the telescope in the bag; `window.telescope` cleared. (`got.telescope` is Act 2's flag, already set when this act begins.) |
 | `keeper.telescope` | Telescope given to the Keeper | The lamp is usable |
 | `disc.charged` | The disc held in the lamp, after `keeper.telescope` | Starts the relay scene |
@@ -189,7 +189,7 @@ The machine that holds Tessel to its anchor. A bronze drum the size of a chapel 
 
 - **All three threads are independent.** The Kid jumps down to the mud for the relay, so the door can open before the rope is down; Cheryl needs both the open door and the rope to get through it herself.
 - **Reaching the Windlass Room without the clapper is fine.** The stump and socket point at it (see the descriptions), and the rope is a two-way climb.
-- **No item is consumed early.** The Shopkeeper accepts the guidebook only in Act 5, once the Keeper has asked for her telescope; in Acts 2 and 4 he declines it ("My window is complete."), because the Clockmaker needs it in Act 4. The jug is only useful to the Clockmaker.
+- **No item is consumed early.** The Shopkeeper accepts the guidebook only in Act 5; in Acts 2 and 4 he declines it ("My window is complete."), because the Clockmaker needs it in Act 4. The jug is only useful to the Clockmaker.
 
 ### Hints in the world
 
@@ -318,9 +318,9 @@ Staring at the fallen display.
 - SHOPKEEPER: The telescope's lying in it like a fallen soldier. Best thing I've ever displayed.
 - After the Keeper has asked for it: SHOPKEEPER: Give it BACK? Then there's a GAP, Miss. I need something local. Something that says Tessel.
 
-**Repeat:** SHOPKEEPER: A gap. People will talk. They'll say, "Did you see his window?"
+**Repeat:** before the Keeper has asked: SHOPKEEPER: If it goes, there's a GAP, Miss. I'd need something local. Something that says Tessel. After: SHOPKEEPER: A gap. People will talk. They'll say, "Did you see his window?"
 
-**Give guidebook** (only once the Keeper has asked; before that, "My window is complete.") → guidebook gone; *Got Telescope.*
+**Give guidebook** (any time in Act 5; the builder removed the wait for the Keeper, which only sent a player who reached the Shop first to the lighthouse and back) → guidebook gone; *Got Telescope.*
 - SHOPKEEPER: A guidebook! "Tessel: A Pocket Companion." Genuinely local. Confidently wrong. PERFECT.
 - SHOPKEEPER: In it goes. Out comes the telescope. Display for display. Twice in one week. I'm practically a merchant.
 
@@ -403,7 +403,8 @@ At his bench, repairing the clock drive she unclamped. Calm now, in a brittle wa
 ### Cistern Court
 
 - OLD MAN: The whole house lifted in the night. Gerald says we've risen in the world. Gerald thinks he's funny.
-- NEIGHBOR: The wind! My sheets are out on the line flat as flags. Whiter than ever. I don't trust it.
+- NEIGHBOR: My whites have never been whiter. Not since the house lifted in the night. I don't trust it.
+- The back line (Acts 5 and 6's night; builder's line after the QA sweep, edited): "Still grey to me. She says whiter than ever. I'm not arguing with her about her sheets. Nobody wins that." Her door: "Shut. She'll be up on her roof, guarding her sheets."
 
 ## Objects and descriptions
 
@@ -427,7 +428,7 @@ At his bench, repairing the clock drive she unclamped. Calm now, in a brittle wa
 
 ### Lamp room
 
-- **The lamp** (before the telescope): "The lamp, lit in the middle of the afternoon. Brightest light in Tessel." / "She's standing between me and it."
+- **The lamp** (before the telescope): "The lamp, lit in the middle of the afternoon. Brightest light in Tessel." / "And she won't let me near it." (As built, after the QA description sweep: she stands at the window, not between Cheryl and the lamp.) The tower door in Act 5: "The tower door, unbolted at last. Ambrose is up there, waiting for moonrise." The Clockmaker's wall: "A wall of clocks, every one at a different time."
 - **The window** (by stage): as the Teeth, but from up here: Stage 1: "From up here, the Teeth are a white line across the mouth of the Bowl. And we're pointing at them." Stage 2: "Closer. The whole town's leaning toward them like a dog on a lead." Stage 3: "Close enough to count. I don't."
 - **The dust sheet**: "The dust sheet the telescope lived under. She's kicked it into a corner."
 

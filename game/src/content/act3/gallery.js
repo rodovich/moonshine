@@ -24,7 +24,7 @@ import { act3Tiles } from './tiles.js';
 import { ds_mirror } from '../../art/downstairs.js';
 import {
   UNDER, WRONGNESS, deck, wall, floor, lever, hatchOpen, hasDisc, valveTurned,
-  wallHotspots, lampEntity, nicheTile, founderUse, getItem, cherylDeclines, ladderDeclines,
+  wallHotspots, lampEntity, nicheTile, founderUse, RUB_WALLS, getItem, cherylDeclines, ladderDeclines,
   discLight, keepLoops, bump,
 } from './common.js';
 
@@ -211,7 +211,7 @@ const galleryObjects = [
     id: `inlay_${which}`, x, y: 2, w: 2,
     look: TARGET_LINES[which === 'sisters' ? 1 : 2],
     use: {
-      paper_charcoal: (g) => g.describe(which === 'sisters' ? "Three bars. I'll remember three bars." : "Four moons. I'll remember four moons."),
+      paper_charcoal: (g) => g.describe(RUB_WALLS, which === 'sisters' ? "Three bars. I'll remember three bars." : "Four moons. I'll remember four moons."),
       ...founderUse,
     },
   })),
@@ -255,7 +255,8 @@ const mirror = {
   },
   use: {
     moonglass_disc: (g) => g.describe("It shows me the disc, and the disc shows it back. Nothing happens. They seem to get on."),
-    paper_charcoal: (g) => g.describe('A rubbing of a mirror. No.'),
+    // Under the open shaft: floor and light, the near miss (structure pass, section 4).
+    paper_charcoal: (g) => (lever(g) ? g.describe('Floor, and light, but nothing written on it. Not this one.') : g.describe('A rubbing of a mirror. No.')),
     crowbar: (g) => g.describe("It turns. I don't need to bully it."),
     '*': cherylDeclines,
   },
