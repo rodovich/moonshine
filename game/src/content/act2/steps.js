@@ -392,6 +392,8 @@ const countingWoman = {
     guidebook: showGuidebook,
     tide_sheet: showTideSheet,
     moon_chart: (g, self) => g.say(self, 'Ticks. Counting ticks. At least you can count, Cheryl.'),
+    // (Playtest: the crowbar here read as a bug; say why not.)
+    crowbar: (g) => g.describe("Not with her sitting on it. I'm brave, not rude."),
     '*': (g, self) => g.say(self, "Don't hand me things. I lose count."),
   },
 };
