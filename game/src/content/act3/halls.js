@@ -24,14 +24,21 @@ import { composedMap } from '../opening/grid.js';
 import { act3Tiles } from './tiles.js';
 import { ds_rod, ds_rod_short, ds } from '../../art/downstairs.js';
 import {
-  UNDER, WRONGNESS, deck, wall, floor, hasDisc, RUB_WALLS, valveTurned, wallHotspots, lampEntity, nicheTile,
-  founderUse, getItem, cherylDeclines, ladderDeclines, discLight, keepLoops, bump, relight,
+  UNDER, WRONGNESS, deck, wall, floor, floorTile, hasDisc, RUB_WALLS, valveTurned, wallHotspots, lampEntity, nicheTile,
+  founderUse, getItem, cherylDeclines, discLight, keepLoops, bump, relight,
 } from './common.js';
 
 const W = 32, H = 14;
 const RIBS = [4, 8, 12, 16, 20, 24];
 const PIPES = [6, 14, 22];
 const dropped = (g) => !!g.flag('halls.ladder');
+// The west end is flooded from the valve on (held back only while the water's
+// on its way, in the valve scene), so saves from before the flood have it too.
+let floodRunning = false;
+const flooded = (g) => valveTurned(g) && !floodRunning;
+const FLOOD_X = 11; // the west end, x1-11, rows 6-10
+// How far east the water reaches on each row (6-10), so its edge is ragged.
+const FLOOD_EDGE = { 6: 11, 7: 11, 8: 10, 9: 11, 10: 10 };
 
 function composeHalls(g) {
   const L = deck(W, H);
@@ -73,6 +80,9 @@ function composeHalls(g) {
 
   // Pools of daylight under the light-pipes.
   for (const x of PIPES) L.set('ground', x, 8, 'hull:floor_glow', true);
+  // After the valve, the passage's water has run down to the west end of the hall
+  // and over the ladder's foot: fast, knee-deep, and solid for the rest of the act.
+  if (flooded(g)) for (let y = 6; y <= 10; y++) for (let x = 1; x <= FLOOD_EDGE[y]; x++) L.set('ground', x, y, 'ds_water:flood', true);
   // Ribs show as rib faces on the wall only: overhead ribs across the floor hid Cheryl.
   return L.done();
 }
@@ -86,6 +96,31 @@ function hallsLights(g) {
 
 // ---------------------------------------------------------------------------
 // The valve
+
+// The drained passage's water runs west along the hall, the camera following
+// the front, and settles over the west end (x1-11), around the chute and the
+// ladder's foot. The dry stretch it crosses is only wet while it passes.
+async function floodWest(g) {
+  g.sfx('far_gurgle');
+  const set = (x, tile) => { for (let y = 6; y <= 10; y++) if (x > FLOOD_X || x <= FLOOD_EDGE[y]) g.setTile('ground', x, y, tile); };
+  // Back to the map's own floor (and the pools under the light-pipes).
+  const dry = (x) => { for (let y = 6; y <= 10; y++) g.setTile('ground', x, y, y === 8 && PIPES.includes(x) ? { tile: 'hull:floor_glow', solid: true } : floorTile(x, y)); };
+  const trail = [];
+  for (let x = 24; x >= 1; x--) {
+    set(x, 'ds_water:flood');
+    if (x > FLOOD_X) trail.push(x);
+    while (trail.length > 3 || (x <= FLOOD_X && trail.length)) {
+      const t = trail.shift();
+      dry(t);
+    }
+    g.panCamera(x, 8, 3);
+    await g.wait(0.09);
+  }
+  floodRunning = false;
+  g.refresh();
+  await g.wait(1);
+  await g.followPlayer(3);
+}
 
 async function turnValve(g) {
   const p = g.player;
@@ -113,8 +148,10 @@ async function turnValve(g) {
   g.sfx('far_gurgle');
   g.facePlayer('right');
   await g.wait(1);
+  floodRunning = true;
   g.setFlag('halls.valve');
-  await g.wait(1.4);
+  await g.wait(1.2);
+  await floodWest(g);
   // Silence. Then, down the speaking tube, small and far away.
   await g.wait(1);
   g.sfx('tube_voice');
@@ -187,6 +224,23 @@ const PIPE_LOOKS = [
   "Somebody's doorstep. I wonder whose.",
 ];
 
+// The flooded west end: the passage's water, over the ladder's foot.
+async function westFloodLook(g) {
+  if (!g.flag('n.westFlood')) {
+    g.setFlag('n.westFlood', 1);
+    return g.describe("The water from the passage. It's run down the hall instead, right over the ladder.", "Knee-deep and running. That way's shut. North, then.");
+  }
+  if (g.flag('founders.unbolted')) return g.describe("Still running. Ottilie's door, then.");
+  return g.describe('Still running. North, then.');
+}
+
+const westFlood = {
+  id: 'west_flood', x: 1, y: 6, w: FLOOD_X, h: 5, solid: false, // the water tiles block; its edge is ragged
+  when: flooded,
+  interact: westFloodLook,
+  use: { '*': (g) => g.describe('Not into that. It would take it, and me.') },
+};
+
 const hallObjects = [
   ...wallHotspots('halls', 5, 1, 23, [3, 4, 8, 9, 13, 14, 18, 20, 22, 23], RIBS),
   lampEntity('halls_w', 9, 5),
@@ -200,7 +254,6 @@ const hallObjects = [
         if ((await g.choose('Pull the chain?', ['Yes', 'Not yet'])) === 0) await dropLadder(g);
         return;
       }
-      if (valveTurned(g)) return ladderDeclines(g);
       await g.describe('The ladder, down. A way back to the gallery and the Steps.');
       if ((await g.choose('Climb up?', ['Yes', 'Not yet'])) === 0) await climbLadder(g);
     },
@@ -262,10 +315,15 @@ export const hallsMap = composedMap(composeHalls, {
   exits: [
     { x: 25, y: 0, w: 2, to: 'chart_room', at: [7, 12], facing: 'up', when: valveTurned, sfx: 'step_hullstone' },
     { x: 13, y: 5, w: 2, to: 'bunk_room', at: [4, 5], facing: 'up', sfx: 'step_hullstone' },
-    { x: 8, y: 5, when: (g) => dropped(g) && !valveTurned(g), run: climbLadder },
-    { x: 8, y: 5, when: (g) => dropped(g) && valveTurned(g), run: async (g) => { await ladderDeclines(g); await g.movePlayer([8, 6]); } },
+    { x: 8, y: 5, when: dropped, run: climbLadder },
   ],
   triggers: [
+    {
+      // Walking west into the flooded end, the first time.
+      x: 12, y: 6, h: 5,
+      when: (g) => flooded(g) && g.player.facing === 'left' && !g.flag('n.westFlood'),
+      run: westFloodLook,
+    },
     {
       // First steps onto the drained passage.
       x: 25, y: 1, w: 2, h: 6, stop: false,
@@ -277,7 +335,7 @@ export const hallsMap = composedMap(composeHalls, {
     g.setWrongness(WRONGNESS);
     keepLoops(g, valveTurned(g) ? [] : ['water_gush']);
   },
-  entities: [...hallObjects, ...pipes],
+  entities: [...hallObjects, ...pipes, westFlood],
 });
 
 // ---------------------------------------------------------------------------

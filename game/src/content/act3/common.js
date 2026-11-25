@@ -98,12 +98,12 @@ export function wall(L, x0, x1, y, ribs = []) {
 
 // Floor plates, mostly plain, with a worn, cracked, or glyph plate now and
 // then (by a hash, so no pattern shows).
+export function floorTile(x, y) {
+  const h = (x * 73 + y * 151) % 29;
+  return `hull:${h === 0 ? 'floor_glyph' : h === 7 ? 'floor_worn' : h === 13 ? 'floor_broken' : 'floor'}`;
+}
 export function floor(L, x0, x1, y0, y1) {
-  for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
-    const h = (x * 73 + y * 151) % 29;
-    const f = h === 0 ? 'floor_glyph' : h === 7 ? 'floor_worn' : h === 13 ? 'floor_broken' : 'floor';
-    L.set('ground', x, y, `hull:${f}`, false);
-  }
+  for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) L.set('ground', x, y, floorTile(x, y), false);
 }
 
 // Ceiling ribs on the overhead layer, one per row from y0 to y1 at each x.
@@ -185,10 +185,3 @@ export async function relight(g, flag) {
 
 // Patches for a lamp niche on the upper wall row.
 export const nicheTile = (g, id) => (g.flag(`lamp.${id}`) ? 'ds:niche_lit' : 'ds:niche_dead');
-
-// Ladders up decline after the valve (the act's only exit is then the
-// Founders' Door).
-export async function ladderDeclines(g) {
-  if (unbolted(g)) return g.describe("Not that way. Ottilie's door is quicker.");
-  return g.describe("Not now. I want to see where that passage goes.");
-}

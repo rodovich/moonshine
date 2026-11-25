@@ -6,7 +6,7 @@
 // way through. The pointer run arrives without it, gets it from Ottilie in the
 // crypt, and goes back down through the Founders' Door for the rubbing. The
 // pointer run also takes the drop-ladder shortcut both ways before the valve,
-// and both runs check that the ladders up decline after it.
+// and both runs check that the passage's water shuts the hall's west end after it.
 import { test, expect } from '@playwright/test';
 import { snap, waitFor, shot } from './helpers.js';
 
@@ -419,6 +419,13 @@ test('keyboard: Act 3', async ({ page }) => {
   log = await read();
   expect(joined(log)).toContain('Tessel: Forward!');
 
+  // The drop-ladder: pull the chain (a back door to the gallery, before the valve).
+  await kbInteract(page, 'drop_ladder');
+  await read();
+  await kbChoose(page, 0);
+  log = await read();
+  expect(joined(log)).toContain('There. A back door.');
+
   // The valve: the crowbar slips off the square spindle.
   await kbInteract(page, 'valve');
   await read();
@@ -457,15 +464,16 @@ test('keyboard: Act 3', async ({ page }) => {
   expect(s.flags['halls.valve']).toBeTruthy();
   expect(s.items).not.toContain('valve_key');
 
-  // The ladders up decline now.
-  await kbInteract(page, 'drop_ladder');
-  await read();
-  await kbChoose(page, 0); // pull the chain
+  // The passage's water has run down the hall over the ladder's foot: the west end is shut.
+  await kbWalk(page, 13, 8);
+  await page.keyboard.press('ArrowLeft');
+  await waitFor(page, () => !!window.moonshine.snapshot().text, null, 4000);
   log = await read();
-  expect(joined(log)).toContain('There. A back door.');
-  await kbInteract(page, 'drop_ladder');
+  expect(joined(log)).toContain("That way's shut. North, then.");
+  await shot(page, 'act3-09b-west-flood');
+  await kbInteract(page, 'west_flood');
   log = await read();
-  expect(joined(log)).toContain('I want to see where that passage goes.');
+  expect(joined(log)).toContain('Still running. North, then.');
 
   // North to the Chart Room: the floor is a picture.
   await kbWalk(page, 25, 1);
@@ -671,11 +679,15 @@ test('pointer: Act 3', async ({ page }) => {
   if ((await snap(page)).inventoryOpen) { await clickGame(page, 241, 14); await page.waitForTimeout(300); }
   if ((await snap(page)).inventoryOpen) { await page.keyboard.press('Escape'); await page.waitForTimeout(300); }
 
-  // The ladders decline after the valve.
+  // After the valve the hall's west end is under the passage's water.
   await ptrExit(page, 7, 13, [7, 12], 'lamp_halls');
-  await ptrInteract(page, 'drop_ladder');
+  await ptrWalk(page, 12, 8); // walking west into it: its first lines
   log = await read();
-  expect(joined(log)).toContain("Ottilie's door is quicker.");
+  expect(joined(log)).toContain("That way's shut. North, then.");
+  await clickTileAt(page, 11, 8); // the water beside her
+  await waitFor(page, () => !!window.moonshine.snapshot().text, null, 8000);
+  log = await read();
+  expect(joined(log)).toContain("Still running. Ottilie's door, then.");
 
   // Back up, through the Archive, to the Crown at dusk.
   await ptrWalk(page, 25, 1);

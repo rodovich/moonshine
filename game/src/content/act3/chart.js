@@ -112,11 +112,15 @@ const HOTSPOTS = [
   ['teapot', (x, y) => (x === 7 || x === 8) && (y === 7 || y === 8)],
   ['shaft', (x) => x === 5],
   ['mast', (x, y) => x === 7 && (y === 5 || y === 6)],
-  ['chain', (x, y) => (x === 11 && y === 7) || (x === 12 && y >= 8)],
-  // The sea comes up to the row 7/8 boundary: the waves at the hull's ends, and the sea below.
-  ['waterline', (x, y) => (y >= 7 && (x === 3 || x === 12)) || y >= 9],
-  ['hull', (x, y) => y >= 7],
-  ['town', () => true],
+  // The chain runs down from the bow to the anchor in the corner.
+  ['chain', (x, y) => (x === 11 && (y === 8 || y === 9)) || (x === 12 && (y === 9 || y === 10))],
+  // The sea comes up to the row 7/8 boundary: little waves at the hull's ends...
+  ['waterline', (x, y) => (x === 3 || x === 12) && (y === 7 || y === 8)],
+  // ...and open sea under the hull.
+  ['sea', (x, y) => y >= 9],
+  ['town', (x, y) => (y === 5 && x >= 5 && x <= 10) || (y === 6 && x >= 4 && x <= 11) || (x === 11 && y === 7)],
+  ['hull', (x, y) => y >= 7 && x >= 4 && x <= 11],
+  ['border', () => true], // the plain band inside the frame, at the top corners
 ];
 
 const INLAY_LOOKS = {
@@ -130,6 +134,8 @@ const INLAY_LOOKS = {
     "A moon in a bowl. A narrow house. I'll think about that later.",
   ],
   waterline: ['Little waves at the hill\'s shoulders. I keep looking at them and they keep being true.'],
+  sea: ['Below the waves, just sea, drawn in little dashes. The hull sits down in it, like a hand in a bath.'],
+  border: ['A plain band of stone round the picture, worn smooth where people stood to look.'],
   teapot: ["And over the middle of the town, the shadow of a teapot. Ottilie's mother, keeping an eye on things."],
 };
 
