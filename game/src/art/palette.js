@@ -178,6 +178,10 @@ export const COLORS = {
   moon: '#f0e0b0',
   moon_shade: '#d0b890',
   moon_mare: '#c0a888',
+  // The full moon just clear of the Rim: pale, faintly peach-gold (it whitens as it climbs).
+  moon_peach: '#f8d8b0',
+  moon_peach_shade: '#e8b890',
+  moon_peach_mare: '#d8b098',
   mist_light: '#e8f0f0',
   mist: '#b8d0d8',
 
