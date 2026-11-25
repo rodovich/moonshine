@@ -411,6 +411,11 @@ Plain and short, in the game's font, over the final vista. The list of credits i
 
 ## Audio needed
 
+All of this is built (audio/foundation, 865415c); ids and a step-by-step order for the whole act are in [audio-direction.md](../audio-direction.md). Notes for the build:
+- **The hauling** is the `hauling` cue, 28.5 seconds from the brake. It carries the chain's booms itself, so the script shakes the screen on its link times (`HAULING_LINKS`: 4.5, 6, 7.5, 9, 10.5, … the last at 24 s) instead of playing a boom sound. Time the montage's five cutaways inside it, so the last link lands back in the Windlass Room.
+- `keel` for the Long Keel; `moon_true` at "Moon true", with `setWrongness(0)` there; `bath` for the bath; plain `neighborhood` for the epilogue; `ending` over the final vista and credits (it loops for as long as they run).
+- `sfx` takes `{ pan, volume }`, so the Long Keel's lamp chimes can be panned and faded as they go away.
+
 **Music**
 - **Hauling cue** (new): the climax. Starts when the brake is thrown. Huge and slow at first: bowed bass, choir, the Tide Wheel's groan as a drone, the chain's booms as its percussion on the beat, the bell's three strokes still ringing in it. It accelerates with the links, carries the montage, and resolves with the last link into a held chord. Use the rhyme's "wind her in slowly, and home again" phrase as its melody.
 - **`keel`** (new): the Long Keel. The `downstairs` material, but warm and lit: the same instruments, the melody resolving for the first time, lamps chiming in on the beat as they wake. About a minute; loops.
