@@ -806,6 +806,14 @@ The Act 4 builder (WCVWR8hxu8) built this act on `content/act4`. This document f
 - **Pointing the guidebook at the Clockmaker** (from a blind playtest): besides his line about Tessel's time never being written down, the Act 4 sundial's first look is "The sundial and the clock disagree by eleven minutes." / "The guidebook has a page on Tessel's time. It's wrong too, naturally." Its later looks are Act 2's.
 - **Lines the builder added, adopted as written:** the belfry lever after pulling ("Pulled. DO NOT TOUCH. I touched it.") and the rope after the bell ("Ambrose's rope. I'm not touching it now. It's his."); the open tower door; the Square's bronze fish dry and flowing; the running Middle Sister; the main pipe weeping, then split ("All that water, with nowhere to go but up the Fountain."); the dry grates; the sea cave mouth; the piano on the mud ("It got to the sea after all. The sea had left."); and the cellar crate ("A crate of fish, packed in ice. The only wet thing for a street in any direction.").
 
+### As built (structure pass and QA sweep, content/act4 ad4fe48)
+
+The structure-pass lines above are in as written (the Kid's jump, the Man on Bench's repeats, the boarded step, the exits that end the act). Lines the builder added to match the art, adopted:
+- The cat: "She's moved herself up against the uphill wall. She's not wrong."
+- The ferry: "The Persistence, tied up and going nowhere. She's level. I checked. Nothing else is."
+- The Harbor's other bollards: "A bollard. Nobody sitting on it. Nobody sitting on any of them."
+- The Pump Hall grates after the burst: "Under water now, with the rest of the floor."
+
 ## Decisions
 
 - **Act 4 runs from the morning after Act 3 to the reveal,** with three parallel threads. The bell thread opens the way down; the other two are free in order.

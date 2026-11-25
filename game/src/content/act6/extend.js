@@ -5,6 +5,7 @@
 //   hide:      [{ when: (g) => bool, ids: ['old_man', ...] }]  base entities to take away while `when` holds
 //   entities:  [...]            added (they come after the base ones)
 //   exits, triggers: [...]      added *before* the base ones, so they win on the same tile
+//   hideExits: [{ when, x, y }]  the base map's exits on that tile don't fire while `when` holds
 //   patches:   (g) => [...]     applied after the base patches (so they win on the same tile)
 //   lights:    [...] or (g) => [...]   added to the base lights
 //   dark, playerLight: (g) => value or undefined   override the base while they return a value
@@ -49,7 +50,17 @@ export function extendMap(map, ext) {
     }),
     ...(ext.entities || []),
   ];
-  if (ext.exits) out.exits = [...ext.exits, ...(map.exits || [])];
+  // hideExits: [{ when, x, y }]: the base map's exits covering that tile don't fire while `when` holds.
+  if (ext.hideExits) {
+    const covers = (e, t) => t.x >= e.x && t.y >= e.y && t.x < e.x + (e.w || 1) && t.y < e.y + (e.h || 1);
+    out.exits = (map.exits || []).map((e) => {
+      const rules = ext.hideExits.filter((t) => covers(e, t));
+      if (!rules.length) return e;
+      const base = e.when;
+      return { ...e, when: joined((g) => !rules.some((t) => t.when(g)) && (!base || base(g)), base, ...rules.map((t) => t.when)) };
+    });
+  }
+  if (ext.exits) out.exits = [...ext.exits, ...(out.exits || map.exits || [])];
   if (ext.triggers) out.triggers = [...ext.triggers, ...(map.triggers || [])];
   if (ext.patches) {
     const base = map.patches;
