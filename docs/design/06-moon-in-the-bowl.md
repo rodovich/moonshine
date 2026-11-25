@@ -226,7 +226,7 @@ On entering, the nearest lamps wake one by one ahead of Cheryl (a chime each). A
 **Trigger:** interacting with the Basin after `sisters.asleep`.
 
 1. "The best bath I'll ever have, and I didn't bring a towel."
-2. Cheryl takes off her shoes and sets them side by side beside the Basin (a shoes sprite at (6, 6)). She climbs in and sits (a sitting-in-water sprite), facing down, the moonlight on her.
+2. Cheryl takes off her shoes and sets them side by side beside the Basin (a shoes sprite at (6, 6)). She climbs in and sits, in her clothes (she hadn't planned a bath; her striped costume is at home, which is the joke of "I didn't bring a towel"), facing down, the moonlight on her. The sitting-in-water sprite and the Basin view's reflection show her ordinary cardigan and bun, not the costume.
 3. The music box plays the skipping rhyme, slowly, perfectly in tune: the tune from the Moonrise scene in Act 1, this time not going flat.
 4. **The Basin view** once more, now with Cheryl's reflection at the edge of the circle: the Gate, the moon true, the ripples from her settling.
 5. Internal monologue (the game's last):
@@ -409,8 +409,8 @@ Plain and short, in the game's font, over the final vista. Roles, not people (de
 - The Fountain Square café with luggage; the Shop window with the guidebook
 
 **Full-screen images**
-- **The Basin view**: a circle of still water in a stone rim, reflecting the Rim's silhouette, the notch of the Gate, and the night sky (full dark: it's an hour after sunset, so no glow on the horizon, just stars and a faint blue-grey along the Rim), with the moon as a separate sprite so it can sit at four positions (far right, nearer, dead center, two fingers past). Two nights past full, the moon is a waning gibbous, a hair flattened on one edge, pale and silver; a variant with Cheryl's reflection at the edge and ripples
-- **The final vista**: the Act 1 vista (the Bowl from Cheryl's roof, looking east) with the full moon rising dead in the Gate, large and pale, the sky around it brightening to silver; the scene's warmth comes only from the rose-lit cliffs and the lit town. The sky follows the same rules as the corrected Act 1 vista: deep blue, a rose-pink band above the Rim, the Earth's shadow along it, and no sunset glow (the sun is setting behind Cheryl); the title MOONSHINE over it. **New:** Cheryl's silhouette sitting *in* the tub (head and shoulders above the rim, from behind, in her striped bathing costume and cap, as in Act 1), replacing the edge-sitting silhouette
+- **The Basin view**: a circle of still water in a stone rim, reflecting the Rim's silhouette, the notch of the Gate, and the night sky (full dark: it's an hour after sunset, so no glow on the horizon, just stars and a faint blue-grey along the Rim), with the moon as a separate sprite so it can sit at four positions (far right, nearer, dead center, two fingers past). Two nights past full, the moon is a waning gibbous, a hair flattened on its upper-right edge, slightly warm because it's low; a variant with Cheryl's reflection at the edge and ripples
+- **The final vista**: the Act 1 vista (the Bowl from Cheryl's roof, looking east) with the full moon rising dead in the Gate, large, pale peach-gold low and whitening as it climbs, with a silver halo and a faint peach-gold path across the Bowl from the Gate; the sky's own warmth comes only from the rose-lit cliffs and the lit town. The sky follows the same rules as the corrected Act 1 vista: deep blue, a rose-pink band above the Rim, the Earth's shadow along it, and no sunset glow (the sun is setting behind Cheryl); the title MOONSHINE over it. **New:** Cheryl's silhouette sitting *in* the tub (head and shoulders above the rim, from behind, in her striped bathing costume and cap, as in Act 1), replacing the edge-sitting silhouette
 
 **Sprites**
 - A generic "sitting down hard" pose for residents (the crowd falling over), and a flying chess piece or two
