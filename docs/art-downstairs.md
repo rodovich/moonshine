@@ -32,8 +32,8 @@ A north wall face is two tiles tall: an upper row (`hull:face_top`) over a lower
 | Drop-ladder: hooked up / down (Lamp Halls, 8, 6) | `ds:over_dropladder_hooked` / `ds_mirror:dropladder_down` | overhead / sprite |
 | The drop-ladder's chain on the wall (Lamp Halls, 7, 5) | `ds:wall_chain` (lower row) | ground |
 | Floor grate (Step Gallery, 6, 8): closed / open with the ladder top | `ds:grate_closed` / `grate_open` | ground |
-| Speaking tube, a bronze horn (Lamp Halls, 22) | `ds:horn` (upper row); also `machines:speaking_tube` | ground; objects |
-| Fountain valve (Lamp Halls, 23), 2×2 | bare square spindle (no key) `machines:valve_spindle_nw/ne/sw/se`; key fitted `valve_key_*`; key turned `valve_key_turned_*`; jammed `valve_key_jammed_<q>` (2 frames, a strained shake). The older handwheel `machines:valve_big_*` is still there for other valves | objects |
+| Speaking tube, a bronze horn (Lamp Halls, 20, 5) | `ds:horn` (upper row); also `machines:speaking_tube` | ground; objects |
+| Fountain valve (Lamp Halls, 22–23, 4–5; used from 22–23, 6), 2×2 | bare square spindle (no key) `machines:valve_spindle_nw/ne/sw/se`; key fitted `valve_key_*`; key turned `valve_key_turned_*`; jammed `valve_key_jammed_<q>` (2 frames, a strained shake). The older handwheel `machines:valve_big_*` is still there for other valves | objects |
 | Bunk Room tool rack, with / without the valve key | `ds:tool_rack_key` / `tool_rack` (upper wall row); it reads once the lamp is relit | ground |
 | Valve key icon | `items3:valve_key` (bronze T-handle with a square socket) | inventory |
 | Gushing pipe (27, 2) / stopped | `ds_water:gush` (4 frames) / `gush_stopped`, over `hull:face_base` | objects |
