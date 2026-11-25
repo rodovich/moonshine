@@ -95,7 +95,9 @@ function shaft() {
     L.set('ground', 2, y, es(`${k}_l`)); L.set('ground', 3, y, es(`${k}_r`));
     L.set('ground', 1, y, es(y >= 20 ? 'side_wet_l' : 'side_l')); L.set('ground', 4, y, es(y >= 20 ? 'side_wet_r' : 'side_r'));
   }
-  return { title: 'Emergency Shaft (6 x 30)', ...L, hero: [3 * 16, 20 * 16, 'up'], scale: 2 };
+  // Cheryl climbing in each column, as the game places her (tile centres), to check she sits on the rungs
+  const sprites = [[2, 21], [3, 13]].map(([x, y]) => ({ sheet: 'cheryl', frame: 'climb_up_0', x: x * 16 + 8, y: (y + 1) * 16 }));
+  return { title: 'Emergency Shaft (6 x 30)', ...L, sprites, hero: [2 * 16 + 8, 25 * 16, 'up'], scale: 2 };
 }
 
 function seacave(turning) {

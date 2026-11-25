@@ -33,7 +33,9 @@ Module `game/src/art/act5_surface.js`. Dev page: `/dev/art.html?only=scene:act5_
 | Lamp room: the window ring (row 1), walls, floor | `lamproom:window`, `wall`, `floor` | ground |
 | The lamp, lit and turning (3–4, 2–3) | `lamproom:lamp_x<0-1>y<0-1>` (4 frames): a lighthouse lens, a faceted glass beehive of prism rings bound in brass under a domed brass top, on a brass pedestal, with the blazing core showing through and the turning shine sweeping across the facets | objects |
 | The empty polish tin (2, 5) | `lamproom:polish_tin` | objects |
+| The way out (3–4, 7): the head of the lighthouse stair going down through the floor, treads falling into the dark, iron rails capped in brass (not a house door) | `lamproom:stair_down_l`, `stair_down_r` | ground |
 | Laundry streaming | `cloth:over_wind_<a-f>` (from Act 4), overhead in a row | overhead |
+| Belfry: the Keepers' hatch beside the rope (5, 6), from Act 5 on | `keepers_hatch:shut` (a flush bronze plate let into the planks, riveted, with a flush ring and no handle: it's bolted from underneath) / `keepers_hatch:open` (the lid standing up on its north hinge with the bolt on its underside, bronze staples going down into the dark). Full tiles on the `belfry:floor_a` plank pattern, in module `act4_surface.js` beside the belfry sheet. Dev page: `?only=scene:act4_surface&state=belfry_hatch` / `belfry_hatch_open` | ground or detail |
 
 ## Underground
 
@@ -49,6 +51,7 @@ The Windlass Room and the Bow Passage (module `game/src/art/act5_under.js`). Wal
 | Coils of spare chain (3–4, 10) and (15–16, 10), 2×1 | `windlass:coil_a_l/r` (west, Cheryl sits here), `coil_b_l/r` | objects |
 | The brake lever (17, 8), with its plate (bell, hand, arrow) | `brake:brake_locked`, `brake_thrown` (16×32, bottom-centred on the tile) | sprite |
 | The speaking tube (15, 2) | `ds:horn` on the upper wall row (15, 1) | ground |
+| The Keepers' ladder beside the tube (16, 1–2), up into the dark toward the belfry | `keepers_rungs:rungs_top` at (16, 1), in place of `hull:face_top`; `rungs_bot` at (16, 2), in place of `hull:face_base`. Bronze staples set in the wall, one every 4 px and centered in the tile (x 4–11, as in the emergency shaft), so `cheryl:climb_up_0/1` sits on them. At the top the wall opens into a dark notch and the last staple dims, so the shaft reads as going on up. Dev page: `state=windlass_ladder` shows Cheryl on them | ground |
 | The sealed hatch to the Long Keel (7–8, 1–2), moon-in-bowl emblem | `keel_hatch:keel_sealed_<nw\|ne\|sw\|se>`, `keel_open_*` (Act 6) | ground |
 | Lamps (Windlass 2 and 19; Bow Passage 2, 7, 12, 16) | `keel_hatch:lamp_dead`, `lamp_flicker_0/1`, `lamp_warming`, `lamp_lit`; the whole wake as one animation `lamp_wake_0..4` (300/120/120/220/600 ms; hold on `_4`, or swap to `lamp_lit`). Upper wall row; put `hull:floor_glow` on the floor below a lit one | ground |
 | The bronze door, inside (Bow Passage 0–1, 3–4) | `bowdoor:bowdoor_shut_<nw\|ne\|sw\|se>` (eye dim), `bowdoor_open_*` (leaves swung back, evening light from the Bilge falling in) | ground |
