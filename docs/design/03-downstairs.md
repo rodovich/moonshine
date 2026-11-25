@@ -528,6 +528,20 @@ All of this is built (audio/foundation, e4adffd): `downstairs`, `reveal`, and `r
 - [ ] Every line fits in its box.
 - [ ] First-time players finish in 18–25 minutes.
 
+## As built
+
+The Act 3 builder (zEKLwXahJL) built this act on `content/act3`; its full list of build decisions is in `game/src/content/act3/README.md`. This document follows them:
+
+- **Chart Room reveal:** the room is exactly one screen, so the camera can't pan. Instead the room dims and a band of daylight sweeps up the floor from the hull to the Crown, then back down to the waterline on "the sea comes up to… there," and fades back under the reveal cue. Same lines, same order.
+- **Chart Room hotspots** follow the art's drawing: town rows 5–6; hull rows 7–8 and 10; waterline row 9; mast (7, 5–6); shaft and bowl (5, 5–10); chain (11–12, 7–10); Sisters (8–9, 8); teapot (7–8, 7–8). Priority as designed. The ledger is at (4, 4) beside the table, the cup on the table at (3, 4).
+- **Step Gallery ribs** at x5, x17, x21 only (x9 and x13 lie on the diagonal beams).
+- **Doorway and passage lines play on arrival**, not as hotspots: entering the Bunk Room plays "Pitch dark in here. Darker than the hall. My disc barely gets past the door."; first stepping onto the drained passage plays "Drained. Wet, but walkable. North."
+- **Ladders, grates, and the drop-ladder:** walking into them climbs; looking at them gives the look line, then a "Climb up?" / "Climb down?" choice ("Pull the chain?" for the hooked ladder), so pointer players can climb.
+- **The mirror:** each inlay's lines play the first time the beam lights it; later turns are silent.
+- **The Crown at dusk:** on arriving, "Dusk already. And the plaza is full of little blue lights." Residents at Ambrose (6, 7), the Kid (10, 10), and the Woman with Watering Can (14, 12). The vista starts on stepping onto row 13 anywhere along the parapet.
+- **Lines added by the builder,** adopted as written: a lamp already lit ("It's already lit. It doesn't want seconds."); paper on the moons inlay ("Four moons. I'll remember four moons."); crowbar on the bolt ("It's a bolt. It doesn't want prying; it wants pulling."); the pipe after the valve ("Dry. A drip, then nothing. The Fountain on a hot day, gone."); crowbar on the grate ("It's bolted from underneath. Somebody liked their grates where they were."); disc on the mirror ("It shows me the disc, and the disc shows it back. Nothing happens. They seem to get on."); crowbar on the mirror ("It turns. I don't need to bully it."); Ottilie mid-scene ("Go home, Cheryl. Soup."); and the dusk residents' declines.
+- **The waterline (open):** the inlay should show the sea crossing the hull partway up, at the hill's shoulders, with the hull curving on below it, because Act 4's reveal depends on the hull having been under water. If the art can't show that, the reveal's third line changes; that's being settled with the art task.
+
 ## Decisions
 
 - **Act 3 is five underground maps, ending at dusk on the Crown.** It's the first descent; it ends on the first surface change caused by the player (the glowing doorsteps) and the first harm (the Fountain).
