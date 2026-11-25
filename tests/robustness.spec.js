@@ -29,11 +29,12 @@ test('clicking an unreachable spot never walks through a door', async ({ page })
 test('a save from an older build still loads', async ({ page }) => {
   await page.goto('/');
   const bad = [
-    { version: 1, map: 'removed_map', x: 3, y: 3, facing: 'down', flags: {}, inventory: [] },
+    // A map that no longer exists falls back to the new-game start.
+    { version: 1, map: 'removed_map', x: 3, y: 3, facing: 'down', flags: {}, inventory: [], expect: 'cistern_court' },
     { version: 1, map: 'test_street', x: 0, y: 0, facing: 'sideways', flags: { street_intro: true } },
     { version: 1, map: 'test_street', x: 99, y: 99, facing: 'up', flags: { street_intro: true }, inventory: ['no_such_item', 'letter'] },
   ];
-  for (const save of bad) {
+  for (const { expect: map = 'test_street', ...save } of bad) {
     await page.evaluate((s) => localStorage.setItem('moonshine.save.v1', JSON.stringify(s)), save);
     await page.goto('/');
     await page.waitForFunction(() => window.moonshine && window.moonshine.scene);
@@ -42,7 +43,7 @@ test('a save from an older build still loads', async ({ page }) => {
     await waitFor(page, () => window.moonshine.snapshot().scene === 'world');
     await page.waitForTimeout(800);
     const s = await snap(page);
-    expect(s.map).toBe('test_street');
+    expect(s.map).toBe(map);
     const solid = await page.evaluate(() => { const w = window.moonshine.world; return w.map.solid(w.player.x, w.player.y); });
     expect(solid).toBe(false);
     expect(['up', 'down', 'left', 'right']).toContain(s.facing);
