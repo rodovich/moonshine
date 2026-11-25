@@ -39,6 +39,8 @@ export function SCENE(state = 'dusk') {
   const tub = moonrise ? 'tub_full' : 'tub_empty';
   set(objects, 3, 4, `tub:${tub}_l`); set(objects, 4, 4, `tub:${tub}_r`);
   set(objects, 2, 4, 'tub:tap');
+  // the sighting pins, in line with the tub on the Gate
+  set(objects, 9, 4, 'sight_pin:wall'); set(objects, 19, 4, 'sight_pin:parapet');
   set(objects, 2, 7, moonrise ? 'roof_props:chair_cardigan' : 'roof_props:chair_fold'); set(objects, 3, 7, 'roof_props:chair_fold');
   // clotheslines: posts at y3 and y7 on x12 and x15
   for (const x of [12, 15]) {

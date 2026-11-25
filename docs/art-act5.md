@@ -27,12 +27,13 @@ Module `game/src/art/act5_surface.js`. Dev page: `/dev/art.html?only=scene:act5_
 | The doorstop: the bell's clapper (7, 5) | `clockshop:clapper` | objects |
 | The door (4–5, 7): propped open / swung shut | `clockshop:door_open_l/r` / `door_shut_l/r` | ground, in the south wall |
 | Walls and floor | `interior:wall_*`, `shop:floor` | ground |
-| Shop: the window display fallen over, the hat on the floor (7–8, 5) | `shop5:display_fallen_l/r` | objects |
+| Shop: the window display fallen over in the rise, the telescope in it (7–8, 5) | `shop5:display_fallen_l/r` (structure pass: redrawn with the Keeper's telescope rolled out across the floor beside the plinth, a cradle tipped under it, in place of the hat) | objects |
 | Shop: the guidebook in pride of place (7–8, 5) | `shop5:display_guide_l/r` | objects |
 | Fountain Square: DRY CANAL DAY — TONIGHT — MOONRISE on two poles over the café (17–22, 11) | `banner:over_banner_<a-f>` (2 frames, a ripple), overhead in a row; the poles' feet `banner:pole_foot_l` / `pole_foot_r` on the objects layer in the row below, under the first and last banner tiles | overhead; objects |
 | Lamp room: the window ring (row 1), walls, floor | `lamproom:window`, `wall`, `floor` | ground |
 | The lamp, lit and turning (3–4, 2–3) | `lamproom:lamp_x<0-1>y<0-1>` (4 frames): a lighthouse lens, a faceted glass beehive of prism rings bound in brass under a domed brass top, on a brass pedestal, with the blazing core showing through and the turning shine sweeping across the facets | objects |
 | The empty polish tin (2, 5) | `lamproom:polish_tin` | objects |
+| The dust sheet left empty where the telescope stood (6, 5) | `lamproom:sheet_empty` (the sheet in a heap). In Act 2 the telescope stands under it: `scope_sheet_top/bot` (see [art-act2.md](art-act2.md)) | objects |
 | The way out (3–4, 7): the head of the lighthouse stair going down through the floor, treads falling into the dark, iron rails capped in brass (not a house door) | `lamproom:stair_down_l`, `stair_down_r` | ground |
 | Laundry streaming | `cloth:over_wind_<a-f>` (from Act 4), overhead in a row | overhead |
 | Belfry: the Keepers' hatch beside the rope (5, 6), from Act 5 on | `keepers_hatch:shut` (a flush bronze plate let into the planks, riveted, with a flush ring and no handle: it's bolted from underneath) / `keepers_hatch:open` (the lid standing up on its north hinge with the bolt on its underside, bronze staples going down into the dark). Full tiles on the `belfry:floor_a` plank pattern, in module `act4_surface.js` beside the belfry sheet. Dev page: `?only=scene:act4_surface&state=belfry_hatch` / `belfry_hatch_open` | ground or detail |
@@ -78,6 +79,7 @@ Modules: `game/src/art/act5_sprites.js` (new sheets), plus additions to `cheryl.
 | Cheryl: sitting on a chain coil | `cheryl:sitcoil_down` (draw her about 6 px up so she sits on `windlass:coil_a_l/r`) |
 | The disc: flaring and dim | `disc_fx:disc_flare_0..3` (white, then deep cyan; 90/120/200/400 ms), `disc_full`, `disc_dim` (16×16) |
 | The Keeper: polishing; at the window; shading her eyes | `keeper:polish_up_0/1`, `window_up_0/1`, `shade_down_0/1`; standing `keeper:<dir>_0` |
+| The Keeper with her telescope (structure pass: after the swap) | `keeper:scope_up_0/1` (at the window, from behind: it runs up past her cap, her right hand gripping it; frame 1 swings a pixel, 1600 ms each); `scope_down_0/1` (facing us, looking out through it: it runs down from her eye over her chest to the round brass end and dark glass, the glint moving, 1400/700 ms); `hold_down_0` (holding it across her body, for talking) |
 | The Clockmaker: at his bench; the square jug held up in rapture | `clockmaker:bench_up_0/1`, `jug_down_0/1` |
 | The Boatman throwing the rope coil up | `boatman_mud:throw_0..2` (wind-up, swing, let go; 500/150/600 ms) |
 | The Fishmonger handing over a bucket | `fishmonger:give_down_0/1`; walking `fishmonger:<dir>_0..2` (the Shopkeeper's body in a striped shirt and rubber apron) |
