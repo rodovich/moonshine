@@ -195,7 +195,7 @@ async function kbStepDownAndUse(page, x, item = null) {
     await kbWalk(page, x, 17);
     // Wait for the Kid to clear the column.
     await waitFor(page, (x) => !window.moonshine.world.entities.some((e) => e.id === 'kid' && e.x === x && e.y >= 18 && e.y <= 20), x, 15000);
-    await page.keyboard.press('ArrowDown');
+    await stepKey(page, 'down');
     await page.waitForTimeout(150);
     await waitFor(page, () => window.moonshine.snapshot().idle, null, 3000);
     const s = await snap(page);
