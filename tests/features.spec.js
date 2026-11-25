@@ -244,3 +244,19 @@ test('Act 4 scene tools: held tilt, white fade, timed tile swaps, chained pans',
   `, 20000);
   expect(r).toEqual({ done: true, v: 2 });
 });
+
+test('credits roll over a picture, skip after a moment, then back to the title', async ({ page }) => {
+  await boot(page, `${STREET}&x=12&y=8&save=1`);
+  await waitIdle(page);
+  page.evaluate(() => window.moonshine.world.run(async (g) => {
+    g.markComplete();
+    await g.credits([{ text: 'MOONSHINE', heading: true }, '', 'Engine', 'a lander task', '', 'Thank you for playing.'], { skipAfter: 0.5, hold: 0.5, fade: 0.2 });
+    await g.toTitle();
+  })).catch(() => {});
+  await page.waitForTimeout(1500);
+  await page.screenshot({ path: 'tests/screenshots/31-credits.png' });
+  await press(page, 'z'); // skip to the last line
+  await waitFor(page, () => window.moonshine.snapshot().scene === 'title', null, 10000);
+  const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('moonshine.save.v1')));
+  expect(saved.flags['game.complete']).toBe(true);
+});
