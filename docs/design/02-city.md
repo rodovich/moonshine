@@ -687,7 +687,7 @@ Idle: gestures grandly at nobody.
 - COUNTING WOMAN: A HUNDRED, Duncan! It's in the NAME!
 - MAYOR: Madam, a guidebook is not an official document—
 - COUNTING WOMAN: Then make it OFFICIAL! Count them! Get a committee!
-- MAYOR: …Miss, did you give her a guidebook? Why would you give her a guidebook?
+- MAYOR: …Miss, did you show her a guidebook? Why would you show her a guidebook?
 - Repeat: MAYOR: There will be a committee. There is always a committee.
 
 **Items**
@@ -838,7 +838,7 @@ Cheryl's descriptions unless labeled. "First / then" follows the look counter.
 - **Clockmaker's shop door**: First: "The Clockmaker's shop. A sign: AT THE BELFRY. CLOCK IS PERFECT. DO NOT ASK." Then: "He was the boy who asked 'is it time yet?' every four minutes. Now it's his job."
 - **Blue Dome** (facade): "The Blue Dome. The Archive's inside it, and Ottilie is inside the Archive, and that's where she'll stay."
 - **South parapet**: First: "From the Crown you can see the whole Bowl. The Gate looks perfectly ordinary." / "That's the worst part." Then: "The whole Bowl, calm as a plate. On the far side, the Teeth, white with surf."
-- **Benches, pots**: "A bench with the best view in Tessel, and a cat who knows it." / "Geraniums. Nobody remembers planting them."
+- **Benches, pots**: West bench (with the cat): "A bench with the best view in Tessel, and a cat who knows it." East bench: "A bench with the best view in Tessel. The cat's on the other one." Pots: "Geraniums. Nobody remembers planting them."
 
 ### Archive
 
@@ -889,7 +889,7 @@ Cheryl's descriptions unless labeled. "First / then" follows the look counter.
 
 ### Shop
 
-- **Window hat display**: First: "A wide straw hat, in the window. Display stock. It's been in that window since before I went grey." After `tourist.met`, first look: "Display stock. She'll be peeling by lunchtime." Second and later looks: "Display stock. I have a perfectly good hat at home, in the wardrobe."
+- **Window hat display**: First: "A wide straw hat, in the window. Display stock. It's been in that window since before I went grey." After `tourist.met`, first look: "Display stock. She'll be peeling by lunchtime." Second and later looks: "Display stock. I have a perfectly good hat at home, in the wardrobe." While Cheryl carries her hat: "Display stock. I have a perfectly good hat right here." After `tourist.hasHat`: "Display stock. Mine's on a tourist now, and it suits her better."
 - **Marble jar**: First: "A jar of marbles. Every single marble has rolled to the same side of the jar." / "The jar is level. I checked." Then: "Every marble, on the same side. Downhill, if the floor was a hill. It isn't."
 - **Shelves**: "Brass polish, lamp oil, string, lanterns. Everything a lighthouse could want. All display."
 - **Barometer**: "The barometer says FAIR. It's said FAIR for nine years. He won't tap it in case it changes its mind."
@@ -911,7 +911,7 @@ Cheryl's descriptions unless labeled. "First / then" follows the look counter.
 - **Other house doors**: "Not my door. Fishing nets drying on the handle."
 - **Sea view** (quay edge x19–29): First: "The Bowl, flat calm. On the far side, the mouth, and the Teeth, white with surf." / "Nobody sails near the Teeth. Nobody needs to. They're a long way off." Then: "The Teeth. A long way off."
 - **The Keyhole**: "Under the lighthouse the rock has a hole worn clean through it. The Keyhole. The sea goes in and out of it like breath."
-- **Bollards, crates, nets**: "A bollard. Mott's sitting on the good one." / "Crates of nothing much, waiting for a ferry."
+- **Bollards, crates, nets**: "A bollard. Mott's sitting on the good one." / Crates: "Crates of nothing much, waiting for a ferry." / Nets: "Nets, drying. Or forgotten. With nets it's hard to tell."
 
 ### Lamp room
 
