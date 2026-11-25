@@ -52,6 +52,8 @@ function compose(g) {
   // The low wall at x9, with its one-step gap at y5.
   for (const y of [2, 3, 7, 8]) set(ground, 9, y, 'roof:lowwall');
   set(ground, 9, 4, 'roof:lowwall_end_s'); set(ground, 9, 5, 'roof:lowwall_gap'); set(ground, 9, 6, 'roof:lowwall_end_n');
+  // The sighting pins: on the low wall's south end and on the east parapet, lined up on the Gate.
+  set(detail, 9, 4, 'sight_pin:wall'); set(detail, 19, 4, 'sight_pin:parapet');
   for (const y of [2, 3, 4, 6, 7, 8]) block(9, y);
   // Chimney stack.
   set(ground, 7, 2, 'roof:chimney_l'); set(ground, 8, 2, 'roof:chimney_r'); block(7, 2); block(8, 2);
@@ -843,7 +845,8 @@ export const courtMap = composedMap(compose, {
   step: 'step_stone',
   onEnter: async (g) => {
     g.playMusic(morning(g) ? 'morning_after' : 'cistern_court');
-    if (morning(g)) g.pose('kid_morning', 'jog');
+    // Only while he's here: later acts move him on, and their layers hide him.
+    if (morning(g)) { try { g.pose('kid_morning', 'jog'); } catch { /* not on the map in this act */ } }
   },
   ambient: [
     // The Old Man reaches out, moves a piece, thinks better of it, and moves it back.

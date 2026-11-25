@@ -19,6 +19,7 @@ Modules: `roof.js` (sheets `roof`, `tub`, `roof_props`, `laundry`) and `court.js
 | `=` west / east parapets | `roof:parapet_w`, `parapet_e` | ground |
 | `=` south roof edge | `roof:roof_edge_s`, `roof_edge_sw`, `roof_edge_se` | ground |
 | `=` low wall (x9) | `roof:lowwall`; `lowwall_end_s` (y4), `lowwall_gap` (y5), `lowwall_end_n` (y6) | ground |
+| Sighting pins | `sight_pin:wall` at (9, 4), standing on the low wall's south end; `sight_pin:parapet` at (19, 4), on the east parapet (module `pins.js`). Small bronze pins with a ring on top, green with age, in line with the tub on the Gate | objects |
 | `.` roof floor | `roof:roof_floor_{nw,ne,sw,se}` (2×2 block, like street paving); `roof_floor_ne_patch`, `roof_floor_sw_cracked` | ground |
 | `C` chimney (7–8, 2) | `roof:chimney_l/r`; pots and hats `over_chimney_l/r` on row 1; rattling `over_chimney_rattle_l/r` | ground; overhead |
 | `h` herb pots | `roof_props:herb_basil`, `herb_rosemary` | objects |
@@ -123,10 +124,13 @@ Cheryl's silhouette, from behind on the tub's rim, wears her bathing costume (ba
 4. `vista_rim:rim` at (0, 0), over the moon. The Gate is a V: its walls slope in through the Rim's dark lower band to a narrow cleft at y 114 (a flat-bottomed notch with sheer walls read as a lighter box in playtest). The glow's outer ring fades out in a checker, so no hard edge shows where the V opens onto it, and `vista_gate_cold` only recolors the cleft.
 5. The moon's path on the Bowl, at (0, 0), after the rim: `vista_path:path_faint` once the moon is half up, then the `path` shimmer (3 frames, 260 ms) about 2 s later. It's pale peach-gold, broken into streaks, and stops at the roofs.
 6. `vista_twinkle:twinkle` at each point in `VISTA_BASINS` (exported by `vista.js`), offset by (−3, −3), each with its own phase.
-7. `vista_cheryl:cheryl_tub` at (0, 128).
+7. `vista_pins:pins` at (0, 0) (module `pins.js`): the sighting pins lined up on the Gate. Our low wall runs across the bottom (lit coping at y 214), Her Next Door's dusk-dark roof lies beyond it with her bare clothes posts, and her east parapet's lit top is at y 186. The far pin is small on the parapet at x 128. The near pin is large on our wall at x 128, and its peep ring frames the far pin, so the pair reads as a gunsight pointing straight up the screen at the notch. Draw it after the twinkles so it covers the ones on her roof. In Act 1 the moon rises at x 176, well outside the pins.
+8. `vista_cheryl:cheryl_tub` at (0, 128).
 
 The Gate goes cold: as the moon clears the ridge off to the side, draw `vista_gate_cold:cold_0` (half) and then `cold_1` (full) over the background, after step 1 and before the glow. The Earth's shadow in the notch deepens a step while the silver glow stays on the moon, so the wrongness is unmistakable.
 
 The picture looks east, opposite the sunset (see [art-direction.md](art-direction.md), Skies): the Earth's shadow on the horizon, the pink Belt of Venus above it, then blue and indigo. The Rim's cliffs catch rose alpenglow, and the glow before the moon is cool silver. The moon itself is pale and faintly peach-gold as it clears the Rim, whitening as it climbs. The dev scene switches at 7 s and 8 s.
 
 `game/dev/scene-vista.js` plays the sequence in a loop, with the moon's height as `content/opening/moonrise.js` has it; `?still` holds the moment the moon is half up, and `?still=<ms>` any moment of the loop.
+
+The QA description sweep added or changed art for this act: see [art-sweep.md](art-sweep.md).
