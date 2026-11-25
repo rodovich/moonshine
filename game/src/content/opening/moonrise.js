@@ -128,16 +128,19 @@ export async function moonrise(g) {
   g.sfx('crack');
   await g.shake(3, 0.5);
 
-  // 12. The piano goes down the Squeeze. Down to the court to see it gone.
+  // 12. The piano goes down the Squeeze. The camera gets there in time to see
+  // it lurch, and go, in a cloud of dust down the stairs.
+  await g.panCamera(15, 22, 6);
+  await g.wait(0.3);
+  g.shake(2, 0.3);
   g.sfx('piano_tumble');
+  await g.wait(0.35);
   g.setFlag('piano.gone');
-  const pan = g.panCamera(15, 22, 4);
-  for (const [x, y] of [[15, 23], [16, 24], [15, 25]]) {
+  for (const [x, y] of [[15, 23], [16, 23], [15, 24], [16, 25], [15, 25]]) {
     g.spawnEffect({ sprite: { sheet: fx, frame: 'dust' }, at: [x + 0.5, y], seconds: 0.4, layer: 'top' });
-    await g.wait(0.35);
+    await g.wait(0.22);
   }
-  await pan;
-  await g.wait(1.6);
+  await g.wait(1.4);
   await g.followPlayer(4);
   await g.wait(0.3);
 
