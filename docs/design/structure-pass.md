@@ -1,6 +1,6 @@
 # Structure pass: Acts 2 to 5 (proposal)
 
-This is a proposal for review, not yet the design. It has been through one round of review (4Zv_hz69Qu); this version takes its must-fixes and most of its other points. Once the reviewer and the orchestrator approve it, its decisions move into [02-city.md](02-city.md) through [05-high-and-dry.md](05-high-and-dry.md) and the [overview](overview.md), and the builders get their specs.
+This is a proposal for review, not yet the design. The reviewer (4Zv_hz69Qu) has verified it as ready to build, with the save rule for saves past Act 2 added. Once the reviewer and the orchestrator approve it, its decisions move into [02-city.md](02-city.md) through [05-high-and-dry.md](05-high-and-dry.md) and the [overview](overview.md), and the builders get their specs.
 
 ## The proposal in brief
 
@@ -123,7 +123,11 @@ All three threads open from the start. The soap is already in the bag, and the g
 
 - **A new item, `shop_hat`** ("Straw Hat"): "A wide straw hat, out of the Shop window. Display stock, retired." Declines: "It's for the Tourist. She's peeling." on anyone else; the Shopkeeper: "No returns, Miss. The window's complete."
 - **Cheryl's `hat` is retired.** It's no longer taken in the opening's morning; the wardrobe keeps its look. Every line that assumes the Tourist has Cheryl's hat changes to the straw hat, and every decline for `hat` goes. In the build: square.js (the Shopkeeper's "That's YOUR hat"), archive.js (Ottilie), harbor.js (Mott), act5/town.js, and the opening's flat. In the docs: 01 (the wardrobe, the hat's item row, its declines), 02, 05 (the Tourist's "I'm wearing your hat"; the fallen window with "the hat on the floor" and its art), 06 (the Tourist's "I'm keeping your hat"), and the story bible (the Tourist, Shopkeeper, and Keeper rows and the Act 2 summary).
-- **Old saves.** A save that holds `hat` without `tourist.hasHat` loses it on load (the wardrobe takes it back), so the player does the new chain. A save with `tourist.hasHat` keeps its state; the Tourist's later lines don't name whose hat it was ("I'm keeping this hat."), so they read right either way.
+- **Old saves.** Two rules run on load:
+  - A save that holds `hat` without `tourist.hasHat` loses it (the wardrobe takes it back), so the player does the new chain.
+  - A save with `tourist.hasHat` but no telescope placed (any save past the old Act 2, including the client's) gets the telescope put in the Shop window, and `telescope.migrated` set. The window shows the telescope; the lamp room has none; the Act 5 chain works. Without this, Act 5's door thread can't be finished.
+  - The Tourist's later lines don't name whose hat it was ("I'm keeping this hat."), so they read right either way.
+  - For `telescope.migrated` saves only, the Act 5 Keeper's second line is: LIGHTHOUSE KEEPER: And my telescope's in a SHOP WINDOW. Don't ask me how.
 
 ### Tide-Sheet thread (new)
 
@@ -184,6 +188,7 @@ The instruction points at what makes the Chart Room mosaic special, so the trial
   - Her repeat line keeps it alive: OTTILIE: Floors, Cheryl. Where the light falls. Primary sources.
 - **Every old surface thing** (the sundial, the Fountain and its fish, mooring posts, the Water Stairs, the bell tower) gets a reply: "Old, but not Founder-old. And Ottilie said floors."
 - **The Founders' Door** (crypt): "Rubbed to a shine. Ottilie's been here before me. Forty times, she says."
+- **The Step Gallery floor under the light shaft**, where "where the light falls" will send some players, gets its own near-miss reply: "Floor, and light, but nothing written on it. Not this one."
 - **Downstairs:** the plain walls and the inlays answer "Walls. Ottilie said floors, where the light falls." as a backstop (the inlays add "Three bars. I'll remember three bars." as now). The Chart Room mosaic is a floor lit through the Dome's eye, so it's the one place that fits both halves of the instruction. It gives the Ship Plan, as now.
 
 ### The Ship Plan and Ottilie
@@ -319,10 +324,10 @@ Art comes first because the Goat Path and the Bilge's west end block the Act 2 b
    - The Tide-Sheet item icon; the straw hat item icon (the Shop's); the Shop window in three states (hat; telescope; fallen over, for Act 5).
 2. **Audio (eoGdH4jg_3):** the hollow step's "bonk"; a Goat Path ambience (wind, surf far below, goat bells).
 3. **Act 2 builder (5DfQsiqAZf):** the Goat Path and the exits; the guidebook chain (with `shop_hat` and the window as a use target) and the Tide-Sheet thread; the Counting Woman's two-source rule and the step beat; the bonk; the Square, Kid, Mott, Tourist, and Girl lines; Ottilie's handover and the rubbing replies on the surface; removing the `hat` declines from the Act 2 files.
-4. **Opening builder (WCVWR8hxu8):** the wardrobe hat becomes look-only in the morning; the old-save rule (a held `hat` without `tourist.hasHat` goes back to the wardrobe on load), with the engine task (JljzUh5NiS) if it needs a load hook in `engine/save.js`.
-5. **Act 3 builder (zEKLwXahJL):** the rubbing replies Downstairs; the Ship Plan's first look.
+4. **Opening builder (WCVWR8hxu8):** the wardrobe hat becomes look-only in the morning; the two old-save rules (a held `hat` without `tourist.hasHat` goes back to the wardrobe; `tourist.hasHat` without the telescope placed puts the telescope in the Shop window and sets `telescope.migrated`), with the engine task (JljzUh5NiS) if it needs a load hook in `engine/save.js`.
+5. **Act 3 builder (zEKLwXahJL):** the rubbing replies Downstairs, including the near miss under the Step Gallery's light shaft; the Ship Plan's first look.
 6. **Act 4 builder (WCVWR8hxu8):** Ottilie as the hub; the Man on Bridge as the Man on Bench; the Act 4 states of the Bilge, Harbor, and Goat Path (Mott's shack and the sea cave on the new path); the new Act 4 lines.
-7. **Act 5 builder (b_30JU3Nrc):** the telescope in place of the polish; the Shop window fallen over with the telescope in it; the Tourist's hat lines; the Act 5 states of the Bilge and Harbor.
+7. **Act 5 builder (b_30JU3Nrc):** the telescope in place of the polish, including the Keeper's `telescope.migrated` line; the Shop window fallen over with the telescope in it; the Tourist's hat lines; the Act 5 states of the Bilge and Harbor.
 8. **Act 6 builder (A7CXb-ur4K):** the epilogue Keeper with her telescope; the Tourist's "I'm keeping this hat."; the epilogue states of the Bilge and Harbor.
 9. **Writer (ibWBNxYUAE):** fold the approved changes into the story bible, 01–06, and the overview; measure every new line against the text box; play each act's branch as it lands.
 
