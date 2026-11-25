@@ -204,3 +204,29 @@ test('a scripted walk into Cheryl waits, then she steps aside; it never passes t
   expect(r.v[0]).toBeGreaterThanOrEqual(19); // he got past where she stood
   expect([r.v[1], r.v[2]]).not.toEqual([17, 6]); // because she stepped aside
 });
+
+test('a non-solid patroller on a one-tile corridor: Cheryl gets through, he turns back, no overlap', async ({ page }) => {
+  await boot(page, `${STREET}&x=18&y=8&facing=left`);
+  await waitIdle(page);
+  // Walls above and below row 8 from x=10 to x=17: a one-tile corridor.
+  await page.evaluate(() => {
+    const w = window.moonshine.world;
+    for (let x = 10; x <= 17; x++) {
+      w.map.setTile('ground', x, 7, { tile: 'street:retain_top', solid: true });
+      w.map.setTile('ground', x, 9, { tile: 'street:retain_top', solid: true });
+    }
+    const k = w.byId.get('kid');
+    k.solid = false;
+    k.def = { ...k.def, solid: false, behavior: { type: 'patrol', route: [[9, 8], [18, 8], [18, 6], [9, 6]], ghost: true } };
+    k.x = k.fromX = 11; k.y = k.fromY = 8;
+    k.patrolIdx = 1;
+    const om = w.byId.get('old_man'); // keep his route clear of other people
+    om.x = om.fromX = 3; om.y = om.fromY = 6;
+  });
+  const watching = watchOverlap(page, 12);
+  // Planning goes through him: there is a route.
+  expect(await page.evaluate(() => { const w = window.moonshine.world; return !!w.pathFor(w.player, [[8, 8]]); })).toBe(true);
+  await clickTile(page, 8, 8);
+  await waitFor(page, () => { const s = window.moonshine.snapshot(); return s.x === 8 && s.y === 8; }, null, 12000);
+  expect(await watching).toBe(null);
+});
