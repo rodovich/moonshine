@@ -838,7 +838,7 @@ Cheryl's descriptions unless labeled. "First / then" follows the look counter.
 - **Clockmaker's shop door**: First: "The Clockmaker's shop. A sign: AT THE BELFRY. CLOCK IS PERFECT. DO NOT ASK." Then: "He was the boy who asked 'is it time yet?' every four minutes. Now it's his job."
 - **Blue Dome** (facade): "The Blue Dome. The Archive's inside it, and Ottilie is inside the Archive, and that's where she'll stay."
 - **South parapet**: First: "From the Crown you can see the whole Bowl. The Gate looks perfectly ordinary." / "That's the worst part." Then: "The whole Bowl, calm as a plate. On the far side, the Teeth, white with surf."
-- **Benches, pots**: West bench (with the cat): "A bench with the best view in Tessel, and a cat who knows it." East bench: "A bench with the best view in Tessel. The cat's on the other one." Pots: "Geraniums. Nobody remembers planting them."
+- **Benches, pots**: West bench (with the cat): "A bench with the best view in Tessel, and a cat who knows it." East bench: "The other bench. Same view, no cat. The cat has made its choice." Pots: "Geraniums. Nobody remembers planting them."
 
 ### Archive
 
@@ -889,7 +889,7 @@ Cheryl's descriptions unless labeled. "First / then" follows the look counter.
 
 ### Shop
 
-- **Window hat display**: First: "A wide straw hat, in the window. Display stock. It's been in that window since before I went grey." After `tourist.met`, first look: "Display stock. She'll be peeling by lunchtime." Second and later looks: "Display stock. I have a perfectly good hat at home, in the wardrobe." While Cheryl carries her hat: "Display stock. I have a perfectly good hat right here." After `tourist.hasHat`: "Display stock. Mine's on a tourist now, and it suits her better."
+- **Window hat display**: First: "A wide straw hat, in the window. Display stock. It's been in that window since before I went grey." After `tourist.met`, first look: "Display stock. She'll be peeling by lunchtime." Second and later looks: "Display stock. I have a perfectly good hat at home, in the wardrobe." While Cheryl carries her hat: "Display stock. I have a perfectly good hat in my bag." After `tourist.hasHat`: "Display stock. Mine is out in the Square on a tourist, and it suits her."
 - **Marble jar**: First: "A jar of marbles. Every single marble has rolled to the same side of the jar." / "The jar is level. I checked." Then: "Every marble, on the same side. Downhill, if the floor was a hill. It isn't."
 - **Shelves**: "Brass polish, lamp oil, string, lanterns. Everything a lighthouse could want. All display."
 - **Barometer**: "The barometer says FAIR. It's said FAIR for nine years. He won't tap it in case it changes its mind."
@@ -1091,6 +1091,7 @@ The same builder built the Goat Path, Harbor, lamp room, and Bilge on `content/a
 - From part 1, moved for reachability: the Woman with Watering Can at (24, 6), the bay tree at (2, 5).
 - Act 2's Wrongness is 0.1 throughout.
 - The blocked arch uses the age-free line ("I'm not climbing over a piano that isn't mine…"), per the client's note on Cheryl's age.
+- After a blind playtest (`content/act2-playtest`): walking onto the open hundredth step asks "Go down?"; the Man on Bench sits on the bench; the Woman with Watering Can stands at (27, 5) beside her pots. Cheryl can squeeze past the Counting Woman: after her first talk, "She's planted on the edge of the landing like a bollard. There's just room to squeeze past her."; the step's look adds "There's just room to get past her, if I mind her feet." After Mott turns down the moon chart, Cheryl thinks "Not today, he says. So some other day. I'll hold him to that."
 
 ## Decisions
 
