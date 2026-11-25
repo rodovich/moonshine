@@ -110,7 +110,7 @@ function act5Flags(g) {
     'rope.tied': g.flag('rope.tied'), 'keeper.asked': g.flag('keeper.asked'), 'telescope.back': g.flag('telescope.back'), 'keeper.telescope': g.flag('keeper.telescope'), 'window.telescope': g.flag('window.telescope'), 'telescope.migrated': g.flag('telescope.migrated'),
     'disc.charged': g.flag('disc.charged'), 'relay.ready': g.flag('relay.ready'), 'relay.run': g.flag('relay.run'),
     'door.open': g.flag('door.open'), 'kid.gaveDisc': g.flag('kid.gaveDisc'), 'got.clapper': g.flag('got.clapper'),
-    'clockmaker.jug': g.flag('clockmaker.jug'), 'shop.guide': g.flag('shop.guide'),
+    'clockmaker.jug': g.flag('clockmaker.jug'), 'shop.guidebook': g.flag('shop.guidebook'),
     'passage.lit': g.flag('passage.lit'), 'windlass.seen': g.flag('windlass.seen'),
     'keepers.ladder': g.flag('keepers.ladder'), 'tooth.out': g.flag('tooth.out'), 'tooth.set': g.flag('tooth.set'),
     'windlass.sat': g.flag('windlass.sat'), 'windlass.late': g.flag('windlass.late'), 'act5.done': g.flag('act5.done'),

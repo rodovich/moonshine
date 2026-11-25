@@ -2,7 +2,7 @@
 
 This is the build-ready design for Act 5 ([overview](overview.md), [story bible](../story-bible.md)). It picks up the same afternoon as the end of [04-the-list.md](04-the-list.md): the canals dry, the bronze door in the exposed hull, and the city riding six feet higher than it should. It ends at dusk in the Windlass Room under the lighthouse, with the bell's old clapper seated where the broken Tooth was, waiting for moonrise.
 
-> **Structure pass (client feedback).** The telescope replaces the brass polish ([structure-pass.md](structure-pass.md), section 6). The Keeper wants her telescope back to watch the reef; the Shopkeeper's fallen window holds it; he swaps it back for the guidebook; the Keeper takes it and lets Cheryl use the lamp. The dialog below is updated. Saves from before the structure pass where the Tourist already had Cheryl's hat get the telescope placed in the window on load (`telescope.migrated`), with one Keeper line for them. The Bilge has a west exit to the Goat Path, (0, 12–14), open in this act. The brass polish stays on the Shop shelf as scenery.
+> **Structure pass (client feedback).** The telescope replaces the brass polish ([structure-pass.md](structure-pass.md), section 6). The Keeper wants her telescope back to watch the reef; it has rolled under the Shopkeeper's counter, and Cheryl hooks it out with her crowbar (revised after the first-time playtest; the guidebook can still fill his window, optionally); the Keeper takes it and lets Cheryl use the lamp. The dialog below is updated. Saves from before the structure pass where the Tourist already had Cheryl's hat get the telescope placed in the window on load (`telescope.migrated`), with one Keeper line for them. The Bilge has a west exit to the Goat Path, (0, 12–14), open in this act. The brass polish stays on the Shop shelf as scenery.
 
 ## The slice in brief
 
@@ -11,7 +11,7 @@ Riding high, Tessel catches the wind and drifts faster. From the harbor and the 
 The Ship Plan shows what's left: the chain runs from the bow to the anchor, and something at the bow holds it. The way to the bow is the bronze door at the foot of the Water Stairs. Three threads, in any order:
 
 - **The rope.** The Water Stairs end in a broken flight above a six-foot drop. The Boatman sits in his beached boat at the bottom, mourning his drying planks, with a coil of mooring rope he won't give up. The Fishmonger lends Cheryl a bucket ("what use is a bucket now the sea's gone?"). She fills it at the refilled Fountain and lowers it to him. He pours it into his boat: "AFLOAT!" A boat that floats doesn't need tying up, so he hands up his rope. Cheryl ties it to the stair's ring and climbs down.
-- **The door.** The door's glass eye wants more light than Cheryl's disc holds. Only the lighthouse lamp is bright enough, and the Keeper, who has turned round at last, won't let anyone near it until she has her telescope back to watch the reef. It's in the Shop window, where Cheryl put it in Act 2. The Shopkeeper's display fell over in the rise; he'll swap the telescope back for the guidebook. In the lamp, the disc blazes, but the charge fades in under a minute, and the door is the length of the town away. The Sweaty Kid, who still has Cheryl's egg timer, winds the egg, takes the disc, and runs. He beats the egg. The door opens.
+- **The door.** The door's glass eye wants more light than Cheryl's disc holds. Only the lighthouse lamp is bright enough, and the Keeper, who has turned round at last, won't let anyone near it until she has her telescope back to watch the reef. It's in the Shop window, where Cheryl put it in Act 2. The Shopkeeper's display fell over in the rise, and the telescope rolled under his counter, out of reach; Cheryl hooks it out with her crowbar. In the lamp, the disc blazes, but the charge fades in under a minute, and the door is the length of the town away. The Sweaty Kid, who still has Cheryl's egg timer, winds the egg, takes the disc, and runs. He beats the egg. The door opens.
 - **The Tooth.** The Clockmaker's doorstop, "the only thing in this town that keeps still," is a great notched bronze lump: the bell's old clapper. He trades it for Mott's square jug, "a doorstop that doesn't roll."
 
 Down the rope, through the door, along the bow passage, into the **Windlass Room**: a bronze drum like a chapel on its side, chain links taller than Cheryl, and beside the drum the stump of the sheared Tooth. She levers out the stump with the crowbar and sets the clapper in its socket. It fits as if it was waiting. *Every part does two jobs.* The speaking tube from the bell brings down wind and gulls and nothing else yet. She sits on a coil of chain to wait for moonrise.
@@ -156,8 +156,9 @@ The machine that holds Tessel to its anchor. A bronze drum the size of a chapel 
 | `bucket.full` | Bucket used on the Fountain | The bucket item becomes "bucket of water" |
 | `boatman.afloat` | Full bucket lowered to the Boatman | He's AFLOAT; Cheryl has the rope |
 | `rope.tied` | Rope used on the stair ring | The rope climb at (25, 8) |
-| `keeper.asked` | First talk with the Keeper | The Shopkeeper's repeat line changes (he swaps the telescope for the guidebook either way) |
-| `telescope.back` | Guidebook given to the Shopkeeper | Guidebook gone; the telescope in the bag; `window.telescope` cleared. (`got.telescope` is Act 2's flag, already set when this act begins.) |
+| `keeper.asked` | First talk with the Keeper | (Not a gate: the crowbar works on the counter any time.) |
+| `telescope.back` | Crowbar used on the Shop counter | The telescope in the bag; `window.telescope` cleared. (`got.telescope` is Act 2's flag, already set when this act begins.) |
+| `shop.guidebook` | Guidebook given to the Shopkeeper after `telescope.back` (optional) | The window shows the guidebook; it does in the epilogue too |
 | `keeper.telescope` | Telescope given to the Keeper | The lamp is usable |
 | `disc.charged` | The disc held in the lamp, after `keeper.telescope` | Starts the relay scene |
 | `door.open` | The relay scene ends | The bronze door open; Bow Passage lamps lit; the disc back, dim |
@@ -170,7 +171,7 @@ The machine that holds Tessel to its anchor. A bronze drum the size of a chapel 
 ```
  ROPE THREAD                         DOOR THREAD                           TOOTH THREAD
  Fishmonger ─► BUCKET                the Keeper wants her telescope        square jug (Act 4)
-     │                               guidebook (Act 2) ─► Shopkeeper          ─► Clockmaker
+     │                               crowbar on the Shop counter              ─► Clockmaker
  fill at the Fountain                        │                                    │
      │                                   TELESCOPE ─► the Keeper                CLAPPER
  lower it to the Boatman                     │                                    │
@@ -201,7 +202,7 @@ The machine that holds Tessel to its anchor. A bronze drum the size of a chapel 
 | The eye needs more light than the disc | The disc on the door: "The eye stays dark. It wants more than my disc has in it." |
 | The lighthouse lamp is bright enough | Cheryl at the door ("Brighter. The brightest light in Tessel."); the Keeper ("Brightest lamp on any coast"); the lamp's own shine |
 | The Keeper wants her telescope; it's in the Shop window | The Keeper's lines; the window itself (the player put it there) |
-| The guidebook fills the Shopkeeper's gap | The Shopkeeper's "something local, something that says Tessel"; the earlier declines ("My window is complete") |
+| The telescope is under the counter and the crowbar reaches it | The Shopkeeper ("I can't reach it"); the counter's look ("…Or a crowbar.") |
 | The disc fades too fast to walk it to the door | Holding it after the charge: "Nobody could walk that in a minute. Somebody would have to run it flat out and jump off the quay." Then the Kid in the harbor |
 | The Clockmaker's Shop is worth visiting | Ambrose: "MY BELL'S OLD BRONZE TONGUE IS PROPPING HIS SHOP DOOR OPEN." |
 | The clapper is the spare Tooth | The doorstop's look ("That notch is made to catch something."); the stump's look in the Windlass Room |
@@ -311,22 +312,26 @@ Cheryl talks to him from the stair tiles (22–25, 7) by interacting with the br
 
 ### The Shopkeeper (Shop)
 
-Staring at the fallen display.
+Staring at the fallen display. **Revised after the first-time playtest (dbcLYG8CWB): getting the telescope back is an action, not a second swap.** Trades dominated Act 5, and this one repeated Act 2's mechanism in the same room. The telescope rolled out of the fallen display and under the counter, where nobody can reach it, and the Shopkeeper won't touch his display anyway ("Curating is hands-off," Act 2).
 
 **First talk**
-- SHOPKEEPER: Miss. Look. The window. It went over in the night. When the whole shop lifted.
-- SHOPKEEPER: The telescope's lying in it like a fallen soldier. Best thing I've ever displayed.
-- After the Keeper has asked for it: SHOPKEEPER: Give it BACK? Then there's a GAP, Miss. I need something local. Something that says Tessel.
+- SHOPKEEPER: Miss. Look. The window. It went over in the night, when the whole shop lifted.
+- SHOPKEEPER: And the telescope rolled right under the counter. Right to the back. I can't reach it.
+- SHOPKEEPER: I wouldn't anyway. Curating is hands-off. But it's very upsetting.
 
-**Cheryl's thought** (design rule 11; the first time he says "something that says Tessel" while she has the guidebook): "Something local that says Tessel. The guidebook says nothing else, wrongly, on every page."
+**Repeat:** SHOPKEEPER: Under the counter. Where nobody can see it. It's the worst place in the world for a display.
 
-**Repeat:** before the Keeper has asked: SHOPKEEPER: If it goes, there's a GAP, Miss. I'd need something local. Something that says Tessel. After: SHOPKEEPER: A gap. People will talk. They'll say, "Did you see his window?"
+**The counter** (look, once the telescope has rolled): "The telescope's under the counter, right at the back. It would take a long arm. Or a crowbar."
 
-**Give guidebook** (any time in Act 5; the builder removed the wait for the Keeper, which only sent a player who reached the Shop first to the lighthouse and back) → guidebook gone; *Got Telescope.*
+**Crowbar on the counter** → `telescope.back`; `window.telescope` cleared; *Got Telescope.* Cheryl kneels and hooks it out with the crowbar (two scrapes, a roll, a clink). "Out it comes. Brass, dusty, and not a dent on it."
+- SHOPKEEPER: Oh, well done. …It's not display now, is it. It's been under a counter. Take it to her.
+
+**Optional: give the guidebook afterward** (the window has a gap) → guidebook gone; `shop.guidebook`
 - SHOPKEEPER: A guidebook! "Tessel: A Pocket Companion." Genuinely local. Confidently wrong. PERFECT.
-- SHOPKEEPER: In it goes. Out comes the telescope. Display for display. Twice in one week. I'm practically a merchant.
+- SHOPKEEPER: In it goes. The window is complete. Twice in one week. I'm practically a merchant.
+- Before that, his repeat after the telescope is out: SHOPKEEPER: A gap. People will talk. They'll say, "Did you see his window?" The guidebook isn't required in Act 5; it fills the window if given.
 
-**After** (repeat): SHOPKEEPER: Two swaps in one week. I'm going to have a sit down.
+**After** (repeat, with the guidebook in): SHOPKEEPER: The window is complete. I'm going to have a sit down.
 
 ### The Clockmaker (Clockmaker's Shop)
 

@@ -62,6 +62,21 @@ export default {
   // Runs once when a new game starts.
   onNewGame: openingIntro,
 
+  // Old-save rules, run on every load (Continue or a debug start), never on a new
+  // game. Each does nothing on a save that doesn't need it (structure pass).
+  // Cheryl's own hat is retired: the engine drops the unknown 'hat' item before
+  // these run, so it goes back to the wardrobe on its own. A save past the old hat
+  // trade (the Tourist has the hat, but no telescope was ever placed) gets the
+  // telescope in the Shop window, so Act 5's door thread can be finished.
+  onLoad: [
+    (g) => {
+      if (g.flag('tourist.hasHat') && !g.flag('window.telescope') && !g.flag('got.telescope') && !g.flag('telescope.back')) {
+        g.setFlag('window.telescope');
+        g.setFlag('telescope.migrated');
+      }
+    },
+  ],
+
   defaults: {
     // Using an item on something with no handler for it.
     useFail: async (g) => cherylDeclines(g),
