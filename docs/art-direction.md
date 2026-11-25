@@ -68,34 +68,54 @@ It should look like an error in the world rather than a monster in it.
 
 - Tiles are 16×16. Character frames are 16×32, anchored at the bottom center: the bottom row of the frame is where the feet touch the ground.
 - **Adults stand about 24 px to the crown** (Cheryl's bun adds 4 more; the Old Man's stoop and cap make him about 23); the head is 9–11 px, around 40% of the height. This is the chunky, expressive SNES proportion: big heads for readable faces, short legs. **Children are about 19 px**, with even bigger heads. Door openings are 26 px tall to the top of the arch, so an adult fits with a little room.
-- **Personality is in the silhouette first.** Each character needs one shape you'd recognize as a black blob: Cheryl's bun and satchel, the Old Man's cap and cane, the Shopkeeper's round apron, the Kid's cowlick. Then color, then face.
+- **Personality is in the silhouette first.** Each character needs one shape you'd recognize as a black blob: Cheryl's bun with its pencil and her tote, the Old Man's cap and cane, Her Next Door's knotted headscarf, the Shopkeeper's round apron, the Sweaty Kid's spiky hair and sweatband. Then color, then face.
 - Faces are minimal: 1 px eyes in `ink`, a 2 px mouth or a mustache, a shade pixel for the nose in profile.
-- Side views (`left`) are drawn; `right` frames are mirrors of `left`. Asymmetric details (a satchel strap) flip with them. That's an accepted convention.
+- Side views (`left`) are drawn. `right` frames may be mirrors of `left` when the character is symmetric enough; when an asymmetric detail matters (Cheryl's tote is always on her right hip), draw `right` properly. The engine mirrors `right` into `left` only when `left` is missing.
 
 ### Cheryl
 
-Late 50s, the player. Silver hair pulled up in a bun with a coral tie; coral cardigan over a cream blouse; navy mid-calf skirt; sensible brown shoes; a leather satchel on a strap across her body (her right hip). She is the most saturated thing on most screens: coral and navy against pale stone. She stands straight; her walk is brisk and purposeful (140 ms per frame). Keep her palette distinct from every NPC's.
+Late 50s, the player, as the story bible describes her: silver-streaked hair in a loose bun with a pencil through it; reading glasses on a beaded chain; a mustard cardigan over a cream blouse; a teal mid-calf skirt; sensible brown shoes; a canvas tote on her right shoulder (the inventory lives in it). The cardigan uses a deeper mustard (`mustard_mid`) as its base so she separates from warm paving, and the teal skirt anchors her. She stands straight; she walks briskly and stops to look at things. Keep her palette distinct from every NPC's (no other resident wears mustard and teal together). (Round 1 had her in coral and navy before the story bible existed; the bible's look replaced it.)
+
+Her sheet also has interaction poses: `reach_up`, `reach_down`, `reach_left`, `reach_right`; `sit_left`/`sit_right` (seated on the tub's edge); `rise_left`/`rise_right` (half-way up); and `idle_<dir>_0/1` (a blink) for scripts.
 
 ### Generic residents
 
-`old_man`, `shopkeeper`, and `kid` in `npcs.js` share one palette letter scheme (`k` outline; `F f x` skin; `H h` hair; `A a Z` main garment; `B b` second garment; `E e` accent; `o O` wood and shoes), so a swap written for one reads the same on the others. Each has two swaps today. To make a new resident, add a swap that changes skin, hair, and clothes together; vary skin tone across the town (`skin`, `skin2`, `skin3`). A named, story-significant character should get its own body rather than a swap.
+`old_man`, `shopkeeper`, and `kid` in `npcs.js`, and the opening's `old_man_seated`, `neighbor`, and `sweaty_kid` in `opening_npcs.js`, share one palette letter scheme (`k` outline; `F f x` skin; `H h` hair; `A a Z` main garment; `B b` second garment; `E e` accent; `o O` wood and shoes), so a swap written for one reads the same on the others. Each has two swaps today. To make a new resident, add a swap that changes skin, hair, and clothes together; vary skin tone across the town (`skin`, `skin2`, `skin3`). A named, story-significant character should get its own body rather than a swap.
 
 ## Animation
 
 - Frames numbered `_0`, `_1`, … form an animation. Optional `durations` on a sheet set the time per frame in ms: a number for every frame, or an array with one entry per frame.
-- **Walk cycles are 4 frames: step, pass, step (other foot), pass**, with the body one pixel lower on the step frames. `walk_down`, `walk_up`, `walk_left`, `walk_right`; Cheryl at 140 ms, residents at 160 ms.
-- **Idles are 2 frames with a long hold and a short beat**, and carry personality: Cheryl blinks; the Old Man nods; the Shopkeeper wipes his hands on his apron; the Kid hops.
+- **Walks use the engine's names:** `<dir>_0` stands, `<dir>_1` and `<dir>_2` are the two steps, and the engine plays 1, 0, 2, 0. The body sits one pixel lower on the step frames. The Sweaty Kid runs on a 4-frame cycle (`<dir>_1`…`<dir>_4`; set `sprite.walk: [1, 2, 3, 4]`).
+- **Idles and poses carry personality** and are 2 frames with a long hold and a short beat where they loop: Cheryl blinks; the Old Man rests his chin on his hand and now and then reaches for a piece; Her Next Door smooths a sheet and then admires it, hands on hips; the Kid jogs in place and throws both arms up.
 - Ambient animation is slow and small: water at 260 ms with ripples that sway rather than scroll; laundry flaps at 600 ms; the cat's tail flicks after a long pause. Nothing on the surface should feel frantic.
 
 ## Tiles and maps
 
-- **Three map layers:** `ground` (opaque tiles), `detail` (transparent tiles drawn on the ground, under characters: lamp posts, pots, jambs, signs, mooring posts), and `overhead` (drawn over characters). **Frames named `over_*` belong on the overhead layer.** Roof tiles above a walk-through passage also go on the overhead layer.
+- **Three map layers** (the engine's names): `ground` (opaque tiles), `objects` (transparent tiles drawn on the ground, under characters: pots, jambs, signs, mooring posts, furniture), and `overhead` (drawn over characters). Anything a character can stand both in front of and behind (a lamp post, a tall plant) should be a sprite that sorts by its feet, not a tile. **Frames named `over_*` belong on the overhead layer.** Roof tiles above a walk-through passage also go on the overhead layer.
 - **Paving is a 2×2 macro-tile** (`pave_nw`, `pave_ne`, `pave_sw`, `pave_se`) so the slab pattern repeats every 32 px instead of every 16. Place by position: `pave_{y even ? n : s}{x even ? w : e}`. Accent variants (`pave_se_crack`, `pave_nw_drain`, `pave_wrong`) replace the quadrant they're named for. Shaded versions (`pave_*_shade`) go under arches and deep doorways.
 - **Building recipe**, top to bottom: roof surface (`roof`, `roof_l`, `roof_r`, or `rooftiles:*`), the front edge (`roof_front*`, or for tiled roofs a plain `wall` row under an overhead `rooftiles:over_eave*`), one or more wall rows (`wall`, `window`, `window_box`, `window_closed`, `balcony`, `door_top`), and a base row with the plinth (`wall_base`, `window_base`, `window_closed_base`, `door_bot`). Use `_l`/`_r` variants at the building's corners. Choose plaster color with a palette swap: base (white with cobalt), `ochre` and `rose` (with sage), `sky` (with wood), `white_sage`.
-- **Arched passage** (2 tiles wide): shaded paving on the ground, `over_arch_l/r` overhead on the wall row, `arch_jamb_l/r` on the detail layer in the row below, and the roof above the passage on the overhead layer.
+- **Arched passage** (2 tiles wide): shaded paving on the ground, `over_arch_l/r` overhead on the wall row, `arch_jamb_l/r` on the objects layer in the row below, and the roof above the passage on the overhead layer.
 - **Terraces**: `retain_top` (coping), any number of `retain`, then `retain_base`. Cut stairs through with `stairs_l` + `stairs_r` (or `stairs` between them for wider flights).
 - **Canal**: `bank_n` (the far quay's wall face), `water` rows, `bank_s` (the near quay's lip). The stepped bridge is 2 wide and 4 tall: `bridge_n_*`, `bridge_down_*`, `bridge_up_*`, `bridge_s_*`, with `water_shadow` on its east side.
 - **Multi-tile objects** are drawn whole and cut into tiles (dome 2×2, bench 2×1, awning 3×1, laundry 3×1, vine 2×1), so their pieces only make sense together and in order.
+
+## Time of day
+
+The tiles are painted in neutral late-morning light. Dusk, night, and day are global washes from `game/src/art/tints.js`, applied with the engine's `tint()`:
+
+- **Dusk** multiplies by a warm apricot at 42%: whitewash turns gold, shadows warm, blues deepen.
+- **Night** multiplies by a moonlit blue at 70%: dark and cool, but every shape still readable.
+- **Day** is the art as painted.
+
+Check new tiles under `?tint=dusk` and `?tint=night` on the dev page. Shapes that depend on a small hue difference (a pale blue door on white) can vanish at night; separate them by value too. Lamp glows and lit windows can't brighten under a multiply tint, so they read as warm accents, not light sources.
+
+## Interiors
+
+Rooms are seen in the same 3/4 view: the north wall's inner face fills the top two rows (wall objects such as shelves, clocks, and windows hang there), the side and south walls show only their tops, and the floor is warm terracotta (`clay_*`). Furniture sits on the objects layer with an `ink` outline like props. Keep rooms lived-in but calm: a few strong pieces, empty floor between them.
+
+## Cutscene pictures
+
+Full-screen pictures (the moonrise vista) are separate 256×224 sheets with their own palettes, split into layers the scene can move: background, a transparent foreground or skyline overlay, and small sprites (the moon, the glow, twinkles). They may use richer gradients than tiles (a limited two-row checker between sky bands), but the same rules otherwise: big clear shapes, light from a stated direction, no pixel soup.
 
 ## Do and don't
 
@@ -120,9 +140,15 @@ Late 50s, the player. Silver hair pulled up in a bun with a coral tie; coral car
 | `canal.js` | `canal` | animated water, quay banks, bridge shadow, stepped bridge, mooring post |
 | `props.js` | `props` | street lamp, pots, crate, bench, signs, a ginger cat (sitting and asleep) |
 | `cloth.js` | `cloth` | awnings (coral, blue, green), laundry line, bougainvillea — all overhead |
-| `cheryl.js` | `cheryl` | the player: idle and walk in four directions |
+| `cheryl.js` | `cheryl` | the player: walk in four directions (`right` drawn, not mirrored), reach, sit, rise, blink |
 | `npcs.js` | `old_man`, `shopkeeper`, `kid` | resident bodies with idle and walk in four directions, and palette swaps |
-| `items.js` | `items` | inventory icons: key, letter, teacup, bread, watering can, spectacles |
+| `opening_npcs.js` | `old_man_seated`, `neighbor`, `sweaty_kid` | the opening's Old Man at chess, Her Next Door, and the Sweaty Kid, with their poses |
+| `roof.js`, `court.js` | see module headers | Cistern Court: roof terraces, tub, sheets, facades, stair, courtyard, well, lemon tree, chess, piano, the Squeeze |
+| `interior.js` | `interior`, `furniture`, `fittings`, `rug` | Cheryl's flat: floor, walls, window, door, furniture |
+| `fx.js` | `fx`, `fx_mist` | sweat drops, swifts, gulls, dust puffs, splashes, the well's breath |
+| `vista.js` | `vista`, `vista_rim`, `vista_glow`, `vista_moon`, `vista_twinkle`, `vista_cheryl` | the moonrise picture and its moving parts |
+| `tints.js` | `TINTS` | dusk, night, and day washes |
+| `items.js` | `items`, `items2` | inventory icons: key, letter, teacup, bread, watering can, spectacles; the opening's pepper mill, egg timer, clothes prop, bath plug, soap, moon chart, hat |
 
 ### Item icons
 
@@ -130,4 +156,4 @@ Late 50s, the player. Silver hair pulled up in a bun with a coral tie; coral car
 
 ## Working method
 
-The art modules are the source of truth; edit the text grids directly. Drafting scripts that generate grids are fine but stay out of the repo. After any change, open the dev page (`?only=<sheet>&zoom=8&expand` shows one sheet's frames at 8×; `&bg=e0c8a0` puts them on stone; `?only=scene` shows the composed street) and look at it at 1× and 3×, then run `node tests/check-art.mjs`.
+The art modules are the source of truth; edit the text grids directly. Drafting scripts that generate grids are fine but stay out of the repo. After any change, open the dev page (`?only=<sheet>&zoom=8&expand` shows one sheet's frames at 8×; `&bg=e0c8a0` puts them on stone; `?only=scene:court`, `scene:flat`, `scene:vista`, or `scene:street` shows one composed scene; `&tint=night` and `&state=morning` change the light and the story state) and look at it at 1× and 3×, then run `node tests/check-art.mjs`.
