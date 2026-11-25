@@ -22,7 +22,7 @@ function shaftRide(g) {
     const off = scrolled % 16;
     for (let row = -1; row < 15; row++) {
       const top = ((row - base) % 2 + 2) % 2 === 0;
-      for (let col = 4; col < 12; col++) {
+      for (let col = 0; col < 16; col++) {
         const rib = col === 5 || col === 10;
         const name = rib ? (top ? 'face_rib_top' : 'face_rib_base') : `${top ? 'face_top' : 'face_base'}${col % 3 ? '' : '_b'}`;
         const img = art.frame(name);
@@ -43,8 +43,6 @@ function shaftRide(g) {
       c.fillRect(0, 0, 256, 224);
     }
     ctx.drawImage(glow, 0, 0);
-    ctx.fillStyle = 'rgba(64,200,216,0.08)';
-    ctx.fillRect(56, 56, 144, 144);
   };
 }
 
@@ -87,7 +85,7 @@ export async function dawn(g) {
   g.place('player', 9, 17, 'down');
   g.player.def.shadow = false;
   for (const [i, s] of [[0, 0.7], [1, 0.6], [2, 0.5]]) {
-    g.pose('player', `well_down_${i}`, { offset: [8, -12] });
+    g.pose('player', `well_down_${i}`, { offset: [8, -20] });
     if (i === 0) g.show('player');
     await g.wait(s);
   }

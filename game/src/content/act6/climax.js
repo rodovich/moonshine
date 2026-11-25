@@ -12,7 +12,8 @@
 //     8  X......PP........B...X   PP the Tooth socket, the clapper in it (7-8, 8-9); B the brake (17, 8)
 //    10  X..cc..........cc....X   the coils (3-4, 10) and (15-16, 10)
 
-import { brake } from '../../art/act5_under.js';
+import { brake, keel_hatch, windlass_drum } from '../../art/act5_under.js';
+import { windlass_night, keel_lit } from '../../art/act6_under.js';
 import { bump, cherylDeclines, night } from './common.js';
 import { act6, HAULING_LINKS, queueScript } from './state.js';
 import { lurchMontage } from './montage.js';
@@ -39,7 +40,7 @@ export async function act6Start(g) {
 
 let bellClock = 0;
 
-async function bell(g) {
+export async function bell(g) {
   if (g.flag('bell.final')) return;
   g.setFlag('bell.final');
   // 1. Cut (no fade) to the belfry at night: Ambrose at the rope, eyes shut, moonlight on his face.
@@ -74,7 +75,7 @@ async function bell(g) {
 // ---------------------------------------------------------------------------
 // The hauling
 
-async function hauling(g) {
+export async function hauling(g) {
   // 1. The brake swings over. A deep shudder. Far off, the Tide Wheel bites.
   g.facePlayer('up');
   g.pose('player', 'heave_up');
@@ -140,7 +141,7 @@ async function hauling(g) {
 
 const before = (g) => night(g) && !g.flag('brake.thrown');
 
-async function brakeLever(g) {
+export async function brakeLever(g) {
   if (!g.flag('bell.final')) {
     await g.describe("Locked. 'When the bell says when.'");
     return bell(g);
@@ -149,7 +150,7 @@ async function brakeLever(g) {
   return g.describe("Thrown. I'm leaving it thrown.");
 }
 
-async function speakingTube(g) {
+export async function speakingTube(g) {
   if (g.flag('brake.thrown')) return g.describe('Somebody up there is laughing. A lot of people are laughing. And somebody\'s crying about a piano.');
   if (bump(g, 'tube.night') === 0) {
     g.setLoopVolume('tube_wind', 1, 400);
@@ -185,6 +186,7 @@ export function windlassAct6(map) {
   ].map((o) => ({ solid: true, ...o, when: o.when || night, use: { crowbar: (g) => g.describe("No. The crowbar's done its part."), '*': cherylDeclines } }));
 
   return {
+    sheets: { brake, keel_hatch, windlass_drum, windlass_night, keel_lit },
     hide: [{ when: night, ids: act6.windlassHide || [] }],
     entities: objects,
     exits: [0, 1].map((i) => ({ x: 7 + i, y: 2, to: 'long_keel', at: [38, 3 + i], facing: 'left', when: (g) => !!g.flag('hatch.open') })),
@@ -226,5 +228,3 @@ export function windlassAct6(map) {
     },
   };
 }
-
-export const windlassScripts = { act6_start: act6Start, act6_bell: bell, act6_hauling: hauling };

@@ -25,10 +25,12 @@ import { disc_fx } from '../../art/act5_sprites.js';
 import { bath_ripple } from '../../art/act6_sprites.js';
 import { basinView, bump, cherylDeclines } from './common.js';
 import { refillMontage } from './montage.js';
+import { showSource } from './extend.js';
 import { dawn } from './dawn.js';
 
 const W = 16, H = 13;
 const Q = [['nw', 0, 0], ['ne', 1, 0], ['sw', 0, 1], ['se', 1, 1]];
+const LAMPS = [5, 10]; // moonglass lamps on the north wall (not in the design's map; added so the walls' lamps can flare)
 
 // The Basin's look for the current state (frames in docs/art-act6.md).
 function basinState(g) {
@@ -75,8 +77,11 @@ function compose(g) {
   // The sighting log on its stand (14, 4), and Cheryl's shoes by the Basin while she bathes.
   L.set('detail', 14, 4, 'sight_props:log_stand', true);
   if (g.flag('fx.shoes')) L.set('detail', 6, 6, 'sight_props:shoes', true);
-  // Light pools under the lamps once every lamp Downstairs blazes.
-  if (g.flag('moon.true')) for (const x of [2, 12]) L.set('ground', x, 3, 'hull:floor_glow', false);
+  // Two moonglass lamps on the north wall, dark until the moon sits true; then they blaze, with pools below.
+  for (const x of LAMPS) {
+    L.set('ground', x, 1, `keel_hatch:${g.flag('moon.true') ? 'lamp_lit' : 'lamp_dead'}`, true);
+    if (g.flag('moon.true')) L.set('ground', x, 3, 'hull:floor_glow', false);
+  }
   return L.done();
 }
 
@@ -88,7 +93,7 @@ async function showBasin(g, v, { hold = 0.6 } = {}) {
   await g.wait(hold);
 }
 
-async function takePlug(g) {
+export async function takePlug(g) {
   await g.think('My plug.');
   await g.describe(
     'My plug. Chain and all. It went down my drain on Moonshine Night and fell all the way here.',
@@ -99,7 +104,7 @@ async function takePlug(g) {
   await g.giveItem('found_plug');
 }
 
-async function plugBasin(g) {
+export async function plugBasin(g) {
   g.takeItem('found_plug');
   await g.describe("The Basin's own stopper went missing centuries ago. Mine fits.", 'Plugs are plugs.');
   g.setFlag('basin.plugged');
@@ -121,7 +126,7 @@ async function plugBasin(g) {
   await g.hidePicture({ fade: 0.6 });
 }
 
-async function basinInteract(g) {
+export async function basinInteract(g) {
   if (g.flag('sisters.asleep') && !g.flag('bathed')) return bath(g);
   if (g.flag('bathed')) {
     if (bump(g, 'basin.after') === 0) {
@@ -161,7 +166,7 @@ const basinUse = {
 // ---------------------------------------------------------------------------
 // The trim wheel and moon true
 
-async function trimWheel(g) {
+export async function trimWheel(g) {
   if (!g.flag('basin.plugged')) {
     return g.describe('A bronze wheel, marked with a moon and an arrow. It won\'t turn. It wants something to look at first.');
   }
@@ -193,19 +198,23 @@ async function trimWheel(g) {
   await g.hidePicture({ fade: 0.6 });
 }
 
-async function moonTrue(g, v) {
+export async function moonTrue(g, v) {
   // 1-2. The water goes perfectly still; the moonglass rim lights all the way round.
   await g.wait(0.8);
   g.sfx('rim_light');
   v.rimAt = v.now;
   await g.wait(2.2);
   // 3-4. Back in the room: the lamps flare; down the Long Keel, lamp after lamp. Wrongness 0.
-  g.setFlag('moon.true');
   g.setWrongness(0);
   await g.hidePicture({ fade: 0 });
   g.playCue('moon_true', { resume: false });
+  for (const f of [0, 1, 2, 3, 4]) {
+    for (const x of LAMPS) g.setTile('ground', x, 1, `keel_hatch:lamp_wake_${f}`);
+    await g.wait(0.14);
+  }
+  g.setFlag('moon.true');
   g.sfx('lamps_blaze');
-  await g.wait(3.5);
+  await g.wait(3.2);
   // 5. The master stop unlocks with a clack and rises an inch.
   g.sfx('master_stop', { volume: 0.7 });
   await g.tween('master_stop', { offset: [0, -2], seconds: 0.3 });
@@ -219,7 +228,7 @@ async function moonTrue(g, v) {
 // ---------------------------------------------------------------------------
 // The master stop
 
-async function masterStop(g) {
+export async function masterStop(g) {
   if (g.flag('sisters.asleep')) return g.describe(bump(g, 'stop.after') % 2 ? 'Down. Asleep. Leave her be.' : 'Pulled. The Middle Sister is asleep, and so is the rest of us, nearly.');
   if (!g.flag('moon.true')) {
     return g.describe('A bronze rod in the floor, with the three-bars emblem, and the middle bar picked out. Locked.');
@@ -248,7 +257,7 @@ async function masterStop(g) {
 // ---------------------------------------------------------------------------
 // The sighting log: one entry per look, newest first; after moon true, Cheryl signs it.
 
-async function sightingLog(g) {
+export async function sightingLog(g) {
   const n = bump(g, 'log.read');
   if (g.flag('moon.true') && !g.flag('log.signed') && n >= 1) {
     g.setFlag('log.signed');
@@ -290,13 +299,13 @@ export async function bath(g) {
   g.place('player', 7, 6, 'down');
   g.sfx('bath_enter');
   g.player.def.shadow = false;
-  g.pose('player', 'bath_down_0', { offset: [0, -4] });
-  const ripple = g.spawnEffect({ sprite: { sheet: bath_ripple, frame: 'bath_ripple' }, at: [7, 6], offset: [0, 1], seconds: 6, layer: 'top' });
+  g.pose('player', 'bath_down_0', { offset: [8, -4] });
+  const ripple = g.spawnEffect({ sprite: { sheet: bath_ripple, frame: 'bath_ripple' }, at: [7.5, 6], offset: [0, 1], seconds: 6, layer: 'top' });
   await g.wait(1.2);
   // 3. The music box: the skipping rhyme, slowly, in tune.
   g.playMusic('bath');
   await g.wait(2.5);
-  g.pose('player', 'bath_down_1', { offset: [0, -4] });
+  g.pose('player', 'bath_down_1', { offset: [8, -4] });
   await g.wait(1.5);
   // 4. The Basin view, with her reflection at the edge.
   const v = basinView(g, { step: 3 });
@@ -329,7 +338,7 @@ export async function bath(g) {
 // ---------------------------------------------------------------------------
 // The lift
 
-async function lift(g) {
+export async function lift(g) {
   if (!g.flag('bathed')) {
     if (bump(g, 'lift.early') === 0) return g.describe("A bronze cage in a shaft of its own, with a counterweight. 'Up,' says the arrow.", 'Not yet. Not with the moon off to one side like that.');
     return g.describe(g.flag('moon.true') ? "'Up.' Not yet." : "'Up,' says the arrow. Not yet.");
@@ -369,7 +378,7 @@ const glint = {
   },
 };
 
-export const sightingMap = composedMap(compose, {
+export const sightingMap = showSource(composedMap(compose, {
   id: 'sighting_room',
   name: 'The Sighting Room',
   tileset: act6Tiles,
@@ -379,8 +388,7 @@ export const sightingMap = composedMap(compose, {
   lights: [
     { x: 7.5, y: 5, radius: 3, color: 'moon_light' },
     { x: 7.5, y: 5.5, radius: 4, color: 'relic_cyan', when: (g) => !!g.flag('moon.true') },
-    { x: 2, y: 2, radius: 4, color: 'moonglass_light', when: (g) => !!g.flag('moon.true') },
-    { x: 12, y: 2, radius: 4, color: 'moonglass_light', when: (g) => !!g.flag('moon.true') },
+    ...LAMPS.map((x) => ({ x, y: 2.5, radius: 4, color: 'moonglass_light', when: (g) => !!g.flag('moon.true') })),
   ],
   ambience: ['hull', 'drips'],
   step: 'step_hullstone',
@@ -400,4 +408,4 @@ export const sightingMap = composedMap(compose, {
     glint.run(g);
     await g.wait(1);
   },
-});
+}), compose, basinState);

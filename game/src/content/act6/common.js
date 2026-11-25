@@ -28,7 +28,10 @@ export const act6Items = {
 // Story state.
 
 export const night = (g) => !!g.flag('act6.started') && !g.flag('epilogue');
-export const epilogue = (g) => !!g.flag('epilogue') || !!g.flag('game.complete');
+// From Cheryl climbing out of the well; still true after the credits (Continue reopens the epilogue).
+export const epilogue = (g) => !!g.flag('epilogue');
+// The ending has played (set just before the credits hand back to the title).
+export const finished = (g) => !!g.flag('act6.done');
 
 // ---------------------------------------------------------------------------
 // The Basin view (docs/art-act6.md, "The Basin view"): the moon at one of four

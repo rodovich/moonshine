@@ -102,6 +102,7 @@ export async function endingVista(g) {
   g.pose('player', null);
   g.setFlag('fx.chart', null);
   g.place('player', 5, 7, 'up');
+  g.setFlag('act6.done');
   g.markComplete();
   await g.toTitle();
 }

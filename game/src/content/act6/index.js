@@ -3,13 +3,13 @@
 // the Sighting Room), plus states added to other acts' maps: the Windlass
 // Room at night, the montage cuts, the dawn, the epilogue, the final scene.
 
-import { keelMap } from './keel.js';
-import { sightingMap, bath } from './sighting.js';
+import { sightingMap, bath, takePlug, plugBasin, moonTrue, trimWheel, masterStop, sightingLog, basinInteract, lift } from './sighting.js';
+import { keelMap, wakeLamps, keelDoor } from './keel.js';
 import { act6Items } from './common.js';
 import { act6 } from './state.js';
 import { extendMap } from './extend.js';
-import { windlassAct6, windlassScripts } from './climax.js';
-import { courtEpilogue, lampStreetEpilogue, crownEpilogue, archiveEpilogue, cryptEpilogue, squareEpilogue, shopEpilogue, stepsEpilogue } from './epilogue.js';
+import { windlassAct6, act6Start, bell, hauling, brakeLever, speakingTube } from './climax.js';
+import { pianoScene, stairRace, courtEpilogue, lampStreetEpilogue, crownEpilogue, archiveEpilogue, cryptEpilogue, squareEpilogue, shopEpilogue, stepsEpilogue } from './epilogue.js';
 import { flatEnding, finalScene, endingVista } from './ending.js';
 import { dawn } from './dawn.js';
 import { lurchMontage, refillMontage } from './montage.js';
@@ -49,13 +49,32 @@ export function addAct6(maps) {
 // Dawn: pale pink and gold (Cistern Court, from the lift until she first leaves the court).
 export const act6Lighting = {
   dawn: [
-    { color: '#f8b0a0', mode: 'multiply', amount: 0.32 },
-    { color: '#f8d088', mode: 'screen', amount: 0.14 },
+    { color: '#e890a8', mode: 'multiply', amount: 0.45 },
+    { color: '#f8c870', mode: 'screen', amount: 0.16 },
   ],
 };
 
+// Every Act 6 script is also a named script, runnable with ?run=<name>, which
+// also lets `npm run check` see the ids they use.
 export const act6Scripts = {
-  ...windlassScripts,
+  // Called by Act 5 after its Moonrise card, with Cheryl on the Windlass Room's west coil.
+  act6_start: act6Start,
+  act6_bell: bell,
+  act6_hauling: hauling,
+  act6_brake: brakeLever,
+  act6_tube: speakingTube,
+  act6_keelLamps: wakeLamps,
+  act6_keelDoor: keelDoor,
+  act6_takePlug: takePlug,
+  act6_plugBasin: plugBasin,
+  act6_basin: basinInteract,
+  act6_trim: trimWheel,
+  act6_moonTrue: moonTrue,
+  act6_masterStop: masterStop,
+  act6_log: sightingLog,
+  act6_lift: lift,
+  act6_piano: pianoScene,
+  act6_stairRace: stairRace,
   // ?map=sighting_room&x=7&y=10&flags=act6.started,chain.home,sisters.asleep,moon.true,basin.plugged,got.plug,trim=3&run=act6_bath
   act6_bath: bath,
   // ?map=sighting_room&x=7&y=7&flags=...,bathed&run=act6_dawn

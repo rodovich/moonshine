@@ -13,7 +13,7 @@ import { props } from '../../art/props.js';
 import { LOOKS } from '../act2/common.js';
 import { clockmaker } from '../../art/act4_sprites.js';
 import { crowd_a, crowd_b } from '../../art/act5_sprites.js';
-import { piano_delivered, luggage } from '../../art/act6_surface.js';
+import { piano_delivered, luggage, well_lift, bunting, step_barrier } from '../../art/act6_surface.js';
 import { counting_rosette, runner, kid_finish, tourist_case } from '../../art/act6_sprites.js';
 import { finalScene } from './ending.js';
 
@@ -105,12 +105,13 @@ export function courtEpilogue(map) {
   }));
 
   return {
+    sheets: { well_lift },
     hide: [{ when: epilogue, ids: ['old_man', 'neighbor_morning', 'cat_morning', 'tub', 'well', 'kid_morning'] }],
     entities: [oldMan, neighborEpi, cat, well, tub, piano, ...movers],
     exits: [
       // The door home: not yet; then (after the piano) the final scene; after the game, as usual.
       {
-        x: 3, y: 11, when: (g) => epilogue(g) && !g.flag('game.complete'),
+        x: 3, y: 11, when: (g) => epilogue(g) && !g.flag('act6.done'),
         run: async (g) => {
           if (!g.flag('epi.piano')) {
             await g.describe('Not yet. I want to see the town first.');
@@ -138,7 +139,7 @@ export function courtEpilogue(map) {
       return out;
     },
     // Pale pink and gold at dawn, until she first leaves the court; plain morning after.
-    lighting: (g) => (epilogue(g) ? (g.flag('epi.leftCourt') || g.flag('game.complete') ? 'day' : 'dawn') : undefined),
+    lighting: (g) => (epilogue(g) ? (g.flag('epi.leftCourt') || g.flag('act6.done') ? 'day' : 'dawn') : undefined),
     quiet: epilogue,
     onEnter: async (g, base) => {
       if (!epilogue(g)) return base(g);
@@ -151,7 +152,7 @@ export function courtEpilogue(map) {
 }
 
 // The piano, delivered at last (on coming back to the court after leaving it).
-async function pianoScene(g) {
+export async function pianoScene(g) {
   await g.wait(0.4);
   await g.panCamera(8, 14, 2);
   await g.wait(0.4);
@@ -371,6 +372,7 @@ export function stepsEpilogue(map) {
     use: npcDecline("I've got my basin, love."),
   });
   return {
+    sheets: { bunting, step_barrier },
     hide: [{ when: epilogue, ids: ['counting_woman', 'basin_woman', 'kid', 'kid_after'] }],
     entities: [counter, ...kid, ...runners, ...crowd, basin].filter(Boolean),
     // Bunting over landing 2; the finish tape across flight 3; the rope barrier round the open step.
@@ -378,7 +380,7 @@ export function stepsEpilogue(map) {
       if (!epilogue(g)) return [];
       const out = [];
       'abcd'.split('').forEach((s, i) => out.push(['overhead', 4 + i, 16, `bunting:over_bunting_${s}`]));
-      const broken = raced(g) || g.flag('fx.tape') ? 'finish_broken' : 'finish_tape';
+      const broken = g.flag('epi.race') || g.flag('fx.tape') ? 'finish_broken' : 'finish_tape';
       out.push(['detail', STEPS.tape[0], STEPS.tape[1], `bunting:${broken}_l`], ['detail', STEPS.tape[0] + 1, STEPS.tape[1], `bunting:${broken}_r`]);
       for (let y = 0; y < 3; y++) for (let x = 0; x < 4; x++) {
         if ((x === 1 || x === 2) && y === 1) continue; // the hole itself
@@ -396,7 +398,7 @@ export function stepsEpilogue(map) {
   };
 }
 
-async function stairRace(g) {
+export async function stairRace(g) {
   // 1-2. The crowd; the Counting Woman counting; the Kid pounds up the Steps, far ahead of two runners.
   g.startLoop('crowd', { fadeMs: 800 });
   const kid = 'epi_kid_start';

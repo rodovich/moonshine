@@ -20,6 +20,7 @@ import { composedMap, blankGrid } from '../opening/grid.js';
 import { layout } from '../act2/common.js';
 import { act6Tiles } from './tiles.js';
 import { cherylDeclines } from './common.js';
+import { showSource } from './extend.js';
 
 const W = 40, H = 7;
 export const KEEL_LAMPS = [37, 32, 27, 22, 17, 12, 7, 2]; // in the order Cheryl reaches them, walking west
@@ -60,16 +61,13 @@ function compose(g) {
 // ---------------------------------------------------------------------------
 // The lamps waking. An ambient callback every tenth of a second: when Cheryl
 // comes within three tiles of the next dead lamp, it wakes (lamp_wake, then
-// lit), with a chime panned by where it is on screen. The door at the west end
-// slides up as she approaches.
+// lit), with a chime panned by where it is on screen.
 
 const WAKE = ['lamp_wake_0', 'lamp_wake_1', 'lamp_wake_2', 'lamp_wake_3', 'lamp_wake_4'];
 const WAKE_TICKS = [3, 1, 1, 2, 6]; // tenths of a second per frame (the art's 300/120/120/220/600 ms)
-const DOOR_TICKS = 3;
 let waking = []; // { x, t } lamps mid-animation (reset when the map loads)
-let door = null; // { t } while the door slides up
 
-function wakeLamps(g) {
+export function wakeLamps(g) {
   const p = g.player;
   let n = awake(g);
   while (n < KEEL_LAMPS.length && p.x - KEEL_LAMPS[n] <= 3) {
@@ -94,22 +92,20 @@ function wakeLamps(g) {
     } else g.setTile('ground', w.x, 1, `keel_hatch:${WAKE[i]}`);
   }
   waking = waking.filter((w) => !w.done);
-  // The door at the west end slides up as she approaches.
-  if (!g.flag('keel.doorOpen') && !door && p.x <= 5) {
-    door = { t: 0 };
-    g.sfx('door_slide_up');
+}
+
+// The west end: the Sighting Room's door slides up as she comes near, and she says so.
+export async function keelDoor(g) {
+  g.setFlag('n.keelDoor', 1);
+  g.sfx('door_slide_up');
+  for (let f = 0; f < 3; f++) {
+    g.setTile('ground', 0, 3, `keel:keel_door_opening_top_${f}`);
+    g.setTile('ground', 0, 4, `keel:keel_door_opening_bot_${f}`);
+    await g.wait(0.26);
   }
-  if (door) {
-    const f = Math.floor(door.t / DOOR_TICKS);
-    door.t++;
-    if (f < 3) {
-      g.setTile('ground', 0, 3, `keel:keel_door_opening_top_${f}`);
-      g.setTile('ground', 0, 4, `keel:keel_door_opening_bot_${f}`);
-    } else {
-      door = null;
-      g.setFlag('keel.doorOpen');
-    }
-  }
+  g.setFlag('keel.doorOpen');
+  await g.wait(0.3);
+  await g.describe('A door, opening on its own. A moon in a bowl, carved over it.');
 }
 
 // Lights: the woken lamps (radius 3), cyan-white.
@@ -132,10 +128,8 @@ const objects = [
     id: `lamp_${x}`, x, y: 1, h: 2, lookKey: 'keel_lamps',
     looks: ['Moonglass lamps. They woke as I came, one after another, like they\'d been waiting.', 'Awake. All of them, all the way down.'],
   })),
-  {
-    id: 'keel_door', x: 0, y: 3, h: 2,
-    interact: (g) => g.describe(g.flag('keel.doorOpen') ? 'A moon in a bowl, carved over the door. It opened on its own.' : 'A door, shut. A moon in a bowl, carved over it.'),
-  },
+  // Only while it's shut: once open, the doorway is the way through.
+  { id: 'keel_door', x: 0, y: 3, h: 2, when: (g) => !g.flag('keel.doorOpen'), look: 'A door, shut. A moon in a bowl, carved over it.' },
 ].map((o) => ({ solid: true, use: { '*': cherylDeclines }, ...o }));
 
 // Lines along the way: first entering (after two steps), and the west end.
@@ -148,18 +142,10 @@ const triggers = [
       await g.describe('The Long Keel. It runs the whole length of us, straight as a ruler.', "The lamps wake up as I come. Like they've been waiting.");
     },
   },
-  {
-    x: 3, y: 3, w: 1, h: 3, stop: false,
-    when: (g) => !g.flag('n.keelDoor'),
-    run: async (g) => {
-      g.setFlag('n.keelDoor', 1);
-      await g.wait(0.4);
-      await g.describe('A door, opening on its own. A moon in a bowl, carved over it.');
-    },
-  },
+  { x: 5, y: 3, w: 1, h: 3, stop: false, when: (g) => !g.flag('keel.doorOpen'), run: keelDoor },
 ];
 
-export const keelMap = composedMap(compose, {
+export const keelMap = showSource(composedMap(compose, {
   id: 'long_keel',
   name: 'The Long Keel',
   tileset: act6Tiles,
@@ -172,14 +158,17 @@ export const keelMap = composedMap(compose, {
   spawn: [37, 4],
   exits: [
     // Each tile of a two-tile edge is its own exit, since these doors turn a corner (west edge → north-facing door).
-    ...[0, 1].map((i) => ({ x: 0, y: 3 + i, to: 'sighting_room', at: [7 + i, 11], facing: 'up', when: (g) => !!g.flag('keel.doorOpen') })),
+    // (Run as scripts: the door's tiles are solid until it slides up.)
+    ...[0, 1].map((i) => ({
+      x: 0, y: 3 + i, when: (g) => !!g.flag('keel.doorOpen'),
+      run: (g) => { g.sfx('door'); return g.changeMap('sighting_room', 7 + i, 11, 'up'); },
+    })),
     ...[0, 1].map((i) => ({ x: 39, y: 3 + i, to: 'windlass_room', at: [7 + i, 3], facing: 'down' })),
   ],
   triggers,
   entities: objects,
   ambient: [{ every: [0.1, 0.1], run: wakeLamps }],
-  onEnter: async (g) => {
+  onEnter: async () => {
     waking = [];
-    door = null;
   },
-});
+}), compose, awake);

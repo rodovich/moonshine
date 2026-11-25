@@ -1,6 +1,7 @@
 // Adding Act 6's states to maps other acts build, without editing their
 // files. `extendMap(map, ext)` returns a copy of `map` with:
 //
+//   sheets:    { well_lift, ... }   art sheets added to the map's tileset, for the tiles below
 //   hide:      [{ when: (g) => bool, ids: ['old_man', ...] }]  base entities to take away while `when` holds
 //   entities:  [...]            added (they come after the base ones)
 //   exits, triggers: [...]      added *before* the base ones, so they win on the same tile
@@ -19,15 +20,24 @@ const fn = (v) => (typeof v === 'function' ? v : () => v);
 
 // A wrapper whose source text (for `npm run check`, which reads scripts'
 // source for the flags, items, and maps they use) includes what it wraps.
-function joined(wrapper, ...parts) {
+export function joined(wrapper, ...parts) {
   const src = [wrapper, ...parts].filter((p) => typeof p === 'function').map((p) => Function.prototype.toString.call(p)).join('\n');
   wrapper.toString = () => src;
   return wrapper;
 }
 
+// A map built with composedMap(): let the check see the compose function (and
+// any helpers) behind its patches, where the story flags are read.
+export function showSource(map, ...fns) {
+  map.patches = joined(map.patches, ...fns);
+  return map;
+}
+
 export function extendMap(map, ext) {
   if (!map) return map;
   const out = { ...map };
+  // Art sheets the added tiles use, beyond the map's own tileset.
+  if (ext.sheets) out.tileset = { ...map.tileset, sheets: { ...map.tileset.sheets, ...ext.sheets } };
   const hide = ext.hide || [];
   const hidden = (g, id) => hide.some((h) => h.ids.includes(id) && h.when(g));
   out.entities = [
