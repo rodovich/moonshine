@@ -278,6 +278,16 @@ export class Control {
     const tx = Math.floor((t.x + w.cam.x) / TILE);
     const ty = Math.floor((t.y + w.cam.y) / TILE);
     if (!w.map.inBounds(tx, ty)) return;
+    // Holding an item and tapping plain ground right by Cheryl means "use it
+    // here": say there's nothing to use it on. Farther away, she walks there
+    // still holding it.
+    const p = this.player;
+    if (this.holding && Math.abs(tx - p.x) + Math.abs(ty - p.y) <= 1) {
+      this.holding = null;
+      const line = w.content.defaults?.nothingToUseOn || "There's nothing there to use it on.";
+      w.run((g) => g.describe(line));
+      return;
+    }
     this.walkTo(tx, ty);
     this.dragging = true;
     this.dragT = 0;
