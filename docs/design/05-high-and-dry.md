@@ -537,6 +537,8 @@ The run is fully scripted and always succeeds.
 
 ## Audio needed
 
+All of this is built (audio/foundation, 0518c2a); ids and a suggested order are in [audio-direction.md](../audio-direction.md). Two timing notes for the build: start `relay` with `playMusic('relay', { fadeMs: 0 })` as the Kid says "EGG," and time the slap so the door opens in its last bars (its final note is the egg timer's ding). Raise the `surf` loop with `setLoopVolume` at each Teeth stage, and stop `drum_strain` with `clapper_seat` so the creaking stops when the clapper seats.
+
 **Music**
 - `neighborhood` and `harbor` at Wrongness 0.5, with the wind loop under them
 - **`relay`** (new, short): the Kid's run. A quick, bright chase on the surface instruments (flute and harp racing, tambourine), the home motif in double time, about 50 seconds, ending on the egg timer's ding as its final note
