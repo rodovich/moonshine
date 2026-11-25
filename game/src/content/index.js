@@ -6,7 +6,7 @@ import { testMaps, testItemDefs, testScripts, testCharacters } from './test/inde
 import { openingMaps, openingItems, openingScripts, openingIntro, opening } from './opening/index.js';
 import { cherylDeclines } from './opening/common.js';
 import { act2Maps, act2Items, act2Scripts, act2 } from './act2/index.js';
-import { act3Maps, act3Items, act3Scripts, withAct3 } from './act3/index.js';
+import { act3Maps, act3Items, act3Scripts, withAct3, act3 } from './act3/index.js';
 import { cheryl } from '../art/cheryl.js';
 
 // Act 3 layers its states onto Act 2's maps (the crypt, the Archive, the Crown at dusk).
@@ -15,6 +15,8 @@ const maps = withAct3({ ...openingMaps, ...act2Maps, ...act3Maps, ...testMaps })
 opening.squeezeTo = maps.lamp_street ? 'lamp_street' : null;
 // The ladder under the hundredth step leads into Act 3 once it registers the Step Gallery; until then Act 2 ends on a card.
 act2.stepTo = maps.step_gallery ? 'step_gallery' : null;
+// After the dusk vista Act 3 hands over to Act 4 (set this to Act 4's startAct4 when it registers); until then it ends on a card.
+act3.next = null;
 
 export default {
   title: 'Moonshine',
