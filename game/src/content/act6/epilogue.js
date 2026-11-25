@@ -335,7 +335,14 @@ export function squareEpilogue(map) {
 export function shopEpilogue(map) {
   return {
     sheets: { shop_epi },
-    patches: (g) => (epilogue(g) ? [['detail', 7, 5, { tile: 'shop_epi:display_book_l', solid: true }], ['detail', 8, 5, { tile: 'shop_epi:display_book_r', solid: true }]] : []),
+    // The window: the guidebook open at the Hundred Steps if Cheryl gave it to him in Act 5 (shop.guidebook),
+    // else his empty stand (display_empty_*, asked of the art task; bare until it lands).
+    patches: (g) => {
+      if (!epilogue(g)) return [];
+      if (g.flag('shop.guidebook')) return [['detail', 7, 5, { tile: 'shop_epi:display_book_l', solid: true }], ['detail', 8, 5, { tile: 'shop_epi:display_book_r', solid: true }]];
+      const empty = shop_epi.frames.display_empty_l ? (s) => ({ tile: `shop_epi:display_empty_${s}`, solid: true }) : () => null;
+      return [['detail', 7, 5, empty('l')], ['detail', 8, 5, empty('r')]];
+    },
     hide: [{ when: epilogue, ids: ['shopkeeper', 'hat_display'] }],
     entities: [
       recast(map, 'shopkeeper', {
@@ -351,7 +358,9 @@ export function shopEpilogue(map) {
         },
         use: npcDecline("No, no. You keep it. I'm a giver now."),
       }),
-      recast(map, 'hat_display', { look: 'The guidebook, in pride of place, open at the Hundred Steps.' }),
+      recast(map, 'hat_display', {
+        interact: (g) => g.describe(g.flag('shop.guidebook') ? 'The guidebook, in pride of place, open at the Hundred Steps.' : "An empty stand. He's leaving it empty on purpose. He says it's minimalism."),
+      }),
     ].filter(Boolean),
   };
 }

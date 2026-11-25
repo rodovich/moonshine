@@ -201,7 +201,7 @@ async function dropLadder(g) {
   g.setFlag('halls.ladder');
   g.shake(2, 0.4);
   await g.wait(0.6);
-  await g.describe('There. A back door.');
+  await g.describe('There. A back door.', 'It comes up through the grate in the gallery, under the Steps.');
 }
 
 async function climbLadder(g) {

@@ -28,6 +28,8 @@ Module `game/src/art/act5_surface.js`. Dev page: `/dev/art.html?only=scene:act5_
 | The door (4–5, 7): propped open / swung shut | `clockshop:door_open_l/r` / `door_shut_l/r` | ground, in the south wall |
 | Walls and floor | `interior:wall_*`, `shop:floor` | ground |
 | Shop: the window display fallen over in the rise, the telescope in it (7–8, 5) | `shop5:display_fallen_l/r` (structure pass: redrawn with the Keeper's telescope rolled out across the floor beside the plinth, a cradle tipped under it, in place of the hat) | objects |
+| Shop: the display fallen with the telescope gone, rolled on under the counter (7–8, 5) | `shop5:display_fallen_empty_l/r`: the plinth on its side, the dust where it stood, both cradles tipped over | objects |
+| Shop: the telescope under the counter, until it's fished out (6, 3), the counter's east end, nearest the window | `shop:counter_r_glint` (2 frames, 900/150 ms), in place of `shop:counter_r`: a dark gap under the front panel with the draw-tube's brass end in it, glinting now and then | detail |
 | Shop: the guidebook in pride of place (7–8, 5) | `shop5:display_guide_l/r` | objects |
 | Fountain Square: DRY CANAL DAY — TONIGHT — MOONRISE on two poles over the café (17–22, 11) | `banner:over_banner_<a-f>` (2 frames, a ripple), overhead in a row; the poles' feet `banner:pole_foot_l` / `pole_foot_r` on the objects layer in the row below, under the first and last banner tiles | overhead; objects |
 | Lamp room: the window ring (row 1), walls, floor | `lamproom:window`, `wall`, `floor` | ground |

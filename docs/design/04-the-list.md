@@ -730,7 +730,7 @@ When Cheryl next visits Fountain Square: the Fountain is full and flowing again,
 | Item | Icon idea | Inventory description |
 | --- | --- | --- |
 | Copper throat | A coil of copper pipe, green at the ends | "Mott's grandfather's copper. A coil of pipe that hums when the tide turns. It came off 'the greedy one.'" |
-| Square jug | A stoneware jug with square shoulders | "Mott's square jug. Empty. Doesn't roll. Smells like a mistake." |
+| Square jug | A stoneware jug with square shoulders | "Mott's square jug. Empty. Doesn't roll. Put it down and it stays put. Smells like a mistake." (The middle clause added after the first-time playtest, to point at the Clockmaker's doorstop.) |
 
 ## Art needed
 
@@ -813,6 +813,17 @@ The structure-pass lines above are in as written (the Kid's jump, the Man on Ben
 - The ferry: "The Persistence, tied up and going nowhere. She's level. I checked. Nothing else is."
 - The Harbor's other bollards: "A bollard. Nobody sitting on it. Nobody sitting on any of them."
 - The Pump Hall grates after the burst: "Under water now, with the rest of the floor."
+- **From the first-time playtest (dbcLYG8CWB):**
+  - After Mott's "Written down, so they'd have to believe it." (first time, with the moon chart in the bag): "Written down. Thirty-one years of moons, written down, in my bag." Without the chart: "Thirty-one years of moons, written down. On my kitchen table."
+  - After the Clockmaker's "nobody has ever written down what time Tessel keeps" (first time, with the guidebook in the bag): "The guidebook has a page on Tessel's time. Wrong, naturally. He'll hate it."
+  - The crowbar on the boarded hundredth step (Act 2's steps.js owns it for every act; merged from both builders' versions): "I opened it with this once. The Mayor's nailed it shut, and fair enough: down there it all ends in water now." So the board isn't a blocker on any route: the way it closes is already shut.
+  - Act 2's lamp room after the telescope is taken: "The dust sheet, in a heap. Nothing under it now but a clean patch of floor." (Act 4 and 5 have their own.)
+  - The Pump Hall's depth, as built (in place of a descent scroll): the ring hatch, "It lifts. A ladder, going down a long way, and the sound of something big, breathing."; arriving, "Down where the water is. Further down than the Bilge, by the rungs. Three of them, side by side."; the climb, "Fifty rungs. Fifty-one. That should be about the Bilge, by now. The Counting Woman would be proud of me." The Pump Hall is at the bottom of the hull, below everything, so the climb up to the Bilge cellar holds.
+  - Mott, as built: the thought after his line is "Written down. Thirty-one years of moonrises, ticked. It's in my bag." (or "…It's on my kitchen table."); later repeats add "My moon chart. Show him." / "My moon chart. On the kitchen table."
+  - The Fountain while the Mayor guards it: "Five hundred years of wishes in a heap, and something round and bronze under them. I'd have to be inside the rope." then the Mayor's "Behind the rope" line. The lamp room's empty dust sheet in Act 4: "The dust sheet the telescope lived under. Folded, very square. She's polishing the spot where it stood."
+- The Fountain ladder after the burst (drawn dry above the water): "The water's over the foot of it, and the floor between is all flood. That way's gone."
+- The Crown's tower, first look in Act 4 (the clock and the door share a column): "The Mayor's clock. Twelve minutes ahead of the sundial now, and prouder than ever." then the door. It matches the Clockmaker's "TWELVE minutes."
+- The boarded step is owned by Act 2's steps.js for every act; its walk-over lines play once. Walking into the Fishmonger's door after the reveal ends the act like the other exits.
 
 ## Decisions
 

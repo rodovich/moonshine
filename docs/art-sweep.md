@@ -23,6 +23,7 @@ Where the text is canonical in the design docs, the existing frames changed in p
 | The Crown, epilogue: the Mayor's clock gone, a paler square where it hung | `tower_noclock:noclock_x{0,1}y{0,1,2}` | Map (4-5, 2-4), in place of `bell_tower:bell_tower_x{2,3}y{2,3,4}` | ground |
 | The crypt's Founders' door, epilogue: open, with Ottilie's sign (OPEN, and a line of small writing) | `founders_door_sign:founders_door_sign_x{0,1}y{0,1}` | The Archive map (5-6, 1-2), in place of `founders_door:founders_door_x*y*` | ground |
 | The Shop window, epilogue: the guidebook open at the Hundred Steps | `shop_epi:display_book_l/_r` | (7, 5) and (8, 5), in place of `shop:display_l/_r` | detail |
+| The Shop window, epilogue, if Cheryl kept the guidebook in Act 5: "An empty stand… minimalism." | `shop_epi:display_empty_l/_r`, the same table with nothing on it | (7, 5) and (8, 5) | detail |
 | The sea cave at low tide (Act 4), the old Goat Path | `cave_low:cave_mouth_low` | (0, 21), in place of `goatpath:cave_mouth` | ground |
 | The sea cave at low tide, the rebuilt Goat Path | `cliff_low:x1y37_low`, `cliff_low:x1y38_low` | (1, 37) and (1, 38), in place of `goatcliff:x1y37`/`x1y38` | ground |
 | The Water Stairs, Act 4: two more steps under | `bilge_deep:wstairs_deep_{l,m,r}` | The Bilge (22-25, 7), in place of `bilge_flood:wstairs_wet_*` (l, m, m, r) | ground |
