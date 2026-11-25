@@ -419,10 +419,9 @@ export function stepsEpilogue(map) {
     hide: [{ when: epilogue, ids: ['counting_woman', 'basin_woman', 'kid', 'kid_after', 'hundredth_step', 'open_step_a4'] }],
     entities: [
       counter, ...kid, ...runners, ...crowd, basin,
-      // The hundredth step, boarded over (from Act 4 on), with 100! chalked on the board. Walkable.
-      { id: 'epi_lid', x: 9, y: 19, w: 2, solid: false, when: epilogue, look: 'Boarded over, and somebody\'s chalked 100 on it. Twice.' },
     ].filter(Boolean),
-    // The board is a floor: Act 2's "Go down?" exit under it doesn't fire.
+    // The board is a floor: Act 2's "Go down?" exit under it doesn't fire. (Act 2's steps.js draws the
+    // chalked board itself from content/act2-structure on, with its first-walk line; these match it.)
     hideExits: [{ when: epilogue, x: 10, y: 19 }],
     // Bunting over landing 2; the finish tape across flight 3; the chalked board over the hundredth step.
     patches: (g) => {
