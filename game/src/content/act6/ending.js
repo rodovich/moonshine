@@ -1,15 +1,15 @@
 // The final scene, the final vista, and the credits
 // (docs/design/06-moon-in-the-bowl.md, "The final scene", "Credits").
 
-import { vista_glow, vista_rim, vista_twinkle, VISTA_BASINS } from '../../art/vista.js';
-import { vista_final, final_moon, vista_cheryl_bath, vista_title } from '../../art/act6_vistas.js';
+import { vista_glow, vista_twinkle, VISTA_BASINS } from '../../art/vista.js';
+import { vista_final, final_rim, final_moon, vista_cheryl_bath, vista_title } from '../../art/act6_vistas.js';
 
 // The final vista, per docs/art-act6.md: the glow gathers in the Gate, the moon
 // rises dead into it and stops, then (when the script says) the title. Its
 // own clock (`t`) keeps running across the hand-off to the credits.
 function finalVista(g) {
   const art = {
-    bowl: g.sheet(vista_final), glow: g.sheet(vista_glow), moon: g.sheet(final_moon), rim: g.sheet(vista_rim),
+    bowl: g.sheet(vista_final), glow: g.sheet(vista_glow), moon: g.sheet(final_moon), rim: g.sheet(final_rim),
     twinkle: g.sheet(vista_twinkle), cheryl: g.sheet(vista_cheryl_bath), title: g.sheet(vista_title),
   };
   const phases = VISTA_BASINS.map((_, i) => (i * 677) % 1180);
@@ -22,7 +22,13 @@ function finalVista(g) {
     if (glow >= 0) ctx.drawImage(art.glow.frame(`glow_${glow}`), 128 - 60, 112 - 48);
     if (ms > 2000) {
       const cy = Math.max(92, Math.round(126 - (6 * (ms - 2000)) / 1000));
+      // Below the Rim's lower edge (y 118) is the sea: the rising moon never shows there.
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(0, 0, 256, 118);
+      ctx.clip();
       ctx.drawImage(art.moon.frameAt('moon', ms), 128 - 16, cy - 16);
+      ctx.restore();
     }
     ctx.drawImage(art.rim.frame('rim'), 0, 0);
     VISTA_BASINS.forEach(([x, y], i) => ctx.drawImage(art.twinkle.frameAt('twinkle', ms + phases[i]), x - 3, y - 3));

@@ -336,3 +336,60 @@ test('click-to-talk reaches a character who keeps moving', async ({ page }) => {
   await clickTile(page, kid[0], kid[1]);
   await waitFor(page, () => window.moonshine.snapshot().speaker === 'Sweaty Kid', null, 15000);
 });
+
+test('click-to-use chases a fast runner until he stops, then uses the item', async ({ page }) => {
+  await boot(page, `${STREET}&x=13&y=8&items=letter`);
+  await waitIdle(page);
+  await page.evaluate(() => {
+    const w = window.moonshine.world;
+    const k = w.byId.get('kid');
+    k.stepTicks = 7; // faster than Cheryl
+    k.def = { ...k.def, behavior: { type: 'patrol', route: [[14, 6], [19, 6], [19, 9], [14, 9]], stopNear: 2 } };
+    w.control.holding = 'letter';
+  });
+  await page.waitForTimeout(700);
+  const at = await page.evaluate(() => { const w = window.moonshine.world; const d = w.byId.get('kid').lastDrawn; return w.game.display.toClient(d.x + d.w / 2 - w.cam.x, d.y + d.h - 10 - w.cam.y); });
+  await page.mouse.click(at.x, at.y);
+  await waitFor(page, () => (window.moonshine.snapshot().text || '').includes('SPEED'), null, 15000);
+});
+
+test('click-to-use waits when the only free side is briefly blocked, then uses the item', async ({ page }) => {
+  await boot(page, `${STREET}&x=13&y=9&items=letter`);
+  await waitIdle(page);
+  await page.evaluate(() => {
+    const w = window.moonshine.world;
+    // The Kid stands still at (14,8); walls on three sides leave (14,9) free,
+    // and a crate sits there for a second.
+    const k = w.byId.get('kid');
+    k.x = k.fromX = 14; k.y = k.fromY = 8; k.def = { ...k.def, behavior: 'idle' };
+    for (const [x, y] of [[14, 7], [13, 8], [15, 8]]) w.map.setTile('ground', x, y, { tile: 'street:retain_top', solid: true });
+    w.mapDef.entities.push({ id: 'crate_tmp', x: 14, y: 9, sprite: { sheet: w.byId.get('cat').def.sprite.sheet, frame: 'cat_sleep' } });
+    w.refreshEntities();
+    w.control.holding = 'letter';
+    setTimeout(() => { w.removeEntity(w.byId.get('crate_tmp')); w.removed.add('crate_tmp'); }, 1000);
+  });
+  const at = await page.evaluate(() => { const w = window.moonshine.world; const d = w.byId.get('kid').lastDrawn; return w.game.display.toClient(d.x + d.w / 2 - w.cam.x, d.y + d.h - 10 - w.cam.y); });
+  await page.mouse.click(at.x, at.y);
+  await waitFor(page, () => (window.moonshine.snapshot().text || '').includes('SPEED'), null, 8000);
+});
+
+test('a thing reachable only diagonally: Z reaches it, and a click walks to the diagonal', async ({ page }) => {
+  await boot(page, `${STREET}&x=12&y=9&facing=up`);
+  await waitIdle(page);
+  await page.evaluate(() => {
+    const w = window.moonshine.world;
+    // A plaque at (14,7) with walls on all four sides.
+    for (const [x, y] of [[14, 6], [13, 7], [15, 7], [14, 8]]) w.map.setTile('ground', x, y, { tile: 'street:retain_top', solid: true });
+    w.mapDef.entities.push({ id: 'plaque', x: 14, y: 7, look: 'A plaque, wedged in a corner.' });
+    w.refreshEntities();
+  });
+  // Pointer: click it, and Cheryl walks to a diagonal tile and reads it.
+  await clickTile(page, 14, 7);
+  await waitFor(page, () => (window.moonshine.snapshot().text || '').includes('plaque'), null, 10000);
+  await readAll(page);
+  await waitIdle(page);
+  // Keyboard: from (13,8), diagonal below-left, facing up with nothing ahead.
+  await runScript(page, "g.place('player', 13, 8, 'up');");
+  await press(page, 'z');
+  await waitFor(page, () => (window.moonshine.snapshot().text || '').includes('plaque'), null, 5000);
+});

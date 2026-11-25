@@ -12,6 +12,10 @@ import { drawText, measure } from './text.js';
 import { inArea, isInteractable, safeCall } from './world.js';
 import { sfx, step } from './sound.js';
 
+// What Cheryl says when an item is used on nothing in particular (content
+// overrides it with defaults.nothingToUseOn).
+const NOTHING_TO_USE_ON = "No. That isn't where that goes.";
+
 const BAG_BTN = { x: WIDTH - 26, y: 3, w: 22, h: 22 };
 // A little more forgiving than the drawn button, for fingers.
 const BAG_HIT = { x: BAG_BTN.x - 4, y: 0, w: BAG_BTN.w + 8, h: BAG_BTN.h + 8 };
@@ -41,7 +45,15 @@ export class Control {
     if (this.world) this.world.marker = null;
   }
 
+  // A held item used on nothing in particular.
+  useNowhere() {
+    const w = this.world;
+    this.holding = null;
+    w.run((g) => g.describe(w.content.defaults?.nothingToUseOn || NOTHING_TO_USE_ON));
+  }
+
   cancelMove() {
+    this.useOnGround = false;
     this.path = null;
     this.goal = null;
     this.pending = null;
@@ -121,8 +133,24 @@ export class Control {
     if (this.world.canEnter(p, p.x + dx, p.y + dy)) {
       p.startStep(dir);
       this.footstep();
+      this.pushing = null;
     } else {
       p.facing = dir;
+      // Pushing on into a character (three presses, or holding half a second)
+      // asks him to step aside; one bump just turns Cheryl to face him.
+      const w = this.world;
+      const blocker = w.entities.find((o) => o !== p && o.directional && o.visible && o.occupies(p.x + dx, p.y + dy));
+      if (blocker) {
+        const push = this.pushing && this.pushing.e === blocker && this.pushing.dir === dir ? this.pushing : { e: blocker, dir, n: 0, t: 0 };
+        push.n += held ? 0 : 1;
+        push.t += held ? 1 : 0;
+        this.pushing = push;
+        if (push.n >= 3 || push.t >= 30) {
+          const avoid = new Set([`${p.x},${p.y}`]);
+          for (let k = 1; k <= 3; k++) avoid.add(`${p.x + dx * k},${p.y + dy * k}`);
+          if (w.yieldTo(blocker, avoid)) this.pushing = null;
+        }
+      } else this.pushing = null;
       if (held && this.bump === 0) {
         sfx('bump');
         this.bump = 20;
@@ -156,8 +184,18 @@ export class Control {
       this.footstep();
       return;
     }
-    // Someone is in the way: wait a moment, then route around them.
+    // Someone is in the way: wait a moment, then route around them. A
+    // character in the way is asked to step aside (or a patroller turns back).
     this.waitT++;
+    // (Before the re-route at 8 ticks, which restarts this count.)
+    if (this.waitT === 6) {
+      const w = this.world;
+      const blocker = w.entities.find((o) => o !== p && o.directional && o.visible && o.occupies(nx, ny));
+      if (blocker && !(this.pending && this.pending.entity === blocker)) {
+        const avoid = new Set([`${p.x},${p.y}`, ...this.path.map(([x, y]) => `${x},${y}`)]);
+        w.yieldTo(blocker, avoid);
+      }
+    }
     if (this.waitT === 8 || this.waitT % 30 === 0) this.repath();
     if (this.waitT > 150) this.cancelMove();
   }
@@ -168,21 +206,42 @@ export class Control {
     this.world.marker = null;
     const pend = this.pending;
     this.pending = null;
+    if (this.useOnGround && this.holding) {
+      this.useOnGround = false;
+      this.useNowhere();
+      return;
+    }
     if (!pend) return;
     const e = pend.entity;
     if (!this.world.entities.includes(e)) return;
-    const spot = this.world.interactSpots(e).find((s) => s.x === p.x && s.y === p.y);
+    const spot = this.world.interactSpots(e).find((s) => s.x === p.x && s.y === p.y)
+      || this.world.diagonalSpots(e).find((s) => s.x === p.x && s.y === p.y && this.world.zTarget(p.x, p.y, s.facing) === e);
     if (spot) {
       p.facing = spot.facing;
       this.act(e, pend.item);
     } else if (this.nearEnough(e)) {
       // A moving character ended up next to her (or on her tile): talk anyway.
       this.act(e, pend.item);
-    } else if ((pend.tries || 0) < 3) {
-      // The target moved (a wandering NPC) or was blocked: try again.
-      this.pending = { ...pend, tries: (pend.tries || 0) + 1 };
+    } else if (e.moving && (pend.waits || 0) < 120) {
+      // He's mid-step (his old and new tiles both count as taken, which can
+      // hide the only free side): wait a beat and look again once he lands.
+      this.pending = { ...pend, waits: (pend.waits || 0) + 1 };
+      this.path = [];
+    } else if ((pend.tries || 0) < 3 || ((e.x !== pend.at[0] || e.y !== pend.at[1]) && (pend.chases || 0) < 40)) {
+      // The target moved (a running Kid) or was blocked: try again. Chasing
+      // someone who keeps moving doesn't use up the three tries (up to 40
+      // re-plans), so when he finally stops she still takes the last step.
+      const moved = e.x !== pend.at[0] || e.y !== pend.at[1];
+      this.pending = { ...pend, tries: (pend.tries || 0) + (moved ? 0 : 1), chases: (pend.chases || 0) + (moved ? 1 : 0) };
       this.repath();
-      if (!this.path.length) this.pending = null;
+      if (!this.path.length) {
+        // No way to a free side right now, but he's close (a side briefly
+        // taken, someone passing): keep the use pending and look again
+        // shortly, for up to two seconds, instead of dropping it.
+        const close = Math.abs(e.x - p.x) + Math.abs(e.y - p.y) <= 3;
+        if (close && (pend.waits || 0) < 120) this.pending = { ...this.pending, waits: (pend.waits || 0) + 1, tries: Math.min(this.pending.tries, 2) };
+        else this.pending = null;
+      }
     }
   }
 
@@ -201,6 +260,8 @@ export class Control {
       this.pending.at = [this.pending.entity.x, this.pending.entity.y];
       const spots = w.interactSpots(this.pending.entity);
       let path = w.pathFor(p, spots.map((s) => [s.x, s.y]));
+      // No side reachable: a diagonal approach, if there is one.
+      if (!path) path = w.pathFor(p, w.diagonalSpots(this.pending.entity).map((s) => [s.x, s.y]));
       if (!path) path = w.pathFor(p, [[this.pending.entity.x, this.pending.entity.y]], { closest: true });
       this.setPath(path);
     } else if (this.goal) {
@@ -278,17 +339,14 @@ export class Control {
     const tx = Math.floor((t.x + w.cam.x) / TILE);
     const ty = Math.floor((t.y + w.cam.y) / TILE);
     if (!w.map.inBounds(tx, ty)) return;
-    // Holding an item and tapping plain ground right by Cheryl means "use it
-    // here": say there's nothing to use it on. Farther away, she walks there
-    // still holding it.
+    // Holding an item and tapping terrain (water, a wall) or the ground right
+    // beside her means "use it there": she walks over, says it doesn't go
+    // there, and puts it away. Tapping open floor farther off is just
+    // walking, and she keeps holding it (to get closer to the real target).
     const p = this.player;
-    if (this.holding && Math.abs(tx - p.x) + Math.abs(ty - p.y) <= 1) {
-      this.holding = null;
-      const line = w.content.defaults?.nothingToUseOn || "There's nothing there to use it on.";
-      w.run((g) => g.describe(line));
-      return;
-    }
+    const useThere = this.holding && (w.map.solid(tx, ty) || Math.abs(tx - p.x) + Math.abs(ty - p.y) <= 1);
     this.walkTo(tx, ty);
+    if (useThere) this.useOnGround = true;
     this.dragging = true;
     this.dragT = 0;
   }
@@ -296,19 +354,11 @@ export class Control {
   interactFront() {
     const p = this.player;
     const w = this.world;
-    const [dx, dy] = DIR_VEC[p.facing];
-    let e = w.interactableAt(p.x + dx, p.y + dy);
-    if (!e && w.map.counter(p.x + dx, p.y + dy)) e = w.interactableAt(p.x + 2 * dx, p.y + 2 * dy);
-    // A character that doesn't block (solid: false) may be standing on her
-    // tile; he beats anything in front of her but another character.
-    const here = w.pickEntity(w.entities.filter((o) => !o.isPlayer && o.visible && o.directional && isInteractable(o) && o.x === p.x && o.y === p.y));
-    if (here && (!e || !e.directional)) e = here;
+    const e = w.zTarget(p.x, p.y, p.facing);
     if (e) {
       this.act(e, this.holding);
     } else if (this.holding) {
-      this.holding = null;
-      const line = w.content.defaults?.nothingToUseOn || "There's nothing there to use it on.";
-      w.run((g) => g.describe(line));
+      this.useNowhere();
     }
   }
 

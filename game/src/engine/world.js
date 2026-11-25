@@ -252,11 +252,12 @@ export class World {
       && e.x <= x && e.y <= y && x < e.x + e.w && y < e.y + e.h && isInteractable(e)));
   }
 
-  // When several interactable things share a tile, characters win over
-  // objects with sprites, which win over sprite-less hotspots (the Kid
-  // standing on the hollow step).
+  // When several interactable things share a tile: solid things win over
+  // non-solid ones (the solid broken edge over the Boatman drawn on it), and
+  // among equals characters win over objects with sprites, which win over
+  // sprite-less hotspots (the Kid standing on the hollow step).
   pickEntity(list) {
-    const rank = (e) => (e.directional ? 0 : e.art ? 1 : 2);
+    const rank = (e) => (e.solid ? 0 : 3) + (e.directional ? 0 : e.art ? 1 : 2);
     return list.length ? list.reduce((a, b) => (rank(b) < rank(a) ? b : a)) : null;
   }
 
@@ -282,17 +283,62 @@ export class World {
     return true;
   }
 
-  // Like canEnter for route planning: moving non-solid characters don't count.
+  // Like canEnter for Cheryl's route planning: characters don't count (they
+  // step aside or turn back when she reaches them), unless they're marked
+  // `blocks: true` (a guard who holds a doorway). Objects still block.
   canPlan(mover, x, y) {
     for (let dy = 0; dy < mover.h; dy++) {
       for (let dx = 0; dx < mover.w; dx++) {
         const tx = x + dx;
         const ty = y + dy;
-        if (this.map.solid(tx, ty) || this.entityAt(tx, ty, mover)) return false;
-        const still = this.entities.some((o) => o !== mover && o.directional && o.visible && !isMover(o) && o.occupies(tx, ty));
-        if (still) return false;
+        if (this.map.solid(tx, ty)) return false;
+        for (const o of this.entities) {
+          if (o === mover || !o.visible || !o.occupies(tx, ty)) continue;
+          if (o.directional ? o.def.blocks : o.solid) return false;
+        }
       }
     }
+    return true;
+  }
+
+  // Ask character `e`, standing in Cheryl's way, to step aside: to the nearest
+  // tile (within 5 steps) that isn't in `avoid` (her route) and isn't an exit.
+  // In a one-tile corridor that means walking out of it ahead of her. Idle
+  // characters go back to their spot once she's gone by. Returns whether he moves.
+  yieldTo(e, avoid) {
+    if (!e.directional || e.def.blocks || e.moving || e.talking || (e.route && e.route.length)) return false;
+    const start = `${e.x},${e.y}`;
+    const seen = new Map([[start, null]]);
+    const queue = [[e.x, e.y, 0]];
+    let goal = null;
+    for (let i = 0; i < queue.length && !goal; i++) {
+      const [x, y, d] = queue[i];
+      if (d >= 5) continue;
+      for (const [dx, dy] of Object.values(DIR_VEC)) {
+        const nx = x + dx;
+        const ny = y + dy;
+        const k = `${nx},${ny}`;
+        if (seen.has(k) || !this.canEnter(e, nx, ny) || this.isExit(nx, ny)) continue;
+        seen.set(k, `${x},${y}`);
+        if (!avoid.has(k)) {
+          goal = [nx, ny];
+          break;
+        }
+        queue.push([nx, ny, d + 1]);
+      }
+    }
+    if (!goal) {
+      if (!e.warnedYield) console.warn(`[world] ${e.id} is in Cheryl's way and has nowhere to step aside to`);
+      e.warnedYield = true;
+      return false;
+    }
+    const path = [];
+    for (let k = `${goal[0]},${goal[1]}`; k !== start; k = seen.get(k)) path.unshift(k.split(',').map(Number));
+    const b = e.def.behavior;
+    const type = b && (typeof b === 'string' ? b : b.type);
+    if (!e.yieldHome && (!type || type === 'idle' || type === 'face')) e.yieldHome = { x: e.x, y: e.y, facing: e.facing };
+    e.route = pathToDirs([e.x, e.y], path);
+    e.routeGoal = null;
     return true;
   }
 
@@ -304,21 +350,48 @@ export class World {
     const goalKeys = new Set(goals.map(([x, y]) => `${x},${y}`));
     const avoidExits = mover.isPlayer;
     const exits = avoidExits ? this.activeExits() : null;
-    // Cheryl's routes plan through moving characters that don't block
-    // (solid: false patrollers and wanderers): they'll move on, and if one is
-    // in her way when she gets there she waits and he turns back.
-    const plan = mover.isPlayer && !ignoreEntities;
-    const blocked = (x, y) => {
-      if (plan ? !this.canPlan(mover, x, y) : ignoreEntities ? this.map.solid(x, y) : !this.canEnter(mover, x, y)) return true;
-      return avoidExits && !goalKeys.has(`${x},${y}`) && this.isExit(x, y, exits);
-    };
+    // Cheryl's routes go around characters when they can. Moving non-solid
+    // characters (patrollers, wanderers) never count, since they move on.
+    // If characters are the only thing in the way, a second pass plans
+    // through them: whoever is in the way steps aside when she gets there.
     const start = [mover.x, mover.y];
-    let path = findPath(start, goals, blocked, this.map.w, this.map.h);
-    if (path || !closest || !goals.length) return path;
-    const target = goals[0];
-    const near = nearestReachable(start, target, blocked, this.map.w, this.map.h);
-    path = findPath(start, [near], blocked, this.map.w, this.map.h);
-    return path;
+    const attempt = (mode) => {
+      const blocked = (x, y) => {
+        let bad;
+        if (mode === 'raw') bad = this.map.solid(x, y);
+        else if (mode === 'enter') bad = !this.canEnter(mover, x, y);
+        else if (mode === 'around') bad = !this.canEnterAround(mover, x, y);
+        else bad = !this.canPlan(mover, x, y);
+        if (bad) return true;
+        return avoidExits && !goalKeys.has(`${x},${y}`) && this.isExit(x, y, exits);
+      };
+      let path = findPath(start, goals, blocked, this.map.w, this.map.h);
+      if (path || !closest || !goals.length) return path;
+      const near = nearestReachable(start, goals[0], blocked, this.map.w, this.map.h);
+      return findPath(start, [near], blocked, this.map.w, this.map.h);
+    };
+    if (ignoreEntities) return attempt('raw');
+    if (!mover.isPlayer) return attempt('enter');
+    const around = findPath(start, goals, (x, y) => !this.canEnterAround(mover, x, y) || (avoidExits && !goalKeys.has(`${x},${y}`) && this.isExit(x, y, exits)), this.map.w, this.map.h);
+    if (around) return around;
+    return attempt('through');
+  }
+
+  // canEnter for Cheryl's first planning pass: everyone blocks except moving
+  // non-solid characters.
+  canEnterAround(mover, x, y) {
+    for (let dy = 0; dy < mover.h; dy++) {
+      for (let dx = 0; dx < mover.w; dx++) {
+        const tx = x + dx;
+        const ty = y + dy;
+        if (this.map.solid(tx, ty)) return false;
+        for (const o of this.entities) {
+          if (o === mover || !o.visible || !o.occupies(tx, ty)) continue;
+          if (o.directional ? o.def.blocks || o.solid || !movesOnItsOwn(o) : o.solid) return false;
+        }
+      }
+    }
+    return true;
   }
 
   // Tiles from which the player can interact with `e`, each with the facing
@@ -344,6 +417,45 @@ export class World {
       }
     }
     return spots;
+  }
+
+  // Fallback spots diagonal to `e`, for things whose sides can't be reached:
+  // Cheryl faces up or down, and Z reaches what's diagonally ahead of her
+  // when nothing is straight ahead (see Control.interactFront).
+  diagonalSpots(e) {
+    const spots = [];
+    const seen = new Set();
+    for (let fy = e.y; fy < e.y + e.h; fy++) {
+      for (let fx = e.x; fx < e.x + e.w; fx++) {
+        for (const [dx, dy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+          const sx = fx + dx;
+          const sy = fy + dy;
+          const k = `${sx},${sy}`;
+          if (seen.has(k) || e.occupies(sx, sy) || !this.map.inBounds(sx, sy) || this.map.solid(sx, sy) || this.isExit(sx, sy)) continue;
+          seen.add(k);
+          spots.push({ x: sx, y: sy, facing: dy > 0 ? 'up' : 'down', diagonal: true });
+        }
+      }
+    }
+    return spots;
+  }
+
+  // What Z reaches from tile (x, y) facing `facing`: the thing straight
+  // ahead (across a counter if need be), else a character on her own tile,
+  // else something diagonally ahead. Shared by the game and the keyboard
+  // reachability check (tests/check-keyboard).
+  zTarget(x, y, facing, self = this.player) {
+    const [dx, dy] = DIR_VEC[facing];
+    let e = this.interactableAt(x + dx, y + dy);
+    if (!e && this.map.counter(x + dx, y + dy)) e = this.interactableAt(x + 2 * dx, y + 2 * dy);
+    const here = this.pickEntity(this.entities.filter((o) => o !== self && !o.isPlayer && o.visible && o.directional && isInteractable(o) && o.x === x && o.y === y));
+    if (here && (!e || !e.directional)) e = here;
+    if (!e) {
+      // Nothing ahead: something diagonally ahead (left or right of the tile in front).
+      const [px, py] = [dy, dx]; // perpendicular
+      e = this.pickEntity([this.interactableAt(x + dx + px, y + dy + py), this.interactableAt(x + dx - px, y + dy - py)].filter(Boolean));
+    }
+    return e;
   }
 
   // ---- Scripts ---------------------------------------------------------
@@ -560,6 +672,19 @@ export class World {
   updateNpc(e) {
     if (e.moving) return;
     if (this.busy || e.talking) return;
+    // Stepped aside for Cheryl: go back once she's well past.
+    if (e.yieldHome) {
+      const h = e.yieldHome;
+      const p = this.player;
+      if (e.x === h.x && e.y === h.y) {
+        e.facing = h.facing;
+        e.yieldHome = null;
+      } else if (Math.abs(p.x - h.x) + Math.abs(p.y - h.y) > 2 && !(this.control.path && this.control.path.length)) {
+        const path = this.pathFor(e, [[h.x, h.y]]);
+        if (path) e.route = pathToDirs([e.x, e.y], path);
+        return;
+      } else return;
+    }
     const b = e.def.behavior;
     if (!b || b === 'idle') return;
     const type = typeof b === 'string' ? b : b.type;
@@ -808,11 +933,16 @@ export class World {
     layer.fillStyle = colorOf(def.darkColor || 'void');
     layer.fillRect(0, 0, WIDTH, HEIGHT);
     // Light pools stay inside the map: no glow over the void around a room.
-    const mapRect = [-cx, -cy, this.map.w * TILE, this.map.h * TILE];
+    // Clipped to the map, or to the map's lightArea rectangles (tiles), so a
+    // small room's light doesn't spill past its walls into the void.
+    const areas = def.lightArea ? def.lightArea.map(([x, y, w, h]) => [x * TILE - cx, y * TILE - cy, w * TILE, h * TILE]) : [[-cx, -cy, this.map.w * TILE, this.map.h * TILE]];
+    const clipTo = (c) => {
+      c.beginPath();
+      for (const r of areas) c.rect(...r);
+      c.clip();
+    };
     layer.save();
-    layer.beginPath();
-    layer.rect(...mapRect);
-    layer.clip();
+    clipTo(layer);
     layer.globalCompositeOperation = 'destination-out';
     for (const l of lights) {
       for (const [k, a] of [[1, 0.4], [0.75, 0.6], [0.5, 1]]) {
@@ -825,9 +955,7 @@ export class World {
     ctx.globalAlpha = Math.min(1, dark);
     ctx.drawImage(layer.canvas, 0, 0);
     // Colored lights tint their pool (inner bands a little more).
-    ctx.beginPath();
-    ctx.rect(...mapRect);
-    ctx.clip();
+    clipTo(ctx);
     ctx.globalCompositeOperation = 'screen';
     for (const l of lights) {
       if (!l.color) continue;
@@ -974,11 +1102,11 @@ export function safeCall(fn, ...args) {
   }
 }
 
-// A character that moves on its own (so routes may plan through it).
-function isMover(e) {
+// A character that walks on its own (a patroller or wanderer).
+function movesOnItsOwn(e) {
   const b = e.def.behavior;
   const t = b && (typeof b === 'string' ? b : b.type);
-  return !e.solid && (t === 'patrol' || t === 'wander');
+  return t === 'patrol' || t === 'wander';
 }
 
 export function isInteractable(e) {
@@ -1049,6 +1177,12 @@ function nearestTileOf(e, x, y) {
 // list of directions; e.routeGoal (optional) lets us re-path around obstacles.
 export function followRoute(world, e) {
   const dir = e.route[0];
+  if (!DIR_VEC[dir]) {
+    // Never let a bad step hang a scene: skip it.
+    console.warn(`[world] ${e.id}: skipping a route step that isn't a direction:`, dir);
+    e.route.shift();
+    return;
+  }
   const [dx, dy] = DIR_VEC[dir];
   const nx = e.x + dx;
   const ny = e.y + dy;
@@ -1074,9 +1208,23 @@ export function followRoute(world, e) {
     if (world.busy && e.routeBlocked > 90 && !p.moving && !(p.route && p.route.length)) nudgeAside(world, p, e, dir);
     return;
   }
-  // Cheryl's own scripted walk never passes through anyone: after three
-  // seconds blocked, she stops where she is (and the script carries on).
+  // Cheryl's own scripted walk never passes through anyone: a character in
+  // the way is asked to step aside; after three seconds blocked, she stops
+  // where she is (and the script carries on).
   if (e.isPlayer) {
+    if (e.routeBlocked % 30 === 12) {
+      const blocker = world.entities.find((o) => o !== e && o.directional && o.visible && o.occupies(nx, ny));
+      if (blocker) {
+        const avoid = new Set([`${e.x},${e.y}`]);
+        let [ax, ay] = [e.x, e.y];
+        for (const d of e.route) {
+          ax += DIR_VEC[d][0];
+          ay += DIR_VEC[d][1];
+          avoid.add(`${ax},${ay}`);
+        }
+        world.yieldTo(blocker, avoid);
+      }
+    }
     if (e.routeBlocked > 180) {
       console.warn(`[script] the player's walk is blocked at (${e.x},${e.y}); stopping it`);
       e.route = [];
@@ -1086,6 +1234,13 @@ export function followRoute(world, e) {
   // A scripted move must finish: after two seconds, walk through another
   // character (never Cheryl, never a wall).
   if (e.routeBlocked > 120 && !world.map.solid(nx, ny)) e.routeForce = true;
+  // Into a wall (a step a script asked for that can never happen): skip it
+  // after two seconds rather than hang the scene.
+  if (e.routeBlocked > 120 && world.map.solid(nx, ny)) {
+    console.warn(`[world] ${e.id}: a scripted step ${dir} from (${e.x},${e.y}) runs into a wall; skipping it`);
+    e.route.shift();
+    e.routeBlocked = 0;
+  }
 }
 
 // Does `p` overlap mover `e`'s footprint if `e` stood at (x, y)?
