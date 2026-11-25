@@ -4,6 +4,8 @@ Moonshine should sound like a well-loved SNES adventure: warm, slightly soft "sa
 
 The story and places come from [story-bible.md](story-bible.md) and the slice designs in [design/](design/): the "Audio needed" lists of [01-opening.md](design/01-opening.md), [02-city.md](design/02-city.md), [03-downstairs.md](design/03-downstairs.md), 04-the-list.md (Act 4), 05-high-and-dry.md (Act 5), and 06-moon-in-the-bowl.md (Act 6) are all delivered: the whole game.
 
+**Client feedback (2026-11-24, on the opening):** the audio is "pretty good"; keep this direction. Later work should refine it, not change course.
+
 ## Sonic identity
 
 - **Warm and a little muffled.** Instruments are oscillators with hand-shaped harmonic spectra, soft envelopes, and lowpass filters, and the whole mix passes through a gentle 11 kHz lowpass. Nothing is bright or harsh. This stands in for the SNES's small, interpolated samples.
