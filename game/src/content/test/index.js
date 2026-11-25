@@ -518,7 +518,62 @@ export const testCharacters = {
   },
 };
 
-export const testMaps = { test_street: streetMap, test_shop: shopMap, test_lane: laneMap };
+// A stress map for performance checks (?map=test_big&debug=1 shows frame
+// times): 64×48 tiles of street with building blocks, lamps, and 40
+// wandering people, lit for night.
+function bigMap() {
+  const W = 64;
+  const H = 48;
+  const ground = [];
+  const detail = [];
+  const overhead = [];
+  for (let y = 0; y < H; y++) {
+    let g = '';
+    let d = '';
+    let o = '';
+    for (let x = 0; x < W; x++) {
+      const bx = x % 16;
+      const by = y % 12;
+      const inBlock = bx >= 2 && bx < 10 && by >= 1 && by < 6;
+      if (inBlock) g += by < 3 ? 'r' : by === 3 ? 'f' : by === 4 ? (bx % 3 ? 'w' : 'n') : 'b';
+      else g += '.';
+      d += !inBlock && bx === 12 && by === 8 ? '|' : ' ';
+      o += !inBlock && bx === 12 && by === 7 ? '8' : ' ';
+    }
+    ground.push(g);
+    detail.push(d);
+    overhead.push(o);
+  }
+  const people = [];
+  const sheets = [kid, old_man, shopkeeper];
+  for (let i = 0; i < 40; i++) {
+    const x = 1 + ((i * 7) % 60);
+    const y = 7 + ((i * 5) % 4) + 12 * (i % 4);
+    people.push({
+      id: `walker_${i}`, name: 'Passer-by', x, y,
+      sprite: { sheet: sheets[i % 3] },
+      behavior: { type: 'wander', area: [x - 3, y - 1, 7, 3], pause: [0.5, 2] },
+      talk: 'Lovely evening.',
+      emote: i % 5 === 0 ? { frame: 'note', every: [3, 6] } : undefined,
+    });
+  }
+  return {
+    id: 'test_big',
+    name: 'Test Big',
+    tileset: testTileset,
+    lighting: 'night',
+    spawn: [12, 9],
+    legend: {
+      '.': 'pave', r: solid('buildings:roof@ochre'), f: solid('buildings:roof_front@ochre'),
+      w: solid('buildings:window@ochre'), n: solid('buildings:window_closed@ochre'), b: solid('buildings:wall_base@ochre'),
+      '|': solid('props:lamp_post'), 8: 'props:over_lamp_top',
+    },
+    ground, detail, overhead,
+    entities: people,
+  };
+}
+
+export const testMaps = { test_street: streetMap, test_shop: shopMap, test_lane: laneMap, test_big: bigMap() };
 
 export const testScripts = {
   // ?map=test_shop&x=2&y=5&facing=up&items=letter&run=wrongness
