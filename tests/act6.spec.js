@@ -517,3 +517,24 @@ test('keyboard: the epilogue, the Stair Race and the Shopkeeper\'s plug', async 
   await shot(page, 'act6-11-shop');
   expect(errors).toEqual([]);
 });
+
+test('keyboard: the epilogue on the Bilge and the Harbor', async ({ page }) => {
+  test.setTimeout(180000);
+  const errors = await start(page, `?map=bilge&x=13&y=11&facing=up&flags=${EPILOGUE},epi.leftCourt,act4.started,act4.risen&items=moonglass_disc`);
+  const adv = kbAdvance(page);
+  const read = (opts) => readThrough(page, adv, opts);
+  await kbInteract(page, 'epi_boatman');
+  expect(joined(await read())).toContain('I delivered a piano, Miss. By BOAT.');
+  await kbInteract(page, 'epi_fishmonger');
+  expect(joined(await read())).toContain("It's on probation.");
+  await kbExit(page, 30, 12, 'right', 'harbor');
+  await read();
+  await kbInteract(page, 'epi_pelletier_m');
+  expect(joined(await read())).toContain("The ferry couldn't FIND the island!");
+  await kbInteract(page, 'epi_mott');
+  expect(joined(await read())).toContain('Right where I left her.');
+  await kbInteract(page, 'epi_keeper');
+  expect(joined(await read())).toContain('Twenty-two years. Who knew.');
+  await shot(page, 'act6-12-harbor');
+  expect(errors).toEqual([]);
+});

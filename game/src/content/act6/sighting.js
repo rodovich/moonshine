@@ -21,7 +21,7 @@ import { composedMap, blankGrid } from '../opening/grid.js';
 import { layout } from '../act2/common.js';
 import { act6Tiles } from './tiles.js';
 import { master_stop } from '../../art/act6_under.js';
-import { disc_fx } from '../../art/act5_sprites.js';
+import { plug_glint } from '../../art/act6_under.js';
 import { bath_ripple } from '../../art/act6_sprites.js';
 import { basinView, bump, cherylDeclines } from './common.js';
 import { refillMontage } from './montage.js';
@@ -30,7 +30,7 @@ import { dawn } from './dawn.js';
 
 const W = 16, H = 13;
 const Q = [['nw', 0, 0], ['ne', 1, 0], ['sw', 0, 1], ['se', 1, 1]];
-const LAMPS = [5, 10]; // moonglass lamps on the north wall (not in the design's map; added so the walls' lamps can flare)
+const LAMPS = [5, 10]; // the Keepers' sconces on the north wall (added to the design's map, so the walls' lamps can flare)
 
 // The Basin's look for the current state (frames in docs/art-act6.md).
 function basinState(g) {
@@ -79,7 +79,7 @@ function compose(g) {
   if (g.flag('fx.shoes')) L.set('detail', 6, 6, 'sight_props:shoes', true);
   // Two moonglass lamps on the north wall, dark until the moon sits true; then they blaze, with pools below.
   for (const x of LAMPS) {
-    L.set('ground', x, 1, `keel_hatch:${g.flag('moon.true') ? 'lamp_lit' : 'lamp_dead'}`, true);
+    L.set('ground', x, 1, `sight_lamp:${g.flag('moon.true') ? 'lamp_lit' : 'lamp_dead'}`, true);
     if (g.flag('moon.true')) L.set('ground', x, 3, 'hull:floor_glow', false);
   }
   return L.done();
@@ -209,7 +209,7 @@ export async function moonTrue(g, v) {
   await g.hidePicture({ fade: 0 });
   g.playCue('moon_true', { resume: false });
   for (const f of [0, 1, 2, 3, 4]) {
-    for (const x of LAMPS) g.setTile('ground', x, 1, `keel_hatch:lamp_wake_${f}`);
+    for (const x of LAMPS) g.setTile('ground', x, 1, `sight_lamp:lamp_wake_${f}`);
     await g.wait(0.14);
   }
   g.setFlag('moon.true');
@@ -373,7 +373,8 @@ const glint = {
   every: [2.2, 3.4],
   when: (g) => !g.flag('got.plug'),
   run: (g) => {
-    g.spawnEffect({ sprite: { sheet: disc_fx, frame: 'disc_flare' }, at: [7.5, 5.6], seconds: 0.8, layer: 'top' });
+    // The glint's center on the plug's bright edge, world pixel (126, 93).
+    g.spawnEffect({ sprite: { sheet: plug_glint, frame: 'glint' }, at: [118 / 16, 85 / 16], seconds: 1.23, layer: 'top' });
     g.sfx('plug_glint', { at: [7, 5], range: 10, volume: 0.7 });
   },
 };

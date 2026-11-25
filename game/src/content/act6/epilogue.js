@@ -12,9 +12,9 @@ import { old_man_seated, neighbor, sweaty_kid } from '../../art/opening_npcs.js'
 import { props } from '../../art/props.js';
 import { LOOKS } from '../act2/common.js';
 import { clockmaker } from '../../art/act4_sprites.js';
-import { crowd_a, crowd_b } from '../../art/act5_sprites.js';
+import { crowd_a, crowd_b, keeper } from '../../art/act5_sprites.js';
 import { piano_delivered, luggage, well_lift, bunting, step_barrier } from '../../art/act6_surface.js';
-import { counting_rosette, runner, kid_finish, tourist_case } from '../../art/act6_sprites.js';
+import { counting_rosette, runner, kid_finish, tourist_case, pelletier_m, pelletier_f } from '../../art/act6_sprites.js';
 import { finalScene } from './ending.js';
 
 const said = (speaker) => (lines) => async (g, self) => g.say(self, ...[].concat(lines));
@@ -428,4 +428,64 @@ export async function stairRace(g) {
   g.stopLoop('crowd', 2000);
   // 5. Control returns.
   await g.followPlayer(4);
+}
+
+// ---------------------------------------------------------------------------
+// The Bilge, wet again
+
+export function bilgeEpilogue(map) {
+  const canal = 'Full. Green, cold, and full of opinions. You\'d never know.';
+  return {
+    hide: [{ when: epilogue, ids: ['fishmonger', 'boatman', 'canal_0', 'canal_16', 'canal_26', 'water_stairs'] }],
+    entities: [
+      recast(map, 'fishmonger', {
+        interact: lines('fishmonger', [], ['The sea came back, Miss! I\'ve forgiven it. Mostly. It\'s on probation.']),
+        use: npcDecline("Not today, Miss. Today I'm just enjoying the smell."),
+      }),
+      recast(map, 'boatman', {
+        interact: lines('boatman', ['♪ The boat is a boat, and the water is back ♪ I delivered a piano, Miss. By BOAT. A first.'],
+          ['♪ ...and the man is a man ♪ Still in the boat. Always in the boat.']),
+        use: npcDecline("I've got everything a man needs, Miss. A boat. Water under it."),
+      }),
+      ...['canal_0', 'canal_16', 'canal_26'].map((id) => recast(map, id, { lookKey: 'epi_canals', look: canal })),
+      recast(map, 'water_stairs', {
+        look: ['The Water Stairs walk down into the canal and keep going. Nobody knows where they go.', 'Nearly nobody.'],
+      }),
+    ].filter(Boolean),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// The Harbor: the ferry in, the Pelletiers home, Mott by the ferry, the Keeper on the quay.
+
+export function harborEpilogue(map) {
+  const pelletiers = lines('pelletiers', ["We've been on the mainland all week! The ferry couldn't FIND the island! Can you imagine!"],
+    ['Did anything happen while we were away? No? It never does.']);
+  return {
+    hide: [{ when: epilogue, ids: ['mott'] }],
+    entities: [
+      { id: 'epi_pelletier_m', name: 'The Pelletiers', x: 15, y: 6, facing: 'down', when: epilogue, sprite: { sheet: pelletier_m }, behavior: { type: 'face', range: 3 }, interact: pelletiers, use: npcDecline("We've got enough luggage, thank you.") },
+      { id: 'epi_pelletier_f', name: 'The Pelletiers', x: 16, y: 6, facing: 'down', when: epilogue, sprite: { sheet: pelletier_f }, behavior: { type: 'face', range: 3 }, interact: pelletiers, use: npcDecline("We've got enough luggage, thank you.") },
+      { id: 'epi_pelletier_bags', x: 17, y: 6, when: epilogue, sprite: { sheet: luggage, frame: 'luggage' }, look: 'The Pelletiers\' luggage. A week on the mainland, and they bought a hatbox.' },
+      recast(map, 'mott', {
+        interact: async (g, self) => {
+          const n = bump(g, 'epi.mott');
+          if (n === 0) return g.say(self, 'Morning, Cheryl. Landed first go, this morning. Right where I left her.');
+          if (n === 1) {
+            await g.say(self, 'Lovely view of the Gate. Same as ever.');
+            await g.wait(1.6);
+            return;
+          }
+          return g.say(self, '...');
+        },
+        use: npcDecline('No, no. I\'ve given up the jug. Tea, now. Mostly tea.'),
+      }),
+      {
+        id: 'epi_keeper', name: 'Lighthouse Keeper', x: 21, y: 7, facing: 'down', when: epilogue,
+        sprite: { sheet: keeper }, behavior: { type: 'face', range: 3 },
+        interact: lines('keeper', [], ["It's lovely, isn't it. The sea. Twenty-two years. Who knew."]),
+        use: npcDecline("I've no use for that down here. I'm just looking."),
+      },
+    ].filter(Boolean),
+  };
 }

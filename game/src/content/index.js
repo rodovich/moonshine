@@ -8,7 +8,7 @@ import { cherylDeclines } from './opening/common.js';
 import { act2Maps, act2Items, act2Scripts, act2 } from './act2/index.js';
 import { act3Maps, act3Items, act3Scripts, withAct3, act3 } from './act3/index.js';
 import { act4Maps, act4Items, act4FallbackItems, act4Scripts, shipPlanAct4, seaCave, withAct4, startAct4 } from './act4/index.js';
-import { act6Maps, act6Items, act6Scripts, act6Lighting, addAct6 } from './act6/index.js';
+import { act6Maps, act6Items, act6Scripts, addAct6 } from './act6/index.js';
 import { cheryl } from '../art/cheryl.js';
 
 // Each later act lays its states over earlier acts' maps (by id), in act order.
@@ -44,9 +44,6 @@ export default {
 
   // Named scripts, runnable with ?run=<name> for testing.
   scripts: { ...openingScripts, ...act2Scripts, ...act3Scripts, ...act4Scripts, ...act6Scripts, ...testScripts },
-
-  // Lighting presets beyond the art task's day, dusk, and night.
-  lighting: { ...act6Lighting },
 
   // Runs once when a new game starts.
   onNewGame: openingIntro,
