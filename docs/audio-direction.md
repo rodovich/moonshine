@@ -44,10 +44,16 @@ Defined in `game/src/audio/instruments.js`.
 
 ## Leitmotifs
 
-- **The skipping rhyme** is the game's central motif ([story-bible.md](story-bible.md), "The skipping rhyme"; the tune is `RHYME` in `music/moonrise.js`). It is a chant in F: *MOON-shine* (C–A), *MOON-shine* (D–A), *catch it in a cup* falling to G; *ring the bell when the tide turns up* rising to C; then the three sisters climb a step at a time and *drink up the sea* comes home to F. It plays on a music box at the moonrise, is sung broadly in the title, and should return underground and at the ending.
-- **Cheryl's home theme** is Cistern Court's opening phrase: a waltz that climbs a broken chord (F–B♭–D) and settles back. Morning After plays it in G minor. Use it for Cheryl's home, her ritual, and her plug.
+- **Cheryl's home phrase** is Cistern Court's opening: a broken chord climbing sol–do–mi–sol (F–B♭–D–F in B♭), then sol–fa–mi falling back. Morning After plays it in G minor. Use it for Cheryl's home, her ritual, and her plug.
+- **The skipping rhyme** is the game's central motif ([story-bible.md](story-bible.md), "The skipping rhyme"; the tune is `RHYME` in `music/moonrise.js`, and the title imports it). It is built from the home phrase, so Tessel's home tune turns out to be a fragment of the Founders' rhyme (requested by the story task):
+  - *MOON-shine, MOON-shine, catch it in a cup* is the home phrase note for note, in F: C–F–A–C, then C–B♭–A, coming to rest on G.
+  - *Ring the bell when the tide turns up* rearranges the same thirds and fourth: D–F–A, B♭–A–F, then G up a fourth to C on "up".
+  - *Thin sister, Stout sister* climbs on F and C7; *Middle sister three*, the greedy one, turns to D-flat, the flat sixth.
+  - *Wake them one by one and they'll drink up the sea* climbs through E-flat and C7 home to F (the same D♭–E♭–F climb that ends the title).
+
+  It plays on a music box at the moonrise and is sung broadly in the title. It should return underground and at the ending. The item jingle is its first four notes.
 - **The flat sixth.** The D-flat chord in F (♭VI): the title turns to it twice, and its last phrase climbs D♭–E♭–F. It is the color of the hidden city. Save it on the surface for moments that brush against the underground.
-- **The Wrongness slip.** The rhyme's "Moonshine, moonshine" with the second one a half step low, then "catch it in a cup" sliding down by half steps (C–B–B♭–A–A♭) over F in the bass with a B held against it. The music box running down at the moonrise is the same idea: the rhyme slowing and sagging flat.
+- **The Wrongness slip.** The rhyme's opening, C–F–A–C, with the third a half step low (A♭) and the top on B, a tritone above F; then "catch it in a cup" sliding down by half steps (B–B♭–A–A♭–G) over F in the bass with a B held against it. The music box running down at the moonrise is the same idea: the rhyme slowing and sagging flat.
 
 ## Tracks
 
@@ -62,12 +68,12 @@ Defined in `game/src/audio/instruments.js`.
 
 - **Cistern Court** is an unhurried waltz: an accordion over a nylon guitar's oom-pah-pah. Each time round it changes: A is guitar and accordion; A2 swaps the guitar for rippling harp; B hands the tune to the flute in G minor while the accordion holds long notes; A3 brings it all back with a soft flute descant.
 - **Moonrise** is three music-box voices (tune, a broken-chord comb, low notes) with a long echo. At the moment the moon appears, the game calls `windDownMusic(ms)`: from the next note on, each step takes longer than the last and every note is flatter, until the box stops wherever it has got to and the last notes ring out. This is the design's "slows, drifts flat, and stops mid-phrase".
-- **Morning After** is Cistern Court's tune in G minor on a lone ocarina, over a harp's pah-pah, a bowed bass, and a ticking clock. Its second half quotes "Moonshine, moonshine" and doesn't finish it. Its last note is F♯, so the loop comes back to F with a small lurch. It is very slightly out of tune (song wrongness 0.12).
-- **Moonshine** (title) sings the rhyme's first couplet on the flute, turns twice to D-flat, then sings the sisters' couplet and climbs D♭–E♭–F.
+- **Morning After** is Cistern Court's tune in G minor on a lone ocarina, over a harp's pah-pah, a bowed bass, and a ticking clock. Its second half starts the rhyme again in E-flat and doesn't finish it. Its last note is F♯, so the loop comes back to F with a small lurch. It is very slightly out of tune (song wrongness 0.12).
+- **Moonshine** (title) sings the whole rhyme (eight bars) on the flute, then answers with its own phrase, which turns to D-flat again and climbs D♭–E♭–F.
 - **Something Wrong** is the rhyme collapsing (see the Wrongness slip).
 - **Stairs to the Water** was the round 1 opening theme. The story moved the opening to a waltz, so this one waits for a place in the wider city.
 
-The game can also turn up a global Wrongness amount (`setWrongness(0..1)`) as the threat grows: notes in every track then drift slightly out of tune and some sag flat. At 0.1–0.2 it should only feel faintly off; 0.5 is clearly sick.
+The game can also turn up a global Wrongness amount (`setWrongness(0..1)`) as the threat grows: notes in every track then drift slightly out of tune and some sag flat. At 0.1–0.2 it should only feel faintly off; 0.5 is clearly sick. The story bible sets it by act: about 0.1 after Act 1, rising to 0.5 in Act 5, and 0 at the ending. A track's own `wrongness` (Morning After's 0.12, the cue's 0.5) is a floor: the track uses whichever is higher.
 
 ## Sound effects
 
@@ -80,7 +86,7 @@ Defined in `game/src/audio/sfx.js` (interface) and `game/src/audio/sfx-world.js`
 | Doors and movement | `door` (open and shut, for map exits), `door_open`, `door_close`, `bump` |
 | Puzzle and characters (the opening) | `tap_squeak`, `water_pour` (loop), `tub_full`, `chess_tap`, `pepper_grind`, `sneeze` (the Old Man: ah… ah… CHOO), `timer_tick` (loop), `timer_ding`, `sheets_flap`, `kid_patter` (a run of the Kid's steps), `kid_hop`, `piano_flat` (one A, a little flat), `splash` |
 | Ambience | `crowd` (loop: the festival murmur below; stop it dead with `stopLoop('crowd', 0)`), `wind` (loop), `swifts`, `dog_bark` (one dog, far off), `gull`, `clock_strike` (the Mayor's clock on the Crown, three strokes, fading), `well_breath` (the morning well's cold whoosh) |
-| The Wrongness | `wrong_sting` (the home chord on bells slipping flat), `groan` (a chain under strain, 3 s; dips the music), `crack` (the Tooth shearing), `rattle` (chimney pots and timbers), `piano_tumble` (a chord crash, then thumps and jangles receding, 3.5 s), `drain` (glunk, gurgle, a hollow sound falling away, a far splash 2.5 s later; 5 s in all) |
+| The Wrongness | `wrong_sting` (the home chord on bells slipping flat), `groan` (a chain under strain, 3 s; dips the music), `crack` (the Tooth shearing), `rattle` (chimney pots and timbers), `piano_tumble` (a chord crash, then thumps and jangles receding, 3.5 s), `drain` (glunk, gurgle, a hollow sound falling away, a far splash; 5 s in all), or its parts for timing to the tub's animation: `drain_glunk`, `drain_gurgle` (1.5 s), `drain_echo` (the fall, with the splash 2.5 s after it starts) |
 
 The dev page's "moonrise sequence" button plays these in the design's order with suggested timings (see `MOONRISE` in `game/dev/audio.html`): fade Cistern Court and start the crowd and clock; 5 s later the music box; at the moon, stop the crowd dead, wind the music down over about 4.5 s, and bark the dog; after the cut, the groan with the rattle, the crack, the piano, the drain, then a gull and the wind.
 

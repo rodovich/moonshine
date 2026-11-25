@@ -1,25 +1,26 @@
 // "Moonshine" — the title theme.
-// The skipping rhyme's tune (see moonrise.js), sung broadly on the flute over rippling harp and
-// strings. After the first couplet the music turns, twice, to a D-flat chord that doesn't
-// belong in F major: the first hint that something lies under the city. The last phrase climbs
+// The skipping rhyme's tune (RHYME, from moonrise.js), sung broadly on the flute over rippling
+// harp and strings: it opens with Cheryl's home phrase and turns to D-flat for the Middle
+// sister. Then the title answers with its own phrase, which turns to D-flat again and climbs
 // Db–Eb–F, hopeful.
 // Loop: 16 bars at 72 bpm = 53.3 s. Format: docs/audio-direction.md.
+
+import { RHYME, RHYME_HARMONY } from './moonrise.js';
 
 const arp = (a, b, c, d, e) => `${a}:2 ${b} ${c} ${d} ${e} ${d} ${c} ${b}`;
 const half = (a, b, c, d) => `${a}:2 ${b} ${c} ${d}`;
 const H = {
   F: arp('F3', 'C4', 'F4', 'A4', 'C5'),
-  C7: arp('G3', 'C4', 'E4', 'Bb4', 'C5'),
+  C: arp('G3', 'C4', 'E4', 'G4', 'C5'),
   Gm7: arp('G3', 'D4', 'F4', 'Bb4', 'D5'),
   Db: arp('Ab3', 'Db4', 'F4', 'Ab4', 'Db5'),
   Csus: arp('G3', 'C4', 'F4', 'G4', 'C5'),
-  C: arp('G3', 'C4', 'E4', 'G4', 'C5'),
   Dm: arp('F3', 'A3', 'D4', 'F4', 'A4'),
   Eb: arp('G3', 'Bb3', 'Eb4', 'G4', 'Bb4'),
   hF: half('F3', 'C4', 'F4', 'A4'),
-  hDm: half('F3', 'A3', 'D4', 'F4'),
-  hGm7: half('G3', 'D4', 'F4', 'Bb4'),
   hC7: half('G3', 'C4', 'E4', 'Bb4'),
+  hDm: half('F3', 'A3', 'D4', 'F4'),
+  hBb: half('F3', 'Bb3', 'D4', 'F4'),
 };
 
 export default {
@@ -47,40 +48,32 @@ export default {
       perc: '.:16 | .:8 swell:8 |',
     },
     A: {
-      harmony: `F | C7 | F Dm | F:4 C:12 | Gm7 | Db | Csus4 | C |
-                F Gm7 | F | F Dm | C7 F | Dm | Db | Eb | F |`,
-      lead: `
-        C6:4 A5 D6 A5 |
-        C6:2 Bb5 A5 F5 G5:8 |
-        A5:2 Bb5 C6:4 D6:2 C6 A5:4 |
-        A5:4 C6:6 Bb5:2 A5 F5 |
+      harmony: `${RHYME_HARMONY}
+                Gm7 | Db | Csus4 | C | Dm | Db | Eb | F |`,
+      lead: `${RHYME}
         D5:4 F5 Bb5:6 A5:2 |
         Ab5:8 F5:4 Db5 |
         F5:8 G5:6 F5:2 |
         E5:12 .:4 |
-        F5:4 G5:2 A5 G5:4 A5:2 Bb5 |
-        A5:2 Bb5 C6 Bb5 A5:8 |
-        C6:2 C6 D6:4 C6:2 A5:4 F5:2 |
-        G5:2 Bb5:4 A5:1 G5 F5:8 |
         A5:8 F5:4 D5 |
         F5:6 Ab5:2 Db6:8 |
         C6:4 Bb5 G5 Eb5 |
         F5:16 |`,
       bell: `
-        .:16 | .:8 E6:4 C6 | .:16 | .:16 |
+        .:16 | .:8 E6:4 C6 | .:16 | .:4 G5 C6 E6 |
+        .:16 | Db6:16 | .:16 | .:8 A5:4 C6 |
         .:16 | Db6:16 | .:16 | .:4 G5 C6 E6 |
-        .:16 | .:8 F6:4 C6 | .:16 | .:8 A5:4 C6 |
         .:16 | Ab5:16 | G5:8 Bb5 | .:4 A5 C6 F6 |`,
-      harp: `${H.F} | ${H.C7} | ${H.hF} ${H.hDm} | F3:2 C4 E4 G4 C5 G4 E4 C4 |
+      harp: `${H.F} | ${H.hF} ${H.hC7} | ${H.hDm} ${H.hBb} | ${H.C} |
+             ${H.hF} ${H.hC7} | ${H.Db} | ${H.Eb} | ${H.hC7} ${H.hF} |
              ${H.Gm7} | ${H.Db} | ${H.Csus} | ${H.C} |
-             ${H.hF} ${H.hGm7} | F3:2 C4 F4 C5 A4 C5 F4 C4 | ${H.hF} ${H.hDm} | ${H.hC7} ${H.hF} |
              ${H.Dm} | ${H.Db} | ${H.Eb} | ${H.F} |`,
-      pad: `A3:16 | Bb3 | A3 | A3:4 G3:12 | F4:16 | F4 | F4 | E4 |
-            A3:8 Bb3 | C4:16 | C4:8 D4 | Bb3 A3 | D4:16 | F4 | G4 | A4 |`,
-      bass: `F2:16 | C2 | F2:8 D2 | F2:4 C2:12 | G2:16 | Db2 | C2 | C2 |
-             F2:8 G2 | F2:16 | F2:8 D2 | C2 F2 | D2:16 | Db2 | Eb2 | F2 |`,
-      perc: `.:16 | .:16 | .:16 | .:16 | .:16 | .:16 | .:16 | .:8 swell:8 |
-             .:16 | .:16 | .:16 | .:16 | k_:8 k_ | k_:8 k_ | tom:4 .:4 swell:8 | .:16 |`,
+      pad: `A3:16 | A3:8 Bb3 | A3 Bb3 | G3:16 | A3:8 Bb3 | F4:16 | G4 | Bb3:8 A3 |
+            F4:16 | F4 | F4 | E4 | D4 | F4 | G4 | A4 |`,
+      bass: `F2:16 | F2:8 C2 | D2 Bb1 | C2:16 | F2:8 C2 | Db2:16 | Eb2 | C2:8 F2 |
+             G2:16 | Db2 | C2 | C2 | D2 | Db2 | Eb2 | F2 |`,
+      perc: `.:16 | .:16 | .:16 | .:16 | .:16 | .:8 swell:8 | .:16 | .:16 |
+             .:16 | .:16 | .:16 | .:8 swell:8 | k_:8 k_ | k_:8 k_ | tom:4 .:4 swell:8 | .:16 |`,
     },
   },
   intro: ['I'],

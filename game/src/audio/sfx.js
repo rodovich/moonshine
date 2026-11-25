@@ -77,7 +77,7 @@ const UI_SFX = {
       { type: 'noise', dur: 0.1, gain: 0.045, filter: { type: 'bandpass', freq: [4500, 1200], q: 1.5 }, env: { a: 0.04, d: 0.06, s: 0, r: 0.03 } },
     ],
   },
-  // Item get: a short fanfare in F (the rhyme's key), ending on the home chord.
+  // Item get: a short fanfare on the rhyme's opening (C–F–A–C, Cheryl's home phrase), ending on the home chord.
   item_get: {
     gain: 0.6, echo: 0.35, duck: 0.15, duckFor: 1.3,
     layers: [

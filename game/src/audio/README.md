@@ -30,7 +30,7 @@ The engine calls these through its bridge, `src/engine/sound.js`, which also for
 - doors and movement: `door`, `door_open`, `door_close`, `bump`
 - the opening's puzzles and people: `tap_squeak`, `tub_full`, `chess_tap`, `pepper_grind`, `sneeze`, `timer_ding`, `sheets_flap`, `kid_patter`, `kid_hop`, `piano_flat`, `splash`
 - ambience: `swifts`, `dog_bark`, `gull`, `clock_strike`, `well_breath`
-- the Wrongness: `wrong_sting`, `groan`, `crack`, `rattle`, `piano_tumble`, `drain`
+- the Wrongness: `wrong_sting`, `groan`, `crack`, `rattle`, `piano_tumble`, `drain` (or its parts `drain_glunk`, `drain_gurgle`, `drain_echo`)
 
 **Loops:** `crowd`, `wind`, `water_pour`, `timer_tick`.
 

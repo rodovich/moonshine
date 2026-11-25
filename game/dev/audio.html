@@ -132,7 +132,7 @@ const GROUPS = {
   'Movement': ['step', 'step_stone', 'step_plaster', 'step_tile', 'step_rug', 'step_stairs', 'step_wood', 'step_kid', 'bump', 'door', 'door_open', 'door_close'],
   'Puzzle and characters': ['tap_squeak', 'tub_full', 'chess_tap', 'pepper_grind', 'sneeze', 'timer_ding', 'sheets_flap', 'kid_patter', 'kid_hop', 'piano_flat', 'splash'],
   'Ambience': ['swifts', 'dog_bark', 'gull', 'clock_strike', 'well_breath'],
-  'The Wrongness': ['wrong_sting', 'groan', 'crack', 'rattle', 'piano_tumble', 'drain'],
+  'The Wrongness': ['wrong_sting', 'groan', 'crack', 'rattle', 'piano_tumble', 'drain', 'drain_glunk', 'drain_gurgle', 'drain_echo'],
 };
 const listed = new Set(Object.values(GROUPS).flat());
 const other = audio.SFX_IDS.filter((id) => !listed.has(id));

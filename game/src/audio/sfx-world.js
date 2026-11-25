@@ -366,30 +366,58 @@ const WRONG = {
       return out;
     },
   },
-  // The drain: glunk, a gurgling whirlpool (1.5 s), a hollow sound falling away and away, and
-  // about 2.5 s later a tiny, faraway splash. About 5 s in all.
+  // The drain, in three parts the moonrise script can time to the tub's animation, and all
+  // three together as `drain` (about 5 s).
+  // drain_glunk: the plug is yanked out of sight.
+  drain_glunk: {
+    gain: 0.85, echo: 0.3,
+    layers: () => drainGlunk(0),
+  },
+  // drain_gurgle: the whirlpool, about 1.5 s.
+  drain_gurgle: {
+    gain: 0.85, echo: 0.3,
+    layers: () => drainGurgle(0),
+  },
+  // drain_echo: a hollow sound falling away and away (2.4 s), then about 2.5 s after it starts,
+  // a tiny, faraway splash.
+  drain_echo: {
+    gain: 0.85, echo: 0.6,
+    layers: () => drainEcho(0),
+  },
   drain: {
     gain: 0.85, echo: 0.5,
-    layers: () => {
-      const out = [
-        { type: 'tone', wave: 'sine', freq: 210, path: [[0.12, 65]], dur: 0.14, gain: 0.6 },
-        { type: 'noise', dur: 0.06, gain: 0.15, filter: { type: 'lowpass', freq: 500 } },
-        { type: 'noise', at: 0.1, dur: 1.5, gain: 0.12, filter: { type: 'bandpass', freq: [700, 260], q: 2, time: 1.5 }, env: { a: 0.1, d: 1.4, s: 0.5, r: 0.2 } },
-      ];
-      for (let i = 0; i < 14; i++) {
-        const f = rand(180, 500);
-        out.push({ type: 'tone', wave: 'sine', at: 0.15 + i * 0.1 + rand(0, 0.05), freq: [f, f * rand(1.8, 2.5)], dur: rand(0.04, 0.08), gain: rand(0.05, 0.1) * (1 - i / 20) });
-      }
-      // Falling away: a hollow resonance sliding down, and a ghost of a tone with it.
-      out.push({ type: 'noise', at: 1.6, dur: 2.4, gain: 0.14, filter: { type: 'bandpass', freq: [950, 110], q: 9, time: 2.4 }, env: { a: 0.08, d: 2.2, s: 0.4, r: 0.3 } });
-      out.push({ type: 'tone', wave: 'sine', at: 1.6, freq: 520, path: [[2.4, 70]], dur: 2.4, gain: 0.05, env: { a: 0.1, d: 2.2, s: 0.6, r: 0.3 } });
-      // The far splash.
-      out.push({ type: 'noise', at: 4.1, dur: 0.22, gain: 0.07, filter: { type: 'bandpass', freq: [2200, 700], q: 1, time: 0.2 }, env: { a: 0.003, d: 0.2, s: 0, r: 0.05 } });
-      out.push({ type: 'tone', wave: 'sine', at: 4.16, freq: [330, 700], dur: 0.04, gain: 0.025 });
-      return out;
-    },
+    layers: () => [...drainGlunk(0), ...drainGurgle(0.1), ...drainEcho(1.6)],
   },
 };
+
+function drainGlunk(t) {
+  return [
+    { type: 'tone', wave: 'sine', at: t, freq: 210, path: [[0.12, 65]], dur: 0.14, gain: 0.6 },
+    { type: 'noise', at: t, dur: 0.06, gain: 0.15, filter: { type: 'lowpass', freq: 500 } },
+  ];
+}
+
+function drainGurgle(t) {
+  const out = [
+    { type: 'noise', at: t, dur: 1.5, gain: 0.12, filter: { type: 'bandpass', freq: [700, 260], q: 2, time: 1.5 }, env: { a: 0.1, d: 1.4, s: 0.5, r: 0.2 } },
+  ];
+  for (let i = 0; i < 14; i++) {
+    const f = rand(180, 500);
+    out.push({ type: 'tone', wave: 'sine', at: t + 0.05 + i * 0.1 + rand(0, 0.05), freq: [f, f * rand(1.8, 2.5)], dur: rand(0.04, 0.08), gain: rand(0.05, 0.1) * (1 - i / 20) });
+  }
+  return out;
+}
+
+function drainEcho(t) {
+  return [
+    // A hollow resonance sliding down, and a ghost of a tone with it.
+    { type: 'noise', at: t, dur: 2.4, gain: 0.14, filter: { type: 'bandpass', freq: [950, 110], q: 9, time: 2.4 }, env: { a: 0.08, d: 2.2, s: 0.4, r: 0.3 } },
+    { type: 'tone', wave: 'sine', at: t, freq: 520, path: [[2.4, 70]], dur: 2.4, gain: 0.05, env: { a: 0.1, d: 2.2, s: 0.6, r: 0.3 } },
+    // The far splash.
+    { type: 'noise', at: t + 2.5, dur: 0.22, gain: 0.07, filter: { type: 'bandpass', freq: [2200, 700], q: 1, time: 0.2 }, env: { a: 0.003, d: 0.2, s: 0, r: 0.05 } },
+    { type: 'tone', wave: 'sine', at: t + 2.56, freq: [330, 700], dur: 0.04, gain: 0.025 },
+  ];
+}
 
 export const WORLD_SFX = {
   ...FOOTSTEPS,

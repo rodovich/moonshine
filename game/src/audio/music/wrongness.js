@@ -1,8 +1,9 @@
 // "Something Wrong" — the Wrongness motif, a one-shot cue (no loop) that interrupts the music
 // through playCue('wrongness').
-// The skipping rhyme starts on sagging bells (MOON-shine, MOON-shine) but its second
-// "moonshine" lands a half step low, and "catch it in a cup" slides down chromatically
-// (C–B–Bb–A–Ab) while a choir holds a B against the F below: a tritone where home should be.
+// The skipping rhyme (and Cheryl's home phrase) starts on sagging bells, MOON-shine,
+// MOON-shine, C–F–A–C, but the third lands a half step low (Ab) and the top lands on B, a
+// tritone above F. Then "catch it in a cup" slides down by half steps (B–Bb–A–Ab–G) while a
+// choir holds a B against the F below.
 // Everything drifts flat. 2 bars at 66 bpm ≈ 7.3 s, then the echo rings out.
 // Format: docs/audio-direction.md.
 
@@ -24,7 +25,7 @@ export default {
   patterns: {
     W: {
       harmony: 'N | N |',
-      bell: 'C5:4 A4 Db5 Ab4 | C5:2 B4 Bb4 A4 Ab4:8 |',
+      bell: 'C5:4 F5 Ab5 B5 | B5:3 Bb5:1 A5:2 Ab5 G5:8 |',
       pad: 'F3:16 | E3:16 |',
       ghost: '.:8 B4:8 | Bb4:12 .:4 |',
       bass: 'F2:16 | E2:12 .:4 |',

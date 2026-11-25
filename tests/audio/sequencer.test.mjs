@@ -150,7 +150,7 @@ test('the required sound effects exist', () => {
     'door_open', 'door_close', 'tap_squeak', 'water_pour', 'tub_full', 'chess_tap', 'pepper_grind', 'sneeze',
     'timer_tick', 'timer_ding', 'sheets_flap', 'kid_patter', 'kid_hop', 'piano_flat',
     'swifts', 'crowd', 'dog_bark', 'gull', 'wind', 'clock_strike', 'well_breath',
-    'groan', 'crack', 'rattle', 'piano_tumble', 'drain',
+    'groan', 'crack', 'rattle', 'piano_tumble', 'drain', 'drain_glunk', 'drain_gurgle', 'drain_echo',
   ];
   for (const id of ids) assert.ok(SFX[id], id);
   for (const id of ['water_pour', 'timer_tick', 'crowd', 'wind']) assert.ok(SFX[id].loop, `${id} loops`);

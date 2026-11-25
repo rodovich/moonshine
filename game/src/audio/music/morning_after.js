@@ -1,7 +1,8 @@
 // "Morning After" — the morning after Moonshine Night, in Cheryl's flat and the court.
 // A thinner, uneasy variation of Cistern Court: the same tune, but in G minor, on a lone ocarina
 // over a harp's pah-pah and a bowed bass, with a clock ticking (the Mayor's clock, though nobody
-// says so). Its second half quotes the skipping rhyme's opening and doesn't finish it, and the
+// says so). Its second half quotes the skipping rhyme's opening (sol–do–mi–sol, rising to a held
+// top note) in E-flat and doesn't finish it, and the
 // last note leans on F# so the loop comes back to F with a little lurch. Everything is very
 // slightly out of tune.
 // Loop: 16 bars of 3/4 at 76 bpm = 37.9 s. Format: docs/audio-direction.md.
@@ -44,9 +45,9 @@ export default {
     M2: {
       harmony: 'Ebmaj7 | Ebmaj7 | Cm | Cm | Gm | Gm | D7sus4 | D7 |',
       lead: `
-        D5:4 Bb4 Eb5 |
-        Bb4:12 |
-        C5:4 Eb5 G5 |
+        Bb4:4 Eb5 G5 |
+        Bb5:12 |
+        Bb5:6 Ab5:2 G5:4 |
         F5:8 Eb5:4 |
         D5:12 |
         .:12 |

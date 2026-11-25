@@ -236,7 +236,7 @@ Maps, audio, misc:
 |---|---|
 | `changeMap(id, x, y, facing, { fade, seconds })` | Fades out, loads, fades in, then runs the map's `onEnter`. |
 | `map` | Current map id. |
-| `playMusic(id)`, `stopMusic()`, `sfx(id)` | Audio (see below). |
+| `playMusic(id)`, `stopMusic(fadeMs)`, `sfx(id)`, `playCue(id)`, `windDownMusic(ms)`, `startLoop(id)`, `stopLoop(id, fadeMs)`, `setWrongness(0..1)` | Audio (see below and `src/audio/README.md`). |
 | `save()` | Save now (saving also happens automatically). |
 | `random(min, max)` | Integer from the game's RNG (seedable with `?seed=`). |
 
