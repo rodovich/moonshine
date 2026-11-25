@@ -53,7 +53,7 @@ Draw in this order:
 
 The Act 1 composition made right. Draw in this order:
 
-1. `vista_final:bowl_moonrise` at (0, 0): the Act 1 Bowl and roofs, with more stars in a clearer sky and the moon's path laid straight down the water from the Gate.
+1. `vista_final:bowl_moonrise` at (0, 0): the Act 1 Bowl and roofs under the same eastern dusk sky (the Earth's shadow and the Belt of Venus; see [art-direction.md](art-direction.md), Skies), with more stars and the moon's silver path laid straight down the water from the Gate. The warmth comes from the alpenglow on the Rim and the lit town, not the sky.
 2. `vista_glow:glow_<0-2>` (the Act 1 glow) bottom-centred on (128, 112), so it gathers in the Gate: `glow_0` from about 0.8 s, `glow_1` from 1.8 s, `glow_2` from 2.8 s.
 3. `final_moon:moon` (32×32, 2-frame shimmer, 500 ms) centred on x = 128, rising from y = 126 (hidden behind the cliffs) at about 6 px/s, from 2 s, and stopping at y = 92: dead in the Gate, framed by its walls. (A new moon sprite: the Act 1 moon's markings read as a face once the whole disc is visible.)
 4. `vista_rim:rim` at (0, 0), over the moon.

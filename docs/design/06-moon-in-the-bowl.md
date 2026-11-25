@@ -88,7 +88,7 @@ Short cutaways, 2–3 seconds each, cut in without fades. Each is an existing ma
 - **`bilge_dry`, Dry Canal Day:** lanterns on poles along both quays (lights, warm); a crowd of six to eight residents on the north quay; the Mayor on the bridge (13, 9) with a lantern; the Movers and the piano on the mud; the Boatman in his boat at the foot of the stairs.
 - **Cistern Court, night:** the Old Man at his chess; the Neighbor on her roof with her sheets on the back line.
 - **Lamp room, night:** the Keeper at the window; through it, the Teeth (stage 3).
-- **Risen Harbor, night:** Mott alone at the quay edge with a mug of tea (his jug is the Clockmaker's doorstop now); the moon over the Rim.
+- **Risen Harbor, night:** Mott alone at the quay edge with a mug of tea (his jug is the Clockmaker's doorstop now); the moon low over the eastern Rim, just risen.
 - **Belfry, night:** Ambrose at the rope, moonlight through the openings.
 - **The wet Bilge, night** (for the refill montage): the canals filling, the Boatman's boat rising with the piano in it.
 
@@ -147,7 +147,7 @@ Control returns after the Moonrise card, with Cheryl on the chain coil.
    1. **`bilge_dry`, Dry Canal Day.** The Mayor on the bridge, lantern raised. MAYOR: …and so, citizens, tonight Tessel steps FORWARD— → a lurch (3 px), and the whole crowd sits down at once (a falling-over pose). The piano rolls along the mud, gathering speed, and drops into the Boatman's boat with a crash of chords. BOATMAN: …I've got a piano.
    2. **Cistern Court.** The lurch. The Old Man's chess pieces fly off the board. OLD MAN: GERALD! On the roof, the Neighbor's sheets stand straight out like flags.
    3. **Lamp room.** The Keeper at the window. Through it, the Teeth (stage 3) slide slowly away to one side and shrink into the dark. LIGHTHOUSE KEEPER: It's going. It's GOING.
-   4. **Risen Harbor.** Mott at the quay edge. On the Rim beyond the Bowl, the moon. He raises a mug of tea to it. No line.
+   4. **Risen Harbor.** Mott at the quay edge. Low over the eastern Rim, the moon, just risen. He raises a mug of tea to it. No line.
    5. **Belfry.** Ambrose still holding the rope, eyes shut. AMBROSE: HOME AGAIN.
 5. Back to the Windlass Room. The booms slow. The last link comes in. The drum stops. Silence, except for the sea through the hawse, which is calmer now. → `chain.home`.
 6. In the north wall, the moon-in-bowl emblem on the hatch lights cyan, and the hatch grinds open (7–8, 1–2).
@@ -361,7 +361,7 @@ The ferry *Persistence* is tied up at the landing, level, as it should be. Two n
 4. "It isn't Moonshine Night."
 5. "But it counts."
 6. Fade to black. Card: **Moonshine Night. A year later.**
-7. **The final vista:** the Bowl at moonrise, from Cheryl's roof, the Act 1 vista composition, on the next Moonshine Night: Cheryl's silhouette **in** her tub this time, not perched on its edge (she has a new plug, whether the Shopkeeper gave it to her or not; a year is long enough to buy one), rooftop basins twinkling, the Rim, and the moon rising **dead in the Gate**, as it should on Moonshine Night with the city where it belongs. The music box plays the rhyme, whole and in tune, and the home motif lands. It closes the Act 1 loop: the ritual bath that was stolen in the opening, finally taken. The Basin bath stays the unexpected one.
+7. **The final vista:** the Bowl at moonrise, from Cheryl's roof, the Act 1 vista composition, on the next Moonshine Night: Cheryl's silhouette **in** her tub this time, not perched on its edge, the straps of her striped bathing costume and its cap showing above the water (she has a new plug, whether the Shopkeeper gave it to her or not; a year is long enough to buy one), rooftop basins twinkling, the Rim, and the moon rising **dead in the Gate**, as it should on Moonshine Night with the city where it belongs. The music box plays the rhyme, whole and in tune, and the home motif lands. It closes the Act 1 loop: the ritual bath that was stolen in the opening, finally taken. The Basin bath stays the unexpected one.
 8. Hold. Then the title **MOONSHINE** fades in over the sky.
 9. The credits roll over the vista (see "Credits").
 10. After the credits, the title screen. The save is marked complete; Continue reopens the flat in the morning state, with everyone's epilogue lines available.
@@ -409,8 +409,8 @@ Plain and short, in the game's font, over the final vista. Roles, not people (de
 - The Fountain Square café with luggage; the Shop window with the guidebook
 
 **Full-screen images**
-- **The Basin view**: a circle of still water in a stone rim, reflecting the Rim's silhouette, the notch of the Gate, and the night sky, with the moon as a separate sprite so it can sit at four positions (far right, nearer, dead center, two fingers past); a variant with Cheryl's reflection at the edge and ripples
-- **The final vista**: the Act 1 vista (the Bowl from Cheryl's roof) with the moon rising dead in the Gate, the sky a little clearer and kinder than in Act 1; the title MOONSHINE over it. **New:** Cheryl's silhouette sitting *in* the tub (head and shoulders above the rim, from behind), replacing the edge-sitting silhouette
+- **The Basin view**: a circle of still water in a stone rim, reflecting the Rim's silhouette, the notch of the Gate, and the night sky (full dark: it's an hour after sunset, so no glow on the horizon, just stars and a faint blue-grey along the Rim), with the moon as a separate sprite so it can sit at four positions (far right, nearer, dead center, two fingers past). Two nights past full, the moon is a waning gibbous, a hair flattened on one edge, pale and silver; a variant with Cheryl's reflection at the edge and ripples
+- **The final vista**: the Act 1 vista (the Bowl from Cheryl's roof, looking east) with the full moon rising dead in the Gate, large and pale, the sky around it brightening to silver; the scene's warmth comes only from the rose-lit cliffs and the lit town. The sky follows the same rules as the corrected Act 1 vista: deep blue, a rose-pink band above the Rim, the Earth's shadow along it, and no sunset glow (the sun is setting behind Cheryl); the title MOONSHINE over it. **New:** Cheryl's silhouette sitting *in* the tub (head and shoulders above the rim, from behind, in her striped bathing costume and cap, as in Act 1), replacing the edge-sitting silhouette
 
 **Sprites**
 - A generic "sitting down hard" pose for residents (the crowd falling over), and a flying chess piece or two
