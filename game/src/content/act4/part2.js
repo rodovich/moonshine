@@ -155,12 +155,12 @@ export function withAct4Part2(maps) {
       tileset: act4Tiles,
       hide: ['sea_cave'],
       tiles: (g, T) => {
-        T.set('detail', 1, 13, 'props:crate', true); // Mott's crates, just left of his door, so (2, 13) in front of it stays free
-        T.block(0, 21, false);
+        T.set('detail', 2, 16, 'props:crate', true); // Mott's crates, in the yard just below and left of his door (3, 15)
+        T.block(1, 37, false); // the sea cave's mouth, open at low tide
       },
-      exits: [{ x: 0, y: 21, to: 'sea_cave', at: [4, 6], facing: 'up', sfx: 'step_stone', when: act4 }],
+      exits: [{ x: 1, y: 37, to: 'sea_cave', at: [4, 6], facing: 'up', sfx: 'step_stone', when: act4 }],
       entities: [{
-        id: 'mott_a4', name: 'Mott', x: 1, y: 13, facing: 'down', when: act4,
+        id: 'mott_a4', name: 'Mott', x: 2, y: 16, facing: 'down', when: act4,
         sprite: mottSits, offset: [0, -8], turnToTalk: false,
         interact: async (g, self) => {
           if (g.flag('got.throat')) return g.say(self, cycle(g, 'a4.mottAfter', ["Whatever you're doing, Cheryl, do it before she tips any further.", "I'll stay off the moonshine. I'll want to remember this."]));
@@ -183,7 +183,7 @@ export function withAct4Part2(maps) {
           '*': (g, self) => g.say(self, "I've no use for that. I've no use for much, today."),
         },
       }, {
-        id: 'cave_mouth_a4', x: 0, y: 21, solid: false, when: act4,
+        id: 'cave_mouth_a4', x: 1, y: 37, solid: false, when: act4,
         look: "The sea cave. The tide's so far out I could walk in. I don't think the tide's ever been this far out.",
       }],
       onEnter: surfaceAudio,

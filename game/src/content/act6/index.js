@@ -59,7 +59,7 @@ export function addAct6(maps) {
   if (goat && maps.bilge && goat.ground.length > 40) {
     maps.bilge = {
       ...maps.bilge,
-      exits: [{ x: 0, y: 11, h: 3, to: 'goat_path', at: [14, 40], facing: 'left', when: epilogue, checkFlags: ['epilogue'] }, ...(maps.bilge.exits || [])],
+      exits: [{ x: 0, y: 11, h: 3, to: 'goat_path', at: [14, 39], facing: 'left', when: epilogue, checkFlags: ['epilogue'] }, ...(maps.bilge.exits || [])],
     };
   }
   if (!maps[act6.ids.windlass]) {
