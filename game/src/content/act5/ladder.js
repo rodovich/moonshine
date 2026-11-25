@@ -118,6 +118,6 @@ export const belfryHatch = {
   use: { crowbar: (g) => g.describe("It's bolted from underneath. I'd only be prying at the floor."), '*': (g) => g.describe('Not down there.') },
 };
 
-export const belfryHatchPatch = (g) => [['detail', HATCH[0], HATCH[1], { tile: known(g) ? 'ice_cellar:hatch_open' : 'ice_cellar:hatch_shut', solid: true }]];
+export const belfryHatchPatch = (g) => [['detail', HATCH[0], HATCH[1], { tile: known(g) ? 'keepers_hatch:open' : 'keepers_hatch:shut', solid: true }]];
 
 export const ladderScripts = { climbToBelfry, climbToWindlass };

@@ -140,7 +140,7 @@ const objects = [
     ],
   })),
   { id: 'bench_2', x: 2, y: 11, w: 2, lookKey: 'benches', look: 'A bench with the best view in Tessel, and a cat who knows it.' },
-  { id: 'bench_20', x: 20, y: 11, w: 2, look: 'The other bench. Same view, no cat. The cat has made its choice.' },
+  { id: 'bench_20', x: 20, y: 11, w: 2, look: "A bench with the best view in Tessel. The cat's on the other one." },
   ...[[1, 7], [22, 7], [1, 13], [22, 13]].map(([x, y]) => ({ id: `pot_${x}_${y}`, x, y, lookKey: 'geraniums', look: 'Geraniums. Nobody remembers planting them.' })),
 ].map((o) => ({ solid: false, use: { '*': cherylDeclines }, ...o }));
 
