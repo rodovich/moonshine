@@ -80,14 +80,16 @@ export const UNDER_SFX = {
       ...bronze(0.52, 880, 0.12, 0.25),
     ],
   },
-  // A moon-lock opening: its glass eye fills with light (a chime), the bolt slides, a low hum swells.
+  // A moon-lock opening: its glass eye fills with light in a rising chime, then the hatch grinds
+  // open, stone on stone.
   moonlock_open: {
-    gain: 0.55, echo: 0.5, duck: 0.4, duckFor: 1.5,
+    gain: 0.55, echo: 0.5, duck: 0.4, duckFor: 2,
     layers: [
-      chime(0, ['Ab4', 'Db5', 'F5', 'Ab5', 'C6'], 0.1, 2, 0.6),
+      chime(0, ['Ab4', 'Db5', 'F5', 'Ab5', 'C6'], 0.12, 2, 0.6),
       { type: 'tone', wave: 'sine', freq: 69.3, dur: 2, gain: 0.15, env: { a: 0.6, d: 1, s: 0.8, r: 0.6 } },
-      { type: 'noise', at: 0.7, dur: 0.3, gain: 0.12, filter: { type: 'bandpass', freq: [600, 300], q: 2, time: 0.3 } },
-      ...bronze(1, 220, 0.25, 0.7),
+      { type: 'noise', at: 1, dur: 1.1, gain: 0.2, filter: { type: 'bandpass', freq: [700, 350], q: 1.5, time: 1.1 }, env: { a: 0.08, d: 1, s: 0.8, r: 0.1 } },
+      { type: 'tone', wave: 'sawtooth', at: 1, freq: 45, path: [[1.1, 58]], dur: 1.1, gain: 0.1, filter: { type: 'lowpass', freq: 300 } },
+      { type: 'tone', wave: 'sine', at: 2.1, freq: [110, 55], dur: 0.2, gain: 0.4 },
     ],
   },
   // The moonglass disc lighting up in Cheryl's hand: a soft swell and shimmer.
@@ -98,25 +100,28 @@ export const UNDER_SFX = {
       { type: 'noise', dur: 1.8, gain: 0.03, filter: { type: 'highpass', freq: 6000 }, env: { a: 0.8, d: 0.8, s: 0.4, r: 0.4 } },
     ],
   },
-  // The chute: a long smooth slide down hullstone, then a bump at the bottom.
+  // The chute: a long smooth slide down hullstone, falling in pitch, two bumps, a thump.
   chute_slide: {
     gain: 0.75, echo: 0.35,
     layers: [
       { type: 'noise', dur: 2, gain: 0.2, filter: { type: 'bandpass', freq: [1800, 300], q: 1.2, time: 2 }, env: { a: 0.1, d: 1.8, s: 0.7, r: 0.1 } },
       { type: 'tone', wave: 'sine', freq: 300, path: [[2, 90]], dur: 2, gain: 0.04 },
+      { type: 'tone', wave: 'sine', at: 0.9, freq: [160, 90], dur: 0.1, gain: 0.25 },
+      { type: 'tone', wave: 'sine', at: 1.45, freq: [150, 80], dur: 0.1, gain: 0.3 },
       { type: 'tone', wave: 'sine', at: 2.05, freq: [140, 55], dur: 0.25, gain: 0.55 },
       { type: 'noise', at: 2.05, dur: 0.1, gain: 0.2, filter: { type: 'lowpass', freq: 900 } },
     ],
   },
-  // Kicking the bronze ladder down: a scrape, a long drop, a big clang, and its rattle.
-  ladder_kick: {
+  // The drop-ladder: its chain runs out through the cleat in a rattle, then the bronze ladder
+  // crashes down and bounces.
+  ladder_drop: {
     gain: 0.45, echo: 0.45,
-    layers: [
-      { type: 'noise', dur: 0.3, gain: 0.15, filter: { type: 'bandpass', freq: [2500, 1200], q: 2, time: 0.3 } },
-      ...bronze(0.45, 260, 0.5, 1.5),
-      ...bronze(0.47, 390, 0.25, 1),
-      { type: 'tone', wave: 'sine', at: 0.45, freq: [100, 50], dur: 0.3, gain: 0.5 },
-      ...[0.65, 0.8, 0.92, 1.0].flatMap((t, i) => bronze(t, rand(400, 600), 0.1 * (1 - i / 5), 0.3)),
+    layers: () => [
+      ...Array.from({ length: 10 }, (_, i) => link(i * 0.06 + rand(0, 0.02), 0.1)).flat(),
+      ...bronze(0.75, 260, 0.5, 1.5),
+      ...bronze(0.77, 390, 0.25, 1),
+      { type: 'tone', wave: 'sine', at: 0.75, freq: [100, 50], dur: 0.3, gain: 0.5 },
+      ...[0.95, 1.1, 1.22, 1.3].flatMap((t, i) => bronze(t, rand(400, 600), 0.1 * (1 - i / 5), 0.3)),
     ],
   },
   // A voice coming down a speaking tube from far above: hollow, muffled, two syllables
@@ -128,6 +133,103 @@ export const UNDER_SFX = {
       { type: 'tone', wave: 'sawtooth', at: 0.33, freq: 330, path: [[0.45, 250]], dur: 0.5, gain: 0.12, filter: { type: 'bandpass', freq: 650, q: 6 }, vibrato: { rate: 6, depth: 30 }, env: { a: 0.03, d: 0.45, s: 0.8, r: 0.08 } },
       { type: 'noise', dur: 0.9, gain: 0.02, filter: { type: 'bandpass', freq: 600, q: 4 } },
     ],
+  },
+
+  // The wall lever: seized, it grinds against the crowbar, then lets go with a clunk.
+  lever_pull: {
+    gain: 0.6, echo: 0.35,
+    layers: [
+      creak(0, 0.9, 40, 55, 0.16, 400),
+      { type: 'noise', dur: 0.9, gain: 0.12, filter: { type: 'bandpass', freq: 1200, q: 2 }, env: { a: 0.1, d: 0.8, s: 0.8, r: 0.05 } },
+      ...bronze(0.95, 180, 0.35, 0.6),
+      { type: 'tone', wave: 'sine', at: 0.95, freq: [120, 60], dur: 0.2, gain: 0.4 },
+    ],
+  },
+  // The ceiling lid over the mirror scraping open (stone over stone), daylight following.
+  lid_open: {
+    gain: 0.65, echo: 0.4,
+    layers: [
+      { type: 'noise', dur: 1.3, gain: 0.2, filter: { type: 'bandpass', freq: [500, 1100], q: 1.4, time: 1.3 }, env: { a: 0.1, d: 1.2, s: 0.8, r: 0.1 } },
+      { type: 'tone', wave: 'sawtooth', freq: 40, path: [[1.3, 55]], dur: 1.3, gain: 0.1, filter: { type: 'lowpass', freq: 300 }, vibrato: { rate: 9, depth: 60 } },
+      { type: 'tone', wave: 'sine', at: 1.35, freq: [110, 55], dur: 0.2, gain: 0.35 },
+      { type: 'noise', at: 1.3, dur: 1.2, gain: 0.04, filter: { type: 'highpass', freq: 4000 }, env: { a: 0.4, d: 0.8, s: 0.3, r: 0.3 } },
+    ],
+  },
+  // A soft, sustained glassy tone while a beam of light is lit (loop).
+  beam_hum: {
+    gain: 0.7,
+    loop: {
+      beds: [
+        { type: 'tone', wave: 'sine', freq: 1108.7, gain: 0.018, lfo: { target: 'gain', rate: 0.35, depth: 0.4 } }, // Db6
+        { type: 'tone', wave: 'sine', freq: 1661.2, gain: 0.01, lfo: { target: 'freq', rate: 0.23, depth: 5 } }, // Ab6
+        { type: 'tone', wave: 'sine', freq: 2793.8, gain: 0.004, lfo: { target: 'gain', rate: 0.5, depth: 0.6 } }, // F7
+      ],
+    },
+  },
+  // A faint hum near moonglass (loop): like the beam, but lower and dimmer.
+  moonglass_hum: {
+    gain: 0.6,
+    loop: {
+      beds: [
+        { type: 'tone', wave: 'sine', freq: 554.4, gain: 0.012, lfo: { target: 'gain', rate: 0.2, depth: 0.5 } }, // Db5
+        { type: 'tone', wave: 'sine', freq: 830.6, gain: 0.007, lfo: { target: 'freq', rate: 0.13, depth: 4 } }, // Ab5
+      ],
+    },
+  },
+  // Taking the moonglass disc: a warm, glassy shimmer on the item jingle's shape, in D-flat.
+  disc_get: {
+    gain: 0.6, echo: 0.45, duck: 0.15, duckFor: 1.6,
+    layers: [
+      { type: 'notes', inst: 'glass', notes: [['Ab4', 0, 0.3, 0.7], ['Db5', 0.12, 0.3, 0.7], ['F5', 0.24, 0.3, 0.75], ['Ab5', 0.36, 1.6, 0.85]] },
+      { type: 'notes', inst: 'bell', notes: [['Db6', 0.36, 1.6, 0.6], ['F6', 0.5, 1.4, 0.4]] },
+      { type: 'noise', at: 0.36, dur: 1, gain: 0.03, filter: { type: 'highpass', freq: 7000 }, env: { a: 0.05, d: 0.9, s: 0, r: 0.1 } },
+    ],
+  },
+  // Relighting a dead moonglass lamp: a soft "drink" of light, then a shimmer.
+  lamp_relight: {
+    gain: 0.65, echo: 0.45,
+    layers: [
+      { type: 'tone', wave: 'sine', freq: 300, path: [[0.25, 520]], dur: 0.25, gain: 0.12, env: { a: 0.05, d: 0.2, s: 0.5, r: 0.05 } },
+      { type: 'noise', dur: 0.25, gain: 0.04, filter: { type: 'bandpass', freq: [500, 1500], q: 3, time: 0.25 } },
+      chime(0.25, ['Db6', 'Ab6', 'F6'], 0.07, 1.2, 0.4),
+    ],
+  },
+  // A far-off murmur through the speaking tube (loop), to play under the FAR-OFF VOICE lines.
+  tube_murmur: {
+    gain: 3.5, echo: 0.5,
+    loop: {
+      beds: [{ type: 'noise', gain: 0.03, filter: { type: 'bandpass', freq: 650, q: 3 }, lfo: { target: 'gain', rate: 0.4, depth: 0.5 } }],
+      period: 0.12, jitter: 0.2,
+      layers: () => [{ type: 'noise', dur: rand(0.08, 0.2), gain: rand(0.02, 0.045), filter: { type: 'bandpass', freq: rand(450, 900), q: 8 }, env: { a: 0.03, d: 0.12, s: 0.4, r: 0.05 } }],
+    },
+  },
+  // Drawing the Founders' Door's three-hundred-year-old bolt: a long bronze grind and a clank.
+  bolt_draw: {
+    gain: 0.6, echo: 0.45,
+    layers: [
+      creak(0, 1.4, 55, 70, 0.14, 800),
+      { type: 'noise', dur: 1.4, gain: 0.12, filter: { type: 'bandpass', freq: [1800, 900], q: 2.5, time: 1.4 }, env: { a: 0.1, d: 1.3, s: 0.8, r: 0.05 } },
+      ...bronze(1.45, 247, 0.4, 1),
+      { type: 'tone', wave: 'sine', at: 1.45, freq: [130, 60], dur: 0.2, gain: 0.35 },
+    ],
+  },
+  // The Founders' Door swinging open: heavy stone on a pivot, and air moving through.
+  founders_door: {
+    gain: 0.65, echo: 0.5,
+    layers: [
+      { type: 'noise', dur: 2, gain: 0.16, filter: { type: 'bandpass', freq: [300, 600], q: 1.3, time: 2 }, env: { a: 0.3, d: 1.7, s: 0.7, r: 0.3 } },
+      { type: 'tone', wave: 'sawtooth', freq: 33, path: [[2, 44]], dur: 2, gain: 0.12, filter: { type: 'lowpass', freq: 220 } },
+      { type: 'noise', at: 0.5, dur: 1.8, gain: 0.05, filter: { type: 'bandpass', freq: [400, 900], q: 1.2, time: 1.5 }, env: { a: 0.6, d: 1, s: 0.3, r: 0.4 } },
+      { type: 'tone', wave: 'sine', at: 2, freq: [95, 50], dur: 0.3, gain: 0.4 },
+    ],
+  },
+  // Taking a charcoal rubbing: a few scratchy sweeps across paper.
+  rubbing: {
+    gain: 1.3,
+    layers: () => [0, 0.32, 0.6, 0.9].map((t, i) => ({
+      type: 'noise', at: t + rand(0, 0.04), dur: rand(0.22, 0.3), gain: 0.12 - i * 0.015,
+      filter: { type: 'bandpass', freq: [rand(2500, 3500), rand(1500, 2200)], q: 1.5 }, env: { a: 0.04, d: 0.2, s: 0.6, r: 0.05 },
+    })),
   },
 
   // ---- Valves and water ----
@@ -186,7 +288,8 @@ export const UNDER_SFX = {
       },
     },
   },
-  // The hull itself (loop): a low drone you feel more than hear, and now and then a deep creak.
+  // The hull itself (loop): a low drone you feel more than hear, and a slow, deep creak every 20
+  // seconds or so, far off: the city at its mooring (03-downstairs.md). Downstairs only.
   hull: {
     gain: 0.9, echo: 0.4,
     loop: {
@@ -194,8 +297,8 @@ export const UNDER_SFX = {
         { type: 'tone', wave: 'sine', freq: 55, gain: 0.07, lfo: { target: 'gain', rate: 0.07, depth: 0.4 } },
         { type: 'noise', gain: 0.05, filter: { type: 'lowpass', freq: 140 }, lfo: { target: 'gain', rate: 0.05, depth: 0.5 } },
       ],
-      offset: 4, period: 7, jitter: 8,
-      layers: () => [creak(0, rand(1.2, 2.2), rand(25, 35), rand(40, 55), 0.12, rand(300, 500))],
+      offset: 6, period: 16, jitter: 8,
+      layers: () => [creak(0, rand(1.8, 2.8), rand(25, 35), rand(40, 55), 0.2, rand(300, 500))],
     },
   },
 

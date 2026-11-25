@@ -2,7 +2,7 @@
 
 Moonshine should sound like a well-loved SNES adventure: warm, slightly soft "sampled" instruments, a little echo, and melodies you hum after you stop playing. Everything is synthesized at runtime with Web Audio ([decisions.md](decisions.md)); there are no audio files. The code is in `game/src/audio/` and its API is documented in [game/src/audio/README.md](../game/src/audio/README.md). Listen to everything on the dev page, `game/dev/audio.html`, which also plays the opening's moonrise sequence in order.
 
-The story and places come from [story-bible.md](story-bible.md) and [design/01-opening.md](design/01-opening.md) (its "Audio needed" list is what round 2 delivered).
+The story and places come from [story-bible.md](story-bible.md) and the slice designs in [design/](design/): the "Audio needed" lists of [01-opening.md](design/01-opening.md), [02-city.md](design/02-city.md), and [03-downstairs.md](design/03-downstairs.md) are all delivered.
 
 ## Sonic identity
 
@@ -38,7 +38,7 @@ Defined in `game/src/audio/instruments.js`.
 
 **The surface city (Tessel)** is sunlit, lived-in, and a little old-fashioned: major keys, accordion, flute, guitar, harp, round bass, and light hand percussion (shaker, rim, tambourine). Tunes are stepwise and singable, and the arrangement changes as a loop goes round, so it doesn't wear out.
 
-**The underground** (not composed yet) is the Founders' work, so it should sound related to the surface but foreign: bells, choir, and bowed bass; no hand percussion, only slow pulses; modes outside the surface's major keys (the title's D-flat chord is the first taste); longer, wetter echo. Its melodies should be built from the skipping rhyme's intervals, because the rhyme is the Founders' own manual.
+**The underground** is the Founders' work, so it sounds related to the surface but foreign: moonglass (a glass harmonica), bells, choir, and bowed bass; no hand percussion, only a slow pulse like machinery far off; long, wet echo. Its key is **D-flat**, the flat sixth that surface music only glances at, in the **Lydian mode**: the fourth is raised (G natural). Its melodies are the skipping rhyme turned inside out, because the rhyme is the Founders' own manual. The Founders' version of the rhyme sings that raised fourth where the children sing a plain one (see **The Founders' voice** below). Downstairs sounds are harder and ring longer than on the surface: stone plates, bronze, glass, water.
 
 **The Wrongness** is something slipping out of tune. It reuses the surface's own material and corrupts it: notes sag flat as they ring, pads beat against themselves, and the rhyme fails to land, sliding down by half steps against a tritone. It is unsettling, never a jump scare. The physical Wrongness sounds of the opening (the groan of the chain, the crack of the Tooth) are the one exception: those are meant to be enormous.
 
@@ -52,7 +52,8 @@ Defined in `game/src/audio/instruments.js`.
   - *Wake them one by one and they'll drink up the sea* climbs through E-flat and C7 home to F (the same D♭–E♭–F climb that ends the title).
 
   It plays on a music box at the moonrise and is sung broadly in the title. It should return underground and at the ending. The item jingle is its first four notes.
-- **The flat sixth.** The D-flat chord in F (♭VI): the title turns to it twice, and its last phrase climbs D♭–E♭–F. It is the color of the hidden city. Save it on the surface for moments that brush against the underground.
+- **The flat sixth.** The D-flat chord in F (♭VI): the title turns to it twice, and its last phrase climbs D♭–E♭–F. It is the color of the hidden city, and D-flat is the underground's home key. On the surface, save it for moments that brush against the underground: the Archive ends on it, unresolved, and the discovery sting climbs D♭–E♭–F.
+- **The Founders' voice.** The rhyme moved to D-flat with its fourth raised (G natural for G-flat): "catch it in a" sings sol–*fa♯*–mi. `downstairs` plays the rhyme's opening upside down (A♭–F–D♭–A♭, falling) with that raised fourth; the `reveal` cue plays the rhyme's first couplet straight, in the Founders' voice, when Cheryl realizes the city is a boat.
 - **The Wrongness slip.** The rhyme's opening, C–F–A–C, with the third a half step low (A♭) and the top on B, a tritone above F; then "catch it in a cup" sliding down by half steps (B–B♭–A–A♭–G) over F in the bass with a B held against it. The music box running down at the moonrise is the same idea: the rhyme slowing and sagging flat.
 
 ## Tracks
@@ -64,14 +65,25 @@ Defined in `game/src/audio/instruments.js`.
 | `moonrise` | Moonrise | F major, 4/4, 63 bpm | 8-bar loop | 30.5 s loop | the moonrise vista; runs down with `windDownMusic` |
 | `morning_after` | Morning After | G minor, 3/4, 76 bpm | 16-bar loop | 37.9 s loop | the morning after Moonshine Night |
 | `wrongness` | Something Wrong | slips off F, 66 bpm | 2-bar one-shot cue | 7.3 s plus echo | `playCue` when the Wrongness shows itself |
-| `stairs` | Stairs to the Water | F major, 4/4, 100 bpm, light swing | 2-bar intro, A A2 B A3 | 76.8 s loop | not yet assigned: a surface theme for the wider city |
+| `neighborhood` | Stairs to the Water | F major, 4/4, 100 bpm, light swing | 2-bar intro, A A2 B A3 | 76.8 s loop | the upper town by day: Lamp Street, the Crown, the Hundred Steps, Fountain Square; muffled in the Shop |
+| `harbor` | Low Tide | D minor, 6/8, 52 bpm (dotted quarters) | 1-bar intro, A B A2 | 55.4 s loop | the Bilge, the Harbor, the Goat Path |
+| `archive` | Dust in Sunlight | F major, 4/4, 56 bpm | 12-bar loop ending on D-flat | 51.4 s loop | the Archive and the crypt |
+| `discovery` | The Hundredth Step | D♭–E♭–F, 60 bpm | 2-bar one-shot cue | 8 s plus echo | `playCue` when the hundredth step opens (and other first glimpses of the Founders' work) |
+| `downstairs` | Downstairs | D-flat Lydian, 4/4, 54 bpm | A B (8 bars each) | 71.1 s loop | the underground: the Step Gallery, the Lamp Halls, the Bunk Room, the Chart Room |
+| `reveal` | We're a Boat | D-flat (Founders' voice), 64 bpm | 4-bar one-shot cue | 15 s plus echo | `playCue` after "Oh, we're a boat." in the Chart Room |
+| `reveal_last` | We're a Boat (last phrase) | as `reveal`, softer | 2-bar one-shot | 7.5 s plus echo | under the dusk vista at the end of Act 3 |
 
 - **Cistern Court** is an unhurried waltz: an accordion over a nylon guitar's oom-pah-pah. Each time round it changes: A is guitar and accordion; A2 swaps the guitar for rippling harp; B hands the tune to the flute in G minor while the accordion holds long notes; A3 brings it all back with a soft flute descant.
 - **Moonrise** is three music-box voices (tune, a broken-chord comb, low notes) with a long echo. At the moment the moon appears, the game calls `windDownMusic(ms)`: from the next note on, each step takes longer than the last and every note is flatter, until the box stops wherever it has got to and the last notes ring out. This is the design's "slows, drifts flat, and stops mid-phrase".
 - **Morning After** is Cistern Court's tune in G minor on a lone ocarina, over a harp's pah-pah, a bowed bass, and a ticking clock. Its second half starts the rhyme again in E-flat and doesn't finish it. Its last note is F♯, so the loop comes back to F with a small lurch. It is very slightly out of tune (song wrongness 0.12).
 - **Moonshine** (title) sings the whole rhyme (eight bars) on the flute, then answers with its own phrase, which turns to D-flat again and climbs D♭–E♭–F.
 - **Something Wrong** is the rhyme collapsing (see the Wrongness slip).
-- **Stairs to the Water** was the round 1 opening theme. The story moved the opening to a waltz, so this one waits for a place in the wider city.
+- **Stairs to the Water** was written for the opening before the story settled on a waltz; Act 2 gives it the upper town. In the Shop it plays through `muffleMusic(true)`, as if heard from outside.
+- **Low Tide** is the upper town's world seen from the waterline: Cheryl's home phrase in D minor (A–D–F–A, G–F–E–D) on the accordion over a rocking 6/8 guitar, with water lapping in the percussion. The middle lifts into F major and leans on an A-major chord; the last time round, a flute answers like a gull.
+- **Dust in Sunlight** is a single bell reading the rhyme's opening aloud to itself over slow harp. It ends on D-flat with the bell stopped on C, and the loop starts over without resolving.
+- **The Hundredth Step** (discovery sting): bells and choir on D-flat, the bass climbing D♭–E♭–F to F major with A on top. Wonder, with a chill.
+- **Downstairs**: moonglass sings the rhyme upside down over choir and bowed bass, with a slow two-beat pulse. It is the quietest looping track on purpose (about −21 dB A-weighted, against −18 to −20 for the surface) so the hull's creak can be heard. The loop ends on the raised G, glowing and unresolved.
+- **We're a Boat** (reveal): the rhyme's first couplet on glass bells, doubled an octave down on moonglass, over a held D-flat chord.
 
 The game can also turn up a global Wrongness amount (`setWrongness(0..1)`) as the threat grows: notes in every track then drift slightly out of tune and some sag flat. At 0.1–0.2 it should only feel faintly off; 0.5 is clearly sick. The story bible sets it by act: about 0.1 after Act 1, rising to 0.5 in Act 5, and 0 at the ending. A track's own `wrongness` (Morning After's 0.12, the cue's 0.5) is a floor: the track uses whichever is higher.
 
@@ -87,8 +99,20 @@ Defined in `game/src/audio/sfx.js` (interface) and `game/src/audio/sfx-world.js`
 | Puzzle and characters (the opening) | `tap_squeak`, `water_pour` (loop), `tub_full`, `chess_tap`, `pepper_grind`, `sneeze` (the Old Man: ah… ah… CHOO), `timer_tick` (loop), `timer_ding`, `sheets_flap`, `kid_patter` (a run of the Kid's steps), `kid_hop`, `piano_flat` (one A, a little flat), `splash` |
 | Ambience | `crowd` (loop: the festival murmur below; stop it dead with `stopLoop('crowd', 0)`), `wind` (loop), `swifts`, `dog_bark` (one dog, far off), `gull`, `clock_strike` (the Mayor's clock on the Crown, three strokes, fading), `well_breath` (the morning well's cold whoosh) |
 | The Wrongness | `wrong_sting` (the home chord on bells slipping flat), `groan` (a chain under strain, 3 s; dips the music), `crack` (the Tooth shearing), `rattle` (chimney pots and timbers), `piano_tumble` (a chord crash, then thumps and jangles receding, 3.5 s), `drain` (glunk, gurgle, a hollow sound falling away, a far splash; 5 s in all), or its parts for timing to the tub's animation: `drain_glunk`, `drain_gurgle` (1.5 s), `drain_echo` (the fall, with the splash 2.5 s after it starts) |
+| The wider city (Act 2, `sfx-city.js`) | `knock`, `shop_bell`, `stone_scrape` (crowbar on mortar; three variants at random), `slab_lift`, `piano_slide` (soapy whoosh, long scrape, jangle, receding; 3.5 s), `trickle` (loop), `sink_gurgle` (water vanishing into the step), `step_splash` (the flooded Bilge), `door_hum` (loop: the Founders' Door, very quiet), `goat`, `boatman_sing` (a few wobbly, off-pitch notes of his shanty or the rhyme), `girls_chant` (the rhyme's opening, with the rope) |
+| City ambience (loops) | `town` (the upper town by day: far voices, a shutter, a hammer, sparrows), `canal` (lapping, a boat knocking), `gulls`, `goats`, `clock_tick` (the Crown's clock, close up), `glow_shimmer` (the Crown at dusk with the moon-eyes lit) |
+| Downstairs: moving about (Act 3, `sfx-under.js`) | `step_hullstone`, `step_rung`, `lever_pull` (seized grind, then release), `lid_open` (the ceiling lid scraping open), `lid_pry`, `mirror_turn` (pivot and clunk), `light_beam` (daylight arriving), `beam_hum` (loop, while a beam is lit), `moonlock_open` (rising chime, then the hatch's stone grind), `hatch_open` (bronze), `disc_get` (taking the disc: the item jingle's shape on glass, in D-flat), `disc_glow`, `lamp_relight` (a soft "drink," then a shimmer), `chute_slide` (falling whoosh, two bumps, a thump), `ladder_drop` (chain rattle, then a crash), `tube_voice` (a shout down the speaking tube), `tube_murmur` (loop: the far-off crowd through the tube, under FAR-OFF VOICE lines), `bolt_draw`, `founders_door`, `rubbing` (charcoal on paper) |
+| Downstairs: machines and water | `valve_turn` (a groaning wheel and its ratchet), `valve_jam`, `water_gush` (loop: the gushing pipe; stop it over about 2 s so the rush slows to a stop), `far_gurgle` (draining far off), `pump_run` (loop), `pump_cough` (the wrong order: ragged chugs, a hiss, a clunk), `chain_rattle`, `chain_haul` (loop), `tide_wheel` (loop) |
+| Downstairs ambience (loops) | `hull` (a low drone and a slow, deep creak every 20 s or so), `drips`, `moonglass_hum` (faint, near moonglass) |
 
 The dev page's "moonrise sequence" button plays these in the design's order with suggested timings (see `MOONRISE` in `game/dev/audio.html`): fade Cistern Court and start the crowd and clock; 5 s later the music box; at the moon, stop the crowd dead, wind the music down over about 4.5 s, and bark the dog; after the cut, the groan with the rattle, the crack, the piano, the drain, then a gull and the wind.
+
+Suggested use in Acts 2 and 3 (the scripts decide):
+
+- **The hundredth step:** `stone_scrape` three times, `slab_lift`, `well_breath`, then `playCue('discovery')`.
+- **The valve:** `valve_turn`, then `stopLoop('water_gush', 2000)` with `far_gurgle`, then `tube_voice` (with `tube_murmur` running under the FAR-OFF VOICE lines), then `valve_jam` when it won't go back.
+- **The Chart Room:** after "Oh, we're a boat.", `playCue('reveal', { resume: false })`; at the dusk vista, `playCue('reveal_last', { resume: false })` with `glow_shimmer` running.
+- **Downstairs maps:** `downstairs` music with the `hull` and `drips` loops; stop both on surfacing.
 
 ## Mixing levels
 
@@ -98,7 +122,8 @@ Measured with the checks below (offline render at full volume, before the safety
 - **Balance within a track:** the melody is at least 3 dB louder (A-weighted, each voice alone) than every other voice in every section; in practice 4.5–13 dB.
 - **Interface sounds:** peaks −9 to −17 dBFS, so they read over music without startling. Footsteps −13 to −18 (the rug and the Kid quieter).
 - **Big moments** (item get, the Wrongness sting, the groan, the crack, the piano): peaks −3 to −6 dBFS, with the music ducked underneath where they would clash.
-- **Ambience:** distant things are quiet (crowd, wind, gull, dog, swifts: peaks −20 to −28).
+- **Ambience:** distant things are quiet (crowd, wind, gulls, dog, swifts, goats, canal: peaks −20 to −31). Hums are near the edge of hearing (the Founders' Door, beams, moonglass: RMS −36 to −48).
+- **Underground music** sits 1–3 dB below the surface tracks (A-weighted), so the hull creak and drips come through.
 - **Default player volumes:** master 0.8, music 0.8, SFX 0.9 (sliders are squared, so they feel even). Settings persist in `localStorage` under `moonshine.audio`.
 - A soft clipper (exactly linear below −3 dBFS) guards the output. It should almost never engage; if something trips it, turn that thing down instead.
 

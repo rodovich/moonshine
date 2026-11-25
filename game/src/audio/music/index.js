@@ -9,6 +9,7 @@ import harbor from './harbor.js';
 import archive from './archive.js';
 import discovery from './discovery.js';
 import downstairs from './downstairs.js';
+import { reveal, reveal_last } from './reveal.js';
 
 export const SONGS = {
   title,
@@ -21,4 +22,6 @@ export const SONGS = {
   archive,
   discovery,
   downstairs,
+  reveal,
+  reveal_last,
 };

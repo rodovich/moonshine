@@ -13,7 +13,7 @@ export default {
   id: 'downstairs',
   title: 'Downstairs',
   bpm: 54,
-  gain: 1.15,
+  gain: 0.75, // quiet enough to hear the hull creak (03-downstairs.md)
   echo: { delay: 0.6, feedback: 0.5, wet: 0.45, lowpass: 1800, spread: 0.05 },
   channels: [
     { id: 'lead', inst: 'glass', vol: 0.9, pan: 0.05, echo: 0.55 },

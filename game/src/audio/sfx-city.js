@@ -228,6 +228,19 @@ export const CITY_SFX = {
       return [{ type: 'notes', inst: 'boatman', notes }];
     },
   },
+  // The Crown at dusk, every moon-eye glowing (end of Act 3): a light, rising, glassy shimmer in
+  // the air, now and then (loop).
+  glow_shimmer: {
+    gain: 0.3, echo: 0.6,
+    loop: {
+      offset: 0.5, period: 2.2, jitter: 2.5,
+      layers: () => {
+        const runs = [['Db6', 'F6', 'Ab6'], ['Ab5', 'Db6', 'F6'], ['F5', 'Ab5', 'Db6', 'F6']];
+        const run = runs[Math.floor(Math.random() * runs.length)];
+        return [{ type: 'notes', inst: 'glass', notes: run.map((p, i) => [p, i * 0.14, 1.4, 0.35]) }];
+      },
+    },
+  },
   // The Skipping Girls chant the rhyme's opening (and a rope slaps the ground on each beat).
   girls_chant: {
     gain: 0.5, echo: 0.15,
