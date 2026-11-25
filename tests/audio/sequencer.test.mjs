@@ -166,12 +166,17 @@ test('the required sound effects exist', () => {
     'pump_thin', 'pump_stout', 'shaft_hum', 'grate_drain', 'hull_creak_long', 'valve_hiss', 'ear_pop', 'groan_great',
     'burst', 'spray', 'roar', 'runoff', 'water_spread', 'hatch_bang', 'air_whistle', 'slack_lap', 'channel_rush', 'gull_close',
     'slab_scrape', 'slab_close', 'shouting', 'bell_low', 'town_rush', 'crabs', 'fish_flop',
+    // docs/design/05-high-and-dry.md, "Audio needed"
+    'laundry', 'surf', 'bucket_fill', 'bucket_lower', 'pour', 'splash_small', 'rope_throw', 'rope_creak', 'tin_lid',
+    'lamp_hum', 'disc_drink', 'disc_fade', 'timer_wind', 'leap', 'mud_splat', 'barnacles_crack', 'door_grind',
+    'light_spill', 'bronze_door', 'lamp_wake', 'lamps_wake', 'chain_creak', 'hawse_wind', 'drum_creak', 'drum_strain',
+    'stump_lever', 'clapper_seat', 'tube_wind',
   ];
   for (const id of act2) assert.ok(SFX[id], id);
   const loops = ['water_pour', 'timer_tick', 'crowd', 'wind', 'trickle', 'door_hum', 'town', 'canal', 'gulls', 'goats',
     'clock_tick', 'water_gush', 'drips', 'hull', 'pump_run', 'chain_haul', 'tide_wheel', 'beam_hum', 'moonglass_hum', 'tube_murmur', 'glow_shimmer'];
   for (const id of loops) assert.ok(SFX[id].loop, `${id} loops`);
-  for (const id of ['title', 'cistern_court', 'moonrise', 'morning_after', 'wrongness', 'neighborhood', 'harbor', 'archive', 'discovery', 'downstairs', 'reveal', 'reveal_last', 'pumps', 'neighborhood_thin', 'climb']) assert.ok(SONGS[id], id);
+  for (const id of ['title', 'cistern_court', 'moonrise', 'morning_after', 'wrongness', 'neighborhood', 'harbor', 'archive', 'discovery', 'downstairs', 'reveal', 'reveal_last', 'pumps', 'neighborhood_thin', 'climb', 'relay']) assert.ok(SONGS[id], id);
 });
 
 test('harmony strings split bars evenly unless lengths are given', () => {

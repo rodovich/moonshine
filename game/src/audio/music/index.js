@@ -13,6 +13,7 @@ import { reveal, reveal_last } from './reveal.js';
 import pumps from './pumps.js';
 import neighborhood_thin from './neighborhood_thin.js';
 import climb from './climb.js';
+import relay from './relay.js';
 
 export const SONGS = {
   title,
@@ -30,4 +31,5 @@ export const SONGS = {
   pumps,
   neighborhood_thin,
   climb,
+  relay,
 };

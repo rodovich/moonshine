@@ -224,6 +224,14 @@ export const INSTRUMENTS = {
         { type: 'tone', wave: 'sine', freq: [62, 40], sweep: 0.15, dur: 0.2, gain: 0.85, env: { a: 0.006, d: 0.18, s: 0, r: 0.05 } },
         { type: 'noise', dur: 0.06, gain: 0.08, filter: { type: 'lowpass', freq: 220 } },
       ],
+      // The egg timer's bell, as a note: pitched at D7 (the third of B-flat) so it can end the
+      // relay as its final note. The sound effect `timer_ding` is the same bell at E7.
+      ding: [
+        { type: 'noise', dur: 0.03, gain: 0.12, filter: { type: 'lowpass', freq: 900 } },
+        { type: 'tone', wave: 'sine', at: 0.03, freq: 2349, dur: 1.6, gain: 0.3, vibrato: { rate: 26, depth: 9 }, env: { a: 0.002, d: 1.5, s: 0, r: 0.2 } },
+        { type: 'tone', wave: 'sine', at: 0.03, freq: 2349 * 2.76, dur: 0.3, gain: 0.05, env: { a: 0.001, d: 0.25, s: 0, r: 0.05 } },
+        { type: 'tone', wave: 'sine', at: 0.03, freq: 1174.7, dur: 1.2, gain: 0.08, env: { a: 0.002, d: 1.1, s: 0, r: 0.1 } },
+      ],
       // Water lapping against a quay, as part of the harbor music's texture.
       wave: [{ type: 'noise', dur: 1.4, gain: 0.12, filter: { type: 'bandpass', freq: [700, 350], q: 0.8, time: 1.4 }, env: { a: 0.45, d: 0.8, s: 0.2, r: 0.4 } }],
       // Low tom for fills and the title's swells.
