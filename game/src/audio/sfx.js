@@ -7,8 +7,13 @@
 //   jitter random pitch spread in cents, so repeated sounds don't machine-gun
 //   mono   a new instance cuts off the previous one
 //   duck   dip the music to this level (0..1) while the effect plays; duckFor sets how long (s)
+// `layers` may be a function returning layers, called on every play (for randomized sounds).
+// Loops (ambience, running water, ticking) have `loop` instead of `layers`; see sfx-world.js.
+// Footsteps, puzzle sounds, ambience, and the Wrongness's sounds are in sfx-world.js.
 
-export const SFX = {
+import { WORLD_SFX } from './sfx-world.js';
+
+const UI_SFX = {
   // Dialog text, one per letter or two. Bright, short, square-ish.
   blip: {
     mono: true, jitter: 12, gain: 1.5,
@@ -18,14 +23,6 @@ export const SFX = {
   blip_cheryl: {
     mono: true, jitter: 45, gain: 0.9,
     layers: [{ type: 'tone', wave: 'ocarina', freq: ['D5', 'C#5'], dur: 0.05, gain: 0.26, env: { a: 0.006, d: 0.045, s: 0, r: 0.02 } }],
-  },
-  // A soft step on stone paving.
-  step: {
-    mono: true, jitter: 250, gain: 0.8,
-    layers: [
-      { type: 'noise', dur: 0.035, gain: 0.22, filter: { type: 'bandpass', freq: 1100, q: 1.1 } },
-      { type: 'tone', wave: 'sine', freq: [140, 90], dur: 0.04, gain: 0.18 },
-    ],
   },
   // Walking into something solid.
   bump: {
@@ -51,6 +48,19 @@ export const SFX = {
       { type: 'tone', wave: 'triangle', freq: 'A4', at: 0.05, dur: 0.08, gain: 0.3 },
     ],
   },
+  // Moving a menu cursor: the smallest tick.
+  cursor: {
+    mono: true, gain: 1,
+    layers: [{ type: 'tone', wave: 'pulse25', freq: 'A6', dur: 0.016, gain: 0.12, filter: { freq: 4500 } }],
+  },
+  // Giving an item to someone: a gentle downward pair on the harp, and a little rustle.
+  give: {
+    gain: 0.7, echo: 0.2,
+    layers: [
+      { type: 'noise', dur: 0.14, gain: 0.05, filter: { type: 'bandpass', freq: [1600, 600], q: 1.2 }, env: { a: 0.04, d: 0.1, s: 0, r: 0.03 } },
+      { type: 'notes', inst: 'harp', notes: [['C6', 0.04, 0.3, 0.7], ['F5', 0.13, 0.6, 0.8]] },
+    ],
+  },
   // Menu opens: a quick upward harp run with a breath of air.
   menu_open: {
     gain: 0.5, echo: 0.2,
@@ -67,7 +77,7 @@ export const SFX = {
       { type: 'noise', dur: 0.1, gain: 0.045, filter: { type: 'bandpass', freq: [4500, 1200], q: 1.5 }, env: { a: 0.04, d: 0.06, s: 0, r: 0.03 } },
     ],
   },
-  // Item get: a short fanfare in the neighborhood theme's key, ending on the home chord.
+  // Item get: a short fanfare on the rhyme's opening (C–F–A–C, Cheryl's home phrase), ending on the home chord.
   item_get: {
     gain: 0.6, echo: 0.35, duck: 0.15, duckFor: 1.3,
     layers: [
@@ -110,3 +120,5 @@ export const SFX = {
     ],
   },
 };
+
+export const SFX = { ...UI_SFX, ...WORLD_SFX };

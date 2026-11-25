@@ -271,16 +271,14 @@ Maps, audio, misc:
 |---|---|
 | `changeMap(id, x, y, facing, { fade, seconds })` | Fades out, loads, fades in, then runs the map's `onEnter`, all before it resolves: `await g.changeMap('b'); await g.say(...)` shows the say after b's intro. |
 | `map` | Current map id. |
-| `playMusic(id)`, `stopMusic(fadeMs)`, `sfx(id)` | Audio (see below). |
-| `playCue(id, { resume })` | A one-shot music cue; the current track dips and comes back (unless `resume: false`). |
-| `setWrongness(amount)` | How far the Wrongness has crept into the music, 0–1. |
+| `playMusic(id)`, `stopMusic(fadeMs)`, `sfx(id)`, `playCue(id, { resume })`, `windDownMusic(ms)`, `startLoop(id)`, `stopLoop(id, fadeMs)`, `setWrongness(0..1)` | Audio (see below and `src/audio/README.md`). |
 | `save()` | Save now (saving also happens automatically). |
 | `toTitle()` | Save and return to the title screen (end of a slice). |
 | `random(min, max)` | Integer from the game's RNG (seedable with `?seed=`). |
 
 ## Audio boundary
 
-The engine calls audio only through `src/engine/sound.js`, a bridge to the audio module (`src/audio/index.js`, documented in `src/audio/README.md`). It exports `unlockAudio()` (first key press or tap), `playMusic(id)`, `stopMusic(fadeMs)`, `playCue(id, opts)`, `sfx(id)`, and `setWrongness(0..1)`, all also on the script API. The bridge maps the engine's generic sound ids (`text`, `text_cheryl`, `cursor`, `select`, `item`) to the audio ids and ignores unknown ids with a one-time console warning, so content can name music or sounds before they exist. Maps play their `music` on entry.
+The engine calls audio only through `src/engine/sound.js`, a bridge to the audio module (`src/audio/index.js`, documented in `src/audio/README.md`). It exports `unlockAudio()` (first key press or tap), `playMusic(id)`, `stopMusic()`, `playCue(id, { resume })`, `windDownMusic(ms)`, `sfx(id)`, `startLoop(id)`, `stopLoop(id, fadeMs)`, `stopAllLoops()`, and `setWrongness(0..1)`. The bridge maps the engine's generic sound ids (`text`, `text_cheryl`, `select`, `item`) to the audio ids (`cursor` has its own sound) and ignores unknown ids with a one-time console warning, so content can name music or sounds before they exist. Maps play their `music` on entry.
 
 ## Debug parameters
 
