@@ -265,6 +265,12 @@ const crownDoor5 = {
     : g.describe("The Clockmaker's door, propped open with something heavy. Clocks ticking inside, all at once.")),
 };
 
+// A map's ground tile at (x, y), by name, without its properties (solidity).
+function tileAt(def, x, y) {
+  const v = def.legend[def.ground[y][x]];
+  return v && typeof v === 'object' ? v.tile : v;
+}
+
 // Ambrose on the Crown, at his tower step, until Act 4's belfry is registered
 // (withAct5 turns this off then; in Act 5 he's up in the belfry).
 export const crownLinks = { ambroseHere: true, belfry: false };
@@ -290,6 +296,8 @@ export function withCrown5(def) {
     patches: (g) => {
       const list = base.patches ? base.patches(g) : [];
       if (!started(g)) return list;
+      // The tower doorway (4-5, 6), walkable: the way up to the belfry.
+      if (crownLinks.belfry) for (const x of [4, 5]) list.push(['ground', x, 6, tileAt(base, x, 6)]);
       return list.map(([layer, x, y, v, ...r]) => {
         const name = typeof v === 'object' && v ? v.tile : v;
         if (!name || !name.endsWith('_eye_glow')) return [layer, x, y, v, ...r];
@@ -297,11 +305,11 @@ export function withCrown5(def) {
         return [layer, x, y, typeof v === 'object' ? { ...v, tile: plain } : plain, ...r];
       });
     },
-    // The Clockmaker's door (12, 6); the tower door (4-5, 6) up to Ambrose in the belfry.
-    collision: openTiles(base, [[12, 6], [4, 6], [5, 6]]),
+    // The Clockmaker's door (12, 6).
+    collision: openTiles(base, [[12, 6]]),
     exits: [
-      ...(base.exits || []).map((e) => (e.run ? untilAct5(e) : e)),
-      ...(crownLinks.belfry ? [{ x: 4, y: 6, w: 2, to: 'belfry', at: [1, 7], facing: 'up', when: started, blocked: "The tower door. Not now." }] : []),
+      // Act 4's tower door up to the belfry stays open in Act 5 (Ambrose is up there).
+      ...(base.exits || []).map((e) => (e.run ? untilAct5(e) : e.to === 'belfry' ? { ...e, act5Before: e.when, when: (g) => started(g) || !e.when || e.when(g) } : e)),
       {
         x: 12, y: 6, to: 'clockmaker_shop', at: [4, 6], facing: 'up', when: started,
         blocked: "Shut. He's not at home to anyone, least of all me.",

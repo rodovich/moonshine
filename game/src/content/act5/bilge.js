@@ -130,7 +130,7 @@ async function toEdge(g, x = 23) {
 async function lowerBucket(g) {
   if (afloat(g)) return g.describe("He's afloat. He doesn't need more. Nobody needs more than afloat.");
   await toEdge(g, 23);
-  const boatman = g.npc('boatman');
+  const boatman = g.npc('boatman5');
   g.pose('player', 'lower_down');
   await g.describe('I lie down on the last good step and lower the bucket to him at full stretch.');
   g.sfx('bucket_lower');
@@ -381,7 +381,7 @@ const fishmongerNpc = {
 };
 
 const boatman = {
-  id: 'boatman', name: 'Boatman', x: 22, y: 10, w: 2, facing: 'down', kind: 'npc', turnToTalk: false,
+  id: 'boatman5', name: 'Boatman', x: 22, y: 10, w: 2, facing: 'down', kind: 'npc', turnToTalk: false,
   sprite: (g) => ({ sheet: boatman_mud, frame: afloat(g) ? 'afloat' : 'mud' }),
   emote: { frame: 'note', every: [5, 9] },
   interact: boatmanTalk,

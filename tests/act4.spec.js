@@ -154,7 +154,8 @@ test('keyboard: Act 4, the morning to the reveal', async ({ page }) => {
   expect(pageTexts(log)).toContain('A door at the bottom of the sea');
   await page.waitForTimeout(2500);
   await shot(page, 'act4-11-end-card');
-  await waitFor(page, () => window.moonshine.snapshot().scene === 'title', null, 20000);
+  // Act 4 ends on its card and the title, or (with Act 5 registered) hands over to Act 5.
+  await waitFor(page, () => { const st = window.moonshine.snapshot(); return st.scene === 'title' || !!st.flags?.['act5.started']; }, null, 20000);
   expect(errors).toEqual([]);
 });
 
@@ -215,7 +216,8 @@ test('pointer: Act 4, the morning to the reveal', async ({ page }) => {
   await ptrInteract(page, 'boatman'); await read();
   await ptrInteract(page, 'door_view');
   await read({ stop: (s) => !!s.flags['act4.done'] });
-  await waitFor(page, () => window.moonshine.snapshot().scene === 'title', null, 20000);
+  // Act 4 ends on its card and the title, or (with Act 5 registered) hands over to Act 5.
+  await waitFor(page, () => { const st = window.moonshine.snapshot(); return st.scene === 'title' || !!st.flags?.['act5.started']; }, null, 20000);
   expect(errors).toEqual([]);
 });
 
