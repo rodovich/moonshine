@@ -158,10 +158,11 @@ function compose(g) {
     'flat_l', 'flat', 'flat_basin', 'flat', 'flat_r', 'flat_l', null, null, 'tiles_l', 'tiles', 'tiles_r'];
   lowTop.forEach((fr, x) => { if (fr) { set(ground, x, 24, `court:low_${fr}`); block(x, 24); } });
   low.forEach((fr, x) => { if (fr) { set(ground, x, 25, `court:low_${fr}`); block(x, 25); } });
-  const sq = am ? '_scraped' : '';
+  const pianoGone = am || f('piano.gone');
+  const sq = pianoGone ? '_scraped' : '';
   set(ground, 15, 24, `court:squeeze_top_l${sq}`); set(ground, 16, 24, `court:squeeze_top_r${sq}`);
   set(ground, 15, 25, `court:squeeze_l${sq}`); set(ground, 16, 25, `court:squeeze_r${sq}`);
-  if (!am) {
+  if (!pianoGone) {
     // The piano, wedged at the top of the Squeeze: its top half is overhead.
     set(overhead, 15, 23, 'court_props:over_piano_nw'); set(overhead, 16, 23, 'court_props:over_piano_ne');
     set(detail, 15, 24, 'court_props:piano_sw'); set(detail, 16, 24, 'court_props:piano_se');
@@ -220,7 +221,7 @@ async function fillTub(g) {
   g.sfx('tub_full');
   await g.wait(0.3);
   await g.describe('Cold as the sea. That\'s how it\'s done. Hot baths are for Tuesdays.');
-  if (g.flag('neighbor.sheetsMoved')) await g.describe('Now I sit, and wait for the moon.');
+  if (g.flag('neighbor.sheetsMoved')) await g.describe('Now I sit on the edge of the tub, and wait for the moon.');
   else await g.describe('Now the view.');
 }
 
@@ -255,7 +256,12 @@ const objects = [
     },
     use: { '*': cherylDeclines },
   },
-  { id: 'chairs', x: 2, y: 7, w: 2, look: 'Two chairs. I only sit in the one.' },
+  {
+    id: 'chairs', x: 2, y: 7, w: 2,
+    interact: (g) => g.describe(!morning(g) && g.flag('tub.full') && g.flag('neighbor.sheetsMoved')
+      ? "Not tonight. Tonight it's the tub."
+      : 'Two chairs. I only sit in the one.'),
+  },
   { id: 'herbs', x: 1, y: 2, w: 2, look: 'Basil, rosemary, and something that blew in and refused to leave. I\'ve grown fond of it.' },
   { id: 'chimney', x: 7, y: 2, w: 2, look: 'My chimney pots, in their little tin hats. Hers next door go bareheaded. Make of that what you will.' },
   {
@@ -326,10 +332,21 @@ const objects = [
       ? "Shut. She's upstairs being disappointed at her sheets."
       : "Her door. She's up on the roof with her sheets, where she always is on Moonshine Night."),
   },
-  ...[[1, 10], [5, 10], [11, 10], [13, 10], [16, 10], [18, 10]].map(([x, y]) => ({
+  ...[[1, 10], [5, 10]].map(([x, y]) => ({
     id: `window_${x}`, x, y, h: 2, lookKey: 'windows',
     look: 'Blue shutters. Everyone in Tessel has blue shutters, except Her Next Door, who has green ones and opinions.',
   })),
+  ...[[11, 10], [13, 10], [16, 10], [18, 10]].map(([x, y]) => ({
+    id: `window_${x}`, x, y, h: 2, lookKey: 'nb_windows',
+    look: "Her green shutters. She repaints them every spring, in case anyone's forgotten they're green.",
+  })),
+  {
+    // The court's drain: every basin in Tessel empties downhill tonight.
+    id: 'drain', x: 6, y: 20, solid: false,
+    interact: (g) => g.describe(morning(g)
+      ? "The drain's making a noise like somebody breathing through a straw. It never used to make any noise at all."
+      : 'The court drain. Tomorrow every basin in Tessel gets tipped out, and it all goes downhill. Somewhere.'),
+  },
 
   // ---- The court ----
   { id: 'lemon', x: 3, y: 14, look: 'The lemon tree. It produces three lemons a year and expects applause for each one.' },
@@ -383,7 +400,7 @@ const objects = [
     },
   },
   {
-    id: 'piano', x: 15, y: 23, w: 2, h: 2, when: dusk,
+    id: 'piano', x: 15, y: 23, w: 2, h: 2, when: (g) => dusk(g) && !g.flag('piano.gone'),
     interact: async (g) => {
       const n = bump(g, 'piano');
       if (n === 0) return g.describe('Someone has tried to bring a piano up the Squeeze. The Squeeze has won.');
@@ -566,7 +583,8 @@ const neighborUse = {
   soap: (g, self) => g.say(self, "Lovely. Are you saying something? You're saying something."),
   bath_plug: (g, self) => g.say(self, "That's yours. Keep it away from my laundry."),
   moon_chart: (g, self) => g.say(self, "See? Outside the Gate! I knew it wasn't straight on. Not that anyone asked me."),
-  '*': (g, self) => g.say(self, "I've no use for that, and I've told you so."),
+  // "...and I've told you so" only once she has.
+  '*': (g, self) => g.say(self, bump(g, 'neighbor.declined') ? "I've no use for that, and I've told you so." : "I've no use for that."),
 };
 
 // Her Next Door appears in three places: among her sheets at dusk (smoothing
@@ -761,7 +779,11 @@ export const courtMap = composedMap(compose, {
     // else the end-of-slice card.
     {
       x: 15, y: 25, w: 2, when: morning,
-      run: (g) => (opening.squeezeTo ? g.changeMap(opening.squeezeTo, 3 + g.player.x - 15, 1, 'down') : endOfSlice(g)),
+      run: async (g) => {
+        await g.think('Down, then.');
+        if (opening.squeezeTo) return g.changeMap(opening.squeezeTo, 3 + g.player.x - 15, 1, 'down');
+        return endOfSlice(g);
+      },
     },
   ],
   triggers: [
@@ -789,6 +811,14 @@ export const courtMap = composedMap(compose, {
   ambient: [
     // The Old Man reaches out, moves a piece, thinks better of it, and moves it back.
     { every: [6, 11], run: oldManFidgets },
+    // The Kid's feet patter as he runs (when he's near enough to hear).
+    {
+      every: [0.5, 0.55], when: (g) => !morning(g),
+      run: (g) => {
+        const k = g.npc('kid');
+        if (k.moving && Math.abs(k.x - g.player.x) + Math.abs(k.y - g.player.y) <= 9) g.sfx('kid_patter');
+      },
+    },
     // In the morning the well breathes: a cold mist every few seconds.
     {
       every: [5, 8], when: morning,

@@ -2,6 +2,7 @@
 // Wrongness. Steps are numbered as in docs/design/01-opening.md, "The
 // Moonrise sequence". Input is locked for the whole thing (it's one script).
 
+import { fx } from '../../art/fx.js';
 import { vista, vista_rim, vista_glow, vista_moon, vista_twinkle, vista_cheryl, VISTA_BASINS } from '../../art/vista.js';
 
 // The vista, drawn each frame per docs/art-opening.md. The script moves it
@@ -21,8 +22,19 @@ function makeVista(g) {
       ctx.drawImage(art.glow.frame(`glow_${t < 1200 ? 0 : t < 2400 ? 1 : 2}`), 116, 42);
     }
     if (scene.moonAt != null && ms >= scene.moonAt) {
-      const cy = Math.max(56, 104 - ((ms - scene.moonAt) / 1000) * 3);
+      // Slowly to half up (about six seconds), then clear of the ridge.
+      const t = (ms - scene.moonAt) / 1000;
+      const cy = Math.max(56, t < 6 ? 104 - t * 3 : 86 - (t - 6) * 6);
       ctx.drawImage(art.moon.frameAt('moon', ms), 176 - 16, Math.round(cy) - 16);
+      // The Gate, where the moon should be, goes cold and empty.
+      const cold = Math.min(0.6, Math.max(0, (t - 1) / 5) * 0.6);
+      if (cold > 0) {
+        const grad = ctx.createLinearGradient(0, 78, 0, 100);
+        grad.addColorStop(0, 'rgba(40, 48, 96, 0)');
+        grad.addColorStop(1, `rgba(40, 48, 96, ${cold})`);
+        ctx.fillStyle = grad;
+        ctx.fillRect(104, 78, 48, 34);
+      }
     }
     ctx.drawImage(art.rim.frame('rim'), 0, 0);
     VISTA_BASINS.forEach(([x, y], i) => ctx.drawImage(art.twinkle.frameAt('twinkle', ms + phases[i]), x - 3, y - 3));
@@ -39,9 +51,11 @@ export async function moonrise(g) {
   await g.movePlayer([3, 5]);
   g.facePlayer('right');
   await g.wait(0.3);
-  g.pose('player', 'rise_right');
+  // She sits on the tub's near rim, in the middle (no floor shadow while she's up there).
+  g.player.def.shadow = false;
+  g.pose('player', 'rise_right', { offset: [4, -6] });
   await g.wait(0.15);
-  g.pose('player', 'sit_right');
+  g.pose('player', 'sit_right', { offset: [7, -13] });
   await g.wait(0.6);
 
   // 3. The court's music fades; the festival below; the Crown clock strikes
@@ -69,9 +83,10 @@ export async function moonrise(g) {
   g.windDownMusic(4500);
   await g.wait(0.7);
   g.sfx('dog_bark');
-  await g.wait(4.5);
+  await g.wait(8);
 
   // 8.
+  g.sfx('wrong_sting');
   await g.think('No.', 'It comes up in the Gate.', 'It has come up in the Gate every year of my life.');
   await g.wait(0.6);
 
@@ -97,9 +112,18 @@ export async function moonrise(g) {
   g.sfx('crack');
   await g.shake(3, 0.5);
 
-  // 12. The piano goes down the Squeeze (off-screen).
+  // 12. The piano goes down the Squeeze. Down to the court to see it gone.
   g.sfx('piano_tumble');
-  await g.wait(3);
+  g.setFlag('piano.gone');
+  const pan = g.panCamera(15, 22, 4);
+  for (const [x, y] of [[15, 23], [16, 24], [15, 25]]) {
+    g.spawnEffect({ sprite: { sheet: fx, frame: 'dust' }, at: [x + 0.5, y], seconds: 0.4, layer: 'top' });
+    await g.wait(0.35);
+  }
+  await pan;
+  await g.wait(1.6);
+  await g.followPlayer(4);
+  await g.wait(0.3);
 
   // 13. The drain takes the plug.
   g.sfx('drain_glunk');
@@ -118,9 +142,10 @@ export async function moonrise(g) {
   await g.wait(1.2);
 
   // 15. Cheryl stands.
-  g.pose('player', 'rise_right');
+  g.pose('player', 'rise_right', { offset: [4, -6] });
   await g.wait(0.25);
   g.pose('player', null);
+  g.player.def.shadow = undefined;
   g.facePlayer('right');
   await g.wait(0.4);
   await g.think('That drain goes to the gutter. The gutter goes to the lane.', 'That sound went somewhere else entirely.');
