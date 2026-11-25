@@ -645,7 +645,7 @@ const kidNpc = {
     if (!g.flag('kid.wantsTimer')) {
       g.setFlag('kid.wantsTimer');
       await g.say(self,
-        "Can't stop! Stair Race in nine days. I'm gonna win it by SO much.",
+        "Can't stop! Stair Race in three days. I'm gonna win it by SO much.",
         "I'm doing laps. Forty laps. Or thirty. I keep losing count, because the well's round.",
         "If I had a timer I'd know if I was getting faster. Mum says I'm only getting sweatier.",
         "The prop? It's my hurdle. Watch!");
