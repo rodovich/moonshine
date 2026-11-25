@@ -387,12 +387,10 @@ const boatman = {
   sprite: (g) => ({ sheet: boatman_mud, frame: afloat(g) ? 'afloat' : 'mud' }),
   emote: { frame: 'note', every: [5, 9] },
   // From above, with the Kid on the mud holding the disc, he throws it up first.
-  interact: (g) => (kidHasDisc(g) ? kidThrowsDisc(g) : boatmanTalk(g)),
-  use: {
-    bucket: (g) => g.describe("An empty bucket. He'd only look at it sadly. I'd better fill it first."),
-    bucket_water: lowerBucket,
-    '*': edgeUse['*'],
-  },
+  // His footprint overlaps the broken edge, and characters answer first, so he
+  // answers for the edge too: its first look, the Kid's throw, and every item.
+  interact: edgeLook,
+  use: edgeUse,
 };
 
 const boatBlock = { id: 'boat5_boatman', x: 22, y: 10, w: 2, solid: true, shadow: false };
