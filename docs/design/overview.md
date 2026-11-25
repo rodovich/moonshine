@@ -20,8 +20,8 @@ These apply to every slice.
 7. **No pixel hunts.** Interactable objects read clearly as objects in the art. With a pointer, hovering over one shows an interact cursor.
 8. **Time of day is scripted.** Each act sets dusk, day, or night; nothing changes on a timer. The engine needs a global map tint (day, dusk, night) and must switch it during a scene.
 9. **Two jobs.** Every Founder object has a forgotten second job (see the story bible). Puzzle solutions come from discovering it.
-11. **When someone asks for something abstract that Cheryl already has, she thinks one line toward it.** "Written down," "what time Tessel keeps," "something that says Tessel": the first time such a request is heard while the item is in her bag, a short description follows that names the item without solving the puzzle for her. (First-time playtest, dbcLYG8CWB: the longest stall was Mott's "written down" with the moon chart in the bag.)
 10. **Text fits the box.** One script line is one text box: it must wrap to three lines or fewer at the real box width (224 px). Aim for about 90 characters.
+11. **When someone asks for something abstract that Cheryl already has, she thinks one line toward it.** "Written down," "what time Tessel keeps," "something that says Tessel": the first time such a request is heard while the item is in her bag, a short description follows that points at the item, so the player still makes the connection. (First-time playtest, dbcLYG8CWB: the longest stall was Mott's "written down" with the moon chart in the bag.)
 
 ## World map
 
