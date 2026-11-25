@@ -5,15 +5,15 @@
 // in for maps whose acts aren't merged yet.
 
 import { passageMap, windlassMap, windlassScripts, act5 } from './windlass.js';
-import { harborMap, withLampRoom5, harborLinks, harborScripts } from './harbor.js';
+import { harborMap, withLampRoom5, harborScripts } from './harbor.js';
 import { clockshopMap, clockshopScripts } from './clockshop.js';
-import { withBilge5, bilgeScripts } from './bilge.js';
+import { withBilge5, bilgeLinks, bilgeScripts } from './bilge.js';
 import { relayScripts } from './relay.js';
 import { withSquare5, withShop5, withCrown5, withBelfry5, withArchive5, withSteps5, withLampStreet5, withCourt5, crownLinks, townScripts } from './town.js';
 import { bilgeDryStandIn, lampRoomStandIn } from './standins.js';
 import { startAct5 } from './start.js';
 import { ladderScripts } from './ladder.js';
-import { act5Items, standInItems, started, both, untilAct5 } from './common.js';
+import { act5Items, standInItems, started, both, untilAct5, telescopeAct5 } from './common.js';
 
 const RISEN = { harbor: 'harbor_risen', bilge: 'bilge_dry' };
 
@@ -24,7 +24,7 @@ export const act5Maps = {
   windlass_room: windlassMap,
 };
 
-export { act5Items, standInItems, act5, startAct5 };
+export { act5Items, standInItems, act5, startAct5, telescopeAct5 };
 
 // The Ship Plan's Act 5 look (after the picture folds away): the tooth drawn
 // at the bow, the same shape as the Clockmaker's doorstop. Wraps the item as
@@ -69,6 +69,7 @@ export function withAct5(maps) {
   if (!out.bilge_dry) out.bilge_dry = bilgeDryStandIn;
   if (!out.lamp_room) out.lamp_room = lampRoomStandIn;
   crownLinks.belfry = !!out.belfry;
+  bilgeLinks.goatPath = !!out.goat_path;
   for (const [id, layer] of Object.entries(LAYERS)) {
     if (!out[id]) continue;
     const before = out[id];
@@ -96,7 +97,6 @@ export function withAct5(maps) {
   }
   // The Harbor's Goat stair leads to Act 2 part 2's Goat Path once it exists.
   crownLinks.ambroseHere = !out.belfry;
-  harborLinks.goatPath = out.goat_path ? { map: 'goat_path', at: [1, 22] } : null;
   return out;
 }
 
@@ -107,7 +107,7 @@ function act5Flags(g) {
   const flags = {
     'act5.started': g.flag('act5.started'), 'teeth.stage': g.flag('teeth.stage'), 'teeth.seen': g.flag('teeth.seen'),
     'got.bucket': g.flag('got.bucket'), 'bucket.full': g.flag('bucket.full'), 'boatman.afloat': g.flag('boatman.afloat'),
-    'rope.tied': g.flag('rope.tied'), 'got.polish': g.flag('got.polish'), 'keeper.polished': g.flag('keeper.polished'),
+    'rope.tied': g.flag('rope.tied'), 'keeper.asked': g.flag('keeper.asked'), 'telescope.back': g.flag('telescope.back'), 'keeper.telescope': g.flag('keeper.telescope'), 'window.telescope': g.flag('window.telescope'), 'telescope.migrated': g.flag('telescope.migrated'),
     'disc.charged': g.flag('disc.charged'), 'relay.ready': g.flag('relay.ready'), 'relay.run': g.flag('relay.run'),
     'door.open': g.flag('door.open'), 'kid.gaveDisc': g.flag('kid.gaveDisc'), 'got.clapper': g.flag('got.clapper'),
     'clockmaker.jug': g.flag('clockmaker.jug'), 'shop.guide': g.flag('shop.guide'),

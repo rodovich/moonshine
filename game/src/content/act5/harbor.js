@@ -36,9 +36,6 @@ import { teethLook, showTeeth, SURF } from './teeth.js';
 const W = 32, H = 15;
 const V8 = (x) => 'abcdefgh'[x % 8];
 
-// Where the Goat stair leads, if Act 2 part 2's Goat Path is registered
-// (set by withAct5).
-export const harborLinks = { goatPath: null };
 
 function compose() {
   const L = layout(W, H, blankGrid);
@@ -166,12 +163,6 @@ export const harborMap = composedMap(compose, {
   exits: [
     { x: 0, y: 6, h: 3, to: 'bilge_dry', at: [30, 12], facing: 'left' },
     { x: 27, y: 3, w: 2, to: 'lamp_room', at: [3, 6], facing: 'up' },
-    {
-      x: 2, y: 0, w: 2,
-      when: () => !!harborLinks.goatPath,
-      run: async (g) => g.changeMap(harborLinks.goatPath.map, harborLinks.goatPath.at[0] + g.player.x - 2, harborLinks.goatPath.at[1], 'up'),
-      blocked: "Mott's goats can have the stair today. The town's where I'm needed.",
-    },
   ],
   ambient: [
     { every: [9, 16], run: (g) => g.sfx('gull', { at: [g.random(4, 28), 3] }) },
@@ -183,44 +174,52 @@ export const harborMap = composedMap(compose, {
 // ---------------------------------------------------------------------------
 // The lamp room in Act 5: the Keeper at the window, the lamp lit for the reef.
 
-const polished = (g) => !!g.flag('keeper.polished');
+// The telescope (docs/design/structure-pass.md, section 6): the Keeper gave
+// it away in Act 2 and Cheryl put it in the Shop window. Now she wants it back
+// to watch the reef, and won't let anyone near the lamp until she has it.
+const hasTelescope = (g) => !!g.flag('keeper.telescope');
 
 async function keeperTalk(g, self) {
-  if (doorOpen(g)) return g.say(self, "Polished it again. Twice. I feel better. The reef doesn't care, but I do.");
-  if (polished(g)) return g.say(self, 'Go on, then. The lamp. Quickly. Then I\'m polishing it.');
-  if (firstMeet(g, 'keeper5')) {
+  if (doorOpen(g)) return g.say(self, "Twenty-two years I looked at the lamp. Now I can't stop looking at that reef.");
+  if (hasTelescope(g)) return g.say(self, "Go on, then. Quickly. I'll be at the window.");
+  if (!g.flag('keeper.asked')) {
+    g.setFlag('keeper.asked');
+    g.setFlag('met.keeper5');
     return g.say(self,
       "There's a REEF. Why is there a REEF? Twenty-two years and nobody mentions a REEF?",
       "I turned round this morning to see what the shouting was. I've never turned round. And THERE IT WAS.",
-      "I've lit the lamp. In the afternoon. For the reef. I've polished it twelve times. I've run out of polish.",
-      "Nobody touches the lamp. Not without polish. If I can't polish it after, I'll go to pieces.",
-      'The Shop has polish. He won\'t sell it. He never sells anything.');
+      'I need to SEE it. Properly. And my telescope\'s in a SHOP WINDOW.',
+      g.flag('telescope.migrated')
+        ? "And my telescope's in a SHOP WINDOW. Don't ask me how."
+        : 'You put it there. I said somewhere it\'d be looked at. ...I did say that.',
+      'Bring me my telescope, and you can have anything. Anything.');
   }
   return g.say(self, cycle(g, 'keeper5.repeat', [
-    "Polish. I need polish. The Shop has polish. He won't sell it. He never sells anything.",
+    'My telescope. In a shop window. Being LOOKED AT.',
     "Don't look at the window. No. Do. Somebody has to.",
   ]));
 }
 
-async function givePolish(g, self) {
-  g.takeItem('brass_polish');
-  g.sfx('tin_lid');
-  g.setFlag('keeper.polished');
+async function giveTelescope(g, self) {
+  g.takeItem('telescope');
+  g.sfx('give');
+  g.setFlag('keeper.telescope');
   await g.say(self,
-    "Polish! Real polish! Oh, Cheryl. You've saved my life. Possibly everyone's. Don't tell me which.",
+    "My telescope! Oh, Cheryl. You've saved my life. Possibly everyone's. Don't tell me which.",
     'What do you want? Anything. ...The LAMP? You want to put your hand in my lamp?',
-    '...Go on, then. Quickly. Then I\'m polishing it.');
+    "...Go on, then. Quickly. I'll be at the window.");
 }
 
 const keeperNpc = {
   id: 'keeper5', name: 'Lighthouse Keeper', x: 5, y: 2, facing: 'up',
-  sprite: (g) => ({ sheet: keeper, frame: polished(g) && !doorOpen(g) ? 'polish_up' : 'window_up' }),
+  // At the window: shading her eyes, then with her telescope once she has it back.
+  sprite: (g) => ({ sheet: keeper, frame: hasTelescope(g) ? 'window_up' : 'shade_down' }),
   turnToTalk: false,
   interact: keeperTalk,
   use: {
-    brass_polish: givePolish,
-    moonglass_disc: (g, self) => (polished(g) ? g.say(self, 'Not me. The LAMP.') : g.say(self, 'Not near the lamp. Not without polish. I mean it.')),
-    '*': (g, self) => g.say(self, "Is it polish? It's not polish."),
+    telescope: giveTelescope,
+    moonglass_disc: (g, self) => (hasTelescope(g) ? g.say(self, 'Not me. The LAMP.') : g.say(self, "Not near the lamp. Not till I've got my telescope. I mean it.")),
+    '*': (g, self) => g.say(self, "Is it my telescope? It's not my telescope."),
   },
 };
 
@@ -231,8 +230,8 @@ const WINDOW_LOOKS = {
 };
 
 async function lampLook(g) {
-  if (doorOpen(g)) return g.describe('The lamp, turning. She\'s polished my handprint off it already.');
-  if (polished(g)) return g.describe('The lamp. Brightest light in Tessel. She\'s let me near it.');
+  if (doorOpen(g)) return g.describe("The lamp, turning. She's had her eye to the telescope the whole time.");
+  if (hasTelescope(g)) return g.describe("The lamp. Brightest light in Tessel. She's let me near it.");
   return g.describe('The lamp, lit in the middle of the afternoon. Brightest light in Tessel.', "She's standing between me and it.");
 }
 
@@ -243,10 +242,9 @@ const lampObjects = [
     use: {
       moonglass_disc: async (g) => {
         if (doorOpen(g)) return g.describe("It's had its drink. Once was plenty.");
-        if (!polished(g)) return g.say('Lighthouse Keeper', 'Not near the lamp. Not without polish. I mean it.');
+        if (!hasTelescope(g)) return g.say('Lighthouse Keeper', "Not near the lamp. Not till I've got my telescope. I mean it.");
         return chargeDisc(g);
       },
-      brass_polish: (g) => g.say('Lighthouse Keeper', "Give it HERE. Don't you dare. That's MY polishing."),
       '*': cherylDeclines,
     },
   },
@@ -255,14 +253,17 @@ const lampObjects = [
     interact: (g) => g.describe(WINDOW_LOOKS[stage(g)]),
   },
   {
-    id: 'polish_tin', x: 2, y: 5, solid: true,
-    look: "Empty. Scraped. She's been at it with a fingernail.",
+    id: 'dust_sheet5', x: 2, y: 5, solid: true,
+    look: "The dust sheet the telescope lived under. She's kicked it into a corner.",
   },
 ].map((o) => ({ use: { '*': cherylDeclines }, ...o }));
 
+// The empty dust sheet on the floor (stand-in: the old polish tin's spot, until the art lands).
+const DUST_SHEET = 'lamproom:polish_tin';
+
 function lampPatches(g) {
   if (!started(g)) return [];
-  const out = [['detail', 2, 5, { tile: 'lamproom:polish_tin', solid: true }]];
+  const out = [['detail', 2, 5, { tile: DUST_SHEET, solid: true }]];
   for (let ty = 0; ty < 2; ty++) for (let tx = 0; tx < 2; tx++) out.push(['detail', 3 + tx, 2 + ty, { tile: `lamproom:lamp_x${tx}y${ty}`, solid: true }]);
   return out;
 }
@@ -293,4 +294,4 @@ export function withLampRoom5(def) {
   };
 }
 
-export const harborScripts = { showTeeth, givePolish, keeperTalk, mottTalk };
+export const harborScripts = { showTeeth, giveTelescope, keeperTalk, mottTalk };

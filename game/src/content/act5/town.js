@@ -106,7 +106,7 @@ async function touristTalk(g, self) {
       "The ferry's six feet DOWN now. I looked over the edge. It's hanging off its ropes like washing.",
       "My guidebook said nothing about the sea leaving. Then again, you've got my guidebook.");
   }
-  return g.say(self, "Dry Canal Day. I'm going. I've nothing else to do. I'm wearing your hat.");
+  return g.say(self, "Dry Canal Day. I'm going. I've nothing else to do. I'm wearing this hat.");
 }
 
 const crowd = [
@@ -159,45 +159,44 @@ export function withSquare5(def) {
 }
 
 // ---------------------------------------------------------------------------
-// The Shop: the window display fallen over in the rise, and his first swap.
+// The Shop: the window display fallen over in the rise, with the Keeper's
+// telescope lying in it. Once she's asked for it back, he swaps it for the
+// guidebook (docs/design/structure-pass.md, section 6).
 
-const swapped = (g) => g.flag('got.polish');
+const swapped = (g) => !!g.flag('telescope.back');
+const asked = (g) => !!g.flag('keeper.asked');
 
 async function shopkeeperTalk(g, self) {
-  if (swapped(g)) return g.say(self, "My first swap in thirty years. I'm going to have a sit down.");
+  if (swapped(g)) return g.say(self, "Two swaps in one week. I'm going to have a sit down.");
   if (firstMeet(g, 'shopkeeper5')) {
-    return g.say(self,
-      'Miss. Look. The window. It went over in the night. When the whole shop lifted. The hat\'s on the floor.',
-      "There's a GAP, Miss. In the window. A shop with a gap in the window is a shop that's given up.",
-      'I need something to display. Something local. Something that says Tessel.');
+    await g.say(self,
+      'Miss. Look. The window. It went over in the night. When the whole shop lifted.',
+      'The telescope\'s lying in it like a fallen soldier. Best thing I\'ve ever displayed.');
+    if (!asked(g)) return;
   }
-  return g.say(self, 'A gap. People will talk. They\'ll say, "Did you see his window?"');
+  if (asked(g)) return g.say(self, 'Give it BACK? Then there\'s a GAP, Miss. I need something local. Something that says Tessel.');
+  return g.say(self, 'A fallen soldier. People will talk. They\'ll say, "Did you see his window?"');
 }
 
 async function giveGuidebook(g, self) {
   if (swapped(g)) return g.say(self, "It's in. It's perfect. Don't touch the window.");
+  if (!asked(g)) return g.say(self, 'A genuine local guidebook! Lovely. But my window is complete.');
   g.takeItem('guidebook');
   g.sfx('give');
   await g.say(self, 'A guidebook! "Tessel: A Pocket Companion." Genuinely local. Confidently wrong. PERFECT.');
-  // In it goes.
+  // In it goes; out comes the telescope.
   await g.moveNpc(self, [7, 4]);
   g.faceNpc(self, 'down');
   await g.wait(0.3);
   g.sfx('stone_scrape');
   g.setFlag('shop.guide');
+  g.setFlag('window.telescope', false);
   await g.wait(0.6);
   g.faceNpc(self, 'player');
-  await g.say(self,
-    'In it goes. There. The window is complete. Thank you, Miss. What can I-- no, I don\'t sell things.',
-    '...Oh, go on. A swap. Display for display. What do you want?');
-  g.facePlayer('up');
-  await g.wait(0.8);
-  await g.say(self, "The polish? That's lighthouse polish. Nobody needs lighthouse polish except--");
-  g.facePlayer(self);
-  await g.say(self, "Take it. Before I change my mind. I've never done this before. I feel quite light-headed.");
-  g.sfx('tin_lid');
-  g.setFlag('got.polish');
-  await getItem(g, 'brass_polish');
+  await g.say(self, 'In it goes. Out comes the telescope. Display for display. Twice in one week. I\'m practically a merchant.');
+  g.sfx('give');
+  g.setFlag('telescope.back');
+  await getItem(g, 'telescope');
 }
 
 function shopPatches(g) {
@@ -213,7 +212,6 @@ const shopkeeper5 = {
   interact: shopkeeperTalk,
   use: {
     guidebook: giveGuidebook,
-    hat: (g, self) => g.say(self, "Your hat? It's been in the window once already. People would think I'd gone backwards."),
     '*': (g, self) => g.say(self, "Is it local? It's not local, Miss. I need local."),
   },
 };
@@ -222,7 +220,7 @@ const display5 = {
   id: 'display5', x: 7, y: 5, w: 2, solid: false, when: started,
   interact: (g) => (g.flag('shop.guide')
     ? g.describe('The guidebook, open in pride of place, on a little stand. "Tessel: A Pocket Companion." Somebody will buy it. He won\'t sell it.')
-    : g.describe('The window display, flat on its back. The straw hat on the floor, the stand on its side. Like a crime scene, but for a hat.')),
+    : g.describe("The window display, flat on its back, and the Keeper's telescope lying in it. Like a crime scene, but for a telescope.")),
   use: { guidebook: (g) => g.describe("It's his window. He should be the one to fill it."), '*': cherylDeclines },
 };
 

@@ -201,7 +201,6 @@ const edgeUse = {
   square_jug: (g) => g.say('Boatman', "Mott's jug? It'd make the boat drunk."),
   rope: tieRope,
   moonglass_disc: discFromStairs,
-  brass_polish: (g) => g.describe("It's for a lighthouse. It says so on the tin."),
   crowbar: (g) => g.describe("It's broken enough already."),
   clapper: (g) => g.describe("If I drop that on him, he'll be a boatman under a bell."),
   '*': (g) => g.say('Boatman', "Is it water, Miss? It's not water. I can tell from here."),
@@ -471,6 +470,9 @@ const entering5 = async (g) => {
   act5Loops(g, LAUNDRY_AMBIENCE);
 };
 
+// Whether the Goat Path is registered (set by withAct5 before layering).
+export const bilgeLinks = { goatPath: false };
+
 export function withBilge5(def) {
   const base = withSheets(def);
   const music = base.music;
@@ -489,6 +491,8 @@ export function withBilge5(def) {
       ...(base.exits || []).map(untilAct5),
       { x: 11, y: 0, w: 2, to: 'fountain_square', at: [11, 15], facing: 'up', when: started, sfx: 'step_stone' },
       { x: 31, y: 12, h: 3, to: 'harbor_risen', at: [1, 6], facing: 'right', when: started },
+      // West to the bottom of the rebuilt Goat Path (structure pass), once it's registered.
+      ...(bilgeLinks.goatPath ? [{ x: 0, y: 12, h: 3, to: 'goat_path', at: [14, 39], facing: 'left', when: started }] : []),
       { x: 25, y: 8, when: both(started, ropeTied), run: climbDown },
       { x: 25, y: 9, when: both(started, ropeTied), run: climbUp },
       { x: 26, y: 9, to: 'bow_passage', at: [2, 3], facing: 'right', when: both(started, doorOpen), sfx: 'step_hullstone', checkFlags: ['act5.started', 'door.open'] },
