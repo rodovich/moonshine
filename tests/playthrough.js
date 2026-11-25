@@ -72,6 +72,7 @@ export const kbAdvance = (page) => () => page.keyboard.press('z');
 
 // Step along a path to (x, y) with the arrow keys.
 export async function kbWalk(page, x, y) {
+  let blockedFor = 0;
   for (let guard = 0; guard < 80; guard++) {
     const s = await snap(page);
     if (s.x === x && s.y === y) return;
@@ -80,7 +81,13 @@ export async function kbWalk(page, x, y) {
       const path = w.pathFor(w.player, [[x, y]]);
       return path && path[0];
     }, [x, y]);
-    if (!next) throw new Error(`no path from ${s.x},${s.y} to ${x},${y}`);
+    if (!next) {
+      // Someone may be standing in a narrow way (the Kid on the Steps): wait for them, like a player would.
+      if ((blockedFor = (blockedFor || 0) + 1) > 20) throw new Error(`no path from ${s.x},${s.y} to ${x},${y}`);
+      await page.waitForTimeout(300);
+      continue;
+    }
+    blockedFor = 0;
     const dir = next[0] > s.x ? 'right' : next[0] < s.x ? 'left' : next[1] > s.y ? 'down' : 'up';
     await page.keyboard.press(DIRKEY[dir]);
     await waitFor(page, ([nx, ny]) => {
