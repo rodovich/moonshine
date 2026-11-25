@@ -9,7 +9,7 @@ import { overlayMap, act4, risen, listing, bump, cycle, getItem, cherylDeclines 
 import { ringTheBell } from './belfry.js';
 import { clockmaker as clockmakerArt } from '../../art/act4_sprites.js';
 import { act4_props } from '../../art/act4_sprites.js';
-import { ambrose as ambroseArt, mayor as mayorArt } from '../../art/act2_npcs.js';
+import { ambrose as ambroseArt, mayor as mayorArt, bench_man_glasses as benchManGlasses } from '../../art/act2_npcs.js';
 import { LOOKS } from '../act2/common.js';
 import { fish as fishArt } from '../../art/landmarks.js';
 
@@ -349,7 +349,18 @@ export function withAct4(maps) {
     hide: ['girl_1', 'girl_2', 'girl_3', 'bench_man', 'watering_woman'],
     entities: [
       ...girls4,
-      { ...firstTalk(find(lamp, 'bench_man'), ['Says here the Fountain stopped because of "subterranean adjustments." I said adjustments. I said it yesterday.']) },
+      {
+        // Glasses on now (structure pass), on his bench until the reveal, when he's on the Bilge bridge.
+        ...find(lamp, 'bench_man'), id: 'bench_man_a4',
+        when: (g) => act4(g) && !g.flag('act4.risen'),
+        sprite: { sheet: benchManGlasses, frame: 'sit_down' },
+        interact: (g, self) => (bump(g, 'a4.bench_man') === 0
+          ? g.say(self, 'Says here the Fountain stopped because of "subterranean adjustments." I said adjustments. I said it yesterday.')
+          : g.say(self, cycle(g, 'a4.bench_repeat', [
+            "New Tide-Sheet. Glasses on. It says the Bilge is 'a little damp.' I can read every word. I liked it better blurred.",
+            "Low water at twenty to three, it says. Lower than it's ever printed. I said lower. I said it yesterday.",
+          ]))),
+      },
       { ...firstTalk(find(lamp, 'watering_woman'), ["My husband says the doorsteps are the clock's fault. I said, everything's the clock's fault with you.", 'He said, exactly.']) },
     ],
     onEnter: surfaceAudio,
@@ -359,11 +370,25 @@ export function withAct4(maps) {
   // The Archive: Ottilie reads the Ship Plan.
 
   const archive = maps.archive;
+  // The four leads in her reading of the Ship Plan (structure pass; 04-the-list.md, "Ottilie Brask").
+  const OTTILIE_LEADS = {
+    bell: 'And a rope from the eels right up to... the bell tower? Ambrose will be unbearable.',
+    copper: 'The middle eel has a collar. Copper, it says. Who has that much copper? Mott. In his still.',
+    fountain: "A pipe from the eels straight up to the Fountain. The Founders' wine cellar. Hence the Mayor's rope.",
+    girls: "Thin, Stout, Middle. That's the skipping rhyme! Those girls have been singing about eels for centuries.",
+  };
 
   const ottilie4 = {
     ...find(archive, 'ottilie'), id: 'ottilie_a4', when: act4,
     interact: async (g, self) => {
-      if (g.flag('ottilie.readPlan')) return g.say(self, cycle(g, 'ottilie.a4after', ['Three eels, side by side, in the belly of a ceremonial fish. It all fits.', "Snails for the doorsteps. Eels for the fish. I'm on a roll, Cheryl."]));
+      if (g.flag('ottilie.readPlan')) {
+        // Her lead repeat names the first lead not yet followed (structure pass).
+        const lead = !g.flag('bell.restored') ? OTTILIE_LEADS.bell
+          : !g.flag('got.throat') ? OTTILIE_LEADS.copper
+          : (g.flag('girls.heard') || 0) < 3 ? OTTILIE_LEADS.girls : null;
+        if (lead) return g.say(self, lead);
+        return g.say(self, cycle(g, 'ottilie.a4after', ['Three eels, side by side, in the belly of a ceremonial fish. It all fits.', "Snails for the doorsteps. Eels for the fish. I'm on a roll, Cheryl."]));
+      }
       if (bump(g, 'ottilie.a4') === 0) {
         return g.say(self, 'Cheryl. Glowing doorsteps. A dry fountain. And you, coming out of my door that doesn\'t open.', "I've decided not to think about the door. I'm thinking about the doorsteps. Phosphorescent snails, I think.");
       }
@@ -373,7 +398,9 @@ export function withAct4(maps) {
       ...(find(archive, 'ottilie').use || {}),
       ship_plan: async (g, self) => {
         if (g.flag('ottilie.readPlan')) return g.say(self, 'Thin, Stout, and Middle. I\'ve written it on my hand.');
-        await g.say(self, "Your rubbing! Let me-- oh. Oh, Cheryl. That's a FISH. A big, hollow, ceremonial fish.", 'And glyphs! Founder glyphs! I know these three. This one\'s "thin." This one\'s "stout." This one\'s "middle."', 'Thin, Stout, and Middle. Types of eel, obviously. A thin eel, a stout eel, and a medium eel.', "This is the most important document in Tessel. I'm going to need a bigger monograph.");
+        await g.say(self, "Your rubbing! Let me-- oh. Oh, Cheryl. That's a FISH. A big, hollow, ceremonial fish.", 'And glyphs! Founder glyphs! I know these three. This one\'s "thin." This one\'s "stout." This one\'s "middle."', 'Thin, Stout, and Middle. Types of eel, obviously. A thin eel, a stout eel, and a medium eel.',
+          OTTILIE_LEADS.bell, OTTILIE_LEADS.copper, OTTILIE_LEADS.fountain, OTTILIE_LEADS.girls,
+          "This is the most important document in Tessel. I'm going to need a bigger monograph.");
         g.setFlag('ottilie.readPlan');
         await g.describe('Thin, Stout, and Middle. The three bars. The three sisters in the rhyme.');
       },

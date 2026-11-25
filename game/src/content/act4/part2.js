@@ -215,10 +215,15 @@ export function withAct4Part2(maps) {
       when: act4,
       tileset: act4Tiles,
       hide: ['keeper'],
-      entities: [firstTalk(find(room, 'keeper'), [
-        "The lamp's rattling in its frame. Rattling! I've tightened every screw. It's the floor. The floor's not right.",
-        "Don't tell me to look out the window. I know what you're going to say. Don't say it.",
-      ])],
+      entities: [{
+        // Act 4's first talk, then her repeat (structure pass): the telescope she gave away in Act 2.
+        ...find(room, 'keeper'), id: 'keeper_a4', when: act4,
+        interact: (g, self) => (bump(g, 'a4.keeper') === 0
+          ? g.say(self,
+            "The lamp's rattling in its frame. Rattling! I've tightened every screw. It's the floor. The floor's not right.",
+            "Don't tell me to look out the window. I know what you're going to say. Don't say it.")
+          : g.say(self, "I gave my telescope away. I don't miss it. ...I keep looking at where it was.")),
+      }],
       onEnter: surfaceAudio,
     });
   }

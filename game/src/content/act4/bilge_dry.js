@@ -20,7 +20,7 @@ import { composedMap, blankGrid, bump, cherylDeclines } from './common.js';
 import { act4Tiles } from './tiles.js';
 import { layout, house, pave, lowRoof } from '../act2/common.js';
 import { bilgeTopRows } from '../act2/bilge.js';
-import { mover } from '../../art/act2_npcs.js';
+import { mover, bench_man_glasses } from '../../art/act2_npcs.js';
 import { bilge_boats, bilge_piano } from '../../art/act4_surface.js';
 import { clockmaker, critters, boatman_mud } from '../../art/act4_sprites.js';
 import { fishmonger } from '../../art/act5_sprites.js';
@@ -91,8 +91,9 @@ const people = [
       : g.say(self, 'Look at my fish. On the ground. Like a common pavement.')),
   },
   {
+    // The Man on Bench (glasses on), come down to look at the canal from the bridge.
     id: 'bridge_man', name: 'Man on Bridge', x: 13, y: 9, facing: 'down',
-    sprite: { sheet: clockmaker, palette: 'bridge', frame: 'look_down' }, turnToTalk: false,
+    sprite: { sheet: bench_man_glasses, frame: 'look_down' }, turnToTalk: false,
     interact: (g, self) => (bump(g, 'dry.bridge') === 0
       ? g.say(self, "Spring tide. That's all it is. A very, very low spring tide. It'll be back by teatime.")
       : g.say(self, "It'll be back by teatime.")),
