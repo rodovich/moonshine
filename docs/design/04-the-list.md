@@ -107,8 +107,8 @@ The Act 2 map, in three flood stages, then the dry reveal state.
     6  ......................WWWW......   the Water Stairs' top step (22-25, 6), walkable
     7  nnnnnnnnnnnnBBnnnnnnnnWWWWnnnnnn   n the old quay wall face (stone); stairs continue down (22-25, 7)
     8  hhhhhhhhhhhhBBhhhhhhhhbbbbDDhhhh   h the exposed hull: Founder slate, barnacles, weed; bbbb the broken flight
-    9  hhhhhhhhhhhhBBhhhhhhhhhhhhDDhhhh   tide line along the top of row 8; under the break, bare hull down to the mud
-   10  mmmmmmmmmmmmBBmmmmmmmmmmmmmm~~~~   m the mud bed; ~~~~ the last trickle running out east (28-31, 10)
+    9  hhhhhhhhhhhhBBhhhhhhhhhhhhDDhhMM   tide line along the top of row 8; under the break, bare hull down to the mud
+   10  mmmmmmmmmmmmBBmmmmmmmmmmmm~~~MMM   m the mud bed; ~~~ the last trickle (27-29, 10); MM the canal mouth (30-31, 9-10)
    11  ssssssssssssBBssssssssssssssssss   s the near quay lip
    12  ................................   SOUTH QUAY (y12-14); east edge (x31, y12-14) → Harbor
    13  ................................
@@ -120,7 +120,7 @@ The Act 2 map, in three flood stages, then the dry reveal state.
 - **The trench reads as deep:** the old stone quay wall (row 7) gives way, at a crisp tide line, to two full rows of exposed Founder hull (rows 8–9): dark fitted slate, barnacles thickest at the bottom, hanging weed. The bridge (12–13, 7–11) now visibly spans a ditch, with its supports going down to the mud.
 - `WWWW` (22–25, 6–7): the Water Stairs, walkable down to row 7 only. `bbbb` (22–25, 8): the last flight, broken: the steps end in a jagged edge, and below them (row 9) there's nothing but bare hull and a six-foot drop to the mud. Solid. (Act 5 crosses it with the Boatman's rope.)
 - `DD` (26–27, 8–9): **the bronze door**, set in the hull rows beside the foot of the stairs, opening onto the mud. Founder work, not a house door: square with chamfered corners, bronze gone green under the barnacles, a moon-lock eye in its middle. About the size of a cart. **It can only be reached from the mud** (26–27, 10): the stairs stop at row 7, and the quay wall above the door is solid, so it's visible but unreachable until Act 5.
-- `~~~~` (28–31, 10): the last of the canal water, a thin animated trickle running east along the mud and spilling out of the canal mouth at the east edge, where the Bowl's water shows, lower down. It's the one image that shows the sea is still there and the city has risen out of it.
+- `~~~` (27–29, 10): the last of the canal water, a thin animated trickle running east along the mud. `MM` (30–31, 9–10, a 2×2 corner): the canal mouth, where it spills over a slate lip and falls in foam to the Bowl's water, visibly lower down. Solid. It's the one image that shows the sea is still there and the city has risen out of it.
 - **Laundry** strung across the north quay (overhead, 14–19, 4) streams out hard to one side in the wind: Tessel, riding high, catches more of it (Act 5's danger).
 - `m`: mud. Not reachable from the quays in Act 4 (the drop is six feet, and Cheryl won't jump). Walkable for NPCs placed there.
 - `h` and the door are the first time the city's Founder hull is visible from the surface.
@@ -151,6 +151,8 @@ A wide, low engine room. Against the north wall stand the **Three Sisters**: thr
    10  X........................X
    11  XXXXXXXXXXXXXXXXXXXXXXXXXX
 ```
+
+**The main pipe** (art sheet `mainpipe`) runs down the north wall at (1, 1–2) and along the west edge of the floor at (1, 3–10), solid. Its joint at (1, 6) weeps while intact and splits in the rise (step 11), spraying over (2–3, 5–7). The floodwater spreads east from there.
 
 **Exits:** ladder (2, 2), entered from (2, 3) → Fountain Square (11–12, 9), facing down (before the flood only). East archway (25, 6–7) → Tide Wheel (1, 4–5), facing right. Emergency ladder (22, 2), entered from (22, 3), only once its hatch has opened → Emergency Shaft (2–3, 28), facing up.
 
