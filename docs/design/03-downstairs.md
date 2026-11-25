@@ -444,7 +444,7 @@ If the vista isn't ready when the slice is built, play step 4 over the Crown map
 
 | Item | Icon idea | Inventory description |
 | --- | --- | --- |
-| Moonglass disc | A milky disc with a cyan glow and a thin bronze rim | "A disc of milky glass. It glows, and it's warm. Lamps down here like it." |
+| Moonglass disc | A milky disc with a cyan glow and a thin bronze rim | "A disc of milky glass. It glows, and it's warm. Lamps Downstairs like it." |
 | Valve key | A bronze T-handle with a square socket | "A Keepers' valve key. Bronze, heavy, with a square socket. Somebody hung it up neatly." |
 | Ship Plan | A folded sheet, charcoal-grey, with a curve drawn on it | "My rubbing of the Founders' floor. Tessel, drawn as a boat. I've folded it in quarters, which feels rude." |
 

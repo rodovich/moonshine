@@ -964,7 +964,7 @@ Every NPC answers an item they have no line for in their own voice, never with C
 | Item | Icon idea | Inventory description |
 | --- | --- | --- |
 | Paper and charcoal | A few sheets with a black stub on top | "Ottilie's paper and a stub of charcoal. For rubbings. Primary sources, Cheryl." |
-| Guidebook | A small red paperback with a gold crest | "Tessel: A Pocket Companion. Confidently wrong on every page. I've grown fond of it." |
+| Guidebook | A small red paperback with a gold crest | "Tessel: A Pocket Companion. Confidently wrong on every page, from the Steps to the time of day. I've grown fond of it." |
 | Crowbar | An iron bar with a hooked end | "The Movers' crowbar. Heavy, honest, and slightly bent." |
 
 The hat, moon chart, and soap carry over from the opening. The soap stays on the washstand and the hat in the wardrobe until taken, so a player who skipped them in Act 1 can still get them.
@@ -979,7 +979,7 @@ Examining the guidebook in the inventory (the bag's Look button) reads one entry
 4. "'Tessel keeps its own time, eleven minutes behind the mainland.'" / "Somebody at the Crown would like a word about that too."
 5. "'Founded by fishermen in the year of the Great Shoal.'" / "Ottilie will scream."
 
-The inventory's one-line description stays: "Tessel: A Pocket Companion. Confidently wrong on every page. I've grown fond of it."
+The inventory's one-line description stays: "Tessel: A Pocket Companion. Confidently wrong on every page, from the Steps to the time of day. I've grown fond of it."
 
 ## End of Act 2: the hundredth step
 

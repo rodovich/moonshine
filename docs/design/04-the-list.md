@@ -356,6 +356,7 @@ A thin, precise man in a waistcoat, with a jeweler's loupe on a cord. He was the
 - CLOCKMAKER: Miss! I'm very busy. The sun is TWELVE minutes wrong now. Twelve. It's getting worse.
 - CLOCKMAKER: I've checked the clock nine times. The clock is perfect. Therefore the sun is wrong. That's just logic, Miss.
 - CLOCKMAKER: I wrote to the observatory. They wrote back "Are you all right?" I am NOT all right.
+- CLOCKMAKER: And nobody has ever written down what time Tessel keeps. If they had, I'd have it framed. Or burned.
 
 **Repeat** (alternate)
 - CLOCKMAKER: Is it time yet? Don't answer that. I know exactly what time it is. It's the sun that doesn't.
