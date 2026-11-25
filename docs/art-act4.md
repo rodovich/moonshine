@@ -2,6 +2,71 @@
 
 Where to find the art for the "Art needed" list in [design/04-the-list.md](design/04-the-list.md) (on design/story-bible). References are `sheet:frame`; animated frames are listed by base name.
 
+## Surface
+
+Module `game/src/art/act4_surface.js`. Composed on the dev page: `/dev/art.html?only=scene:act4_surface&state=belfry|square|bilge1|bilge2|dry|cellar`.
+
+### Belfry (10 × 10)
+
+| Piece | Frames | Layer, placement |
+| --- | --- | --- |
+| North wall, upper / lower row | `belfry:wall_upper` (row 0), `wall_lower` (row 1) | ground |
+| Belfry openings with louvres and sky | `belfry:opening` (row 1 at x1, 3, 6, 8) | ground |
+| Side walls, south wall | `belfry:wall_side`, `wall_south` | ground |
+| Plank floor | `belfry:floor_a`, `floor_b`, `floor_c` (pick by a hash) | ground |
+| The rope hole (4, 5) | `belfry:floor_hole` | ground |
+| The stair down (1–2, 8) | `belfry:stair_l`, `stair_r` | ground |
+| The great bell over (3–4, 2–3) | `belfry_bell:over_bell_x<0-1>y<0-1>_<n>`: `_0` still, `_1` swung west, `_2` swung east (play 0, 1, 0, 2 for a stroke) | overhead |
+| The Clockmaker's drive (6–7, 3–4), ticking / lifted and stopped | `belfry_props:drive_x<0-1>y<0-1>` (3 frames, 330 ms) / `drive_lifted_x<0-1>y<0-1>` | objects |
+| DO NOT TOUCH lever with its card (8, 4) | `belfry_props:lever_up`, `lever_pulled` | objects |
+| The old bell rope (4, 4) down into the hole (4, 5) | `belfry_rope:rope_still`, `rope_swing` (4 frames), `rope_run` (4 frames, running down through the floor for each stroke); 16×32 sprite, anchored bottom-centre on (4, 5) | sprite |
+| The workbench with tools and stacked letters (1–2, 6) | `belfry_props:bench_l`, `bench_r` | objects |
+
+### Fountain Square, Act 4
+
+| Piece | Frames | Layer, placement |
+| --- | --- | --- |
+| The dry basin full of coins and buttons, hatch closed, with the step-over in the south rim at (11–12, 10) | `square4:fountain_coins_closed_x<0-3>y<0-3>` on (10–13, 7–10), replacing `fountain:fountain_dry_*` | objects |
+| The same with the bronze ring hatch open onto a ladder at (11–12, 8) | `square4:fountain_coins_open_x<0-3>y<0-3>` | objects |
+| The bronze fish (11–12, 7) | `fish:fish_dry` (landmarks), feet at the bottom of row 7 | sprite |
+| The cordon: posts at (9, 6), (14, 6), (9, 11), (14, 11) | `square4:cordon_post` | objects |
+| Rope between the posts | `square4:cordon_rope_h` (rows 6 and 11), `cordon_rope_v` (columns 9 and 14); the PENDING AN INQUIRY sign hangs from `cordon_rope_sign` on the south rope | objects |
+| The Fountain flowing again over the closed hatch | the existing `fountain:fountain_x<c>y<r>` (animated) | objects |
+
+### The Bilge (32 × 16)
+
+| Piece | Frames | Layer, placement |
+| --- | --- | --- |
+| Flooded paving, stage 1 (ankle-deep: the stone shows, water in the joints) | `bilge_flood:flood1_<q>` (4 frames, 280 ms), `<q>` = the paving quadrant (`nw` on even x and y, `ne` odd x, `sw` odd y, `se` both odd) | ground |
+| Flooded paving, stage 2 (deeper) | `bilge_flood:flood2_<q>` (4 frames) | ground |
+| Water lapping onto the dry paving next to a flood | `bilge_flood:flood<1-2>_lap_w` (flood to the west), `_lap_n`, `_lap_s` (4 frames) on the dry tile | objects |
+| The Water Stairs' top steps (22–25, 6) | `reveal:wstairs_top_l`, `wstairs_top_m` (×2), `wstairs_top_r` | ground |
+| The flight going under water (22–25, 7), flood stages | `bilge_flood:wstairs_wet_l/m/r` | ground |
+| The piano half-sunk, lid up (6–7, 8–9), stage 1 | `bilge_piano:piano_halfsunk` (32×32) | sprite |
+| Just its lid showing, stage 2 | `bilge_piano:piano_lid` | sprite |
+| **Dry:** the old quay wall face (row 7) | `reveal:qwall_a`, `qwall_b`, `qwall_c` (pick by a hash) | ground |
+| **Dry:** the exposed hull: Founder slate, weed, a tide line, barnacles (row 8) | `reveal:hull_a`, `hull_b`, `hull_c`, `hull_d` (`d` has no weed) | ground |
+| **Dry:** the mud bed (row 9) | `reveal:mud_a` … `mud_d`, with puddles `mud_puddle_a`, `mud_puddle_b` | ground |
+| **Dry:** the near quay's lip (row 10) | `reveal:lip_a`, `lip_b` | ground |
+| **Dry:** the bridge's shadow on the trench (x14) | `reveal:qwall_bridge_shadow`, `hull_bridge_shadow`, `mud_bridge_shadow` (the bridge itself stays `canal:bridge_*`) | ground |
+| **Dry:** the Water Stairs through the quay wall (22–25, 7), and the broken last flight (22–25, 8) | `reveal:wstairs_l/m/r` and `wstairs_broken_l/m/r` (Founder slate, ending in a jagged drop) | ground |
+| **Dry:** the bronze door with its moon-lock eye, crusted with barnacles (26–27, 7–8) | `reveal_door:bronze_door_x<0-1>y<0-1>` | ground |
+| **Dry:** taut mooring ropes from the quay down to the boats | `reveal:rope_taut_v`, `rope_taut_se`, `rope_taut_sw` | objects |
+| **Dry:** wet quay paving and stranded fish | `bilge_flood:wet_<q>`; `fish_stranded_a`, `fish_stranded_b` (the flopping fish is a sprite in "Sprites and icons") | ground; objects |
+| **Dry:** boats on their sides in the mud (3–4, 9), (8–9, 9), (19–20, 9); the Boatman's boat upright (22–23, 9) | `bilge_boats:boat_side_a`, `boat_side_b`, `boat_upright` (32×16) | sprite |
+| **Dry:** the piano on the mud, upright, lid open (15–16, 9) | `bilge_piano:piano_mud` | sprite |
+
+### Ice Cellar (10 × 8)
+
+| Piece | Frames | Layer, placement |
+| --- | --- | --- |
+| Walls (north upper / lower rows, sides, south), floor | `ice_cellar:wall_upper`, `wall_lower`, `wall_side`, `wall_south`; `floor_a`, `floor_b`, `floor_c` | ground |
+| The wooden stair up (6–7, 1) to the door with daylight under it (row 0) | `ice_cellar:stair_top_l/r` (row 0), `stair_l/r` (row 1) | ground |
+| The hatch (2, 6): shut under its slab / slab shoved aside | `ice_cellar:hatch_shut`, `hatch_open` | ground |
+| Hanging fish on hooks (row 1 marks; drawn on the upper row) | `ice_cellar_props:fish_hanging` | objects |
+| Ice blocks in sawdust (1–2, 3–4) and (7–8, 3–4) | `ice_cellar_props:ice_x<0-1>y<0-1>` (2×2) | objects |
+| Crates (8, 4) | `ice_cellar_props:crate_fish` | objects |
+
 ## Sprites and icons
 
 Modules: `act4_sprites.js` (new), plus new frames in `act2_npcs.js` and `cheryl.js` (existing frames unchanged). Walks use the engine's names (`<dir>_0` stands, `_1`/`_2` step). On the dev page: `/dev/art.html?only=scene:act4_people`.
