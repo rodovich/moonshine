@@ -494,6 +494,8 @@ Sent early to the art task (Kn_OwEk0wq). Everything is in the underground style 
 
 ## Audio needed
 
+All of this is built (audio/foundation, e4adffd): `downstairs`, `reveal`, and `reveal_last` (the reveal's last phrase, softer, for the dusk vista), plus the sounds. The ids and a suggested order for the hundredth step, the valve, and the Chart Room are in [audio-direction.md](../audio-direction.md).
+
 **Music**
 - **`downstairs`** (new): the underground theme, following the audio direction: bells, choir, and bowed bass; no hand percussion; a slow pulse; a mode outside the surface's major keys; long, wet echo; a melody built from the surface motifs' intervals, rearranged. Quiet enough to hear the creaks.
 - **Reveal cue** (new, one-shot, about 15 seconds): plays after "Oh, we're a boat." The skipping-rhyme tune, slowly, on glass bells over a held D-flat chord: the first time the player hears the rhyme in the Founders' voice. Its last phrase is reused softly under the dusk vista.

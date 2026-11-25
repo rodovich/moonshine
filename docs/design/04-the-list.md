@@ -735,6 +735,8 @@ When Cheryl next visits Fountain Square: the Fountain is full and flowing again,
 
 ## Audio needed
 
+All of this is built (audio/foundation, e4adffd). The ids and a step-by-step suggestion for the belfry, the Sisters, the rise, the climb, the cellar, and the reveal are in [audio-direction.md](../audio-direction.md). The new controls are `bendMusic(cents, ms)` (creep the pumps cue sharp through the rise and raise the climb's heartbeat), `setLoopVolume(id, v, ms)` (fade the roar as Cheryl climbs), and the `ear_pop` sound, which dips the mix by itself.
+
 **Music**
 - `neighborhood` at Wrongness 0.35 for the act's surface maps, and the **thin, strange** variant for the reveal: one flute, the rest stripped out, at Wrongness 0.5
 - `harbor` (requested) for the Bilge and the Goat Path; `downstairs` (requested) for the Pump Hall and Tide Wheel
