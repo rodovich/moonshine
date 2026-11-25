@@ -6,9 +6,12 @@ import { testMaps, testItemDefs, testScripts, testCharacters } from './test/inde
 import { openingMaps, openingItems, openingScripts, openingIntro, opening } from './opening/index.js';
 import { cherylDeclines } from './opening/common.js';
 import { act2Maps, act2Items, act2Scripts, act2 } from './act2/index.js';
+import { act6Maps, act6Items, act6Scripts, act6Lighting, addAct6 } from './act6/index.js';
 import { cheryl } from '../art/cheryl.js';
 
-const maps = { ...openingMaps, ...act2Maps, ...testMaps };
+const maps = { ...openingMaps, ...act2Maps, ...act6Maps, ...testMaps };
+// Act 6 adds its night, dawn, and epilogue states to the other acts' maps (last, so it sees them all).
+addAct6(maps);
 // The Squeeze leads on to Lamp Street once Act 2 registers it; until then it ends the slice.
 opening.squeezeTo = maps.lamp_street ? 'lamp_street' : null;
 // The ladder under the hundredth step leads into Act 3 once it registers the Step Gallery; until then Act 2 ends on a card.
@@ -26,10 +29,13 @@ export default {
   maps,
   // People defined once and placed by story state (see the engine README).
   characters: { ...testCharacters },
-  items: { ...openingItems, ...act2Items, ...testItemDefs },
+  items: { ...openingItems, ...act2Items, ...act6Items, ...testItemDefs },
 
   // Named scripts, runnable with ?run=<name> for testing.
-  scripts: { ...openingScripts, ...act2Scripts, ...testScripts },
+  scripts: { ...openingScripts, ...act2Scripts, ...act6Scripts, ...testScripts },
+
+  // Lighting presets beyond the art task's day, dusk, and night.
+  lighting: { ...act6Lighting },
 
   // Runs once when a new game starts.
   onNewGame: openingIntro,
