@@ -44,6 +44,8 @@ Downstairs maps can be **dark**: a darkness layer over everything, with light so
 
 Without the disc, the Lamp Halls would be almost black; but the player always has the disc before reaching them.
 
+The engine supports this (engine/core, 156a0cc): `dark: 0.6` on the map; fixed sources as `lights: [{ x, y, radius, color, when }]`, where `when` ties a lamp or beam to its flag; and `playerLight: (g) => g.hasItem('moonglass_disc') && { radius: 3, color: 'relic_cyan' }`. Lights don't stop at walls, so keep light sources away from walls they shouldn't shine through. The Ship Plan's full-screen view uses the item `examine` hook with `g.showPicture(...)`, `g.waitForInput()`, and `g.hidePicture(...)`.
+
 ## Maps
 
 Shared underground legend:
