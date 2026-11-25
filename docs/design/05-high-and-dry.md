@@ -60,7 +60,7 @@ The Harbor from Act 2, after the rise. The quay now stands six feet above the wa
 ```
 
 - **The ferry** (10–15, 11–12) hangs lower than the quay, tilted, its mooring ropes running taut up to the bollards.
-- **The Teeth** (an overhead sprite along row 14): stage 1, a thin white line of surf on dark rocks, small; stage 2, larger and clearer, rocks distinct; stage 3, large, the surf visibly breaking. Never a fail state: the city never reaches them.
+- **The Teeth** (an overhead sprite, 176×48, drawn with its top-left at (128, 192) px, so it covers x8–18 of rows 12–14 and rises into the near sea at stage 3): stage 1, a thin white line of surf on dark rocks, small; stage 2, larger and clearer, rocks distinct; stage 3, large, the surf visibly breaking. Never a fail state: the city never reaches them.
 - **Entities:** Captain Mott at the quay edge (13, 8), facing the sea. The Sweaty Kid running laps of the Prow road (patrol: (18, 6) → (26, 6) → (26, 4) → (18, 4)), stopping for Cheryl as usual. Bollards, crates, nets as before. Laundry streaming.
 - **Exits:** west (0, 6–8) → `bilge_dry` (30, 12–14); Goat stair (2–3, 0) → Goat Path; lighthouse door (27–28, 3) → lamp room.
 
