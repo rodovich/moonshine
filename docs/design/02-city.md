@@ -1081,7 +1081,8 @@ The Act 2 part 1 builder (5DfQsiqAZf) built Lamp Street through the Shop on `con
 The same builder built the Goat Path, Harbor, lamp room, and Bilge on `content/act2b`. This document follows its choices:
 
 - Lamp Street's west edge (0, 9–11) is a gap in the wall to the Goat Path (no gate art); the gate line plays the first time, before the map changes.
-- The Fishmonger stands at (4, 4), in front of her door, not under a stall's canopy. The Bilge's west mooring post is at (1, 6), so the north quay's west end stays open.
+- The Fishmonger stands at (4, 4), in front of her door, not under a stall's canopy. The Bilge's west mooring post is at (10, 6), so the north quay's west end stays open.
+- In the Counting Woman's storm-off, the camera pans down to the arch so the piano, both Movers, and her climb over it are in frame, with the lines at the top of the screen; then it follows Cheryl again.
 - The Lighthouse Keeper polishes from (4, 4), facing the lamp (up).
 - Mott sits on the middle bollard at (13, 8) and swigs from his jug every so often.
 - Wading into the flooded street plays its first and second looks on the first and second wades (no hotspot on the water).
