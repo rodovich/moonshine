@@ -148,13 +148,29 @@ export function bindSnesSheets(map = {}, frameAliases = {}) {
   aliases = frameAliases;
 }
 
+const warnedMissing = new Set();
 export function isoFrameFor(e) {
-  const names = (e.sprite && e.sprite.sheet && bySnes.get(e.sprite.sheet)) || [];
+  let names = (e.sprite && e.sprite.sheet && bySnes.get(e.sprite.sheet)) || [];
+  // A palette swap has its own sheet, <name>_<palette> (mover_other, girl_b).
+  const pal = e.sprite && typeof e.sprite.palette === 'string' ? e.sprite.palette : null;
+  if (pal) names = names.flatMap((n) => (sheets.has(`${n}_${pal}`) ? [`${n}_${pal}`, n] : [n]));
   for (const name of names) {
     const s = sheets.get(name);
     if (!s || !s.ready) continue;
     const f = frameIn(e, s, name);
     if (f) return f;
+  }
+  // A character whose sheet lacks this frame stands in its own art, not the
+  // SNES sprite (and the console says which frame is missing).
+  const s = names.map((n) => sheets.get(n)).find((x) => x && x.ready);
+  if (s && e.directional) {
+    const want = e.pose || (e.moving ? `walk_${e.facing}` : `${e.facing}_0`);
+    if (!warnedMissing.has(`${s.name}:${want}`)) {
+      warnedMissing.add(`${s.name}:${want}`);
+      console.warn(`[iso art] ${s.name} has no frame for "${want}"; standing in its ${e.facing}_0`);
+    }
+    const f = s.frame(`${e.facing}_0`) || s.frame(`${MIRROR[e.facing]}_0`) || s.frame('down_0');
+    if (f) return { ...f, flip: !s.frame(`${e.facing}_0`) && !!s.frame(`${MIRROR[e.facing]}_0`), shadow: s.frame(`${f.name}.shadow`) };
   }
   return null;
 }

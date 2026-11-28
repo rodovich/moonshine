@@ -64,8 +64,9 @@ export class Display {
     this.ox = Math.floor((devW - this.drawW) / 2);
     // In tall portrait screens, sit near the top and leave the space below
     // for thumbs; otherwise center.
-    const portrait = this.phonePanels && devH > devW * 1.3;
-    this.oy = Math.floor(((devH - this.drawH) / 2) * (portrait ? 0.4 : 1));
+    const tall = devH > devW * 1.3;
+    const portrait = this.phonePanels && tall;
+    this.oy = Math.floor(((devH - this.drawH) / 2) * (tall ? 0.4 : 1));
     // On tall portrait screens there's room below the frame for a big bag
     // button (in game pixels, below y = 224, drawn at twice the frame's scale).
     const below = (devH - this.oy - this.drawH) / this.scale;
