@@ -23,7 +23,7 @@ function bandJob(i) {
   return {
     name: `band_${i}`,
     render() {
-      const r = renderPersp(V.scene(), { w: V.W, h: V.H, ss: 2, cam: V.CAM, sky: V.sky, ...V.lighting(), water: V.WATER, layers: LAYERS, defaultLayer: 'fg', rows: [y0, y1] });
+      const r = renderPersp(V.scene(), { w: V.W, h: V.H, ss: 3, cam: V.CAM, sky: V.sky, ...V.lighting(), water: V.WATER, layers: LAYERS, defaultLayer: 'fg', rows: [y0, y1] });
       return LAYERS.map((name) => {
         const L = r.layers[name];
         const px = L.px.slice(y0 * V.W, y1 * V.W);
@@ -102,10 +102,11 @@ export default {
     out.push(moon('moon_white', '#f4f4ea', '#d0d0cc', '#c4c4c0'));
     // Cool silver halo round the moon.
     const sil = hex('#c8d4f0');
-    out.push(paint('moon_halo', 220, 220, (x, y) => {
-      const r = Math.hypot(x - 110, y - 110) / 110;
+    out.push(paint('moon_halo', 340, 340, (x, y) => {
+      // The moon brightens the sky round it: a broad, soft silver glow.
+      const r = Math.hypot(x - 170, y - 170) / 170;
       if (r > 1) return null;
-      const a = Math.pow(1 - r, 2.2) * 0.55;
+      const a = Math.pow(1 - r, 2.6) * 0.5;
       return [...sil, a];
     }));
     // The pre-rise brightening behind the Rim: a wide, low dome of silver light.

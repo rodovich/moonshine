@@ -74,13 +74,15 @@ export function renderPersp(scene, opts) {
     const m = leaf && leaf.mat;
     const n = normalAt(scene, p[0], p[1], p[2], Math.max(0.002, t * 0.0004));
     const alb = m ? m.color(p[0], p[1], p[2], NEAR.lx, NEAR.ly, NEAR.lz, n[0], n[1], n[2]) : [0.5, 0.5, 0.5];
+    let n0 = n;
+    if (m && m.bump) { const bn = m.bump(p[0], p[1], p[2], n); const l = Math.hypot(bn[0], bn[1], bn[2]); n0 = [bn[0] / l, bn[1] / l, bn[2] / l]; }
     const em = alb[3] ?? (m ? m.emit : 0) ?? 0;
     if (em >= 1) return { c: alb.slice(0, 3).map((v) => v * 1.4), m, p, n };
-    const ndl = Math.max(0, n[0] * sun[0] + n[1] * sun[1] + n[2] * sun[2]);
+    const ndl = Math.max(0, n0[0] * sun[0] + n0[1] * sun[1] + n0[2] * sun[2]);
     let sh = 0;
-    if (ndl > 0) sh = (m && m.noShadow) ? 1 : softShadow(scene, [p[0] + n[0] * 0.02, p[1] + n[1] * 0.02, p[2] + n[2] * 0.02], sun, 12, opts.shadowMax ?? 400);
+    if (ndl > 0) { const off = Math.max(0.02, t * 0.002); sh = (m && m.noShadow) ? 1 : softShadow(scene, [p[0] + n[0] * off, p[1] + n[1] * off, p[2] + n[2] * off], sun, 12, opts.shadowMax ?? 400); }
     const sunAmt = opts.sunAt ? opts.sunAt(p) : 1;
-    const amb = opts.ambient(n, p);
+    const amb = opts.ambient(n0, p);
     let c = [0, 1, 2].map((i) => alb[i] * (opts.sun.color[i] * ndl * sh * sunAmt + amb[i]));
     if (m && m.spec) {
       const r = [d[0] - 2 * n[0] * (d[0] * n[0] + d[1] * n[1] + d[2] * n[2]), d[1] - 2 * n[1] * (d[0] * n[0] + d[1] * n[1] + d[2] * n[2]), d[2] - 2 * n[2] * (d[0] * n[0] + d[1] * n[1] + d[2] * n[2])];

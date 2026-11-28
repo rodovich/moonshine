@@ -14,6 +14,7 @@ import { mat, hex, mix } from '../lib/render.mjs';
 import { fbm, vnoise, hash3 } from '../lib/noise.mjs';
 import { figure } from './figure.mjs';
 import { cherylLook } from './cheryl.mjs';
+import { vistaCheryl } from './vista-cheryl.mjs';
 import { tub, foldingChair } from './props.mjs';
 import { plaster } from './materials.mjs';
 
@@ -39,20 +40,19 @@ const SKY = {
 /** Sky color for a direction (linear). Bands by elevation above the true horizon, in degrees. */
 export function sky(d, { stars = true } = {}) {
   const e = Math.asin(Math.max(-1, Math.min(1, d[2]))) * 180 / Math.PI;
-  // Smooth bands: blue-grey Earth's shadow to ~6°, the Belt of Venus soft from
-  // 5° to 12° peaking near 8°, then blue deepening to indigo.
-  let c = lerp3(SKY.earthLow, SKY.earth, sstep(-1, 6.5, e));
-  const belt = Math.exp(-(((e - 8.2) / 2.6) ** 2));
-  c = lerp3(c, lerp3(SKY.mauve, SKY.venus, 0.6), belt * 0.75);
-  c = lerp3(c, SKY.blue, sstep(10, 15, e) * (1 - belt * 0.5));
-  c = lerp3(c, SKY.indigo, sstep(14, 21, e));
-  c = lerp3(c, SKY.deep, sstep(21, 30, e));
-  if (stars && e > 17) {
-    // Only the brightest stars are out while the Belt still shows.
+  // Facing east at moonrise: the blue-grey Earth's shadow along the horizon, the
+  // Belt of Venus a broad soft rose glow above it, blue overhead deepening to indigo.
+  let c = lerp3(SKY.earthLow, SKY.earth, sstep(-1, 5, e));
+  const belt = Math.exp(-(((e - 9.5) / 5.5) ** 2)) * sstep(2.5, 7, e);
+  c = lerp3(c, lerp3(SKY.mauve, SKY.venus, 0.5), belt * 0.55);
+  c = lerp3(c, SKY.blue, sstep(9, 22, e) * (1 - belt * 0.35));
+  c = lerp3(c, SKY.indigo, sstep(18, 32, e));
+  c = lerp3(c, SKY.deep, sstep(28, 45, e));
+  if (stars && e > 19) {
     const az = Math.atan2(d[1], d[0]);
     const gx = Math.floor(az * 700), gy = Math.floor(e * 12);
     const hh = hash3(gx, gy, 3);
-    if (hh > 0.9992) c = lerp3(c, hex('#e8ecf8'), (0.5 + 0.5 * (hh - 0.9992) / 0.0008) * sstep(17, 20, e));
+    if (hh > 0.9993) c = lerp3(c, hex('#e8ecf8'), (0.45 + 0.55 * (hh - 0.9993) / 0.0007) * sstep(19, 24, e));
   }
   return c;
 }
@@ -60,38 +60,75 @@ export function sky(d, { stars = true } = {}) {
 // ---------------------------------------------------------------------------
 // The Rim: cliffs ringing the Bowl, with the Gate notch due east.
 
-function rimHeight(th) {
-  const base = 400 + 60 * (fbm(th * 9 + 3, 1.3, 0, 3) - 0.5) + 30 * (fbm(th * 40, 7.7, 0, 2) - 0.5);
-  const dth = Math.abs(th - GATE);
-  const notch = 110 + Math.pow(dth / 0.15, 1.25) * 300 + 12 * (fbm(th * 80, 2, 0, 2) - 0.5);
-  return Math.min(base, notch);
+const SPAN = 480; // the cliff band's depth, shore to skyline
+const shoreR = (th) => 3250 + 120 * (fbm(th * 8 + 1, 0.5, 0, 3) - 0.5) + 40 * (fbm(th * 40, 2, 0, 2) - 0.5);
+const ridged = (v) => 1 - (2 * v - 1) ** 2; // a smooth ridge (a sharp crease made vertical seams on the cliffs)
+export const GATE_TH = 0.004, GATE_SADDLE = 128;
+
+/** The skyline height at bearing th: broken, with buttresses, and the Gate's worn saddle. */
+export function skyline(th) {
+  let H = 370 + 160 * (fbm(th * 5 + 2, 1.1, 0, 4) - 0.5) + 70 * (fbm(th * 18, 3.3, 0, 3) - 0.5);
+  const b = ridged(vnoise(th * 45, 5.5, 0)); H += 55 * b * b * b; // towers on the buttresses
+  H -= 45 * Math.pow(Math.max(0, ridged(vnoise(th * 30 + 7, 2.2, 1)) - 0.7) / 0.3, 2); // small notches
+  const g = th - GATE_TH;
+  const sad = GATE_SADDLE + 14 * (vnoise(th * 400, 1, 1) - 0.5);
+  // North side (left) steep; south side (right) gentler, with a shoulder part-way up.
+  const t = g < 0 ? sstep(0.006, 0.07, -g) : sstep(0.01, 0.17, g) * 0.86 + 0.14 * sstep(0.03, 0.06, g);
+  return sad + (H - sad) * t;
+}
+
+function rimH(th, r, rs) {
+  const t = (r - rs) / SPAN;
+  const H = skyline(th);
+  if (t < -0.22) return -6;
+  if (t < 0) { const u = (t + 0.22) / 0.22; return -6 + u * u * (H * 0.13 + 12 * fbm(th * 300, r * 0.02, 4, 2)); } // scree fans
+  if (t > 1) return H + Math.min(40, (t - 1) * 60) + 10 * (fbm(th * 60, r * 0.01, 6, 2) - 0.5);
+  // The cliff: ledges and steep risers, beds of rock stepping back.
+  // Ledges run along the Rim and fade slowly in and out (a fast-changing offset cut the face into vertical seams).
+  const q = t * 5 + 0.6 * fbm(th * 6, 2, 7, 2), fl = Math.floor(q), fr = q - fl;
+  const step = Math.min(1, (fl + sstep(0.45, 1, fr)) / 5);
+  return H * (0.13 + 0.87 * step);
 }
 
 export function rim() {
-  const cliff = mat((x, y, z) => {
-    const n = fbm(x * 0.02, y * 0.02, z * 0.03, 3);
-    const strata = Math.sin(z * 0.06 + n * 3) * 0.5 + 0.5;
-    const band = Math.abs(Math.sin(z * 0.021 + n * 1.5)) > 0.92 ? 0.82 : 1; // darker beds every few tens of meters
-    let c = lerp3(hex('#bca0a6'), hex('#e4d0c8'), strata * 0.6 + n * 0.4).map((v) => v * band);
-    if (z < 75) c = lerp3(c, hex('#9a8c94'), sstep(75, 30, z) * (0.6 + vnoise(x * 0.2, y * 0.2, z * 0.2) * 0.4)); // scree
-    if (z < 3) c = lerp3(c, hex('#d8d0d8'), sstep(3, 0.5, z) * 0.8); // the wet line at the shore
+  const rock = [hex('#c8a892'), hex('#b8a6a8'), hex('#dcc8b4'), hex('#a68478'), hex('#cdb4a4')];
+  const cliff = mat((x, y, z, lx, ly, lz, nx, ny, nz) => {
+    const th = Math.atan2(y, x);
+    const bed = fbm(z * 0.012 + th * 9 + Math.sin(th * 14) * 0.8, th * 6, 1, 3); // beds tilting along the Rim
+    const i = Math.floor(bed * rock.length * 1.4) % rock.length;
+    let c = lerp3(rock[i], rock[(i + 1) % rock.length], (bed * rock.length * 1.4) % 1);
+    c = lerp3(c, hex('#d0987c'), Math.max(0, fbm(th * 6, z * 0.004, 11, 3) - 0.55) * 1.6); // warmer, iron-stained rock in places
+    c = c.map((v) => v * (0.88 + vnoise(x * 0.05, y * 0.05, z * 0.05) * 0.2));
+    if (nz > 0.6 && z > 20) c = lerp3(c, hex('#58604c'), (0.35 + 0.45 * vnoise(x * 0.05, y * 0.05, 3)) * sstep(0.6, 0.85, nz)); // scrub on the ledges
+    if (z < 60) c = lerp3(c, hex('#9a8e94'), sstep(60, 20, z) * 0.6); // scree
+    if (z < 2.5) c = lerp3(c, hex('#d8d0d8'), sstep(2.5, 0.4, z) * 0.75); // the wet line
     return c;
-  }, { layer: 'far', tag: 'rim' });
+  }, {
+    layer: 'far', tag: 'rim',
+    // Crags: the rock's surface broken at two scales, by bending the normal rather than the shape.
+    bump: (x, y, z, n) => {
+      const e = 5, f = (a, b, c) => fbm(a * 0.05, b * 0.05, c * 0.06, 2) + 0.6 * fbm(a * 0.012, b * 0.012, c * 0.02, 2);
+      const g0 = f(x, y, z);
+      const gx = (f(x + e, y, z) - g0) / e, gy = (f(x, y + e, z) - g0) / e, gz = (f(x, y, z + e) - g0) / e;
+      const k = 20;
+      return [n[0] - gx * k, n[1] - gy * k, n[2] - gz * k];
+    },
+  });
   return custom((x, y, z) => {
     const r = Math.hypot(x, y);
+    // Before the cliffs: the nearest surface is the water-level floor below, or the cliffs
+    // ahead, which are no nearer than the gap to them and no higher than ~650 m.
+    if (r < 2500) return Math.min(z + 6, Math.max(2600 - r, z - 650));
     const th = Math.atan2(y, x);
-    const g = fbm(th * 60, z * 0.004, 2, 3);
-    let R = RIM_R + 110 * (fbm(th * 25, z * 0.004, 0, 3) - 0.5) + 30 * Math.abs(Math.sin(th * 90 + g * 5));
-    // Ledges: each bed of rock steps back a little from the one below.
-    const sb = z / 55 + fbm(th * 40, 1, 3, 2) * 0.6;
-    R += 12 * (Math.floor(sb) + sstep(0.82, 1, sb - Math.floor(sb)));
-    // Scree: a talus fan at the foot, spreading toward the water.
-    R -= Math.max(0, 70 - z) * (1.3 + vnoise(th * 300, z * 0.05, 4) * 0.6);
-    const Ht = rimHeight(th);
-    const face = (R - r) * 0.7;
-    const top = z - Ht;
-    return Math.max(face, top, -z - 50) * 0.45;
-  }, [-RIM_R * 1.3, -RIM_R * 1.3, -50, RIM_R * 1.3, RIM_R * 1.3, 700], cliff);
+    const butt = 150 * (fbm(th * 13 + 4, 0.7, 3, 3) - 0.5) * 2; // great buttresses standing out, bays falling back
+    const g = sstep(0.55, 0.95, ridged(vnoise(th * 40 + fbm(th * 15, 1, 2, 2) * 2, 1.5, 9)));
+    const rs = shoreR(th) - butt + 45 * g; // and a few broad gullies
+    // (Only while well short of the cliffs; close to them the heightfield bound takes over,
+    // or rays above the scree would creep up to the guard's edge and stop there.)
+    const gap = rs - 0.22 * SPAN - 40 - r;
+    if (gap > 40) return Math.min(z + 6, Math.max(gap, z - 650));
+    return (z - rimH(th, r, rs)) * 0.24;
+  }, [-6000, -6000, -10, 6000, 6000, 700], cliff);
 }
 
 // ---------------------------------------------------------------------------
@@ -229,29 +266,35 @@ export function foreground() {
   parts.push(boxAt(-6, -9, D - 1, 5.64, 9, D, deckM));
   parts.push(boxAt(5.36, -9, D - 6, 5.64, 9, D + 0.3, wallM, 0.03));
   parts.push(boxAt(5.32, -9, D + 0.26, 5.68, 9, D + 0.34, fg(plaster('#f6f2ea', { weather: false })), 0.03));
-  // The far pier at x19 (15.5 m).
-  parts.push(boxAt(15.3, -0.2, ground(15.5, 0) - 1, 15.7, 0.2, D + 0.82, wallM, 0.02));
-  parts.push(boxAt(15.24, -0.26, D + 0.78, 15.76, 0.26, D + 0.9, wallM, 0.03));
-  // The sighting pins: bronze ring sights on short posts, in line with the tub.
-  const pin = (x, z, s) => union(
-    capsule([x, 0, z], [x, 0, z + 0.3 * s], 0.03 * s, bronzeM),
-    place(torus(0.11 * s, 0.022 * s, bronzeM), { at: [x, 0, z + 0.42 * s], ry: Math.PI / 2 }),
-    capsule([x, -0.11 * s, z + 0.42 * s], [x, 0.11 * s, z + 0.42 * s], 0.008 * s, bronzeM),
-    capsule([x, 0, z + 0.31 * s], [x, 0, z + 0.53 * s], 0.008 * s, bronzeM),
-  );
-  parts.push(pin(5.5, D + 0.3, 1), pin(15.5, D + 0.9, 1));
+  // The far parapet's end (Her Next Door's east parapet): a short whitewashed run at 15.5 m.
+  // A low run, so it reads as a parapet rather than a post.
+  parts.push(boxAt(15.35, -0.8, D - 0.6, 15.65, 0.8, D + 0.3, wallM, 0.03));
+  parts.push(boxAt(15.3, -0.85, D + 0.26, 15.7, 0.85, D + 0.36, fg(plaster('#f6f2ea', { weather: false })), 0.03));
+  // The sighting pins: matched bronze ring sights on slender rods, the near on the low
+  // wall and the far on the far parapet, set so that from the tub they line up on the
+  // Gate's saddle like a gunsight, the far ring centered inside the near one.
+  const C0 = CAM.pos, P = [3550 * Math.cos(GATE_TH), 3550 * Math.sin(GATE_TH), GATE_SADDLE + 6];
+  const onLine = (x) => { const f = (x - C0[0]) / (P[0] - C0[0]); return [x, C0[1] + (P[1] - C0[1]) * f, C0[2] + (P[2] - C0[2]) * f]; };
+  const ringSight = (x, base, R) => {
+    const c = onLine(x);
+    return union(
+      capsule([x, c[1], base], [x, c[1], c[2] - R], 0.018, bronzeM), // the rod
+      move(cylinder(0.05, base - 0.01, base + 0.04, bronzeM, 0.01), x, c[1], 0), // its foot
+      place(torus(R, R * 0.09, bronzeM), { at: c, ry: Math.PI / 2 }), // the ring
+      capsule([x, c[1] - R, c[2]], [x, c[1] + R, c[2]], R * 0.025, bronzeM), // fine crosswires
+      capsule([x, c[1], c[2] - R], [x, c[1], c[2] + R], R * 0.025, bronzeM),
+    );
+  };
+  parts.push(ringSight(5.5, D + 0.34, 0.26), ringSight(15.5, D + 0.36, 0.2));
   // The tub, and Cheryl on its rim in her costume, from behind.
   const t = tub('full', { t: 0.2 });
   const TY = -0.62; // the tub's center, a little north of the camera's line
   const tubNode = { b: [t.b[0], t.b[1] + TY, t.b[2] + D, t.b[3], t.b[4] + TY, t.b[5] + D], dist: (x, y, z) => t.dist(x, y - TY, z - D), near: (x, y, z) => t.near(x, y - TY, z - D) };
   parts.push(tubNode);
-  // On the west rim, knees up, shins in the water; her right hand on the rim beside her.
-  const a = Math.PI / 2 + 0.35;
-  const pose = { bob: 0.75 - 0.86, hipL: a, hipR: a - 0.06, kneeL: a + 0.1, kneeR: a + 0.05, shL: 0.35, elL: 0.6, outL: 0.3, shR: 0.05, elR: 0.25, outR: 0.55, lean: 0.06, nod: -0.04 };
-  const her = figure(cherylLook({ swim: true }), pose);
-  const herNode = move(her, -0.74, TY - 0.14, D);
+  // On the west rim, knees up, shins in the water, her right hand on the rim beside her.
+  const herNode = move(vistaCheryl(), -0.74, TY - 0.14, D + 0.69);
   // "Two chairs. I only sit in the one." Her cardigan lies folded on the nearer.
-  const chairs = union(move(foldingChair({ face: 0.3, cardigan: true }), 0.1, 0.75, 0), move(foldingChair({ face: -0.2 }), 1.0, 1.45, 0));
+  const chairs = union(move(foldingChair({ face: 2.7, cardigan: true }), 0.2, 0.85, 0), move(foldingChair({ face: 2.9 }), 1.1, 1.5, 0));
   parts.push({ b: [chairs.b[0], chairs.b[1], chairs.b[2] + D, chairs.b[3], chairs.b[4], chairs.b[5] + D], dist: (x, y, z) => chairs.dist(x, y, z - D), near: (x, y, z) => chairs.near(x, y, z - D) });
   parts.push(herNode);
   return union(parts);
