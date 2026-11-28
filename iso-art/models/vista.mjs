@@ -68,15 +68,16 @@ function rimHeight(th) {
 export function rim() {
   const cliff = mat((x, y, z) => {
     const n = fbm(x * 0.02, y * 0.02, z * 0.03, 3);
-    const strata = Math.sin(z * 0.09 + n * 4) * 0.5 + 0.5;
-    const c = lerp3(hex('#c8aeb0'), hex('#e0ccc8'), strata * 0.5 + n * 0.5);
+    const strata = Math.sin(z * 0.06 + n * 3) * 0.5 + 0.5;
+    const band = Math.abs(Math.sin(z * 0.021 + n * 1.5)) > 0.92 ? 0.82 : 1; // darker beds every few tens of meters
+    const c = lerp3(hex('#bca0a6'), hex('#e4d0c8'), strata * 0.6 + n * 0.4).map((v) => v * band);
     return c;
   }, { layer: 'far', tag: 'rim' });
   return custom((x, y, z) => {
     const r = Math.hypot(x, y);
     const th = Math.atan2(y, x);
     const g = fbm(th * 60, z * 0.004, 2, 3);
-    const R = RIM_R + 110 * (fbm(th * 25, z * 0.004, 0, 3) - 0.5) + 22 * Math.abs(Math.sin(th * 140 + g * 5));
+    const R = RIM_R + 110 * (fbm(th * 25, z * 0.004, 0, 3) - 0.5) + 38 * Math.abs(Math.sin(th * 90 + g * 5));
     const Ht = rimHeight(th);
     const face = (R - r) * 0.7;
     const top = z - Ht;
@@ -228,7 +229,14 @@ export function lighting() {
     sun: { dir: [-0.995, 0.06, 0.06], color: [1.3, 0.8, 0.78] },
     ambient: (n, p) => {
       const up = n[2] * 0.5 + 0.5;
-      if (p[0] > 2000) return [0.12 * up + 0.04, 0.09 * up + 0.035, 0.17 * up + 0.07]; // violet shade on the cliffs
+      if (p[0] > 2000) {
+        // The cliffs' shaded feet face west, toward the afterglow behind the viewer:
+        // a soft rose-violet fill from low in the west, so their ribs still read,
+        // fading toward the water where the Earth's shadow is deepest.
+        const west = Math.max(0, -n[0] * 0.9 + n[2] * 0.2);
+        const k = 0.55 + 0.45 * Math.min(1, p[2] / 200);
+        return [(0.09 * up + 0.03 + west * 0.2) * k, (0.07 * up + 0.03 + west * 0.12) * k, (0.14 * up + 0.06 + west * 0.2) * k];
+      }
       return [0.16 * up + 0.06, 0.17 * up + 0.06, 0.27 * up + 0.08];
     },
     // Alpenglow: only the upper cliffs still catch the sun; the town's lowest streets are in shadow.

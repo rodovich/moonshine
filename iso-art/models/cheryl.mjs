@@ -70,7 +70,7 @@ export function cherylLook({ swim = false } = {}) {
     hemR: 0.205,
     shoes: swim ? C.skin : C.shoes,
     legs: swim ? C.skin : '#dcae90',
-    headScale: 1.15,
+    headScale: 1.22,
     hairNode: (s) => cherylHair(s, swim),
     extras: (j) => cherylExtras(j, swim),
   };
@@ -110,11 +110,11 @@ function cherylHair(s, swim) {
   return union(
     // Hair swept back over the crown, leaving the face clear.
     smooth(0.03 * s,
-      move(ellipsoid(0.108 * s, 0.096 * s, 0.1 * s, hm), -0.016 * s, 0, 0.028 * s),
+      move(ellipsoid(0.1 * s, 0.095 * s, 0.092 * s, hm), -0.032 * s, 0, 0.04 * s),
       move(ellipsoid(0.06 * s, 0.092 * s, 0.07 * s, hm), -0.05 * s, 0, -0.02 * s),
     ),
     // The bun, high at the back, and its coral tie.
-    move(ellipsoid(0.062 * s, 0.064 * s, 0.058 * s, hm), -0.118 * s, 0, 0.055 * s),
+    move(ellipsoid(0.056 * s, 0.058 * s, 0.052 * s, hm), -0.12 * s, 0, 0.06 * s),
     place(torus(0.045 * s, 0.014 * s, tie), { at: [-0.085 * s, 0, 0.048 * s], ry: Math.PI / 2 - 0.5 }),
   );
 }

@@ -5,7 +5,7 @@
 import { frame, split, POST } from '../lib/jobs.mjs';
 import { union, move, place, boxAt } from '../lib/sdf.mjs';
 import { cobbles, deck } from '../models/ground.mjs';
-import { facade, parapet, parapetPier, stairFlight, retainingWall, lowRoof, roofTop, crownWall, COLORS, U } from '../models/arch.mjs';
+import { facade, parapet, parapetPier, stairFlight, retainingWall, lowRoof, roofTop, crownWall, lowHouse, COLORS, U } from '../models/arch.mjs';
 import { sightPin } from '../models/props.mjs';
 import * as P from '../models/props.mjs';
 import { figure } from '../models/figure.mjs';
@@ -134,6 +134,14 @@ export default {
     // ---- Below the court: lower roofs and the Squeeze
     out.push(prop('lowroof_terra', () => lowRoof('terra', { h: 0.4 }), [1, 1], 30, { shadow: false, post: POST.arch }));
     out.push(prop('lowroof_flat', () => lowRoof('flat', { h: 0.4 }), [1, 1], 20, { shadow: false, post: POST.arch }));
+    // The houses below the court, flanking the Squeeze (walls 60 px to the eaves).
+    out.push(prop('lowhouse_terra_3x2', () => lowHouse({ w: 3, d: 2, roof: 'terra', seed: 1 }), [3, 2], 80, { shadow: false, post: POST.arch }));
+    out.push(prop('lowhouse_terra_2x2', () => lowHouse({ w: 2, d: 2, roof: 'terra', seed: 2, color: COLORS.ochre }), [2, 2], 80, { shadow: false, post: POST.arch }));
+    out.push(prop('lowhouse_flat_2x2', () => lowHouse({ w: 2, d: 2, roof: 'flat' }), [2, 2], 70, { shadow: false, post: POST.arch }));
+    out.push(prop('lowhouse_flat_3x2', () => lowHouse({ w: 3, d: 2, roof: 'flat', color: COLORS.rose }), [3, 2], 70, { shadow: false, post: POST.arch }));
+    out.push(prop('lowhouse_flat_2x2_tall', () => lowHouse({ w: 2, d: 2, roof: 'flat', wallH: 3 }), [2, 2], 130, { shadow: false, post: POST.arch }));
+    out.push(prop('lowhouse_terra_3x2_tall', () => lowHouse({ w: 3, d: 2, roof: 'terra', seed: 4, wallH: 3 }), [3, 2], 140, { shadow: false, post: POST.arch }));
+    out.push(prop('stair_scraped', () => move(stairFlight(1, { below: 0, scraped: true }), 0, 0, 1), [1, 1], 40, { shadow: false, post: POST.arch }));
     return out;
   },
   anims: {

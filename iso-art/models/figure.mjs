@@ -156,24 +156,30 @@ function headNode(look, s, p) {
   const browCol = hex(look.brows ?? look.hair ?? '#504040');
   const skinC = hex(skin);
   const blink = p.blink;
-  const faceMat = mat((x, y, z, lx, ly, lz, nx) => {
-    // Eyes: two small dark dots on the front of the face.
+  // Features sized to read at 66 px: eyes about a pixel and a half, firm brows,
+  // a warm cheek, a mouth line. (ox, oz) shift a part's frame back to the head's,
+  // so the jaw piece paints the same face as the skull.
+  const fs = look.featureScale ?? 1.3;
+  const blush = mix(skinC, hex('#e07870'), 0.35);
+  const faceAt = (ox, oz) => mat((x, y, z, lx0, ly, lz0) => {
+    const lx = lx0 + ox, lz = lz0 + oz;
     if (lx > 0.04 * s) {
       for (const ey of [-0.036 * s, 0.036 * s]) {
         const dy = ly - ey, dz = lz - 0.012 * s;
-        if (blink) { if (Math.abs(dz + 0.004 * s) < 0.008 * s && Math.abs(dy) < 0.02 * s) return mix(skinC, eyeCol, 0.7); }
-        else if (dy * dy / (0.016 * s) ** 2 + dz * dz / (0.02 * s) ** 2 < 1) return eyeCol;
-        if (look.brows !== false && Math.abs(lz - 0.048 * s) < 0.009 * s && Math.abs(dy) < 0.025 * s) return mix(skinC, browCol, 0.75);
+        if (blink) { if (Math.abs(dz + 0.004 * s) < 0.009 * s * fs && Math.abs(dy) < 0.02 * s * fs) return mix(skinC, eyeCol, 0.75); }
+        else if (dy * dy / (0.016 * s * fs) ** 2 + dz * dz / (0.019 * s * fs) ** 2 < 1) return eyeCol;
+        if (look.brows !== false && Math.abs(lz - 0.05 * s) < 0.008 * s * fs && Math.abs(dy) < 0.026 * s * fs) return mix(skinC, browCol, 0.85);
       }
-      // A touch of color on the cheeks and a mouth line.
-      if (Math.abs(lz + 0.045 * s) < 0.007 * s && Math.abs(ly) < 0.024 * s) return mix(skinC, hex(look.mouth ?? '#a05050'), 0.6);
+      if (Math.abs(lz + 0.045 * s) < 0.007 * s * fs && Math.abs(ly) < 0.024 * s) return mix(skinC, hex(look.mouth ?? '#a05050'), 0.65);
+      if (Math.hypot(Math.abs(ly) - 0.052 * s, lz + 0.022 * s) < 0.02 * s) return blush;
     }
     return skinC;
   }, { tag: 'skin', spec: 0.1, shin: 12 });
+  const faceMat = faceAt(0, 0);
   const parts = [
     smooth(0.03 * s,
       ellipsoid(0.1 * s, 0.088 * s, 0.112 * s, faceMat),
-      move(ellipsoid(0.07 * s, 0.07 * s, 0.06 * s, faceMat), 0.025 * s, 0, -0.05 * s),
+      move(ellipsoid(0.07 * s, 0.07 * s, 0.06 * s, faceAt(0.025 * s, -0.05 * s)), 0.025 * s, 0, -0.05 * s),
     ),
     move(ellipsoid(0.03 * s, 0.018 * s, 0.03 * s, skinMat(skin)), 0.1 * s, 0, -0.005 * s), // nose
     move(sphere(0.022 * s, skinMat(skin)), -0.005 * s, -0.088 * s, -0.005 * s), // ears
