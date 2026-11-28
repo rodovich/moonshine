@@ -126,7 +126,9 @@ function scene(g) {
   add(C, 'stool', 2, 16, 0);
   add(C, am ? 'chess_slid' : f('oldMan.hasPepperKing') ? 'chess_pepper' : 'chess_plug', 3, 16, 0);
   add(C, 'gerald_chair', 4, 16, 0);
-  add(C, 'well', 9, 16, 0, 2, 2);
+  // Act 6's dawn lifts the grate (fx.wellGrate 1 lifting, 2 open), as act6/epilogue.js patches the SNES well.
+  const grate = f('fx.wellGrate');
+  add(C, grate ? `well_grate_${grate}` : 'well', 9, 16, 0, 2, 2);
   add(C, am || f('kid.hasTimer') ? 'pots_bare' : 'hurdle', 12, 17, 0, 3, 1);
   add(C, 'bench', 16, 12, 0, 2, 1);
   for (const [x, y, i] of [[1, 21, 0], [18, 21, 1], [1, 23, 2], [2, 23, 0], [18, 23, 1]]) add(C, `geraniums_${i}`, x, y, 0);
