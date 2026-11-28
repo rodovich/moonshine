@@ -6,7 +6,7 @@
 import { figure, cloth, skinMat, hairMat, facing } from './figure.mjs';
 import { sphere, ellipsoid, capsule, union, move, place, torus, box, smooth, roundCone, squash, frustum } from '../lib/sdf.mjs';
 import { mat, hex, mix } from '../lib/render.mjs';
-import { fbm } from '../lib/noise.mjs';
+import { fbm, vnoise } from '../lib/noise.mjs';
 
 export const C = {
   skin: '#e8b090',
@@ -62,7 +62,8 @@ export function cherylLook({ swim = false } = {}) {
     height: 1.64,
     skin: C.skin,
     hair: C.hair,
-    brows: '#6a6070',
+    brows: '#3e3440',
+    featureScale: 1.45,
     top,
     sleeve: swim ? null : mat(knit(C.coral), { tag: 'body', spec: 0.03, shin: 6 }),
     skirt: swim ? null : cloth(C.navy, { noise: 0.06 }),
@@ -88,22 +89,31 @@ export function cherylLook({ swim = false } = {}) {
 }
 
 function swimTop() {
-  const navy = hex(C.stripeNavy), cream = hex(C.cream);
-  return mat((x, y, z) => {
-    // Horizontal stripes in world height (the figure is upright).
+  const navy = hex(C.stripeNavy), cream = hex(C.cream), skin = hex(C.skin);
+  return mat((x, y, z, lx, ly, lz) => {
+    // A low back: bare skin across the shoulder blades, crossed by two navy straps
+    // (only the torso's own frame has its back at lx < -0.06 and its top at lz > 0).
+    if (lx < -0.07 && lz > 0.02 && lz < 0.3) {
+      if (Math.abs(Math.abs(ly) - 0.07) < 0.018) return navy;
+      return skin.map((v) => v * (0.96 + vnoise(ly * 40, lz * 40, 3) * 0.06));
+    }
+    // Knit: horizontal stripes in world height, with a fine vertical rib and soft wear.
     const band = Math.floor(z / 0.045);
-    return band % 2 ? cream : navy;
+    const base = band % 2 ? cream : navy;
+    const rib = 0.94 + 0.06 * Math.abs(Math.sin((lx + ly) * 260));
+    const n = 0.95 + fbm(lx * 30, ly * 30, z * 30, 2) * 0.1;
+    return base.map((v) => v * rib * n);
   }, { tag: 'body', spec: 0.06, shin: 10 });
 }
 
 function cherylHair(s, swim) {
-  const hm = hairMat(C.hair, C.hairStreak, 0.42);
+  const hm = hairMat(C.hair, C.hairStreak, 0.2);
   if (swim) {
     // A snug navy cap with a cream band, over the bun.
     const cap = mat((x, y, z, lx, ly, lz) => (Math.abs(lz - 0.02 * s) < 0.014 * s ? hex(C.cream) : hex(C.stripeNavy)), { tag: 'hair', spec: 0.2, shin: 16 });
     return union(
       move(ellipsoid(0.112 * s, 0.098 * s, 0.11 * s, cap), -0.012 * s, 0, 0.022 * s),
-      move(sphere(0.062 * s, cap), -0.1 * s, 0, 0.06 * s),
+      move(ellipsoid(0.07 * s, 0.072 * s, 0.065 * s, cap), -0.115 * s, 0, 0.07 * s), // the bun's bump under the cap
     );
   }
   const tie = mat(C.coral, { tag: 'hair', spec: 0.15 });
@@ -115,7 +125,7 @@ function cherylHair(s, swim) {
     ),
     // The bun, high at the back, and its coral tie.
     move(ellipsoid(0.056 * s, 0.058 * s, 0.052 * s, hm), -0.12 * s, 0, 0.06 * s),
-    place(torus(0.045 * s, 0.014 * s, tie), { at: [-0.085 * s, 0, 0.048 * s], ry: Math.PI / 2 - 0.5 }),
+    place(torus(0.05 * s, 0.021 * s, tie), { at: [-0.09 * s, 0, 0.05 * s], ry: Math.PI / 2 - 0.5 }),
   );
 }
 
@@ -131,6 +141,8 @@ function cherylExtras(j, swim) {
   const strapM = mat(C.strap, { tag: 'body', spec: 0.2 });
   const brass = mat(C.brass, { tag: 'body', spec: 0.8, shin: 40 });
   const cream = mat(C.cream, { tag: 'body', spec: 0.05 });
+  const blouse = mat('#e4d8bc', { tag: 'body', spec: 0.05 });
+  const blouseShade = mat('#c8b8a0', { tag: 'body', spec: 0.03 });
   // Satchel on the right hip (+y), strap from the left shoulder across the chest.
   const bagC = [0.02 * k, 0.2 * k, waistZ - 0.08 * k];
   return [
@@ -141,10 +153,11 @@ function cherylExtras(j, swim) {
     capsule([-0.1 * k + leanX * 0.6, -0.13 * k, shZ - 0.01 * k], [-0.06 * k, 0.17 * k, waistZ + 0.0 * k], 0.017 * k, strapM),
     // The cardigan's ribbed hem, over the top of the skirt.
     squash(frustum(0.172 * k, 0.15 * k, waistZ - 0.13 * k, waistZ + 0.06 * k, mat(knit(C.coral), { tag: 'body', spec: 0.03 }), 0.012), 0.84, 1, 1),
-    // The blouse: a small cream V at the throat, and its collar.
-    place(roundCone([0, 0, 0], [0, 0, -0.09 * k], 0.04 * k, 0.008 * k, cream), { at: [0.085 * k + leanX * 0.6, 0, shZ + 0.005 * k], ry: -0.35 }),
-    capsule([0.05 * k + leanX * 0.6, -0.05 * k, shZ + 0.035 * k], [0.08 * k + leanX * 0.6, 0, shZ - 0.015 * k], 0.018 * k, cream),
-    capsule([0.05 * k + leanX * 0.6, 0.05 * k, shZ + 0.035 * k], [0.08 * k + leanX * 0.6, 0, shZ - 0.015 * k], 0.018 * k, cream),
+    // The blouse: a narrow V of shaded cream below bare skin at the throat,
+    // with two small collar points lying on the cardigan, so it reads as fabric.
+    place(roundCone([0, 0, 0], [0, 0, -0.075 * k], 0.022 * k, 0.005 * k, blouseShade), { at: [0.1 * k, 0, shZ - 0.025 * k], ry: -0.3 }),
+    place(roundCone([0, 0, 0], [0.012 * k, 0, -0.045 * k], 0.014 * k, 0.004 * k, blouse), { at: [0.095 * k, -0.03 * k, shZ + 0.005 * k], rx: 0.5 }),
+    place(roundCone([0, 0, 0], [0.012 * k, 0, -0.045 * k], 0.014 * k, 0.004 * k, blouse), { at: [0.095 * k, 0.03 * k, shZ + 0.005 * k], rx: -0.5 }),
   ];
 }
 
@@ -159,7 +172,8 @@ export function walkPose(i, n = 8, amp = 1) {
     shL: -0.32 * s * amp, shR: 0.32 * s * amp,
     elL: 0.25 + 0.2 * Math.max(0, -s), elR: 0.25 + 0.2 * Math.max(0, s),
     bob: -0.018 * Math.abs(s),
-    lean: 0.04,
+    lean: 0.0,
+    sway: -0.045 * c * amp, // the hem trails the stride by a quarter step
   };
 }
 

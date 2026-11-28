@@ -42,7 +42,7 @@ export function onFace(node, face) {
 
 /** Plaster wall column with optional plinth (a stone base course). */
 export function wallColumn(h, { color = COLORS.whitewash, plinth = 0.2, face = 's', stain = 0.5 } = {}) {
-  const pl = plaster(color, { axis: face === 's' ? 'x' : 'y', stainHeight: stain, base: plinth });
+  const pl = plaster(color, { axis: face === 's' ? 'x' : 'y', stainHeight: stain, base: plinth, top: h });
   const parts = [boxAt(-0.5, -0.5, plinth ? plinth : 0, 0.5, 0.5, h, pl)];
   if (plinth) {
     // A plastered plinth, a little proud of the wall and a shade warmer.
@@ -160,16 +160,31 @@ export function facade(face, h, kind = 'plain', opts = {}) {
   if (kind === 'gate') feature = gateFeature({ z1: Math.min(h - 0.15, 2.1) });
   if (feature) {
     body = subtract(body, onFace(feature.cut, face), plaster('#cfc8bc', { tag: 'wall' }));
+    if (kind.startsWith('window')) {
+      // Rain stain running down from the sill: a decal flush with the wall, fading out.
+      const z0 = opts.z0 ?? 0.95;
+      const wallM = plaster(opts.wall ?? COLORS.whitewash, { axis: face === 's' ? 'x' : 'y', top: h, base: opts.plinth ?? 0.2 });
+      const grime = hex('#8a8078');
+      const stainM = mat((x, y, z, lx, ly, lz, nx, ny, nz) => {
+        const base = wallM.color(x, y, z, lx, ly, lz, nx, ny, nz);
+        const u = face === 's' ? x : y;
+        const t = Math.max(0, (z0 - 0.06 - z) / 0.5);
+        const edge = Math.max(0, 1 - Math.abs(u) / (0.3 - t * 0.12));
+        const n = vnoise(u * 30, z * 6, 4);
+        return mix(base, grime, Math.min(0.28, (1 - t) * edge * (0.5 + n * 0.6) * 0.3));
+      }, { tag: 'wall', spec: 0.02 });
+      feature.parts.push(boxAt(-0.32, -0.01, Math.max(0.05, z0 - 0.6), 0.32, 0.003, z0 - 0.06, stainM));
+    }
     return union(body, ...feature.parts.map((p) => onFace(p, face)));
   }
   return body;
 }
 
 /** A thin parapet wall along x (dir 'x') or y (dir 'y') through the tile, height h, with rounded coping. Ends are cut flat so runs join seamlessly. */
-export function parapet(dir, h = 0.9, { thick = 0.3, color = COLORS.whitewash, from = -0.5, to = 0.5, offset = 0 } = {}) {
+export function parapet(dir, h = 0.9, { thick = 0.3, color = '#e0e0e4', from = -0.5, to = 0.5, offset = 0 } = {}) {
   const pl = plaster(color, { axis: dir === 'x' ? 'x' : 'y' });
   const t = thick / 2;
-  const cap = plaster('#f4eee4', { axis: dir === 'x' ? 'x' : 'y' });
+  const cap = plaster('#fbf8f0', { axis: dir === 'x' ? 'x' : 'y', weather: false });
   // Build along x, then turn for 'y'.
   const body = boxAt(from - 0.1, offset - t, -0.02, to + 0.1, offset + t, h - 0.05, pl);
   const coping = boxAt(from - 0.1, offset - t - 0.025, h - 0.1, to + 0.1, offset + t + 0.025, h, cap, 0.045);
@@ -194,8 +209,9 @@ export function stairFlight(drop = 1, { steps = 5, w = 1, stone = '#dccab0', bel
   const parts = [];
   const run = 1 / steps, rise = drop / steps;
   for (let i = 0; i < steps; i++) {
-    const y0 = -0.5 + i * run, ztop = -rise * (i + 1);
-    parts.push(boxAt(-w / 2, y0, -drop - below, w / 2, 0.5, ztop, m, 0.008));
+    // Tread i covers its own strip of the run, highest at the north edge.
+    const y0 = -0.5 + i * run, ztop = -rise * i;
+    parts.push(boxAt(-w / 2, y0, -drop - below, w / 2, y0 + run + 0.001, ztop, m, 0.008));
     parts.push(boxAt(-w / 2, y0 + run - 0.03, ztop - 0.03, w / 2, y0 + run + 0.0, ztop, nose, 0.008));
   }
   // The first tread starts at z = 0: a landing lip.

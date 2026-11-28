@@ -65,8 +65,8 @@ export const ICONS = {
   },
   // A long forked pole, diagonal.
   clothes_prop: () => {
-    const w = m('#c8a070', { spec: 0.1 });
-    return place(union(capsule([0, 0, -1.2], [0, 0, 1.0], 0.07, w), capsule([0, 0, 1.0], [0.18, 0, 1.3], 0.055, w), capsule([0, 0, 1.0], [-0.18, 0, 1.3], 0.055, w)), { ry: 0.75, rz: -0.6 });
+    const w = m('#e0bc88', { spec: 0.15 });
+    return place(union(capsule([0, 0, -1.2], [0, 0, 1.0], 0.12, w), capsule([0, 0, 1.0], [0.22, 0, 1.35], 0.09, w), capsule([0, 0, 1.0], [-0.22, 0, 1.35], 0.09, w)), { ry: 0.75, rz: -0.6 });
   },
   // Brass plug with a little chain and ring.
   bath_plug: () => {
@@ -114,7 +114,7 @@ export function iconJob(name, build) {
       s *= 36 / Math.max(trial.w, trial.h);
       const fr = render(place(build(), { s }), { ss: 4 });
       // Dark items get a light rim so they read on the satchel's dark slots (as in the SNES icons).
-      const dark = name === 'item_pepper_mill';
+      const dark = name === 'item_pepper_mill' || name === 'item_clothes_prop';
       const img = trim(toImage(fr, { ...POST.prop, ink: dark ? [176, 168, 192] : [24, 16, 32], inkAmount: dark ? 0.6 : 0.75 }));
       // Center on a 40×40 transparent cell; a light rim so dark items read on the dark bag panel.
       const out = blank(40, 40);

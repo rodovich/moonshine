@@ -53,7 +53,7 @@ export function cobbles({ seed = 0, n = 3, tones = ['#d8c4a0', '#d0bc98', '#dcc8
  * bond) with soft joints. A 2×2 macro: quadrant q in 'nw', 'ne', 'sw', 'se'.
  * Variants: 'crack' (a crack across a slab), 'patch' (one slab re-plastered).
  */
-export function deck({ q = 'nw', variant = '', base = '#e4dccc' } = {}) {
+export function deck({ q = 'nw', variant = '', base = '#d6cec0' } = {}) {
   const ox = q[1] === 'e' ? 1 : 0, oy = q[0] === 's' ? 1 : 0;
   const c = hex(base), joint = hex('#bcb4a8'), patch = hex('#f0ece0');
   const slab = (x, y) => {

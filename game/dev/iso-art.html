@@ -137,7 +137,7 @@ if ((!only || only === 'ui') && manifest.fonts && manifest.sheets.ui) {
     },
     inventory: (ctx) => {
       nine(ctx, 'panel_inventory', 120, 110, 400, 250);
-      text(ctx, 'label', 'Satchel', 144, 128);
+      text(ctx, 'label', 'SATCHEL', 144, 128);
       const items = ['pepper_mill', 'egg_timer', 'bath_plug', 'soap', 'clothes_prop', 'moon_chart'];
       items.forEach((it, i) => {
         const x = 146 + (i % 6) * 58, y = 160;
@@ -190,6 +190,7 @@ if (!only || only === 'pictures') {
       if (t >= 0) { blit('moon_halo', mx, my, 0.9); blit(t < 0.3 ? 'moon_peach' : t < 0.7 ? 'moon_cream' : 'moon_white', mx, my); }
       blit('far', 0, 0);
       if (t >= 0) blit('path', mx, sheet.pathTop, Math.min(1, t * 4));
+      blit('town', 0, 0);
       blit('fg', 0, 0);
       (sheet.twinkles || []).forEach(([x, y], i) => { if ((i * 7 + stages.indexOf(stage)) % 3 === 0) blit(`twinkle_${i % 3}`, x, y); });
       const cell = document.createElement('div'); cell.className = 'cell';
