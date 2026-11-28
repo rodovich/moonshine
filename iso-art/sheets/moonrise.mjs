@@ -23,7 +23,7 @@ function bandJob(i) {
   return {
     name: `band_${i}`,
     render() {
-      const r = renderPersp(V.scene(), { w: V.W, h: V.H, ss: 2, cam: V.CAM, sky: V.sky, ...V.lighting(), water: V.WATER, layers: LAYERS, defaultLayer: 'fg', rows: [y0, y1] });
+      const r = renderPersp(V.scene(), { w: V.W, h: V.H, ss: 3, cam: V.CAM, sky: V.sky, ...V.lighting(), water: V.WATER, layers: LAYERS, defaultLayer: 'fg', rows: [y0, y1] });
       return LAYERS.map((name) => {
         const L = r.layers[name];
         const px = L.px.slice(y0 * V.W, y1 * V.W);
@@ -102,10 +102,11 @@ export default {
     out.push(moon('moon_white', '#f4f4ea', '#d0d0cc', '#c4c4c0'));
     // Cool silver halo round the moon.
     const sil = hex('#c8d4f0');
-    out.push(paint('moon_halo', 220, 220, (x, y) => {
-      const r = Math.hypot(x - 110, y - 110) / 110;
+    out.push(paint('moon_halo', 340, 340, (x, y) => {
+      // The moon brightens the sky round it: a broad, soft silver glow.
+      const r = Math.hypot(x - 170, y - 170) / 170;
       if (r > 1) return null;
-      const a = Math.pow(1 - r, 2.2) * 0.55;
+      const a = Math.pow(1 - r, 2.6) * 0.5;
       return [...sil, a];
     }));
     // The pre-rise brightening behind the Rim: a wide, low dome of silver light.
@@ -135,7 +136,7 @@ export default {
     for (let k = 0; k < 3; k++) {
       out.push(paint(`twinkle_${k}`, 5, 5, (x, y) => {
         const r = Math.hypot(x - 2.5, y - 2.5);
-        const a = [0.9, 0.55, 0.3][k] * Math.max(0, 1 - r / 1.8);
+        const a = [1, 0.75, 0.45][k] * Math.max(0, 1 - r / 2.3);
         return a > 0.05 ? [...hex('#e0ecff'), a] : null;
       }, { ax: 2, ay: 2 }));
     }
@@ -151,6 +152,31 @@ export default {
       const name = m[1];
       full[name] ??= { w: V.W, h: V.H, ax: 0, ay: 0, data: new Uint8Array(V.W * V.H * 4) };
       full[name].data.set(o.img.data, o.band * V.W * 4);
+    }
+    // Lamps and lit windows: a soft warm halo round each, baked into the town layer
+    // (over the water too, where the layer is otherwise clear).
+    {
+      const T = full.town, W0 = V.W, H0 = V.H, src = new Uint8Array(T.data);
+      const hot = [];
+      for (let i = 0; i < W0 * H0; i++) { const r = src[i * 4], g = src[i * 4 + 1], b = src[i * 4 + 2]; if (src[i * 4 + 3] && r > 235 && g > 165 && b < 150) hot.push(i); }
+      const add = new Float32Array(W0 * H0);
+      for (const i of hot) {
+        const x0 = i % W0, y0 = Math.floor(i / W0);
+        for (let dy = -5; dy <= 5; dy++) for (let dx = -5; dx <= 5; dx++) {
+          const x = x0 + dx, y = y0 + dy; if (x < 0 || y < 0 || x >= W0 || y >= H0) continue;
+          const r = Math.hypot(dx, dy); if (r > 5) continue;
+          add[y * W0 + x] += Math.pow(1 - r / 5, 2) * 0.22;
+        }
+      }
+      const BY = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
+      for (let i = 0; i < W0 * H0; i++) {
+        const a = Math.min(0.85, add[i]); if (a < 0.03) continue;
+        const x = i % W0, y = Math.floor(i / W0), dth = (BY[(y & 3) * 4 + (x & 3)] + 0.5) / 16 - 0.5;
+        if (a + dth * 0.12 < 0.06) continue;
+        const k = i * 4, glow = [255, 196, 110];
+        if (T.data[k + 3]) { for (let c = 0; c < 3; c++) T.data[k + c] = Math.min(255, Math.round(T.data[k + c] + glow[c] * a * 0.7)); }
+        else { T.data[k] = glow[0]; T.data[k + 1] = glow[1]; T.data[k + 2] = glow[2]; T.data[k + 3] = Math.round(Math.min(1, a) * 200); }
+      }
     }
     TWINKLES.length = 0;
     TWINKLES.push(...findBasins(full.town, full.fg));
