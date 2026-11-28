@@ -58,7 +58,9 @@ export const cryptIso = sceneOf(() => {
   S.stairs(1, 5, { dir: 'right', z: 40 });
   // (Act 3 opens it: founders_door_open is Act 3's to place.)
   S.prop(LM, 'founders_door', 5, 1, 0, 2, 1);
-  return { S, list: S.done().filter(notFaceAt([[5, 1], [6, 1]])) };
+  const list = S.done().filter(notFaceAt([[5, 1], [6, 1]]))
+    .map((d) => (d.s === 'town' && d.f === 'stairs_right' ? { ...d, s: 'rooms', f: 'crypt_stairs_right' } : d));
+  return { S, list };
 });
 
 // The lamp room (8 × 8): floor x1-6, rows 2-6; windows all along the north wall; the stair down at (3-4, 7).

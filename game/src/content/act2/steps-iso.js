@@ -63,10 +63,11 @@ function build(g) {
   for (const [x, y] of MOON_PAVING) S.add('town', 'pave_moon_eye', x, y, landingZ(y), 1, 1, 0);
 
   // ---- The hollow step (9-10, 19), flush with landing 2: wet in the joint, then open.
-  // (Boarded over from Act 4 on: STAND-IN, the dry slab, until the art has the boards.)
+  // Boarded over from Act 4 on (MIND THE STEP), with 100! chalked on it in the epilogue.
   const open = flag('step.open');
   const boarded = open && (flag('act4.started') || flag('epilogue'));
-  const [hl, hr] = boarded ? ['hollow_dry_l', 'hollow_dry_r'] : open ? ['hollow_open_l', 'hollow_open_r'] : ['hollow_wet_l', 'hollow_wet_r'];
+  const lid = flag('epilogue') ? 'lid_chalked' : 'lid_boarded';
+  const [hl, hr] = boarded ? [`${lid}_l`, `${lid}_r`] : open ? ['hollow_open_l', 'hollow_open_r'] : ['hollow_wet_l', 'hollow_wet_r'];
   S.floor(9, 19, 1, 1, { z: 600, kind: hl, sheet: LM });
   S.floor(10, 19, 1, 1, { z: 600, kind: hr, sheet: LM });
 
