@@ -20,7 +20,7 @@ import { plaster } from './materials.mjs';
 
 export const D = 95; // deck height above the sea: the Upper Terraces, near the summit
 export const W = 640, H = 480;
-export const CAM = { pos: [-3.6, 0, D + 2.15], yaw: 0, pitch: -Math.atan(10 / 560), f: 560 };
+export const CAM = { pos: [-3.6, 0, D + 1.8], yaw: 0, pitch: -Math.atan(10 / 560), f: 560 };
 const RIM_R = 3500;
 const GATE = 0; // bearing of the Gate (east)
 
@@ -63,18 +63,18 @@ export function sky(d, { stars = true } = {}) {
 const SPAN = 480; // the cliff band's depth, shore to skyline
 const shoreR = (th) => 3250 + 120 * (fbm(th * 8 + 1, 0.5, 0, 3) - 0.5) + 40 * (fbm(th * 40, 2, 0, 2) - 0.5);
 const ridged = (v) => 1 - (2 * v - 1) ** 2; // a smooth ridge (a sharp crease made vertical seams on the cliffs)
-export const GATE_TH = 0.004, GATE_SADDLE = 128;
+export const GATE_TH = 0.004, GATE_SADDLE = 34;
 
 /** The skyline height at bearing th: broken, with buttresses, and the Gate's worn saddle. */
 export function skyline(th) {
   let H = 380 + 220 * (fbm(th * 2.2 + 5, 1.1, 0, 3) - 0.5) + 60 * (fbm(th * 9, 3.3, 0, 3) - 0.5) + 25 * (fbm(th * 30, 4.4, 0, 2) - 0.5);
-  H *= 1 - 0.12 * Math.exp(-((th / 0.12) ** 2)); // a little lower toward the Gate
   const b = ridged(vnoise(th * 18, 5.5, 0)); H += 40 * b ** 6; // a few towers
   H -= 45 * Math.pow(Math.max(0, ridged(vnoise(th * 30 + 7, 2.2, 1)) - 0.7) / 0.3, 2); // small notches
   const g = th - GATE_TH;
-  const sad = GATE_SADDLE + 14 * (vnoise(th * 400, 1, 1) - 0.5);
+  const sad = GATE_SADDLE + 6 * (vnoise(th * 400, 1, 1) - 0.5);
   // North side (left) steep; south side (right) gentler, with a shoulder part-way up.
-  const t = g < 0 ? sstep(0.006, 0.07, -g) : sstep(0.01, 0.17, g) * 0.86 + 0.14 * sstep(0.03, 0.06, g);
+  // A deep notch: the north side (left) steep, the south side (right) a little gentler with a shoulder; a worn, rounded saddle.
+  const t = g < 0 ? sstep(0.004, 0.06, -g) : sstep(0.007, 0.1, g) * 0.88 + 0.12 * sstep(0.02, 0.04, g);
   return sad + (H - sad) * t;
 }
 
@@ -142,7 +142,7 @@ const PROW = 760;
 const halfWidth = (x) => (x < PROW ? 300 * Math.sqrt(Math.max(0, 1 - (Math.max(0, x) / PROW) ** 2)) + 30 * (1 - x / PROW) : 0);
 export function ground(x, y) {
   // A steep drop below the Upper Terraces, then the long slope down to the Prow.
-  const along = D - 6 - 26 * sstep(8, 45, x) - (D - 32) * Math.pow(Math.max(0, x) / PROW, 1.4);
+  const along = D - 6 - 26 * sstep(8, 45, x) - (D - 32) * Math.pow(Math.max(0, x) / PROW, 1.15);
   const w = halfWidth(x);
   if (w <= 0) return -6;
   const s = Math.abs(y) / w;
@@ -163,7 +163,7 @@ export function houseAt(i, j) {
   const cx = i * 10 + 5, cy = j * 10 + 5 + (hash3(i, j, 2) - 0.5) * 1.5;
   const g = ground(i * 10 + 5, cy); // one base per row: terraces
   const hx = 3.6 + hash3(i, j, 3) * 1.1, hy = 3.4 + hash3(i, j, 4) * 1.4;
-  const hh = 6 + hash3(i, j, 5) * 8;
+  const hh = (6 + hash3(i, j, 5) * 8) * (1 - 0.45 * Math.min(1, (i * 10) / PROW)); // lower houses toward the shore
   const kind = hash3(i, j, 6);
   return { cx, cy, g, hx, hy, hh, top: g + hh, roof: kind < 0.28 ? 'terra' : kind < 0.31 ? 'dome' : 'flat', lit: hash3(i, j, 7), tint: hash3(i, j, 8), ok: !street && g > 1.5 && cx > 50 && Math.abs(cy) < halfWidth(cx) - 6 && cx < PROW - 60 };
 }
@@ -289,16 +289,21 @@ export function foreground() {
   // The sighting pins (design step 5): two separate bronze pins, the near one large
   // and low on the dark line of the low wall, the far one small, directly above it on
   // the far parapet's end, so the eye runs up the pair to the Gate.
-  // The far parapet: a short run of Her Next Door's east parapet, a pale line across the town.
-  parts.push(boxAt(15.35, -1.3, D - 0.05, 15.65, 1.3, D + 0.3, wallM, 0.03));
-  parts.push(boxAt(15.3, -1.35, D + 0.27, 15.7, 1.35, D + 0.35, fg(plaster('#f6f2ea', { weather: false })), 0.03));
+  // The far pin stands on the parapet of a house in the town's front rows, directly
+  // in line below the Gate: a whitewashed roof in the last light, houses round it.
+  const FX = 560, FZ = ground(FX, 0) + 6.5; // on the town's back rows, above the near pin
+  const farWall = mat('#ece4d6', { tag: 'town', layer: 'town', noShadow: true });
+  parts.push(boxAt(FX - 4, -4, FZ - 9, FX + 4, 4, FZ, farWall, 0.1));
+  parts.push(boxAt(FX - 4.2, -4.2, FZ, FX + 4.2, 4.2, FZ + 0.6, mat('#f4eee4', { tag: 'town', layer: 'town', noShadow: true }), 0.1));
   const pinM = fg(mat('#b88a48', { spec: 0.9, shin: 30 }));
   const pin = (x, base, top, R) => union(
-    capsule([x, 0, base], [x, 0, top - R * 1.2], R * 0.4, pinM),
-    move(cylinder(R * 1.1, base - 0.01, base + R * 0.5, pinM, R * 0.2), x, 0, 0),
-    place(torus(R, R * 0.28, pinM), { at: [x, 0, top], ry: Math.PI / 2 }),
+    capsule([x, 0, base], [x, 0, top - R * 1.05], R * 0.22, pinM),
+    place(torus(R, R * 0.2, pinM), { at: [x, 0, top], ry: Math.PI / 2 }),
   );
-  parts.push(pin(5.5, D + 0.2, D + 0.5, 0.11), pin(15.5, D + 0.35, D + 0.75, 0.09));
+  const farPinM = mat('#c8964e', { spec: 0.9, shin: 30, layer: 'town', noShadow: true });
+  parts.push(pin(5.5, D + 0.2, D + 0.44, 0.17));
+  // (Drawn larger than life so it reads as the far pin at this distance: a few pixels.)
+  parts.push(union(capsule([FX - 3.6, 0, FZ + 0.6], [FX - 3.6, 0, FZ + 5], 0.5, farPinM), place(torus(2.4, 0.65, farPinM), { at: [FX - 3.6, 0, FZ + 7.4], ry: Math.PI / 2 })));
   // The tub, and Cheryl on its rim in her costume, from behind.
   const stillWater = mat((x, y, z) => {
     const far = Math.max(0, Math.min(1, (x + 0.8) / 1.6));
@@ -325,7 +330,9 @@ export function scene() {
 }
 
 export function lighting() {
-  const near = (p) => Math.hypot(p[0], p[1]) < 40;
+  // Cheryl's roof is in the houses' shadow; the low wall's coping and the near pin, a
+  // little higher and further east, just catch the last light over them.
+  const near = (p) => Math.hypot(p[0], p[1]) < 11 && !(p[0] > 5.25 && p[2] > D + 0.17);
   return {
     sun: { dir: [-0.995, 0.06, 0.06], color: [1.3, 0.8, 0.78] },
     ambient: (n, p) => {
@@ -343,8 +350,8 @@ export function lighting() {
     rim: (p, n, d) => {
       if (!near(p)) return null;
       // Silhouette edges only: not the floor or the tops of things.
-      const f = Math.pow(Math.max(0, 1 - Math.abs(n[0] * d[0] + n[1] * d[1] + n[2] * d[2])), 4) * Math.max(0, 1 - Math.abs(n[2]) * 1.4);
-      return [0.75 * f, 0.42 * f, 0.38 * f];
+      const f = Math.pow(Math.max(0, 1 - Math.abs(n[0] * d[0] + n[1] * d[1] + n[2] * d[2])), 2.5) * Math.max(0, 1 - Math.abs(n[2]) * 1.3);
+      return [1.5 * f, 0.85 * f, 0.7 * f];
     },
     // Aerial perspective: the Rim takes on the colour of the air, more so beyond the Gate (south);
     // the town hazes a little with depth.
@@ -357,7 +364,7 @@ export function lighting() {
       return c.map((v, i) => v * (1 - k) + air[i] * k);
     },
     // Alpenglow on the upper cliffs; the town in the last light; the roof in shadow.
-    sunAt: (p) => (p[0] > 2000 || Math.hypot(p[0], p[1]) > 2000 ? sstep(150, 330, p[2]) : near(p) ? 0 : 0.95),
+    sunAt: (p) => (p[0] > 2000 || Math.hypot(p[0], p[1]) > 2000 ? sstep(150, 330, p[2]) : near(p) ? 0 : 0.72),
   };
 }
 

@@ -41,9 +41,9 @@ const navyM = mat(C.navy, { tag: 'body', spec: 0.08, layer: 'fg' });
 
 /** The cap: navy rubber with fine horizontal ribbing, a cream band at the edge. */
 const capM = mat((x, y, z) => {
-  const rib = Math.sin(z * 520) > 0.2 ? 0.86 : 1;
-  return C.navy.map((v) => v * rib * 1.05);
-}, { tag: 'hair', spec: 0.45, shin: 24, layer: 'fg' });
+  const rib = Math.sin(z * 520) > 0.2 ? 0.9 : 1;
+  return C.navy.map((v) => v * rib);
+}, { tag: 'hair', spec: 0.12, shin: 24, layer: 'fg' }); // navy rubber, a soft sheen
 const bandM = mat(C.cream, { tag: 'hair', spec: 0.3, shin: 20, layer: 'fg' });
 const hairM = mat((x, y, z) => mix(C.hair, C.hairSilver, vnoise(x * 900, z * 80, 1) > 0.6 ? 0.6 : 0.1), { tag: 'hair', spec: 0.3, layer: 'fg' });
 
