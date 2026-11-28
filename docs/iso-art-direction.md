@@ -96,6 +96,7 @@ An error in the world, not a monster. It uses only the reserved `wrong_*` colors
   - `panel_narration` (warm brown): Cheryl's descriptions. `panel_thought` (warm brown, dashed frame, no studs): her thoughts, in italics.
   - `panel_menu` (navy): choices, with the gold crescent `choice_marker` beside the current one.
   - `panel_inventory`: the inside of Cheryl's satchel, brown leather with stitching and a brass frame; `slot` and `slot_selected` are 48×48 wells.
+- **Title font:** `manifest.fonts.title`, the SNES face grown to 6× and cast in gold: a rounded bevel lit from the upper left, an ink outline, and a soft drop shadow, as late-90s title logos were rendered. Pre-colored; glyph boxes carry a 6 px margin (`margin`), so draw each glyph at (pen x − 6, line top − 6) and advance by its fifth value. Line height 64, caps 42.
 - **Font:** five pre-colored styles (`text`, `narr`, `thought` (italic), `label`, `dim`) in `manifest.fonts`, each glyph `[x, y, w, h, advance]` in `ui.png`, line height 22, caps 14 px. The glyphs are the SNES font grown to 4× with Scale2x twice (which rounds diagonals; corners where a stem meets a bar stay square) and averaged down to 2×, with soft edges and a 1 px drop shadow. The SNES font's character set applies (story bible, "Text conventions").
 - **Item icons** are 40×40, rendered from small models in three-quarter view with a dark rim, one dominant material each.
 - **The bag button** is Cheryl's satchel, rendered (`bag`, `bag_hover`, `bag_open`). **The pointer** is a cream arrow with an ink outline (`cursor_arrow`, hot spot at its tip).
@@ -145,6 +146,7 @@ Add or change a model in `iso-art/models/`, list its frames in a sheet in `iso-a
 | `sweaty_kid` | stand, 8-frame run, jog in place, hop, arms up |
 | `cistern` | Cistern Court: cobbles, roof slabs, facade storeys (blue, green, the Pelletiers' ochre with the gate), upper storeys, courses, retaining wall, the Crown's walls and higher houses, parapets and the low wall with the pins, the stair, pent roofs, chimney, herbs, chairs, tap, the tub in every state (and with Cheryl sitting on its rim), line posts and sheets (N–S and the back line, white and grey, flapping and swung), the lemon tree, the chess table (plug, pepper, slid), stool, Gerald's chair, the well, hurdle and pots, geraniums, bench, piano, the houses below the court (flat roofs with their Moonshine basins, hipped terracotta roofs, taller ones flanking the Squeeze), the stair and its scraped morning version |
 | `flat` | Cheryl's flat: terracotta floor, the north and west walls' inner faces (plain, window, clock, kitchen shelf), cut wall caps and stubs (door, plug hook), counter (with and without the mill or the timer), stove, bed, side table with the photograph face down, table (with the chart, bare), chairs, wardrobe, washstand (with and without the soap), bookshelf, rug |
+| `cat` | the Pelletiers' cat: sitting with a slow tail flick (`cat_0…3`), and asleep (`cat_sleep_0/1`) |
 | `fx` | blob shadow, sweat drops, the well's breath, dust, swifts, a gull |
 | `moonrise` | the moonrise picture in layers |
 | `ui` | panels, slots, choice marker, pointer, bag button, item icons, fonts |
