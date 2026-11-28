@@ -818,3 +818,149 @@ export function goat({ pose = 'stand', phase = 0, chew = 0, brown = false } = {}
 }
 
 export { PI };
+
+// ---------------------------------------------------------------------------
+// The Bilge's ankle-deep flood, the Harbor's Keyhole and culvert
+
+/** Wet flagstones in the town's sizes (half-meter slabs in offset rows), as an analytic color for under water. */
+function slabColor(x, y) {
+  const row = Math.floor((y + 10) * 2), off = row % 2 ? 0.5 : 0;
+  const u = (x + 10) * 2 + off, col = Math.floor(u);
+  const fu = u - col, fv = (y + 10) * 2 - row;
+  const joint = Math.min(fu, 1 - fu) < 0.04 || Math.min(fv, 1 - fv) < 0.04;
+  const c = mix(hex('#b8a888'), hex('#a89878'), hash3(col, row, 31));
+  return tint(c, (joint ? 0.6 : 1) * (0.9 + fbm((x + 0.5) * 7, (y + 0.5) * 7, 3, 2, 7) * 0.15));
+}
+
+/** Shallow water's film: the sky's cool light, ripples drifting, glints; `t` the phase (0–1, loops). */
+function floodFilm(t) {
+  const sky = hex('#8ab0b4'), deep = hex('#4e6e70'), foam = hex(PAL.foam);
+  return (x, y) => {
+    const r = vnoise((x + 0.5) * 5 + t * 5, (y + 0.5) * 5 - t * 5, 4, 5);
+    const r2 = vnoise((x + 0.5) * 11 - t * 11, (y + 0.5) * 11, 9, 11);
+    let c = mix(deep, sky, 0.3 + r * 0.45 + r2 * 0.15);
+    if (r * 0.6 + r2 * 0.4 > 0.8) c = mix(c, foam, 0.5);
+    return c;
+  };
+}
+
+/**
+ * The flood over the Bilge's south quay, west end: paving seen through a few centimeters of water.
+ * edge: null (all water), or 'e' (the tile east of the flood: the water lapping in over its west
+ * part onto dry paving, with a foam line at the margin and dark wet stone beyond). A floor piece;
+ * `t` loops 0–1.
+ */
+export function shallowFlood({ t = 0, edge = null } = {}) {
+  const film = floodFilm(t);
+  // The margin wanders (noise, not a regular scallop) and creeps in and out with the phase.
+  const margin = (y) => 0.02 + 0.07 * Math.sin(t * PI * 2) + 0.16 * (vnoise((y + 0.5) * 4, 3 + t * 2, 1, 4) - 0.5);
+  const under = (x, y, z) => (z < -0.005 ? slabColor(x, y) : null);
+  const wetM = seeThrough((x, y) => {
+    const c = film(x, y);
+    return edge === 'e' && x > margin(y) - 0.05 ? mix(c, hex(PAL.foam), 0.7) : c;
+  }, under, { k: 0.38, depth: 0.2, steps: 8, tag: 'floor', spec: 1.6, shin: 90, emit: 0.05 });
+  const dryM = mat((x, y) => {
+    const damp = edge === 'e' ? Math.max(0, 1 - (x - margin(y)) / 0.18) : 0;
+    return tint(slabColor(x, y), 1 - Math.min(1, damp) * 0.35);
+  }, { tag: 'floor', spec: 0.1, shin: 12 });
+  const ground = heightfield(() => -0.02, dryM);
+  if (!edge) return union(ground, boxAt(-0.6, -0.6, -0.02, 0.6, 0.6, 0.004, wetM));
+  const sheet = custom((x, y, z) => Math.max(Math.abs(z + 0.008) - 0.012, x - margin(y), -0.6 - x, Math.abs(y) - 0.6), [-0.6, -0.6, -0.03, 0.4, 0.6, 0.01], wetM);
+  return union(ground, sheet);
+}
+
+/** The town's quay stone (as town:quay_s), for faces with openings. */
+const quayStone = () => mat((x, y, z) => {
+  const course = Math.floor((z + 100) / 0.4), off = course % 2 ? 0.5 : 0;
+  const bu = (x + 10) * 2 + off, blk = Math.floor(bu), fu = bu - blk, fz = ((z + 100) / 0.4) % 1;
+  const joint = Math.min(fu, 1 - fu) < 0.035 || Math.min(fz, 1 - fz) < 0.05;
+  let c = mix(hex('#bca88a'), hex('#d0bc9c'), hash3(blk, course, 21));
+  c = mix(c, hex('#4a5a48'), Math.max(0, 1 - z / 0.6) * 0.7);
+  return c.map((v) => v * (joint ? 0.72 : 1) * (0.9 + fbm((x + 0.5) * 8, z * 8, 1, 3, 8) * 0.16));
+}, { tag: 'wall', spec: 0.08 });
+
+const foamM = () => mat(PAL.foam, { tag: 'prop', spec: 0.6, emit: 0.1 });
+
+/**
+ * The Keyhole (2×1, the quay edge at the Harbor's 30–31, 9; origin at the shared edge of the two
+ * tiles, at the sea's level; the face is the south side, y = 0.5): a hole worn through the rock
+ * under the lighthouse, a round head (r 0.3) over a slot 0.4 wide, and the sea breathing in and out of it.
+ * `t` 0–1 is one breath: the water in the throat rises and falls, and at the top of it a gout of
+ * foam spills out over the sea.
+ */
+export function keyhole({ t = 0 } = {}) {
+  const st = quayStone();
+  const ragged = (x, z) => 0.03 * (fbm(x * 14 + 3, z * 14, 5, 2) - 0.5);
+  // Negative inside the hole's outline on the face: round head (r 0.2 at z 0.62) over a slot 0.24 wide.
+  const holeD = (x, z) => Math.min(Math.hypot(x, z - 0.58) - 0.3, Math.max(Math.abs(x) - 0.2, z - 0.58, -z - 0.2)) + ragged(x, z);
+  // The hole's own sides: wet, dark rock, darker the deeper in; the face is quay stone.
+  const faceM = mat((x, y, z, lx, ly, lz, nx, ny, nz) => {
+    if (holeD(x, z) > 0.03 || y > 0.47) return st.color(x, y, z, lx, ly, lz, nx, ny, nz);
+    return tint(mix(hex('#4a4a44'), hex('#6a6658'), fbm(x * 12, z * 12, y * 6, 2)), 0.35 + Math.max(0, y) * 1.1);
+  }, { tag: 'wall', spec: 0.2, shin: 20 });
+  const wall = custom((x, y, z) => Math.max(Math.abs(x) - 1, Math.abs(y) - 0.5, -z, z - 1, -holeD(x, z)), [-1, -0.5, 0, 1, 0.5, 1], faceM);
+  const breath = 0.5 - 0.5 * Math.cos(t * PI * 2); // 0 low, 1 high
+  const parts = [wall];
+  // Inside: the dark going back into the headland.
+  parts.push(boxAt(-0.4, -0.3, 0, 0.4, 0.05, 0.95, mat('#141820', { tag: 'wall', spec: 0 })));
+  // The water in the throat, at the breath's height.
+  parts.push(boxAt(-0.34, -0.2, 0, 0.34, 0.47, 0.04 + breath * 0.2, water({ t, glint: 0.7 })));
+  if (breath > 0.55) {
+    const k = (breath - 0.55) / 0.45, fm = foamM();
+    for (let i = 0; i < 6; i++) {
+      const a = (i / 5 - 0.5) * 1.6;
+      parts.push(move(ellipsoid(0.12 + 0.05 * k, 0.1 + 0.08 * k, 0.04, fm), Math.sin(a) * 0.25 * k, 0.55 + Math.cos(a) * 0.25 * k, 0.02));
+    }
+  }
+  return union(parts);
+}
+
+/**
+ * The culvert (2×1, the quay edge at the Harbor's 1–2, 9; origin at the shared edge, at sea level):
+ * a stone arch in the quay face where the canal runs out under the quay, the canal water sliding
+ * out over its sill and dropping a hand's breadth into the sea. `t` loops 0–1.
+ */
+export function culvert({ t = 0 } = {}) {
+  const st = quayStone();
+  const voussoir = limestone('#d8c8a6', { tag: 'wall' });
+  const R = 0.42, cz = 0.42; // half-round head over short jambs, the sill at 0.14
+  const openD = (x, z) => Math.min(Math.hypot(x, z - cz) - R, Math.max(Math.abs(x) - R, z - cz, 0.14 - z));
+  const wall = custom((x, y, z) => Math.max(Math.abs(x) - 1, Math.abs(y) - 0.5, -z, z - 1, -openD(x, z)), [-1, -0.5, 0, 1, 0.5, 1], st);
+  // The arch's ring of dressed stones, standing a little proud of the face.
+  const ring = custom((x, y, z) => Math.max(Math.abs(Math.hypot(x, z - cz) - R - 0.06) - 0.06, cz - z, Math.abs(y - 0.5) - 0.03), [-0.6, 0.45, cz - 0.02, 0.6, 0.55, 1], voussoir);
+  const parts = [wall, ring];
+  parts.push(boxAt(-0.42, -0.4, 0.14, 0.42, 0.3, 0.98, mat('#10141a', { tag: 'wall', spec: 0 })));
+  const flow = mat((x, y, z) => {
+    const s = vnoise(x * 10, (y - t) * 14 - z * 10, 3);
+    return mix(hex('#3a7a80'), hex('#cfe8ec'), s > 0.62 ? 0.7 : 0.15 + s * 0.2);
+  }, { tag: 'prop', spec: 1.4, shin: 80, emit: 0.05 });
+  parts.push(boxAt(-0.4, 0.3, 0.14, 0.4, 0.5, 0.2, flow));
+  parts.push(custom((x, y, z) => {
+    // The fall: a curved sheet from the sill's lip (y 0.5, z 0.2) down to the sea (y 0.66, z 0).
+    const u = Math.max(0, Math.min(1, (0.2 - z) / 0.2)), yc = 0.5 + 0.16 * u * u;
+    return Math.max(Math.abs(y - yc) - 0.02, Math.abs(x) - 0.38, -z, z - 0.2);
+  }, [-0.4, 0.46, 0, 0.4, 0.7, 0.21], flow));
+  const fm = foamM();
+  const R2 = rng(7 + Math.floor(t * 3) * 13);
+  for (let i = 0; i < 7; i++) parts.push(move(ellipsoid(0.08 + R2() * 0.05, 0.06, 0.025, fm), -0.34 + i * 0.11 + (R2() - 0.5) * 0.04, 0.7 + R2() * 0.08, 0.01));
+  return union(parts);
+}
+
+/**
+ * The culvert's outflow (2×1 of sea, the Harbor's 1–2, 10; origin at the shared edge, sea level):
+ * the town's sea with a fan of paler, quicker canal water spreading from the quay, foam drifting
+ * off on it. `t` loops 0–1.
+ */
+export function outflow({ t = 0 } = {}) {
+  const mt = mat((x, y) => {
+    const n = vnoise((x + 1) * 4 + t, (y + 0.5) * 4, 7, 4);
+    let c = mix(hex('#1e4a52'), hex('#3a7a80'), n * 0.6); // as town:water
+    // The fan, from the culvert's mouth (0, −0.5) spreading south, streaked with the current.
+    const d = Math.hypot(x / 1.1, y + 0.5), fan = Math.max(0, 1 - d) * sstep(-0.55, -0.3, y);
+    const streak = vnoise(Math.atan2(x, y + 0.6) * 6, d * 6 - t * 6, 2);
+    c = mix(c, hex('#5a9aa0'), fan * (0.5 + streak * 0.4));
+    if (streak > 0.7 && fan > 0.15) c = mix(c, hex(PAL.foam), Math.min(1, (streak - 0.7) * 2.4 * fan));
+    return c;
+  }, { tag: 'floor', spec: 1.4, shin: 80 });
+  return custom((x, y, z) => Math.max(Math.abs(x) - 1, Math.abs(y) - 0.5, z - 0.004 - (vnoise((x + 1) * 3 + t * 2, (y + 0.5) * 3, t * 3) - 0.5) * 0.02, -z - 0.05), [-1, -0.5, -0.05, 1, 0.5, 0.02], mt);
+}
