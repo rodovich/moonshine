@@ -885,6 +885,48 @@ export function stepsTile(half = 'l', { moon = false } = {}) {
   return union(parts);
 }
 
+// A 3×5 stencil font for the lid's words.
+const GLYPHS = {
+  M: ['101', '111', '111', '101', '101'], I: ['111', '010', '010', '010', '111'], N: ['101', '111', '111', '111', '101'],
+  D: ['110', '101', '101', '101', '110'], T: ['111', '010', '010', '010', '010'], H: ['101', '101', '111', '101', '101'],
+  E: ['111', '100', '110', '100', '111'], S: ['111', '100', '111', '001', '111'], P: ['110', '101', '110', '100', '100'],
+  1: ['010', '110', '010', '010', '111'], 0: ['111', '101', '101', '101', '111'], '!': ['010', '010', '010', '000', '010'],
+};
+/** Is (u, v) inside a stroke of `word` set centered at u = 0, v = 0 (cell size c, v down the letter)? */
+function inWord(word, u, v, c) {
+  const n = word.length, lw = 4 * c, x0 = -(n * lw - c) / 2;
+  const i = Math.floor((u - x0) / lw);
+  if (i < 0 || i >= n) return false;
+  const cx = Math.floor((u - x0 - i * lw) / c), cy = Math.floor((v + 2.5 * c) / c);
+  if (cx < 0 || cx > 2 || cy < 0 || cy > 4) return false;
+  return GLYPHS[word[i]][cy][cx] === '1';
+}
+
+/** The boards over the hundredth step's hole: this half's share of three planks running across the flight. */
+function boardLid(half, chalk, R) {
+  const words = ['MIND', 'THE', 'STEP'];
+  const pw = (2 * R + 0.1) / 3;
+  const lid = mat((x, y) => {
+    const gx = x + (half === 'l' ? -0.5 : 0.5); // 0 at the seam between the halves
+    const k =Math.max(0, Math.min(2, Math.floor((y + R + 0.05) / pw)));
+    const v = y + R + 0.05 - (k + 0.5) * pw;
+    const g = vnoise(gx * 4, y * 60 + k * 7, 5) * 0.14 + fbm(gx * 20, y * 30, k, 2) * 0.1;
+    let c = tint(mix(hex('#8a6a48'), hex('#7a5c3e'), hash3(k, 0, 41)), 0.88 + g);
+    if (Math.abs(v) > pw / 2 - 0.012) c = tint(c, 0.55);
+    if (inWord(words[k], gx, v, 0.042)) c = mix(c, hex('#f0e8d0'), 0.85 - fbm(gx * 40, y * 40, 3, 2) * 0.35);
+    if (chalk && k === 1 && inWord('100!', gx + 0.03, v + 0.01, 0.05) && vnoise(gx * 90, y * 90, 8) > 0.25) c = mix(c, hex('#fafaf4'), 0.8);
+    return c;
+  }, { tag: 'floor', spec: 0.08, shin: 12 });
+  // Flush with the landing; the boards run past the seam, so the halves meet in one lid.
+  const xa = half === 'l' ? -R - 0.045 : -0.5, xb = half === 'l' ? 0.5 : R + 0.045;
+  const parts = [boxAt(xa, -R - 0.045, -0.2, xb, R + 0.045, -0.002, lid, 0.006)];
+  // Nail heads at the plank ends.
+  const nail = m('#4a4448', { tag: 'floor', spec: 0.6 });
+  const xe = half === 'l' ? -R + 0.01 : R - 0.01;
+  for (let k = 0; k < 3; k++) for (const dy of [-0.05, 0.05]) parts.push(move(sphere(0.012, nail), xe, -R - 0.045 + (k + 0.5) * pw + dy, -0.004));
+  return union(parts);
+}
+
 /** Landing paving at the Steps (flat, at a flight's head): big worn slabs, 'l' and 'r' halves of a two-wide pattern. */
 export function landingTile(half = 'l', { hollow = null, t = 0 } = {}) {
   // Slabs: the two-wide landing is laid in big stones 0.66 deep; the hollow
@@ -913,7 +955,7 @@ export function landingTile(half = 'l', { hollow = null, t = 0 } = {}) {
       return c;
     }, { tag: 'floor', spec: 0.06, shin: 10 });
     const jointM = m('#2a2228', { tag: 'floor' });
-    if (hollow !== 'open') {
+    if (hollow === 'dry' || hollow === 'wet') {
       parts.length = 0;
       parts.push(subtract(boxAt(-0.6, -0.6, -0.3, 0.6, 0.6, 0, slabM), boxAt(-R - 0.06, -R - 0.06, -0.2, R + 0.06, R + 0.06, 0.1, null), jointM));
       parts.push(boxAt(-R - 0.06, -R - 0.06, -0.3, R + 0.06, R + 0.06, -0.04, jointM));
@@ -929,6 +971,15 @@ export function landingTile(half = 'l', { hollow = null, t = 0 } = {}) {
         const film = mat((x, y, z) => mix(hex('#9a907c'), hex('#d8ecf0'), vnoise(x * 24 - t * 8, y * 24, t * 4) > 0.65 ? 0.8 : 0.0), { tag: 'floor', spec: 1.2, shin: 60 });
         parts.push(custom((x, y, z) => Math.max(Math.abs(z + 0.001) - 0.003, Math.abs(y - (0.42 + Math.sin(x * 9) * 0.02)) - 0.05 - (x < -0.2 ? 0.0 : 0), x - (half === 'r' ? 0.38 : 0.6), -0.6 - x), [-0.6, 0.3, -0.01, 0.6, 0.55, 0.005], film));
       }
+    } else if (hollow === 'boarded' || hollow === 'chalked') {
+      // Acts 4–6: the hole boarded over flush, three planks across both halves, MIND / THE / STEP stenciled
+      // one word to a plank (docs/art-act4.md); in the epilogue someone has chalked 100! over THE.
+      parts.length = 0;
+      // One hole across both halves: open to the seam side.
+      const [ha, hb] = half === 'l' ? [-R - 0.06, 0.6] : [-0.6, R + 0.06];
+      parts.push(subtract(boxAt(-0.6, -0.6, -0.3, 0.6, 0.6, 0, slabM), boxAt(ha, -R - 0.06, -0.2, hb, R + 0.06, 0.1, null), jointM));
+      parts.push(boxAt(ha, -R - 0.06, -0.3, hb, R + 0.06, -0.04, jointM));
+      parts.push(boardLid(half, hollow === 'chalked', R));
     } else {
       // Open: the slab gone, the shaft dark below, a ladder's top rungs.
       parts.length = 0;

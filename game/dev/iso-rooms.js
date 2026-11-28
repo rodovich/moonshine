@@ -15,6 +15,10 @@ export const roomsIso = {
     S.prop('act2_interiors', 'crate_stack', 1, 9);
     S.prop('act2_interiors', 'lectern', 3, 10);
     S.room(9, 9, 6, 5, { set: 'lamp', windows: [[10, 8], [12, 8], [14, 8], [8, 10], [8, 12]], doors: [[11, 14]] });
+    S.add('rooms', 'crypt_stairs_right', 1, 12, 0, 1, 1, 0.3);
+    // The hundredth step's lid, Acts 4–6 and the epilogue, on a strip of landing.
+    for (const [x, f] of [[17, 'landing_l'], [18, 'landing_r'], [19, 'landing_l'], [20, 'landing_r']]) for (const y of [3, 5]) S.add('act2_landmarks', f, x, y, 0, 1, 1, 0);
+    for (const [x, f] of [[17, 'lid_boarded_l'], [18, 'lid_boarded_r'], [19, 'lid_chalked_l'], [20, 'lid_chalked_r']]) S.add('act2_landmarks', f, x, 4, 0, 1, 1, 0);
     return S.done();
   },
 };

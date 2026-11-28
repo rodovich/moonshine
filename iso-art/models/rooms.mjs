@@ -11,7 +11,7 @@ import { mat, hex, mix } from '../lib/render.mjs';
 import { plaster, limestone, wood } from './materials.mjs';
 import { fbm, vnoise } from './materials.mjs';
 import { hash3 } from '../lib/noise.mjs';
-import { onFace } from './arch.mjs';
+import { onFace, stairFlight } from './arch.mjs';
 import { heightfield, sstep } from './ground.mjs';
 import { PAL, ashlar, tint } from './act2-materials.mjs';
 import { ROOM_H } from './flat.mjs';
@@ -195,4 +195,9 @@ export function roomCut(set, dir = 'x', { door = false } = {}) {
   return union(parts);
 }
 
-void move; void sstep;
+/** The crypt's stair: one tile of old cellar steps in the town kit's stair geometry (descending toward +y before `place`). */
+export function cryptStairs() {
+  return move(stairFlight(1, { below: 0, stone: '#8a7a66', noseColor: '#a49280' }), 0, 0, 1);
+}
+
+void sstep;
