@@ -24,9 +24,11 @@
 //   - A block directly south of a raised floor holds it up (its top is
 //     flush with that floor); one directly north of it is a parapet (a
 //     little above it). Other blocks stand on the floor south of them, as
-//     tall as their run of blocks in that column suggests (32-96 px). A
+//     tall as their run of blocks in that column suggests (32-96 px; at
+//     most 48 with floor at both ends: a fountain in a square). A
 //     tile that blocks only because of its detail layer (a crate on the
-//     floor) is a low block (24 px).
+//     floor) is a low block (28 px); detail-layer things of up to four
+//     tiles are props, drawn upright (render.js).
 
 const WATER = /water|canal|sea|harbou?r|river|pool|wave/i;
 const LOW = /low|fence|rail|hedge|bench|crate|barrel|planter|post|stool|chair/i;
@@ -173,6 +175,8 @@ export function convertMap(map, def = {}) {
         const c = at(x, yy);
         c.z = base;
         if (walk(north) && north.z > base) c.h = north.z - base; // holds up a raised floor
+        // Standing free in open floor (a fountain, a statue): low, whatever its size.
+        else if (walk(north) && walk(south)) c.h = Math.min(48, 24 + 8 * run);
         else c.h = Math.min(96, 32 + 16 * (run - 1));
       }
       // A parapet or edge: a lip a little above the floor beside it.
@@ -240,6 +244,9 @@ export function convertMap(map, def = {}) {
         }
       }
     }
+    // Big things (a windlass shaft, a long counter) stay low blocks: stood
+    // upright they'd wall off the room.
+    if (group.length > 4) continue;
     const xs = group.map((g) => g.x);
     const ys = group.map((g) => g.y);
     const prop = { x0: Math.min(...xs), y0: Math.min(...ys), x1: Math.max(...xs), y1: Math.max(...ys), cells: group };

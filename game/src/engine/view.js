@@ -15,7 +15,7 @@
 //   hudHit(world, p)          'bag' | 'banner' | null for a tap on the HUD
 //   onScreen(p)               is a point inside the frame
 //   mapDir(dir)               arrow key -> grid direction
-//   tileToScreen(world, x, y) screen point at a tile's center (tests)
+//   tileToScreen(world, x, y) where to click to reach a tile (tests)
 //   playerScreenY(world)      for text boxes that keep off Cheryl
 
 import { WIDTH, HEIGHT } from './display.js';

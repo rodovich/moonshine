@@ -404,8 +404,8 @@ The same game can be drawn a second way: 640×480 in 2:1 dimetric, benchmarked a
 **Maps.** Every map renders from its SNES layers: `iso/convert.js` drafts per-tile kinds (`floor`, `stair`, `block`, `door`, `water`, `void`) and heights, and the renderer draws the SNES tiles themselves sheared onto floor diamonds and wall faces until a map has isometric art. The draft's rules:
 - Tiles named like water, canals, or the sea that block are water, a little below the floor.
 - Walkable tiles named like stairs or steps are stairs. Floor areas joined only through stairs differ in height by the stair's length (rows − 1) × 24 px; the largest area is at 0.
-- A run of blocks directly south of a raised floor holds it up (flush with it); a tile named like a parapet or edge is a lip 12 px above the floor beside it. Other blocks stand on the floor south of them, 32–96 px tall by the length of their run.
-- Things on the floor drawn by the detail layer (a chair, the well) are props: their SNES tiles put back together and stood upright at 2×. Low walls and fences are 28 px blocks.
+- A run of blocks directly south of a raised floor holds it up (flush with it); a tile named like a parapet or edge is a lip 12 px above the floor beside it. Other blocks stand on the floor south of them, 32–96 px tall by the length of their run, except that a run with floor at both ends (a fountain in a square) is at most 48 px.
+- Things on the floor drawn by the detail layer (a chair, the well) are props, up to four tiles: their SNES tiles put back together and stood upright at 2×. Bigger ones (a windlass shaft), low walls, and fences are 28 px blocks.
 - Overhead tiles over the floor are slabs 64 px up (awnings, canopies, washing).
 - An exit set into a wall is a door, drawn in the wall.
 
@@ -415,7 +415,9 @@ Correct a map by hand with overrides on the map definition: `iso: { cells: [[x, 
 
 **Lighting and effects.** Lighting presets, tints, the hue shift, flicker, the wobble, fades, shakes (2.5× as far), and tilts apply to the whole isometric frame. Darkness works as in the SNES view, with light pools as ellipses on the floor. Not yet: emissive pixels that skip lighting, and the dimmer lighting on characters than on the map.
 
-**Tests.** `tests/iso.spec.js` boots the view, walks by keyboard and by click, talks, uses an item, goes through a door, saves in one view and continues in the other, and shows a picture; its screenshots are `tests/screenshots/iso-*.png`.
+**Tests.** `tests/iso.spec.js` boots the view, walks by keyboard and by click, talks, uses an item, goes through a door, saves in one view and continues in the other, and shows a picture; its screenshots are `tests/screenshots/iso-*.png`. `tests/iso-maps.spec.js` loads every map in the isometric view, saves a screenshot of each to `tests/screenshots/iso-maps/`, and checks that the open floor near Cheryl can be clicked. The `iso` Playwright project (`npx playwright test --project=iso`) runs the whole story again, every act's keyboard and pointer playthroughs, in the isometric view.
+
+So that tests work in both views, click by meaning rather than by SNES pixel: `window.moonshine.tileToClient(x, y)` is where a player would click to reach a tile (in the isometric view, a character standing there, or a visible part of the tile); `window.moonshine.tileScreen(x, y)` is a tile's position scaled to the 256×224 frame, off screen if it's hidden behind something; `clickUi(page, name, i)` in `tests/helpers.js` clicks the bag button, an inventory slot, Look/Use/Close, a title option, or the middle of the screen.
 
 ## Module map
 
