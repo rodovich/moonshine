@@ -137,21 +137,40 @@ const bySnes = new WeakMap(); // SNES sheet object -> isometric sheet names
 // content.iso.sheets = { isoSheetName: snesSheet }.
 let aliases = {};
 export function bindSnesSheets(map = {}, frameAliases = {}) {
-  for (const [name, snes] of Object.entries(map)) {
+  for (const [name, list] of Object.entries(map)) {
+    // One isometric sheet may stand in for several SNES sheets (fx and fx_mist).
+    for (const snes of [list].flat()) {
     if (!snes) continue;
     // Several isometric sheets may draw one shared SNES sheet's objects (the cat, from props).
     bySnes.set(snes, [...(bySnes.get(snes) || []), name]);
+    }
   }
   aliases = frameAliases;
 }
 
+const warnedMissing = new Set();
 export function isoFrameFor(e) {
-  const names = (e.sprite && e.sprite.sheet && bySnes.get(e.sprite.sheet)) || [];
+  let names = (e.sprite && e.sprite.sheet && bySnes.get(e.sprite.sheet)) || [];
+  // A palette swap has its own sheet, <name>_<palette> (mover_other, girl_b).
+  const pal = e.sprite && typeof e.sprite.palette === 'string' ? e.sprite.palette : null;
+  if (pal) names = names.flatMap((n) => (sheets.has(`${n}_${pal}`) ? [`${n}_${pal}`, n] : [n]));
   for (const name of names) {
     const s = sheets.get(name);
     if (!s || !s.ready) continue;
     const f = frameIn(e, s, name);
     if (f) return f;
+  }
+  // A character whose sheet lacks this frame stands in its own art, not the
+  // SNES sprite (and the console says which frame is missing).
+  const s = names.map((n) => sheets.get(n)).find((x) => x && x.ready);
+  if (s && e.directional) {
+    const want = e.pose || (e.moving ? `walk_${e.facing}` : `${e.facing}_0`);
+    if (!warnedMissing.has(`${s.name}:${want}`)) {
+      warnedMissing.add(`${s.name}:${want}`);
+      console.warn(`[iso art] ${s.name} has no frame for "${want}"; standing in its ${e.facing}_0`);
+    }
+    const f = s.frame(`${e.facing}_0`) || s.frame(`${MIRROR[e.facing]}_0`) || s.frame('down_0');
+    if (f) return { ...f, flip: !s.frame(`${e.facing}_0`) && !!s.frame(`${MIRROR[e.facing]}_0`), shadow: s.frame(`${f.name}.shadow`) };
   }
   return null;
 }
@@ -189,4 +208,17 @@ function frameIn(e, s, name) {
     if (r) return r;
   }
   return pick((d) => s.frame(`${d}_0`) || s.frameAt(`idle_${d}`, ms));
+}
+
+// The isometric frame for an SNES sheet's frame or animation (an effect's
+// sprite), as { img, ax, ay }, or null.
+export function isoFrameForSheet(snes, frame, ms) {
+  for (const name of bySnes.get(snes) || []) {
+    const s = sheets.get(name);
+    if (!s || !s.ready) continue;
+    const alias = aliases[name] && aliases[name][frame];
+    const f = s.frameAt(alias || frame, ms);
+    if (f) return f;
+  }
+  return null;
 }

@@ -56,7 +56,9 @@ function artFont(fallback, only = null) {
       for (const ch of normalize(text)) {
         if (n++ >= count) break;
         const g = glyph(f, ch);
-        if (g && g[2] && ch !== ' ') ctx.drawImage(rec.img, g[0], g[1], g[2], g[3], cx, Math.round(y), g[2], g[3]);
+        // A glyph's box may carry a margin for its outline and shadow (the title font's 6 px).
+        const mg = f.margin || 0;
+        if (g && g[2] && ch !== ' ') ctx.drawImage(rec.img, g[0], g[1], g[2], g[3], cx - mg, Math.round(y) - mg, g[2], g[3]);
         cx += advance(f, ch);
       }
     },

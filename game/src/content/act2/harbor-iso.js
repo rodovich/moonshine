@@ -58,4 +58,5 @@ function build() {
 const base = build();
 const list = base.done();
 // follows: the Harbor doesn't change in Act 2 (Act 5's risen Harbor falls back to the converter).
-export const harborIso = { scene: () => list, floor: base.floorHeight(0), follows: [] };
+// hide: the ferry's SNES sprite (the scene draws the Persistence itself).
+export const harborIso = { scene: () => list, floor: base.floorHeight(0), follows: [], hide: ['ferry_sprite'] };

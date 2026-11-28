@@ -100,7 +100,12 @@ const entities = [
   { id: 'stove', x: 3, y: 2, look: "The stove. No kettle tonight. Cold baths only on Moonshine Night. That's the rule." },
   {
     id: 'clock', x: 4, y: 1,
-    interact: (g) => g.describe(morning(g) ? 'Half past something.' : "Nearly moonrise. Roughly. That clock has never once been right, but it's always been confident."),
+    interact: (g) => {
+      if (morning(g)) return g.describe('Half past something.');
+      // A nudge toward the egg timer while the Kid wants something that ticks (iso playtest).
+      if (g.flag('kid.wantsTimer') && !g.flag('got.egg_timer')) return g.describe("It ticks, but it isn't going anywhere. The egg timer, though, is portable.");
+      return g.describe("Nearly moonrise. Roughly. That clock has never once been right, but it's always been confident.");
+    },
   },
   { id: 'window', x: 5, y: 1, w: 2, look: "My window looks at the Pelletiers' wall. I didn't buy this house for the window. I bought it for the roof." },
   // The bookshelf sits above the bed; Z reaches it diagonally from (8, 2).

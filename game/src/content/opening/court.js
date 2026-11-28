@@ -455,7 +455,12 @@ const objects = [
   {
     // Morning: the top of the Squeeze, walkable; the exit is the row below.
     id: 'squeeze', x: 15, y: 24, w: 2, solid: false, when: morning,
-    look: 'The Squeeze is clear. There\'s a long scrape down every step, and at the bottom, a lot of surprised geraniums.',
+    // The first look and the first step onto it share the line, and say it once (iso playtest).
+    interact: async (g) => {
+      if (g.flag('n.squeezeSeen')) return g.describe('Clear, and scraped all the way down.');
+      g.setFlag('n.squeezeSeen', 1);
+      return g.describe('The Squeeze is clear. There\'s a long scrape down every step, and at the bottom, a lot of surprised geraniums.');
+    },
   },
 ];
 
@@ -863,7 +868,7 @@ export const courtMap = composedMap(compose, {
       every: [5, 8], when: morning,
       run: (g) => {
         g.sfx('well_breath');
-        g.spawnEffect({ sprite: { sheet: fx_mist, frame: 'mist' }, at: [9.5, 16.5], seconds: 1.8, layer: 'top' });
+        g.spawnEffect({ sprite: { sheet: fx_mist, frame: 'mist' }, at: [9.5, 16.5], seconds: 1.8, layer: 'top', z: 26 });
       },
     },
   ],

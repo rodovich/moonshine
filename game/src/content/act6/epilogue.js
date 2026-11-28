@@ -58,7 +58,7 @@ export function courtEpilogue(map) {
     use: npcDecline("Not now. Gerald's deciding whether a draw counts as a win."),
   };
   const neighborEpi = {
-    id: 'epi_neighbor', name: 'Neighbor', x: 14, y: 3, facing: 'up', sprite: { sheet: neighbor }, when: epilogue,
+    id: 'epi_neighbor', name: 'Her Next Door', x: 14, y: 3, facing: 'up', sprite: { sheet: neighbor }, when: epilogue,
     interact: lines('neighbor', [
       ["Whitest sheets of my life. The moon was straight on last night. I don't know where it had been."],
     ], ["Mother's recipe. Vinegar and something. And a straight moon. That's the secret."]),

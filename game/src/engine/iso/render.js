@@ -7,12 +7,12 @@
 // SNES sprites at 2×. iso/sprites.js swaps in real art per sheet when it
 // exists.
 
-import { TILE } from '../tilemap.js';
+import { TILE, TileMap } from '../tilemap.js';
 import { colorOf } from '../art.js';
 import { safeCall, isInteractable } from '../world.js';
 import { ISO_W, ISO_H, HW, HH, TW, TH, proj, inDiamond } from './project.js';
 import { convertMap } from './convert.js';
-import { isoFrameFor, isoSheet } from './sprites.js';
+import { isoFrameFor, isoSheet, isoFrameForSheet } from './sprites.js';
 
 const warnedFrames = new Set();
 
@@ -175,7 +175,30 @@ export class IsoRenderer {
 
   bounds(world) {
     const iso = this.model(world);
-    return { x0: 0, x1: (iso.w + iso.h) * HW, y0: -iso.maxZ - 16, y1: (iso.w + iso.h) * HH + 16 };
+    const b = { x0: 0, x1: (iso.w + iso.h) * HW, y0: -iso.maxZ - 16, y1: (iso.w + iso.h) * HH + 16 };
+    // A hand-built scene: as high and as low as its pieces reach (a hill's
+    // top at z 1120, a stair going down below the map's last row).
+    const scene = this.sceneFor(world);
+    if (scene) {
+      if (this.sceneCache.bounds) return this.sceneCache.bounds;
+      let y0 = Infinity;
+      let y1 = -Infinity;
+      for (const d of scene) {
+        const sheet = isoSheet(d.s);
+        const name = sheet && (sheet.m.anims && sheet.m.anims[d.f] ? sheet.m.anims[d.f].frames[0] : d.f);
+        const f = sheet && sheet.raw(name);
+        if (!f) continue;
+        const q = proj(d.x, d.y, d.z, this.ox);
+        y0 = Math.min(y0, q.y - f.ay);
+        y1 = Math.max(y1, q.y - f.ay + f.h);
+      }
+      if (y0 < Infinity) {
+        b.y0 = Math.min(b.y0, y0 - 16);
+        b.y1 = Math.max(b.y1, y1 + 16);
+      }
+      this.sceneCache.bounds = b;
+    }
+    return b;
   }
 
   // Tile images for a cell, by layer (current animation frames).
@@ -213,12 +236,27 @@ export class IsoRenderer {
     if (scene) {
       for (const d of scene) {
         const k = d.x0 + d.fw - 1 + d.y0 + d.fd - 1;
-        // Floors (layer 0) go down before anything stands on them.
         // Floors and decals on them (layer < 0.1) go down before anything stands on them.
-        items.push(d.layer < 0.1 ? { type: 'd', key: -1e6 + d.layer * 1e5 + k, order: 0, d } : { type: 'd', key: k, order: d.layer, d });
+        if (d.layer < 0.1) { items.push({ type: 'd', key: -1e6 + d.layer * 1e5 + k, order: 0, d }); continue; }
+        if (d.fw === 1 && d.fd === 1) { items.push({ type: 'd', key: k, order: d.layer, d }); continue; }
+        // A piece wider than a tile is drawn in 32 px screen columns, one per
+        // diagonal of its footprint, each sorted by its own front tile, so a
+        // long back line or a tower sorts right against people beside it.
+        const ac = d.x - d.y; // the anchor's column (x - y), in tiles
+        const c0 = d.x0 - (d.y0 + d.fd - 1);
+        const c1 = d.x0 + d.fw - 1 - d.y0;
+        for (let c = c0; c <= c1; c++) {
+          let key = -Infinity;
+          for (let y = d.y0; y < d.y0 + d.fd; y++) {
+            const x = c + y;
+            if (x >= d.x0 && x < d.x0 + d.fw) key = Math.max(key, x + y);
+          }
+          const mid = (c - ac) * HW; // the column's center, from the anchor, in px
+          items.push({ type: 'd', key, order: d.layer, d, strip: [c === c0 ? -1e4 : mid - HW / 2, c === c1 ? 1e4 : mid + HW / 2] });
+        }
       }
     }
-    for (const c of scene ? [] : iso.cells) {
+    for (const c of scene ? iso.cells.filter((c) => this.netCells?.has(`${c.x},${c.y}`)) : iso.cells) {
       const T = this.top(c);
       if (T == null) continue;
       const p = proj(c.x, c.y, T, ox);
@@ -227,7 +265,7 @@ export class IsoRenderer {
       items.push({ type: 'cell', key: c.x + c.y, order: 0, c, T });
       if (c.over && c.kind !== 'block') items.push({ type: 'slab', key: c.x + c.y, order: 2, c });
     }
-    for (const pr of scene ? [] : iso.props) items.push({ type: 'prop', key: pr.x1 + pr.y1, order: 1, pr });
+    for (const pr of scene ? iso.props.filter((p) => p.cells.some((c) => this.netCells?.has(`${c.x},${c.y}`))) : iso.props) items.push({ type: 'prop', key: pr.x1 + pr.y1, order: 1, pr });
     const p = world.player;
     for (const e of world.entities) {
       if (!e.visible) continue;
@@ -249,12 +287,18 @@ export class IsoRenderer {
     if (pr && p.visible) {
       // The area around her, so the floor she'd walk or click on next shows too.
       const zone = { x: pr.x - CUT_X, y: pr.y - CUT_Y, w: pr.w + 2 * CUT_X, h: pr.h + 2 * CUT_Y };
+      const near = { x: pr.x - 24, y: pr.y - 16, w: pr.w + 48, h: pr.h + 32 }; // a hand-built scene's walls: just around her
       for (const it of items) {
         if (it.type === 'd') {
-          // A wall, roof, or big prop in front of her fades while she's behind it.
-          if (it.key <= pk || it.d.layer < 0.1 || !it.d.rect) continue;
-          if (it.d.topZ != null && it.d.topZ <= pz + 20) continue; // below her feet: a floor she can see over
-          if (overlap(it.d.rect, it.d.layer < 1 ? zone : pr)) cut.add(it);
+          // A wall or roof (layer < 1) in front of her, near her, fades
+          // while she's behind it. In front means its whole footprint is at
+          // or past hers on both axes (side by side, or behind, it isn't).
+          // Props don't fade: she shows through them instead (drawGhost).
+          const d = it.d;
+          if (d.layer < 0.1 || d.layer >= 1 || !d.rect || d.fade === false) continue;
+          if (!(d.x0 >= p.x && d.y0 >= p.y) || (d.x0 === p.x && d.y0 === p.y && d.fw === 1 && d.fd === 1)) continue;
+          if (d.topZ != null && d.topZ <= pz + 48) continue; // too low to hide her (a floor, a low wall)
+          if (overlap(d.rect, near)) cut.add(it);
           continue;
         }
         if (it.type !== 'cell' && it.type !== 'slab') continue;
@@ -275,7 +319,11 @@ export class IsoRenderer {
         this.drawShadows(ctx, world, items, ms, cut);
         shadowsDone = true;
       }
-      if (it.type === 'd') this.drawDrawable(ctx, it.d, ms, cut.has(it));
+      if (it.type === 'd') {
+        this.drawDrawable(ctx, it.d, ms, cut.has(it), it.strip);
+        // A prop drawn over her: her outline shows through it.
+        if (drawnPlayer && pr && it.d.layer >= 1 && it.d.rect && overlap(stripRect(it.d.rect, it.strip), pr)) hidden = true;
+      }
       else if (it.type === 'cell') this.drawCell(ctx, world, it, ms, cut.has(it));
       else if (it.type === 'slab') { if (!cut.has(it)) this.drawSlab(ctx, world, it.c, ms); }
       else if (it.type === 'fx') this.drawFx(ctx, world, it.fx);
@@ -412,13 +460,25 @@ export class IsoRenderer {
       return null;
     }
     // Scenes follow the flags (and the player's pose: Cheryl seated on the tub).
-    const key = JSON.stringify(world.state.flags) + (world.player.pose || '');
+    // ...and the map's run-time tile changes (g.setTile).
+    const key = JSON.stringify(world.state.flags) + (world.player.pose || '') + (world.map.version || 0);
     if (this.sceneCache && this.sceneCache.def === world.mapDef.iso && this.sceneCache.key === key) return this.sceneCache.list;
-    const list = (safeCall(world.mapDef.iso.scene, world.api) || []).map((d) => {
+    const iso = world.mapDef.iso;
+    const norm = (d) => {
       const fw = d.fw || 1;
       const fd = d.fd || 1;
       return { ...d, fw, fd, x0: Math.round(d.x - fw / 2), y0: Math.round(d.y - fd / 2), z: d.z || 0, layer: d.layer ?? 1 };
-    });
+    };
+    let list = safeCall(iso.scene, world.api) || [];
+    // Later acts extend an earlier act's scene for the maps they change:
+    // iso.extend: [(g, drawables, kit) => drawables].
+    for (const fn of iso.extend || []) list = safeCall(fn, world.api, list, sceneKit()) || list;
+    list = list.map(norm);
+    // The safety net: cells whose tiles differ from what the scene was built
+    // for (a later act's patch, variant, or overlay) drop the scene's pieces
+    // and show the converter's version instead.
+    this.netCells = this.changedCells(world);
+    if (this.netCells.size) list = list.filter((d) => !footprint(d).some((k) => this.netCells.has(k)));
     this.sceneCache = { def: world.mapDef.iso, key, list };
     // Entities the scene draws itself (their own sprites are hidden).
     let hide = world.mapDef.iso.hide || [];
@@ -427,9 +487,45 @@ export class IsoRenderer {
     return list;
   }
 
+  // Cells whose tiles differ from the map as its scene knows it: the map
+  // rebuilt with only the flags the scene follows (iso.follows: names, or
+  // prefixes ending in '*'). Without `follows`, nothing is checked.
+  changedCells(world) {
+    const out = new Set();
+    const follows = world.mapDef.iso.follows;
+    if (!follows) return out;
+    const keep = (name) => follows.some((f) => (f.endsWith('*') ? name.startsWith(f.slice(0, -1)) : name === f));
+    const all = world.state.flags;
+    const saved = { variant: world.variant, map: world.map, patched: world.patched };
+    let base;
+    try {
+      world.state.flags = Object.fromEntries(Object.entries(all).filter(([k]) => keep(k)));
+      world.variant = world.pickVariant(world.mapDef);
+      world.map = new TileMap(world.layerDef());
+      world.patched = [];
+      const fn = world.mapDef.patches;
+      for (const [layer, x0, y0, value, w = 1, h = 1] of (fn && safeCall(fn, world.api)) || []) {
+        for (let y = y0; y < y0 + h; y++) for (let x = x0; x < x0 + w; x++) world.map.setTile(layer, x, y, value);
+      }
+      base = world.map;
+    } finally {
+      world.state.flags = all;
+      Object.assign(world, saved);
+    }
+    const now = world.map;
+    const name = (m, l, x, y) => { const t = m.tile(l, x, y); return t ? t.name : ''; };
+    for (let y = 0; y < now.h; y++) {
+      for (let x = 0; x < now.w; x++) {
+        const same = ['ground', 'detail', 'overhead'].every((l) => name(base, l, x, y) === name(now, l, x, y)) && base.solid(x, y) === now.solid(x, y);
+        if (!same) out.add(`${x},${y}`);
+      }
+    }
+    return out;
+  }
+
   // One drawable: its frame (or animation) with its anchor on the
   // footprint's center at its base height, its cast shadow first.
-  drawDrawable(ctx, d, ms, faded) {
+  drawDrawable(ctx, d, ms, faded, strip = null) {
     const sheet = isoSheet(d.s);
     if (!sheet) return;
     const f = sheet.m.anims && sheet.m.anims[d.f] ? sheet.frameAt(d.f, ms) : sheet.frame(d.f);
@@ -440,12 +536,17 @@ export class IsoRenderer {
     const q = proj(d.x, d.y, d.z, this.ox);
     const x = q.x - this.cx;
     const y = q.y - this.cy;
-    if (faded) ctx.globalAlpha = 0.3;
-    drawAnchored(ctx, f, x, y);
+    if (faded) ctx.globalAlpha = 0.35;
+    if (strip) {
+      // One screen column of it: image x from the anchor's column.
+      const sx0 = Math.max(0, Math.round(f.ax + strip[0]));
+      const sx1 = Math.min(f.img.width, Math.round(f.ax + strip[1]));
+      if (sx1 > sx0) ctx.drawImage(f.img, sx0, 0, sx1 - sx0, f.img.height, Math.round(x - f.ax) + sx0, Math.round(y - f.ay), sx1 - sx0, f.img.height);
+    } else drawAnchored(ctx, f, x, y);
     ctx.globalAlpha = 1;
     d.topZ = d.z + (f.hpx || Math.max(0, f.ay - HH)); // how high it rises
-    d.rect = { x: Math.round(x - f.ax), y: Math.round(y - f.ay), w: f.img.width, h: f.img.height, img: f.img, flip: false, scale: 1 };
-    if (!faded || d.layer < 0.1) this.hits.push({ type: 'd', d, rect: d.rect });
+    d.rect = { anchorX: f.ax, x: Math.round(x - f.ax), y: Math.round(y - f.ay), w: f.img.width, h: f.img.height, img: f.img, flip: false, scale: 1 };
+    if (!faded || d.layer < 0.1) this.hits.push({ type: 'd', d, rect: d.rect, strip });
   }
 
   // The shadow pass: drawables' and characters' cast shadows.
@@ -590,9 +691,16 @@ export class IsoRenderer {
   }
 
   drawFx(ctx, world, fx) {
-    const img = fx.art.frameAt(fx.frame, fx.t * (1000 / 60));
-    if (!img) return;
+    const ms = fx.t * (1000 / 60);
     const q = this.worldToMap(world, fx.x + fx.offset[0], fx.y + fx.offset[1]);
+    // The art's version, standing at its point (raised by the effect's z, in px).
+    const art = isoFrameForSheet(fx.art.sheet, fx.frame, ms);
+    if (art) {
+      drawAnchored(ctx, art, q.x - this.cx, q.y - (fx.z || 0) - this.cy);
+      return;
+    }
+    const img = fx.art.frameAt(fx.frame, ms);
+    if (!img) return;
     ctx.drawImage(img, Math.round(q.x - img.width - this.cx), Math.round(q.y - img.height - this.cy), img.width * 2, img.height * 2);
   }
 
@@ -629,6 +737,10 @@ export class IsoRenderer {
       const h = this.hits[i];
       if (h.type === 'd') {
         if (tile || !hitRect(h.rect, sx, sy)) continue;
+        if (h.strip) {
+          const local = sx - (h.rect.x + h.rect.anchorX); // from the anchor's column
+          if (local < h.strip[0] || local >= h.strip[1]) continue;
+        }
         tile = this.cellUnder(h.d, mx, my);
         continue;
       }
@@ -680,6 +792,55 @@ function drawAnchored(ctx, f, x, y, flip = false) {
   ctx.scale(-1, 1);
   ctx.drawImage(f.img, -dx - f.img.width, dy);
   ctx.restore();
+}
+
+// The tiles a drawable stands on, as 'x,y' keys.
+function footprint(d) {
+  const out = [];
+  for (let y = d.y0; y < d.y0 + d.fd; y++) for (let x = d.x0; x < d.x0 + d.fw; x++) out.push(`${x},${y}`);
+  return out;
+}
+
+// Helpers for building drawables (what iso.extend functions receive).
+function sceneKit() {
+  const add = (list, s, f, x, y, z = 0, fw = 1, fd = 1, layer = 1) => {
+    const d = { s, f, x: x + fw / 2, y: y + fd / 2, z, fw, fd, layer };
+    list.push(d);
+    return d;
+  };
+  return {
+    // A piece on tile (x, y)'s footprint (top-left tile, like the scenes' add()).
+    add,
+    // A wall column: face pieces [frame, heightPx] stacked from z0, then its top [frame, z].
+    column(list, s, x, y, z0, sFaces = [], eFaces = [], top = null) {
+      let z = z0;
+      for (const [f, h] of sFaces) { add(list, s, f, x, y, z, 1, 1, 0.1); z += h; }
+      z = z0;
+      for (const [f, h] of eFaces) { add(list, s, f, x, y, z, 1, 1, 0.1); z += h; }
+      if (top) add(list, s, top[0], x, y, top[1], 1, 1, 0.2);
+    },
+    // Remove the pieces standing on any of these tiles ([[x, y], ...]).
+    clear(list, tiles) {
+      const keys = new Set(tiles.map(([x, y]) => `${x},${y}`));
+      return list.filter((d) => {
+        const fw = d.fw || 1;
+        const fd = d.fd || 1;
+        const x0 = Math.round(d.x - fw / 2);
+        const y0 = Math.round(d.y - fd / 2);
+        for (let y = y0; y < y0 + fd; y++) for (let x = x0; x < x0 + fw; x++) if (keys.has(`${x},${y}`)) return false;
+        return true;
+      });
+    },
+  };
+}
+
+// The part of a drawable's rect in one of its screen columns.
+function stripRect(r, strip) {
+  if (!strip) return r;
+  const ax = r.x + (r.anchorX || 0);
+  const x0 = Math.max(r.x, ax + strip[0]);
+  const x1 = Math.min(r.x + r.w, ax + strip[1]);
+  return { x: x0, y: r.y, w: Math.max(0, x1 - x0), h: r.h };
 }
 
 function overlap(a, b) {
