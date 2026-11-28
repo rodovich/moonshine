@@ -44,4 +44,7 @@ function scene(g) {
   return out;
 }
 
-export const flatIso = { scene, floor: () => 0 };
+// The flags this scene follows (see court-iso.js).
+const follows = ['got.pepper_mill', 'got.egg_timer', 'got.moon_chart', 'got.soap'];
+
+export const flatIso = { scene, floor: () => 0, follows };
