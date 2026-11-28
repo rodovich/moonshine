@@ -2,7 +2,7 @@
 // (docs/design/01-opening.md, "Art needed"). Frame names and footprints are
 // listed in docs/iso-art-direction.md.
 
-import { frame, split, POST } from '../lib/jobs.mjs';
+import { frame, split, sliceX, POST } from '../lib/jobs.mjs';
 import { union, move, place, boxAt, torus } from '../lib/sdf.mjs';
 import { cobbles, deck } from '../models/ground.mjs';
 import { facade, parapet, parapetPier, stairFlight, retainingWall, lowRoof, roofTop, crownWall, lowHouse, COLORS, U } from '../models/arch.mjs';
@@ -100,14 +100,16 @@ export default {
     out.push(runProp('parapet_x', 'x', () => parapet('x', 0.9), 36));
     out.push(runProp('parapet_y', 'y', () => parapet('y', 0.9), 36));
     out.push(prop('parapet_pier', () => parapetPier(0.95), [1, 1], 38, { shadow: true, post: POST.arch }));
-    out.push(runProp('parapet_y_pin', 'y', () => union(parapet('y', 0.9), move(sightPin(), 0, 0, 0.9)), 44));
+    out.push(runProp('parapet_y_pin', 'y', () => union(parapet('y', 0.9), move(sightPin('blade'), 0, 0, 0.9)), 58));
     out.push(runProp('lowwall_y', 'y', () => parapet('y', 0.55, { thick: 0.28 }), 22));
     // The low wall's ends at its gap: end_s ends the northern run at its south end (pier to +y), end_n starts the southern run.
     out.push(prop('lowwall_end_s', () => union(parapet('y', 0.55, { thick: 0.28, from: -0.5, to: 0.36 }), parapetPier(0.6, { oy: 0.32, w: 0.34 })), [1, 1], 24, { shadow: true, post: POST.arch }));
-    out.push(prop('lowwall_end_s_pin', () => union(parapet('y', 0.55, { thick: 0.28, from: -0.5, to: 0.36 }), parapetPier(0.6, { oy: 0.32, w: 0.34 }), move(sightPin(), 0, 0.32, 0.6)), [1, 1], 32, { shadow: true, post: POST.arch }));
+    out.push(prop('lowwall_end_s_pin', () => union(parapet('y', 0.55, { thick: 0.28, from: -0.5, to: 0.36 }), parapetPier(0.6, { oy: 0.32, w: 0.34 }), move(sightPin('ring'), 0, 0.32, 0.6)), [1, 1], 46, { shadow: true, post: POST.arch }));
     out.push(prop('lowwall_end_n', () => union(parapet('y', 0.55, { thick: 0.28, from: -0.36, to: 0.5 }), parapetPier(0.6, { oy: -0.32, w: 0.34 })), [1, 1], 24, { shadow: true, post: POST.arch }));
         for (const [n, drop] of [['stair', 1]]) out.push(prop(n, () => move(stairFlight(drop, { below: 0 }), 0, 0, drop), [1, 1], 40, { shadow: false, post: POST.arch }));
     out.push(prop('pent_roof', () => P.pentRoof({ rise: 0.6 }), [1, 2], 24, { shadow: false, post: POST.arch }));
+    // The same at a house's east end, its gable wall closing the triangle under the slope.
+    out.push(prop('pent_roof_end_e', () => P.pentRoof({ rise: 0.6, gable: 'e' }), [1, 2], 24, { shadow: false, post: POST.arch }));
     out.push(prop('chimney', () => P.chimney(), [2, 1], 66));
     out.push(prop('chimney_rattle_0', () => P.chimney({ rattle: 1 }), [2, 1], 66));
     out.push(prop('chimney_rattle_1', () => P.chimney({ rattle: -1 }), [2, 1], 66));
@@ -144,6 +146,18 @@ export default {
     out.push(prop('backline_two', () => P.sheetsX({ y0: -3.6, y1: 0, n: 2, drop: 1.2 }), [8, 1], 76));
     out.push(prop('backline_prop', () => union(P.sheetsX({ y0: -3.6, y1: 3.6, n: 0 }), P.clothesProp([0, 0.15, 0], [0, -0.05, 1.86])), [8, 1], 76));
     out.push(prop('backline_sag', () => P.sheetsX({ y0: -3.6, y1: 3.6, n: 0, zl: 1.4 }), [8, 1], 60));
+    // The back line again, in one-tile slices (<name>_x0 … _x7, west to east, at (11 + i, 2)), so
+    // someone standing in front of it on row 3 isn't drawn under its sheets.
+    const sl = (name, build, h = 76) => sliceX(name, build, 8, { shadow: true, h });
+    for (const grey of [false, true]) {
+      const g = grey ? '_grey' : '';
+      for (let i = 0; i < 2; i++) out.push(sl(`backline_sheets${g}_${i}`, () => P.sheetsX({ y0: -3.6, y1: 3.6, t: i * 0.9, grey, n: 4, drop: 1.2 })));
+      out.push(sl(`backline_swung${g}`, () => P.sheetsX({ y0: -3.6, y1: 3.6, t: 0.4, grey, n: 4, drop: 1.2, swing: 0.55 })));
+    }
+    out.push(sl('backline_one', () => P.sheetsX({ y0: -3.6, y1: -1.8, n: 1, drop: 1.2 })));
+    out.push(sl('backline_two', () => P.sheetsX({ y0: -3.6, y1: 0, n: 2, drop: 1.2 })));
+    out.push(sl('backline_prop', () => union(P.sheetsX({ y0: -3.6, y1: 3.6, n: 0 }), P.clothesProp([0, 0.15, 0], [0, -0.05, 1.86]))));
+    out.push(sl('backline_sag', () => P.sheetsX({ y0: -3.6, y1: 3.6, n: 0, zl: 1.4 }), 60));
 
     // ---- The court
     out.push(prop('lemon_tree', () => P.lemonTree(), [1, 1], 120));
@@ -191,6 +205,10 @@ export default {
     sheets_ns_grey: { frames: ['sheets_ns_grey_0', 'sheets_ns_grey_1'], ms: 600 },
     backline_sheets: { frames: ['backline_sheets_0', 'backline_sheets_1'], ms: 600 },
     backline_sheets_grey: { frames: ['backline_sheets_grey_0', 'backline_sheets_grey_1'], ms: 600 },
+    ...Object.fromEntries([0, 1, 2, 3, 4, 5, 6, 7].flatMap((i) => [
+      [`backline_sheets_x${i}`, { frames: [`backline_sheets_0_x${i}`, `backline_sheets_1_x${i}`], ms: 600 }],
+      [`backline_sheets_grey_x${i}`, { frames: [`backline_sheets_grey_0_x${i}`, `backline_sheets_grey_1_x${i}`], ms: 600 }],
+    ])),
   },
 };
 void boxAt; void place;

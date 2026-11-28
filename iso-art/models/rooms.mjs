@@ -181,7 +181,9 @@ export function roomCut(set, dir = 'x', { door = false } = {}) {
   const run = (a, b) => (dir === 'x' ? boxAt(a, -0.18, 0, b, 0.18, STUB, wm) : boxAt(-0.18, a, 0, 0.18, b, STUB, wm));
   const cap = (a, b) => (dir === 'x' ? boxAt(a, -0.18, STUB - 0.01, b, 0.18, STUB + 0.005, top) : boxAt(-0.18, a, STUB - 0.01, 0.18, b, STUB + 0.005, top));
   if (dir === 'corner') {
-    parts.push(boxAt(-0.18, -0.18, 0, 0.18, 0.18, STUB, wm), boxAt(-0.18, -0.18, STUB - 0.01, 0.18, 0.18, STUB + 0.005, top));
+    // An L reaching back along both walls to the neighboring stubs.
+    parts.push(boxAt(-0.5, -0.18, 0, 0.18, 0.18, STUB, wm), boxAt(-0.18, -0.5, 0, 0.18, 0.18, STUB, wm));
+    parts.push(boxAt(-0.5, -0.18, STUB - 0.01, 0.18, 0.18, STUB + 0.005, top), boxAt(-0.18, -0.5, STUB - 0.01, 0.18, 0.18, STUB + 0.005, top));
   } else if (door) {
     parts.push(run(-0.5, -0.36), run(0.36, 0.5), cap(-0.5, -0.36), cap(0.36, 0.5));
     const th = limestone('#d8c8a8', { tag: 'floor' });

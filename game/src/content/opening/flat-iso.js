@@ -26,6 +26,7 @@ function scene(g) {
   // The near walls, cut away: the door at (5, 8), the plug hook beside it.
   for (let x = 1; x <= 10; x++) add(F, x === 5 ? 'cut_door' : x === 6 ? 'cut_hook' : 'cut_x', x, 8, 0);
   for (let y = 1; y <= 7; y++) add(F, 'cut_y', 11, y, 0);
+  add(F, 'cut_corner', 11, 8, 0);
   // Furniture.
   add(F, 'bookshelf_l', 9, 1);
   add(F, 'bookshelf_r', 10, 1);
