@@ -163,6 +163,6 @@ const seated = (g) => g.player.pose === 'sit_tub_right';
 // The flags this scene follows. Where another flag changes the court's tiles
 // (a later act), the engine shows its own rough version of those tiles.
 const follows = ['act1.moonrise', 'tub.full', 'tub.plugged', 'fx.tub', 'fx.tap', 'fx.chimney', 'fx.cardigan',
-  'neighbor.stage', 'neighbor.sheetsMoved', 'fx.backline', 'oldMan.hasPepperKing', 'kid.hasTimer', 'piano.gone'];
+  'neighbor.stage', 'neighbor.sheetsMoved', 'fx.backline', 'oldMan.hasPepperKing', 'kid.hasTimer', 'piano.gone', 'epilogue'];
 
 export const courtIso = { scene, floor, follows, hide: (g) => (seated(g) ? ['player'] : []) };
