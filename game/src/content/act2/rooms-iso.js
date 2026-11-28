@@ -73,5 +73,8 @@ export const lampRoomIso = sceneOf((g) => {
   // The telescope under its dust sheet, until the Keeper gives it away.
   S.prop(I, flag('got.telescope') || flag('telescope.migrated') ? 'sheet_empty' : 'scope_sheet', 6, 5, 0);
   S.prop(I, 'polish_tin', 1, 6, 0);
-  return { S, list: S.done() };
+  // A lighthouse lantern: glazed all round the back walls, its back corner chamfered (rooms:lamp_*_glazed).
+  S.add('rooms', 'lamp_corner_chamfer', 1, 2, 0, 1, 1, 0.1);
+  const glazed = { lamp_s_window: 'lamp_s_glazed', lamp_s_plain: 'lamp_s_glazed', lamp_e_window: 'lamp_e_glazed', lamp_e_plain: 'lamp_e_glazed' };
+  return { S, list: S.done().map((d) => (d.s === 'rooms' && glazed[d.f] ? { ...d, f: glazed[d.f] } : d)) };
 }, ['got.telescope', 'telescope.migrated']);

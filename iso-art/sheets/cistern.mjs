@@ -186,6 +186,13 @@ export default {
     out.push(prop('lowhouse_flat_3x2', () => lowHouse({ w: 3, d: 2, roof: 'flat', color: COLORS.rose }), [3, 2], 70, { shadow: false, post: POST.arch }));
     out.push(prop('lowhouse_flat_1x2', () => lowHouse({ w: 1, d: 2, roof: 'flat', color: COLORS.ochre }), [1, 2], 70, { shadow: false, post: POST.arch }));
     out.push(prop('lowhouse_terra_1x2', () => lowHouse({ w: 1, d: 2, roof: 'terra', seed: 5 }), [1, 2], 80, { shadow: false, post: POST.arch }));
+    // More lower houses for the bands beyond a map's edge (the town kit's lowRoofs mixes them in):
+    // a gabled terracotta roof, a roof terrace with washing, a small dome, a tall chimney stack.
+    out.push(prop('lowhouse_gable_2x2', () => lowHouse({ w: 2, d: 2, roof: 'gable', seed: 6, color: COLORS.ochre }), [2, 2], 90, { shadow: false, post: POST.arch }));
+    out.push(prop('lowhouse_gable_3x2', () => lowHouse({ w: 3, d: 2, roof: 'gable', seed: 8 }), [3, 2], 90, { shadow: false, post: POST.arch }));
+    out.push(prop('lowhouse_flat_2x2_washing', () => lowHouse({ w: 2, d: 2, roof: 'flat', extra: 'washing', seed: 3 }), [2, 2], 110, { shadow: false, post: POST.arch }));
+    out.push(prop('lowhouse_flat_2x2_dome', () => lowHouse({ w: 2, d: 2, roof: 'flat', extra: 'dome', color: COLORS.rose }), [2, 2], 100, { shadow: false, post: POST.arch }));
+    out.push(prop('lowhouse_flat_3x2_stack', () => lowHouse({ w: 3, d: 2, roof: 'flat', extra: 'stack', color: COLORS.ochre }), [3, 2], 140, { shadow: false, post: POST.arch }));
     out.push(prop('lowhouse_flat_2x2_tall', () => lowHouse({ w: 2, d: 2, roof: 'flat', wallH: 3 }), [2, 2], 130, { shadow: false, post: POST.arch }));
     out.push(prop('lowhouse_terra_3x2_tall', () => lowHouse({ w: 3, d: 2, roof: 'terra', seed: 4, wallH: 3 }), [3, 2], 140, { shadow: false, post: POST.arch }));
     out.push(prop('stair_scraped', () => move(stairFlight(1, { below: 0, scraped: true }), 0, 0, 1), [1, 1], 40, { shadow: false, post: POST.arch }));

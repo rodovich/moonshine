@@ -39,8 +39,18 @@ export function floorFrame(kind, x, y) {
   return kind;
 }
 
-const FRONT = { '#': 'plain', w: 'window', b: 'window_box', c: 'window_closed', D: 'door', S: 'shop', A: 'arch' };
-const UPPER = { '#': 'plain', w: 'window', b: 'window_box', c: 'window_closed', B: 'balcony' };
+const FRONT = { '#': 'plain', w: 'window', b: 'window_box', c: 'window_closed', D: 'door', S: 'shop', A: 'arch', p: 'pipe', l: 'blind' };
+const UPPER = { '#': 'plain', w: 'window', b: 'window_box', c: 'window_closed', B: 'balcony', p: 'pipe', l: 'blind' };
+
+// A long facade written as plain windows and wall gets some variety, chosen by position: some
+// shutters closed, a window box, now and then a balcony upstairs; a drainpipe or a walled-up
+// arch on plain wall. (house()'s `vary: false` keeps a facade exactly as written.)
+function vary(ch, x, y, storey) {
+  const h = hash(x, y, 41 + storey);
+  if (ch === 'w') return h < 0.18 ? 'c' : h < 0.32 ? 'b' : storey > 0 && h < 0.4 ? 'B' : 'w';
+  if (ch === '#') return h < 0.12 ? 'p' : h < 0.2 ? 'l' : '#';
+  return ch;
+}
 const SIDE = { '#': 'plain', w: 'window', b: 'window', c: 'window_closed', D: 'door' };
 const SIDE_UP = { '#': 'plain', w: 'window', b: 'window', c: 'window_closed', B: 'window' };
 
@@ -72,12 +82,13 @@ export function isoScene() {
     },
     /**
      * A house block w×d with its front on the south (row y0+d−1) and its side on the east
-     * (column x0+w−1). front: one letter per column for the ground storey (# w b c D S A);
-     * upper: a string (or a list, one per storey) for the storeys above (# w b c B); side: one
+     * (column x0+w−1). front: one letter per column for the ground storey (# w b c D S A, p drainpipe, l blind arch);
+     * upper: a string (or a list, one per storey) for the storeys above (# w b c B p l); side: one
      * letter per row, north to south, for the east face (# w c D), used on every storey.
-     * plaster: white | ochre | rose | sky | sage. roof: 'flat' | 'hip' | 'none'.
+     * plaster: white | ochre | rose | sky | sage. roof: 'flat' | 'hip' | 'none'. A flat roof gets a parapet
+     * round its edge and a few things on it (roofProps: false for a bare one).
      */
-    house(x0, y0, w, d, { z = 0, front = '#'.repeat(w), upper = null, storeys = null, side = null, plaster = 'white', roof = 'flat' } = {}) {
+    house(x0, y0, w, d, { z = 0, front = '#'.repeat(w), upper = null, storeys = null, side = null, plaster = 'white', roof = 'flat', roofProps = true, vary: varied = true } = {}) {
       const ups = upper == null ? [] : Array.isArray(upper) ? upper : [upper];
       const n = storeys ?? 1 + ups.length;
       while (ups.length < n - 1) ups.push('#'.repeat(w));
@@ -86,18 +97,47 @@ export function isoScene() {
       for (let y = y0; y < y0 + d; y++) for (let x = x0; x < x0 + w; x++) {
         const south = [], east = [];
         if (y === y0 + d - 1) {
-          south.push([`w_${plaster}_s_${FRONT[front[x - x0]] ?? 'plain'}`, STOREY]);
-          for (const u of ups) south.push([`u_${plaster}_s_${UPPER[u[x - x0]] ?? 'plain'}`, STOREY]);
+          const ch = (c, i) => (varied ? vary(c, x, y, i) : c);
+          south.push([`w_${plaster}_s_${FRONT[ch(front[x - x0], 0)] ?? 'plain'}`, STOREY]);
+          ups.forEach((u, i) => south.push([`u_${plaster}_s_${UPPER[ch(u[x - x0], i + 1)] ?? 'plain'}`, STOREY]));
         }
         if (x === x0 + w - 1) {
           const ch = sd[y - y0] ?? '#';
           east.push([`w_${plaster}_e_${SIDE[ch] ?? 'plain'}`, STOREY]);
           for (let i = 1; i < n; i++) east.push([`u_${plaster}_e_${SIDE_UP[ch] ?? 'plain'}`, STOREY]);
         }
-        S.column(x, y, z, south, east, roof === 'none' ? null : [`roof_${plaster}`, z + H]);
+        // Under a hipped roof there's no flat top: drawn by column, it would show through the roof.
+        S.column(x, y, z, south, east, roof === 'flat' ? [`roof_${plaster}`, z + H] : null);
         heights.delete(key(x, y));
       }
       if (roof === 'hip') S.hipRoof(x0, y0, w, d, z + H);
+      if (roof === 'flat') S.roofDressing(x0, y0, w, d, z + H, { plaster, props: roofProps });
+    },
+    /**
+     * A flat roof's parapet round the block's edge, and a few things on the roof (chimneys, a
+     * Moonshine basin, a water tank, a hatch, a pot), chosen and placed by the block's position.
+     */
+    roofDressing(x0, y0, w, d, z, { plaster = 'white', props = true } = {}) {
+      for (let x = x0; x < x0 + w; x++) {
+        add(T, `parapet_${plaster}_n`, x, y0, z, 1, 1, 1);
+        add(T, `parapet_${plaster}_s`, x, y0 + d - 1, z, 1, 1, 1);
+      }
+      for (let y = y0; y < y0 + d; y++) {
+        add(T, `parapet_${plaster}_w`, x0, y, z, 1, 1, 1);
+        add(T, `parapet_${plaster}_e`, x0 + w - 1, y, z, 1, 1, 1);
+      }
+      if (!props || w * d < 2) return;
+      const kinds = ['roof_chimney_0', 'roof_basin', 'roof_tank', 'roof_chimney_1', 'roof_hatch', 'pot_geranium', 'roof_basin'];
+      const n = Math.min(4, 1 + Math.floor((w * d) / 6));
+      const used = new Set();
+      for (let i = 0; i < n; i++) {
+        // Prefer tiles off the parapet's line when the roof is big enough to have any.
+        const ix = w > 2 ? 1 + Math.floor(hash(x0, y0, 11 + i) * (w - 2)) : Math.floor(hash(x0, y0, 11 + i) * w);
+        const iy = d > 2 ? 1 + Math.floor(hash(x0, y0, 23 + i) * (d - 2)) : Math.floor(hash(x0, y0, 23 + i) * d);
+        if (used.has(`${ix},${iy}`)) continue;
+        used.add(`${ix},${iy}`);
+        add(T, kinds[Math.floor(hash(x0 + i, y0, 31) * kinds.length)], x0 + ix, y0 + iy, z);
+      }
     },
     /** Terracotta hipped roofs over a block, in pieces of at most 6×6. */
     hipRoof(x0, y0, w, d, z) {
@@ -128,16 +168,19 @@ export function isoScene() {
     pot(x, y, kind = 'pot_geranium', z = 0) { if (typeof kind === 'number') [kind, z] = [typeof z === 'string' ? z : 'pot_geranium', kind]; add(T, kind, x, y, z); },
     /** The roofs of the houses below a street's edge (cistern's lowhouse props), from x0 for w tiles. */
     lowRoofs(x0, y0, w, { z = -80, skip = [] } = {}) {
-      const kinds = ['lowhouse_terra_3x2', 'lowhouse_flat_2x2', 'lowhouse_flat_3x2', 'lowhouse_terra_2x2'];
-      const narrower = { 3: ['lowhouse_flat_3x2', 'lowhouse_terra_3x2'], 2: ['lowhouse_flat_2x2', 'lowhouse_terra_2x2'], 1: ['lowhouse_flat_1x2', 'lowhouse_terra_1x2'] };
+      // Picked by position (not in a fixed cycle), so neighboring maps' bands don't repeat each other.
+      const all = ['lowhouse_terra_3x2', 'lowhouse_flat_2x2', 'lowhouse_gable_3x2', 'lowhouse_flat_2x2_washing', 'lowhouse_flat_3x2', 'lowhouse_terra_2x2',
+        'lowhouse_flat_2x2_dome', 'lowhouse_gable_2x2', 'lowhouse_flat_3x2_stack', 'lowhouse_flat_2x2'];
+      const kinds = { length: all.length, pick: (x) => all[Math.floor(hash(x, y0, 51) * all.length)] };
+      const narrower = { 3: ['lowhouse_flat_3x2', 'lowhouse_gable_3x2', 'lowhouse_terra_3x2'], 2: ['lowhouse_flat_2x2', 'lowhouse_gable_2x2', 'lowhouse_terra_2x2', 'lowhouse_flat_2x2_washing'], 1: ['lowhouse_flat_1x2', 'lowhouse_terra_1x2'] };
       let x = x0, i = 0;
       while (x < x0 + w) {
         if (skip.includes(x)) { x++; continue; }
-        const k0 = kinds[(i++ + x0) % kinds.length];
+        const k0 = kinds.pick(x + i++);
         let kw = k0.includes('3x2') ? 3 : 2;
         // Narrow the house until it fits before the next gap or the map's edge (down to one tile).
         while (kw > 1 && (skip.some((s) => s >= x && s < x + kw) || x + kw > x0 + w)) kw--;
-        const k = kw === (k0.includes('3x2') ? 3 : 2) ? k0 : narrower[kw][i % 2];
+        const k = kw === (k0.includes('3x2') ? 3 : 2) ? k0 : narrower[kw][i % narrower[kw].length];
         add('cistern', k, x, y0, z - 60, kw, 2, 1);
         x += kw;
       }

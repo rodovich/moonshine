@@ -965,18 +965,37 @@ export function keeper(dir, pose = {}, kind = null, n = 0) {
 // ---------------------------------------------------------------------------
 // The Boatman in his rowing boat (boat and man are one sprite, as in the SNES).
 
+// A clinker-built wooden dinghy, like the harbor's brown rowboat: overlapping strakes (each
+// plank's lower edge stands proud, so every lap catches the light above a dark line), painted
+// brown with a cobalt top strake, the paint worn through to grey-gold wood along the laps and
+// at the waterline, and a varnished wooden gunwale capping the sheer.
 function rowingBoat() {
-  const paint = mat((x, y, z, lx, ly, lz) => {
-    if (z > 0.27) return hex(C.wood_light);
-    if (z > 0.2) return hex(C.cobalt);
-    if (z > 0.17) return hex(C.cobalt_shade);
-    return hex(C.white_light).map((v) => v * (0.96 + vnoise(x * 20, y * 20, z * 20) * 0.06));
-  }, { tag: 'body', spec: 0.2, shin: 18 });
+  const ST = 0.055; // strake width (height on the side)
+  // (In the boat's own frame, so the paint rides with the hull as it bobs and rolls.)
+  const paint = mat((wx, wy, wz, x, y, z) => {
+    const f = ((z / ST) % 1 + 1) % 1, k = Math.floor(z / ST);
+    const blue = z > 0.235;
+    let c = hex(blue ? '#3c5c94' : '#7a5236');
+    c = c.map((v) => v * (0.9 + vnoise(x * 6, k * 3.1, 2) * 0.14));
+    // Worn paint: bare weathered wood showing in patches, most along each lap and low down.
+    const wear = fbm(x * 9, z * 30, y * 4, 2) + (f > 0.8 ? 0.18 : 0) + (z < 0.06 ? 0.15 : 0);
+    if (wear > 0.68) c = mix(c, hex('#a89070'), Math.min(0.8, (wear - 0.68) * 5));
+    if (f < 0.18) c = c.map((v) => v * 0.55); // the shadowed lap under the plank above
+    if (z < 0.085) c = mix(c, hex('#3a4038'), 0.5); // weed at the waterline
+    return c;
+  }, { tag: 'body', spec: 0.12, shin: 14 });
   const inside = woodMat(C.wood);
-  const hull = intersect(ellipsoid(0.98, 0.4, 0.42, paint), boxAt(-1, -1, 0, 1, 1, 0.3, paint));
+  const shellE = ellipsoid(0.98, 0.4, 0.42, paint);
+  // The laps: each strake's lower edge stands out a little from the one below.
+  const laps = { b: shellE.b.map((v, i) => (i < 3 ? v - 0.01 : v + 0.01)),
+    dist(x, y, z) { const f = ((z / ST) % 1 + 1) % 1; return shellE.dist(x, y, z) - 0.014 * (1 - f); },
+    near(x, y, z) { return shellE.near(x, y, z); } };
+  const hull = intersect(laps, boxAt(-1, -1, 0, 1, 1, 0.29, paint));
   const hollow = subtract(hull, move(ellipsoid(0.92, 0.35, 0.36, inside), 0, 0, 0.04), inside);
+  const gun = mat((x, y, z) => hex('#9a6a3a').map((v) => v * (0.88 + fbm(x * 20, y * 4, 3, 2) * 0.22)), { tag: 'body', spec: 0.35, shin: 26 });
+  const gunwale = intersect(subtract(ellipsoid(1.0, 0.425, 0.445, gun), ellipsoid(0.93, 0.36, 0.38, gun), gun), boxAt(-1.1, -1, 0.27, 1.1, 1, 0.31, gun));
   return union(
-    hollow,
+    hollow, gunwale,
     intersect(ellipsoid(0.92, 0.35, 0.36, inside), boxAt(-1, -1, 0.03, 1, 1, 0.07, inside)), // the bottom boards
     boxAt(-0.08, -0.33, 0.2, 0.08, 0.33, 0.24, woodMat(C.wood_light), 0.01), // the thwart he sits on
     boxAt(-0.75, -0.2, 0.2, -0.62, 0.2, 0.235, woodMat(C.wood_light), 0.01),
@@ -1002,34 +1021,54 @@ export function boatman({ rock = 0, sing = false } = {}) {
 // ---------------------------------------------------------------------------
 // The goats (white, and the brown one): a walk and grazing.
 
+const clamp01 = (v) => Math.max(0, Math.min(1, v));
+
 export function goat(dir, { pal = 'white', walk = -1, eat = -1 } = {}) {
-  const P = pal === 'brown' ? { fur: C.wood, furD: C.wood_shade, nose: C.rose_deep } : { fur: C.white, furD: C.white_shade, nose: C.rose_shade };
-  const fur = mat((x, y, z, lx, ly, lz) => { const n = fbm(lx * 18, ly * 18, lz * 18, 2); return mix(hex(P.fur), hex(P.furD), Math.max(0, n - 0.45) * 0.9); }, { tag: 'body', spec: 0.05 });
-  const horn = mat(C.stone_mid, { tag: 'body', spec: 0.3 });
-  const hoof = mat(C.stone_dark, { tag: 'body', spec: 0.2 });
+  // Coat: an off-white (or brown) that the light can model, a little darker and cooler on the
+  // belly and the inside of the legs, the lower legs greyer (or near-black on the brown goat), and
+  // a soft broken texture of tufts (low contrast, so it reads as fur, not noise).
+  const brown = pal === 'brown';
+  const P = brown
+    ? { fur: '#9a6640', furD: '#5e3c28', sock: '#3a2a22', nose: '#3a2a26', ear: '#7a4e34', beard: '#3a2820', horn: '#5a4a3c' }
+    : { fur: '#e6e1d4', furD: '#a8a4ac', sock: '#b4aca0', nose: '#7a5a58', ear: '#c8b0a8', beard: '#b0a898', horn: '#6e665c' };
+  const fur = mat((x, y, z) => {
+    const n = fbm(x * 14, y * 14, z * 14, 2);
+    let c = mix(hex(P.fur), hex(P.furD), clamp01((0.42 - z) * 2.6) * 0.55 + (n - 0.5) * 0.25);
+    if (z < 0.2) c = mix(c, hex(P.sock), clamp01((0.2 - z) * 8) * 0.7);
+    return c;
+  }, { tag: 'body', spec: 0.04, shin: 8 });
+  const horn = mat((x, y, z, lx, ly, lz) => mix(hex(P.horn), hex('#c8bca8'), clamp01((lz - 0.1) * 12) * 0.5), { tag: 'body', spec: 0.35, shin: 24 });
+  const hoof = mat('#2c2424', { tag: 'body', spec: 0.3, shin: 20 });
+  const eyeM = mat('#241a14', { tag: 'body', spec: 0.9, shin: 50 });
+  const noseM = mat(P.nose, { tag: 'body', spec: 0.4, shin: 30 });
+  const earM = mat(P.ear, { tag: 'body', spec: 0.04 });
+  const beardM = mat(P.beard, { tag: 'body', spec: 0.03 });
   const ph = walk >= 0 ? (walk / 8) * PI * 2 : 0, s = walk >= 0 ? Math.sin(ph) : 0;
   const legs = [];
   for (const [x, y, sg] of [[0.24, -0.09, 1], [0.24, 0.09, -1], [-0.22, -0.09, -1], [-0.22, 0.09, 1]]) {
     const sw = s * sg * 0.12;
     const top = [x, y, 0.34], foot = [x + sw, y, 0.03 + Math.max(0, s * sg) * 0.04];
-    legs.push(roundCone(top, foot, 0.042, 0.028, fur), move(sphere(0.03, hoof), foot[0] + 0.01, foot[1], 0.025));
+    legs.push(roundCone(top, foot, 0.045, 0.026, fur), move(cylinder(0.03, -0.01, 0.045, hoof, 0.008), foot[0] + 0.008, foot[1], foot[2] - 0.03));
   }
   const bodyN = smooth(0.06, move(ellipsoid(0.33, 0.16, 0.17, fur), 0, 0, 0.43), move(ellipsoid(0.13, 0.14, 0.15, fur), 0.18, 0, 0.46));
   // The head: up and forward, or down to the grass when eating.
   const down = eat >= 0;
   const neckTop = down ? [0.47, 0, 0.18 + (eat ? 0.03 : 0)] : [0.42, 0, 0.7 + s * 0.01];
   const headRot = down ? 1.25 : 0.35;
-  const head = place(union(
-    move(ellipsoid(0.11, 0.065, 0.075, fur), 0.05, 0, 0),
-    roundCone([0.05, 0, 0], [0.16, 0, -0.03], 0.06, 0.045, fur),
-    move(ellipsoid(0.02, 0.03, 0.015, mat(P.nose, { tag: 'body' })), 0.2, 0, -0.03),
-    roundCone([0.12, 0, -0.06], [0.1, 0, -0.14 - (down && eat ? 0.02 : 0)], 0.02, 0.008, mat(C.white_light, { tag: 'body' })), // the beard
-    roundCone([0.0, -0.03, 0.06], [-0.1, -0.05, 0.13], 0.018, 0.008, horn),
-    roundCone([0.0, 0.03, 0.06], [-0.1, 0.05, 0.13], 0.018, 0.008, horn),
-    place(ellipsoid(0.05, 0.02, 0.018, fur), { at: [-0.02, -0.08, 0.02], rx: -0.4 }),
-    place(ellipsoid(0.05, 0.02, 0.018, fur), { at: [-0.02, 0.08, 0.02], rx: 0.4 }),
-    move(sphere(0.013, glaze(C.brass)), 0.1, -0.05, 0.02), move(sphere(0.013, glaze(C.brass)), 0.1, 0.05, 0.02),
-  ), { at: neckTop, ry: headRot });
+  // The head (local +x forward): skull, a long muzzle tapering to a dark nose, eyes set wide
+  // under the brow, ears held out sideways, horns sweeping back, and the beard under the chin.
+  const hparts = [
+    move(ellipsoid(0.1, 0.068, 0.078, fur), 0.03, 0, 0.01),
+    roundCone([0.06, 0, -0.005], [0.17, 0, -0.04], 0.056, 0.04, fur),
+    move(ellipsoid(0.026, 0.036, 0.024, noseM), 0.2, 0, -0.04), // nose and lips
+    roundCone([0.13, 0, -0.07], [0.115, 0, -0.17 - (down && eat ? 0.02 : 0)], 0.026, 0.01, beardM), // the beard
+  ];
+  for (const s of [-1, 1]) {
+    hparts.push(move(sphere(0.021, eyeM), 0.075, s * 0.058, 0.03)); // eye
+    hparts.push(place(ellipsoid(0.075, 0.024, 0.034, earM), { at: [-0.02, s * 0.1, 0.0], rz: s * 0.7, rx: s * 0.35 })); // ear, out and a little down
+    hparts.push(roundCone([0.0, s * 0.03, 0.07], [-0.07, s * 0.045, 0.15], 0.024, 0.016, horn), roundCone([-0.07, s * 0.045, 0.15], [-0.15, s * 0.065, 0.14], 0.016, 0.006, horn));
+  }
+  const head = place(union(hparts), { at: neckTop, ry: headRot });
   const neck = roundCone([0.25, 0, 0.48], down ? add(neckTop, [-0.03, 0, 0.05]) : neckTop, 0.08, 0.06, fur);
   const tail = roundCone([-0.31, 0, 0.52], [-0.37, 0, 0.62], 0.03, 0.015, fur);
   const g = union(bodyN, neck, head, tail, ...legs);

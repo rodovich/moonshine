@@ -70,7 +70,8 @@ function build() {
     const z = heightAt(x, y);
     const below = y + 1 < H ? heightAt(x, y + 1) : SEA;
     const east = x + 1 < W ? heightAt(x + 1, y) : z; // the map's east edge: the hill goes on, no face
-    const courses = (to, f) => Array.from({ length: Math.max(0, Math.ceil((z - to) / 40)) }, () => [f, 40]);
+    // Rock courses, each a crag variant picked by position so the face doesn't repeat tile by tile.
+    const courses = (to, f) => Array.from({ length: Math.max(0, Math.ceil((z - to) / 40)) }, (_, i) => [[f, `${f}_1`, `${f}_2`][(x * 7 + y * 13 + i * 5) % 3], 40]);
     if (z === SEA) { S.add('town', 'water', x, y, SEA, 1, 1, 0); continue; }
     const step = isPath(x, y) && stepRect(x, y);
     const top = step ? PZ.get(`${x},${y}`) : z;
