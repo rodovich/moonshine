@@ -76,6 +76,7 @@ export default {
   ],
   anims: {
     sweat: { frames: ['sweat_0', 'sweat_1'], ms: 150 },
+    sweat_drop: { frames: ['sweat_0', 'sweat_1'], ms: 150 }, // the SNES sheet's name for it
     mist: { frames: ['mist_0', 'mist_1', 'mist_2'], ms: 420 },
     dust: { frames: ['dust_0', 'dust_1', 'dust_2'], ms: 120 },
     swift: { frames: ['swift_0', 'swift_1'], ms: 110 },
