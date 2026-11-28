@@ -42,7 +42,7 @@ export function onFace(node, face) {
 
 /** Plaster wall column with optional plinth (a stone base course). */
 export function wallColumn(h, { color = COLORS.whitewash, plinth = 0.2, face = 's', stain = 0.5 } = {}) {
-  const pl = plaster(color, { axis: face === 's' ? 'x' : 'y', stainHeight: stain, base: plinth });
+  const pl = plaster(color, { axis: face === 's' ? 'x' : 'y', stainHeight: stain, base: plinth, top: h });
   const parts = [boxAt(-0.5, -0.5, plinth ? plinth : 0, 0.5, 0.5, h, pl)];
   if (plinth) {
     // A plastered plinth, a little proud of the wall and a shade warmer.
@@ -160,16 +160,31 @@ export function facade(face, h, kind = 'plain', opts = {}) {
   if (kind === 'gate') feature = gateFeature({ z1: Math.min(h - 0.15, 2.1) });
   if (feature) {
     body = subtract(body, onFace(feature.cut, face), plaster('#cfc8bc', { tag: 'wall' }));
+    if (kind.startsWith('window')) {
+      // Rain stain running down from the sill: a decal flush with the wall, fading out.
+      const z0 = opts.z0 ?? 0.95;
+      const wallM = plaster(opts.wall ?? COLORS.whitewash, { axis: face === 's' ? 'x' : 'y', top: h, base: opts.plinth ?? 0.2 });
+      const grime = hex('#8a8078');
+      const stainM = mat((x, y, z, lx, ly, lz, nx, ny, nz) => {
+        const base = wallM.color(x, y, z, lx, ly, lz, nx, ny, nz);
+        const u = face === 's' ? x : y;
+        const t = Math.max(0, (z0 - 0.06 - z) / 0.5);
+        const edge = Math.max(0, 1 - Math.abs(u) / (0.3 - t * 0.12));
+        const n = vnoise(u * 30, z * 6, 4);
+        return mix(base, grime, Math.min(0.28, (1 - t) * edge * (0.5 + n * 0.6) * 0.3));
+      }, { tag: 'wall', spec: 0.02 });
+      feature.parts.push(boxAt(-0.32, -0.01, Math.max(0.05, z0 - 0.6), 0.32, 0.003, z0 - 0.06, stainM));
+    }
     return union(body, ...feature.parts.map((p) => onFace(p, face)));
   }
   return body;
 }
 
 /** A thin parapet wall along x (dir 'x') or y (dir 'y') through the tile, height h, with rounded coping. Ends are cut flat so runs join seamlessly. */
-export function parapet(dir, h = 0.9, { thick = 0.3, color = COLORS.whitewash, from = -0.5, to = 0.5, offset = 0 } = {}) {
+export function parapet(dir, h = 0.9, { thick = 0.3, color = '#e0e0e4', from = -0.5, to = 0.5, offset = 0 } = {}) {
   const pl = plaster(color, { axis: dir === 'x' ? 'x' : 'y' });
   const t = thick / 2;
-  const cap = plaster('#f4eee4', { axis: dir === 'x' ? 'x' : 'y' });
+  const cap = plaster('#fbf8f0', { axis: dir === 'x' ? 'x' : 'y', weather: false });
   // Build along x, then turn for 'y'.
   const body = boxAt(from - 0.1, offset - t, -0.02, to + 0.1, offset + t, h - 0.05, pl);
   const coping = boxAt(from - 0.1, offset - t - 0.025, h - 0.1, to + 0.1, offset + t + 0.025, h, cap, 0.045);
@@ -186,14 +201,17 @@ export function parapetPier(h = 0.9, { color = COLORS.whitewash, ox = 0, oy = 0,
 }
 
 /** A flight of outside stairs descending toward +y across one tile: from z = 0 at the north edge to −drop at the south edge. */
-export function stairFlight(drop = 1, { steps = 5, w = 1, stone = '#dccab0', below = 0.2 } = {}) {
-  const m = limestone(stone, { tag: 'floor' });
+export function stairFlight(drop = 1, { steps = 5, w = 1, stone = '#dccab0', below = 0.2, scraped = false } = {}) {
+  const lime = limestone(stone, { tag: 'floor' });
+  // The morning after: long scrapes down every step where the piano went.
+  const m = scraped ? mat((x, y, z, lx, ly, lz) => (Math.abs(x - 0.08 + Math.sin(y * 7) * 0.03) < 0.05 || Math.abs(x + 0.22) < 0.025 ? hex('#a89478') : lime.color(x, y, z, lx, ly, lz)), { tag: 'floor', spec: 0.04 }) : lime;
   const nose = mat('#ece0c8', { tag: 'floor', spec: 0.05 });
   const parts = [];
   const run = 1 / steps, rise = drop / steps;
   for (let i = 0; i < steps; i++) {
-    const y0 = -0.5 + i * run, ztop = -rise * (i + 1);
-    parts.push(boxAt(-w / 2, y0, -drop - below, w / 2, 0.5, ztop, m, 0.008));
+    // Tread i covers its own strip of the run, highest at the north edge.
+    const y0 = -0.5 + i * run, ztop = -rise * i;
+    parts.push(boxAt(-w / 2, y0, -drop - below, w / 2, y0 + run + 0.001, ztop, m, 0.008));
     parts.push(boxAt(-w / 2, y0 + run - 0.03, ztop - 0.03, w / 2, y0 + run + 0.0, ztop, nose, 0.008));
   }
   // The first tread starts at z = 0: a landing lip.
@@ -273,5 +291,48 @@ export function roofTop(color = '#ece6da') {
 export function crownWall(h, { buttress = false } = {}) {
   const parts = [retainingWall(h)];
   if (buttress) parts.push(boxAt(-0.25, 0.2, 0, 0.25, 0.75, h * 0.6, limestone('#c4aa88', { tag: 'wall' })));
+  return union(parts);
+}
+
+/**
+ * A house below the court, seen mostly from above: whitewashed walls `wallH`
+ * tall over a w×d footprint (centered), and a roof: 'terra' (a hipped
+ * terracotta roof) or 'flat' (a whitewashed terrace with a lip, a chimney, and
+ * a basin of water set out for Moonshine Night).
+ */
+export function lowHouse({ w = 2, d = 2, wallH = 1.5, roof = 'terra', color = COLORS.whitewash, seed = 1 } = {}) {
+  const hw = w / 2, hd = d / 2;
+  const pl = plaster(color, { axis: 'x' });
+  const parts = [boxAt(-hw, -hd, 0, hw, hd, wallH, pl)];
+  if (roof === 'terra') {
+    const tile = mat((x, y, z) => {
+      const c = hex('#c4643e');
+      const onX = Math.abs(x) / hw > Math.abs(y) / hd; // which slope: tiles run down each
+      const along = onX ? y : x, across = onX ? x : y;
+      const ridge = Math.abs(Math.sin((along + 10) * Math.PI * 5));
+      const course = ((Math.abs(across) + 10) * 4.5) % 1;
+      const n = vnoise(Math.floor((along + 10) * 5), Math.floor((across + 10) * 4.5), seed);
+      const k = (0.72 + ridge * 0.3) * (course > 0.88 ? 0.75 : 1) * (0.9 + n * 0.2);
+      return [c[0] * k, c[1] * k, c[2] * k];
+    }, { tag: 'roof', spec: 0.12 });
+    const rise = 0.5;
+    const m0 = Math.min(hw, hd);
+    parts.push(custom((x, y, z) => {
+      // A hipped roof: height falls off toward every eave.
+      const t = Math.min(hw + 0.08 - Math.abs(x), hd + 0.08 - Math.abs(y)) / m0;
+      const top = wallH + 0.02 + Math.max(0, Math.min(1, t)) * rise;
+      return Math.max((z - top) * 0.6, wallH - 0.08 - z, Math.abs(x) - hw - 0.08, Math.abs(y) - hd - 0.08);
+    }, [-hw - 0.1, -hd - 0.1, wallH - 0.1, hw + 0.1, hd + 0.1, wallH + rise + 0.05], tile));
+  } else {
+    const cap = mat('#f2ece2', { tag: 'wall' });
+    parts.push(boxAt(-hw, -hd, wallH, hw, hd, wallH + 0.02, plaster('#e6e0d4')));
+    parts.push(boxAt(-hw, -hd, wallH, -hw + 0.12, hd, wallH + 0.22, cap, 0.03), boxAt(hw - 0.12, -hd, wallH, hw, hd, wallH + 0.22, cap, 0.03));
+    parts.push(boxAt(-hw, -hd, wallH, hw, -hd + 0.12, wallH + 0.22, cap, 0.03), boxAt(-hw, hd - 0.12, wallH, hw, hd, wallH + 0.22, cap, 0.03));
+    // A chimney, and the Moonshine Night basin.
+    parts.push(boxAt(hw - 0.5, -hd + 0.2, wallH, hw - 0.2, -hd + 0.5, wallH + 0.55, plaster('#ece6da'), 0.03));
+    const tin = mat('#8a9098', { tag: 'prop', spec: 0.7, shin: 30 });
+    parts.push(move(subtract(cylinder(0.24, wallH, wallH + 0.14, tin, 0.02), cylinder(0.21, wallH + 0.03, wallH + 0.3, tin), tin), -0.2, 0.15, 0));
+    parts.push(move(cylinder(0.21, wallH + 0.09, wallH + 0.1, mat('#b8c8e0', { tag: 'prop', spec: 1.4, shin: 60 })), -0.2, 0.15, 0));
+  }
   return union(parts);
 }

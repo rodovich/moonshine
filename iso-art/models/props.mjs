@@ -68,19 +68,23 @@ export function tub(state = 'empty', { t = 0, level = 1, grey = false } = {}) {
   if (lvl !== null) {
     const water = mat((x, y, z, lx, ly, lz, nx, ny, nz) => {
       // Cool sky in the water, with moving ripples.
+      // Depth: dark toward the far (north and west) walls, the sky's reflection
+      // brightening toward the near rim, and ripples catching the light.
       const r = vnoise(x * 9 + t * 6, y * 9, t * 3);
-      const base = mix(hex('#7aa8c8'), hex('#c8e0e8'), r * 0.5);
+      const near = Math.max(0, Math.min(1, (x + y + 0.9) / 1.6));
+      let base = mix(hex('#22405a'), hex('#6a92b4'), near * 0.8 + r * 0.2);
+      if (r > 0.78) base = mix(base, hex('#d8ecf4'), (r - 0.78) * 3);
       if (state === 'whirl') {
         const a = Math.atan2(y, x - drainX), rr = Math.hypot(x - drainX, y);
         const sp = Math.sin(a * 3 + rr * 30 - t * 12);
         return sp > 0.3 ? mix(hex('#b830c8'), hex('#100010'), Math.min(1, rr * 2)) : mix(base, hex('#304060'), 0.5);
       }
       return base;
-    }, { tag: 'prop', spec: 1.3, shin: 70 });
+    }, { tag: 'prop', spec: 1.6, shin: 110 });
     const tilt = state === 'slosh' ? Math.sin(t * PI * 2) * 0.12 : 0;
     const surf = custom((x, y, z) => {
       let h = lvl + x * tilt * 0.3;
-      if (state !== 'whirl') h += (vnoise(x * 14 + t * 5, y * 14, t * 2) - 0.5) * 0.008;
+      if (state !== 'whirl') h += (vnoise(x * 14 + t * 5, y * 14, t * 2) - 0.5) * 0.012;
       else { const rr = Math.hypot(x - drainX, y); h -= Math.max(0, 0.12 - rr) * 0.8; }
       return (z - h) * 0.7;
     }, [-L, -W, floorZ, L, W, lvl + 0.05], water);
@@ -182,7 +186,7 @@ export function clothesProp(a, b) {
 
 /** Chimney stack (2×1 along x) with two pots in little tin hats. */
 export function chimney({ rattle = 0 } = {}) {
-  const pl = plaster('#e6e0d4', { axis: 'x' });
+  const pl = plaster('#e6e0d4', { axis: 'x', top: 0.9, stain: '#8a8080' });
   const parts = [boxAt(-0.9, -0.36, 0, 0.9, 0.36, 0.9, pl, 0.03), boxAt(-0.95, -0.41, 0.88, 0.95, 0.41, 0.98, mat('#f0eae0', { tag: 'wall' }), 0.03)];
   const tc = terracotta('#b8603a');
   const tin = mat('#9aa0a8', { tag: 'prop', spec: 0.7, shin: 30 });
@@ -217,9 +221,9 @@ export function sheetsY({ y0 = -1.5, y1 = 1.5, zl = 1.85, t = 0, swing = 0, grey
   const col = grey ? hex('#b4b0ac') : hex('#f8f6f0');
   const m = mat((x, y, z, lx, ly, lz) => {
     const fold = Math.sin(ly * 22 + t * 4) * 0.5 + 0.5;
-    const k = 0.94 + fold * 0.06;
+    const k = 0.92 + fold * 0.1;
     return [col[0] * k, col[1] * k, col[2] * k];
-  }, { tag: 'cloth', spec: 0.05, shin: 8 });
+  }, { tag: 'cloth', spec: 0.05, shin: 8, emit: 0.18 }); // thin cloth: some light comes through
   const lineM = mat('#d8d0c0', { tag: 'cloth' });
   const parts = [capsule([0, y0 - 0.2, zl + 0.02], [0, y1 + 0.2, zl + 0.02], 0.008, lineM)];
   const gap = 0.06, each = (y1 - y0 - gap * (n - 1)) / n;

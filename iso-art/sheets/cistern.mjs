@@ -3,11 +3,13 @@
 // listed in docs/iso-art-direction.md.
 
 import { frame, split, POST } from '../lib/jobs.mjs';
-import { union, move, place, boxAt } from '../lib/sdf.mjs';
+import { union, move, place, boxAt, torus } from '../lib/sdf.mjs';
 import { cobbles, deck } from '../models/ground.mjs';
-import { facade, parapet, parapetPier, stairFlight, retainingWall, lowRoof, roofTop, crownWall, COLORS, U } from '../models/arch.mjs';
+import { facade, parapet, parapetPier, stairFlight, retainingWall, lowRoof, roofTop, crownWall, lowHouse, COLORS, U } from '../models/arch.mjs';
 import { sightPin } from '../models/props.mjs';
 import * as P from '../models/props.mjs';
+import { TUB } from '../models/props.mjs';
+import { mat } from '../lib/render.mjs';
 import { figure } from '../models/figure.mjs';
 import { cherylLook } from '../models/cheryl.mjs';
 
@@ -25,12 +27,38 @@ const floor = (name, build) => frame(name, build, { diamond: [1], fp: [1, 1], h:
 const prop = (name, build, fp = [1, 1], h = 40, opts = {}) => frame(name, build, { post: POST.prop, shadow: true, fp, h, ...opts });
 
 function tubSitting(state, t) {
-  // Cheryl in her costume on the tub's west rim, facing east, shins in the water.
-  const rimZ = 0.66;
-  const pose = { bob: rimZ - 0.86 + 0.05, hipL: PI / 2 - 0.25, hipR: PI / 2 - 0.3, kneeL: PI / 2 - 0.25, kneeR: PI / 2 - 0.2, shL: 0.25, elL: 0.6, outL: 0.35, shR: 0.25, elR: 0.6, outR: 0.35, lean: 0.06, nod: -0.1 };
-  const her = move(figure(cherylLook({ swim: true }), pose), -0.72, 0, 0);
-  return union(P.tub(state, { t }), her);
+  // Cheryl in her costume on the tub's west rim, facing east: thighs level over
+  // the rim, shins straight down into the water, a pale ring at each waterline.
+  // Knees up, as you sit on a bath's edge: thighs rising a little, shins going
+  // steeply down into the water a hand's width in from the rim.
+  const water = TUB.z1 - 0.07, hipZ = 0.75, a = PI / 2 + 0.35, back = -0.1;
+  const pose = { bob: hipZ - 0.86, hipL: a, hipR: a - 0.06, kneeL: a - back, kneeR: a - 0.06 - back + 0.05, shL: 0.25, elL: 0.6, outL: 0.35, shR: 0.25, elR: 0.6, outR: 0.35, lean: 0.06, nod: -0.06 };
+  const x0 = -0.74;
+  const her = move(figure(cherylLook({ swim: true }), pose), x0, 0, 0);
+  const parts = [P.tub(state, { t }), her];
+  if (state !== 'empty' && state !== 'whirl') {
+    // Where each shin meets the water (the figure's own leg geometry: thigh 0.42, shin 0.4).
+    const kx = Math.sin(a) * 0.42, kz = hipZ - Math.cos(a) * 0.42;
+    const tw = (kz - water) / Math.cos(back);
+    const wx = kx + Math.sin(back) * tw;
+    const ring = mat('#e8f4f8', { tag: 'prop', spec: 1, emit: 0.3 });
+    for (const y of [-0.085, 0.085]) parts.push(move(torus(0.07, 0.012, ring), x0 + wx, y, water + 0.004));
+  }
+  return union(parts);
 }
+
+
+// Parapet runs: each piece casts its shadow with its neighbors in place and keeps
+// only its own share (traced back along the light to the wall's line), so a run's
+// shadow is one continuous band. The light falls 0.75 east and 0.55 north per unit of height.
+function runShadow(dir, build) {
+  const run = union([-2, -1, 0, 1, 2].map((k) => (dir === 'x' ? move(build(), k, 0, 0) : move(build(), 0, k, 0))));
+  const clip = dir === 'x'
+    ? (gx, gy) => Math.abs(gx + (0.75 * gy) / 0.55) < 0.5
+    : (gx, gy) => Math.abs(gy + (0.55 * gx) / 0.75) < 0.5;
+  return { shadowScene: run, shadowClip: clip };
+}
+const runProp = (name, dir, build, h) => frame(name, build, { post: POST.arch, shadow: true, fp: [1, 1], h, render: runShadow(dir, () => parapet(dir, dir === 'y' && h < 30 ? 0.55 : 0.9, h < 30 ? { thick: 0.28 } : {})) });
 
 export default {
   name: 'cistern',
@@ -69,15 +97,15 @@ export default {
     out.push(split('house_plain', () => facade('s', 3, 'plain', { plinth: 0 }), { house_s_plain: left, house_e_plain: right }, { fp: [1, 1], h: 120 }));
 
     // ---- Roof terraces: parapets (36 px), the low wall (22 px), sighting pins, stairs, pent roof
-    out.push(prop('parapet_x', () => parapet('x', 0.9), [1, 1], 36, { shadow: false, post: POST.arch }));
-    out.push(prop('parapet_y', () => parapet('y', 0.9), [1, 1], 36, { shadow: false, post: POST.arch }));
-    out.push(prop('parapet_pier', () => parapetPier(0.95), [1, 1], 38, { shadow: false, post: POST.arch }));
-    out.push(prop('parapet_y_pin', () => union(parapet('y', 0.9), move(sightPin(), 0, 0, 0.9)), [1, 1], 44, { shadow: false, post: POST.arch }));
-    out.push(prop('lowwall_y', () => parapet('y', 0.55, { thick: 0.28 }), [1, 1], 22, { shadow: false, post: POST.arch }));
+    out.push(runProp('parapet_x', 'x', () => parapet('x', 0.9), 36));
+    out.push(runProp('parapet_y', 'y', () => parapet('y', 0.9), 36));
+    out.push(prop('parapet_pier', () => parapetPier(0.95), [1, 1], 38, { shadow: true, post: POST.arch }));
+    out.push(runProp('parapet_y_pin', 'y', () => union(parapet('y', 0.9), move(sightPin(), 0, 0, 0.9)), 44));
+    out.push(runProp('lowwall_y', 'y', () => parapet('y', 0.55, { thick: 0.28 }), 22));
     // The low wall's ends at its gap: end_s ends the northern run at its south end (pier to +y), end_n starts the southern run.
-    out.push(prop('lowwall_end_s', () => union(parapet('y', 0.55, { thick: 0.28, from: -0.5, to: 0.36 }), parapetPier(0.6, { oy: 0.32, w: 0.34 })), [1, 1], 24, { shadow: false, post: POST.arch }));
-    out.push(prop('lowwall_end_s_pin', () => union(parapet('y', 0.55, { thick: 0.28, from: -0.5, to: 0.36 }), parapetPier(0.6, { oy: 0.32, w: 0.34 }), move(sightPin(), 0, 0.32, 0.6)), [1, 1], 32, { shadow: false, post: POST.arch }));
-    out.push(prop('lowwall_end_n', () => union(parapet('y', 0.55, { thick: 0.28, from: -0.36, to: 0.5 }), parapetPier(0.6, { oy: -0.32, w: 0.34 })), [1, 1], 24, { shadow: false, post: POST.arch }));
+    out.push(prop('lowwall_end_s', () => union(parapet('y', 0.55, { thick: 0.28, from: -0.5, to: 0.36 }), parapetPier(0.6, { oy: 0.32, w: 0.34 })), [1, 1], 24, { shadow: true, post: POST.arch }));
+    out.push(prop('lowwall_end_s_pin', () => union(parapet('y', 0.55, { thick: 0.28, from: -0.5, to: 0.36 }), parapetPier(0.6, { oy: 0.32, w: 0.34 }), move(sightPin(), 0, 0.32, 0.6)), [1, 1], 32, { shadow: true, post: POST.arch }));
+    out.push(prop('lowwall_end_n', () => union(parapet('y', 0.55, { thick: 0.28, from: -0.36, to: 0.5 }), parapetPier(0.6, { oy: -0.32, w: 0.34 })), [1, 1], 24, { shadow: true, post: POST.arch }));
         for (const [n, drop] of [['stair', 1]]) out.push(prop(n, () => move(stairFlight(drop, { below: 0 }), 0, 0, drop), [1, 1], 40, { shadow: false, post: POST.arch }));
     out.push(prop('pent_roof', () => P.pentRoof({ rise: 0.6 }), [1, 2], 24, { shadow: false, post: POST.arch }));
     out.push(prop('chimney', () => P.chimney(), [2, 1], 66));
@@ -134,6 +162,14 @@ export default {
     // ---- Below the court: lower roofs and the Squeeze
     out.push(prop('lowroof_terra', () => lowRoof('terra', { h: 0.4 }), [1, 1], 30, { shadow: false, post: POST.arch }));
     out.push(prop('lowroof_flat', () => lowRoof('flat', { h: 0.4 }), [1, 1], 20, { shadow: false, post: POST.arch }));
+    // The houses below the court, flanking the Squeeze (walls 60 px to the eaves).
+    out.push(prop('lowhouse_terra_3x2', () => lowHouse({ w: 3, d: 2, roof: 'terra', seed: 1 }), [3, 2], 80, { shadow: false, post: POST.arch }));
+    out.push(prop('lowhouse_terra_2x2', () => lowHouse({ w: 2, d: 2, roof: 'terra', seed: 2, color: COLORS.ochre }), [2, 2], 80, { shadow: false, post: POST.arch }));
+    out.push(prop('lowhouse_flat_2x2', () => lowHouse({ w: 2, d: 2, roof: 'flat' }), [2, 2], 70, { shadow: false, post: POST.arch }));
+    out.push(prop('lowhouse_flat_3x2', () => lowHouse({ w: 3, d: 2, roof: 'flat', color: COLORS.rose }), [3, 2], 70, { shadow: false, post: POST.arch }));
+    out.push(prop('lowhouse_flat_2x2_tall', () => lowHouse({ w: 2, d: 2, roof: 'flat', wallH: 3 }), [2, 2], 130, { shadow: false, post: POST.arch }));
+    out.push(prop('lowhouse_terra_3x2_tall', () => lowHouse({ w: 3, d: 2, roof: 'terra', seed: 4, wallH: 3 }), [3, 2], 140, { shadow: false, post: POST.arch }));
+    out.push(prop('stair_scraped', () => move(stairFlight(1, { below: 0, scraped: true }), 0, 0, 1), [1, 1], 40, { shadow: false, post: POST.arch }));
     return out;
   },
   anims: {

@@ -37,7 +37,11 @@ export function cloth(base, opts = {}) {
 }
 
 export function skinMat(base, opts = {}) {
-  return mat(base, { tag: 'skin', spec: 0.12, shin: 14, ...opts });
+  const c = hex(base), warm = hex('#d87868');
+  return mat((x, y, z, lx, ly, lz) => {
+    const n = fbm(lx * 25 + 3, ly * 25, lz * 25, 2);
+    return mix(c, warm, Math.max(0, n - 0.55) * 0.5).map((v) => v * (0.96 + n * 0.08));
+  }, { tag: 'skin', spec: 0.12, shin: 14, ...opts });
 }
 
 /**
@@ -102,7 +106,28 @@ export function figure(look, pose = {}) {
     // The cloth drapes over the thighs, so it swings with the stride.
     const bell = squash(frustum(look.hemR ?? 0.2 * k * W, 0.15 * k * W, hem - 0.05, waistZ, look.skirt, 0.012), 0.82, 1, 1);
     const drape = thighs.map(([a, b]) => capsule(a, b, 0.115 * k * W, look.skirt));
-    parts.push(intersect(smooth(0.1 * k, bell, ...drape), boxAt(-1, -1, hem, 1, 1, waistZ + 0.05, look.skirt)));
+    let skirt = intersect(smooth(0.1 * k, bell, ...drape), boxAt(-1, -1, hem, 1, 1, waistZ + 0.05, look.skirt));
+    if (Math.max(p.hipL, p.hipR) > 1.0) {
+      // Seated: the cloth lies along the thighs and falls a hand's width from the knees,
+      // so the shins show below the hem.
+      const seat = move(ellipsoid(0.17 * k, 0.19 * k * W, 0.12 * k, look.skirt), 0, 0, hipZ + 0.02 * k);
+      const laps = thighs.map(([a, b]) => {
+        const kn = [a[0] + (b[0] - a[0]) * 0.8, a[1] + (b[1] - a[1]) * 0.8, a[2] + (b[2] - a[2]) * 0.8];
+        return smooth(0.05 * k, capsule(a, kn, 0.1 * k * W, look.skirt), capsule(kn, [kn[0] + 0.03 * k, kn[1], kn[2] - 0.11 * k], 0.085 * k * W, look.skirt));
+      });
+      skirt = smooth(0.08 * k, seat, ...laps);
+    }
+    if (p.sway) {
+      // Shear the cloth so the hem leads and trails the step while the waist stays put.
+      const sw = p.sway * k, base = skirt;
+      const off = (z) => sw * Math.max(0, Math.min(1, (waistZ - z) / (waistZ - hem)));
+      skirt = {
+        b: [base.b[0] - Math.abs(sw), base.b[1], base.b[2], base.b[3] + Math.abs(sw), base.b[4], base.b[5]],
+        dist: (x, y, z) => base.dist(x - off(z), y, z) * 0.9,
+        near: (x, y, z) => base.near(x - off(z), y, z) * 0.9,
+      };
+    }
+    parts.push(skirt);
   } else if (look.trousers) {
     parts.push(squash(move(ellipsoid(0.15 * k * W, 0.17 * k * W, 0.12 * k, look.trousers), 0, 0, (hipZ + 0.04 * k) / 1), 0.85, 1, 1));
   }
@@ -110,8 +135,8 @@ export function figure(look, pose = {}) {
   // ---- Torso (cardigan, shirt, apron…)
   const torsoTop = shZ + 0.02 * k;
   const torso = smooth(0.07 * k,
-    squash(move(ellipsoid(0.12 * k, 0.16 * k * W, 0.2 * k, look.top), 0, 0, 1.17 * k + z0), 1, 1, 1),
-    capsule([leanX * 0.6, -shY * 0.82, shZ - 0.015 * k], [leanX * 0.6, shY * 0.82, shZ - 0.015 * k], 0.07 * k, look.top),
+    squash(move(ellipsoid(0.12 * k, 0.16 * k * W, 0.2 * k, look.top), 0.012 * k, 0, 1.17 * k + z0), 1, 1, 1),
+    capsule([leanX * 0.6 - 0.02 * k, -shY * 0.82, shZ - 0.015 * k], [leanX * 0.6 - 0.02 * k, shY * 0.82, shZ - 0.015 * k], 0.07 * k, look.top),
     roundCone([0, 0, waistZ - 0.05 * k], [leanX * 0.3, 0, 1.12 * k + z0], 0.13 * k * W, 0.14 * k * W, look.top),
   );
   parts.push(torso);
@@ -119,7 +144,7 @@ export function figure(look, pose = {}) {
 
   // ---- Arms
   for (const [side, sh, el, out] of [[-1, p.shL, p.elL, p.outL], [1, p.shR, p.elR, p.outR]]) {
-    const S = [leanX * 0.6, side * shY, shZ - 0.02 * k];
+    const S = [leanX * 0.6 - 0.02 * k, side * shY, shZ - 0.02 * k];
     const d1 = limbDir(sh, out, side);
     const E = add(S, mul(d1, upper));
     const d2 = limbDir(sh + el, out * 0.6, side);
@@ -139,9 +164,10 @@ export function figure(look, pose = {}) {
   }
 
   // ---- Neck and head
-  const headC = [leanX + Math.sin(p.nod) * 0.03, 0, headZ];
-  parts.push(capsule([leanX * 0.8, 0, neckZ - 0.06 * k], [leanX * 0.9, 0, neckZ + 0.03 * k], 0.045 * k, skinMat(look.skin)));
   const hs = (look.headScale ?? 1) * k;
+  // The head sits over the shoulders, raised clear of them in proportion to its size.
+  const headC = [leanX * 0.6 - 0.028 * hs + Math.sin(p.nod) * 0.03, 0, headZ + (hs - k) * 0.09];
+  parts.push(capsule([leanX * 0.6 - 0.025 * k, 0, neckZ - 0.06 * k], [leanX * 0.6 - 0.025 * k, 0, neckZ + 0.05 * k], 0.045 * k, skinMat(look.skin)));
   const head = headNode(look, hs, p);
   parts.push(place(head, { at: headC, rz: p.turn, ry: p.nod }));
 
@@ -156,24 +182,31 @@ function headNode(look, s, p) {
   const browCol = hex(look.brows ?? look.hair ?? '#504040');
   const skinC = hex(skin);
   const blink = p.blink;
-  const faceMat = mat((x, y, z, lx, ly, lz, nx) => {
-    // Eyes: two small dark dots on the front of the face.
+  // Features sized to read at 66 px: eyes about a pixel and a half, firm brows,
+  // a warm cheek, a mouth line. (ox, oz) shift a part's frame back to the head's,
+  // so the jaw piece paints the same face as the skull.
+  const fs = look.featureScale ?? 1.3;
+  const blush = mix(skinC, hex('#e07870'), 0.35);
+  const faceAt = (ox, oz) => mat((x, y, z, lx0, ly, lz0) => {
+    const lx = lx0 + ox, lz = lz0 + oz;
     if (lx > 0.04 * s) {
       for (const ey of [-0.036 * s, 0.036 * s]) {
-        const dy = ly - ey, dz = lz - 0.012 * s;
-        if (blink) { if (Math.abs(dz + 0.004 * s) < 0.008 * s && Math.abs(dy) < 0.02 * s) return mix(skinC, eyeCol, 0.7); }
-        else if (dy * dy / (0.016 * s) ** 2 + dz * dz / (0.02 * s) ** 2 < 1) return eyeCol;
-        if (look.brows !== false && Math.abs(lz - 0.048 * s) < 0.009 * s && Math.abs(dy) < 0.025 * s) return mix(skinC, browCol, 0.75);
+        const ez = (look.eyeZ ?? 0.012) * s;
+        const dy = ly - ey, dz = lz - ez;
+        if (blink) { if (Math.abs(dz + 0.004 * s) < 0.009 * s * fs && Math.abs(dy) < 0.02 * s * fs) return mix(skinC, eyeCol, 0.75); }
+        else if (dy * dy / (0.016 * s * fs) ** 2 + dz * dz / (0.019 * s * fs) ** 2 < 1) return eyeCol;
+        if (look.brows !== false && Math.abs(lz - ez - (0.012 + 0.016 * fs) * s) < 0.006 * s * fs && Math.abs(dy) < 0.026 * s * fs) return mix(skinC, browCol, 0.85);
       }
-      // A touch of color on the cheeks and a mouth line.
-      if (Math.abs(lz + 0.045 * s) < 0.007 * s && Math.abs(ly) < 0.024 * s) return mix(skinC, hex(look.mouth ?? '#a05050'), 0.6);
+      if (Math.abs(lz + 0.045 * s) < 0.007 * s * fs && Math.abs(ly) < 0.024 * s) return mix(skinC, hex(look.mouth ?? '#a05050'), 0.65);
+      if (Math.hypot(Math.abs(ly) - 0.052 * s, lz + 0.022 * s) < 0.02 * s) return blush;
     }
     return skinC;
   }, { tag: 'skin', spec: 0.1, shin: 12 });
+  const faceMat = faceAt(0, 0);
   const parts = [
     smooth(0.03 * s,
       ellipsoid(0.1 * s, 0.088 * s, 0.112 * s, faceMat),
-      move(ellipsoid(0.07 * s, 0.07 * s, 0.06 * s, faceMat), 0.025 * s, 0, -0.05 * s),
+      move(ellipsoid(0.07 * s, 0.07 * s, 0.06 * s, faceAt(0.025 * s, -0.05 * s)), 0.025 * s, 0, -0.05 * s),
     ),
     move(ellipsoid(0.03 * s, 0.018 * s, 0.03 * s, skinMat(skin)), 0.1 * s, 0, -0.005 * s), // nose
     move(sphere(0.022 * s, skinMat(skin)), -0.005 * s, -0.088 * s, -0.005 * s), // ears

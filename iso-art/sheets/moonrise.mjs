@@ -16,7 +16,7 @@ import { fbm, vnoise, hash3 } from '../lib/noise.mjs';
 import * as V from '../models/vista.mjs';
 
 const BANDS = 16;
-const LAYERS = ['sky', 'far', 'fg'];
+const LAYERS = ['sky', 'far', 'town', 'fg'];
 
 function bandJob(i) {
   const y0 = Math.floor((V.H * i) / BANDS), y1 = Math.floor((V.H * (i + 1)) / BANDS);
@@ -115,28 +115,29 @@ export default {
       if (r > 1) return null;
       return [...hex('#d8e0f0'), Math.pow(1 - r, 1.8) * 0.75];
     }, { ax: 130, ay: 110 }));
-    // The moon's path on the water: broken horizontal streaks of peach-gold, widening toward the viewer.
-    const gold = hex('#ffd49a');
-    out.push(paint('path', 90, 110, (x, y) => {
-      const t = y / 110; // 0 at the far edge (just below the Rim), 1 near
-      const half = 6 + t * 38;
-      const dx = Math.abs(x - 45) / half;
+    // The moon's path on the water: thin horizontal glints in a continuous column,
+    // tight and bright just under the Rim, wider and more broken toward the viewer.
+    // The town layer is drawn over it, so it shows only on the water.
+    const gold = hex('#ffd8a0');
+    out.push(paint('path', 120, 70, (x, y) => {
+      const t = y / 70; // 0 at the far edge, 1 near
+      const half = 7 + t * 44;
+      const dx = Math.abs(x - 60) / half;
       if (dx > 1) return null;
-      const row = Math.floor(y / (1.5 + t * 2.5));
-      const streak = vnoise(x * (0.25 - t * 0.12), row * 3.7, 2) > 0.45 + dx * 0.35;
-      if (!streak) return null;
-      return [...gold, (0.95 - t * 0.45) * (1 - dx * 0.5)];
-    }, { ax: 45, ay: 0 }));
-    // Basin glints: a tiny four-point sparkle in three phases.
+      const pitch = 1.4 + t * 2.4; // rows of glints spread out toward the viewer
+      const row = Math.floor(y / pitch), fy = (y / pitch) % 1;
+      if (fy > 0.45 + 0.25 * (1 - t)) return null; // one-pixel lines with dark water between
+      const seg = vnoise(x * (0.6 - t * 0.35), row * 5.3, 7);
+      if (seg < 0.25 + dx * 0.55 + t * 0.15) return null;
+      return [...gold, Math.min(1, (1.0 - t * 0.45) * (1 - dx * dx * 0.7))];
+    }, { ax: 60, ay: 0 }));
+    // Basin glints: a soft two-pixel glint of sky in a rooftop basin, three phases.
     for (let k = 0; k < 3; k++) {
-      out.push(paint(`twinkle_${k}`, 9, 9, (x, y) => {
-        const dx = Math.abs(x - 4.5), dy = Math.abs(y - 4.5);
-        const arm = k === 1 ? 4.5 : k === 0 ? 2.5 : 1.5;
-        const on = (dx < 0.6 && dy < arm) || (dy < 0.6 && dx < arm) || (dx < 1.2 && dy < 1.2);
-        if (!on) return null;
-        const core = dx < 0.7 && dy < 0.7;
-        return core ? [...hex('#ffffff'), 1] : [...hex('#d8e4f8'), 0.8];
-      }, { hard: true, ax: 4, ay: 4 }));
+      out.push(paint(`twinkle_${k}`, 5, 5, (x, y) => {
+        const r = Math.hypot(x - 2.5, y - 2.5);
+        const a = [0.9, 0.55, 0.3][k] * Math.max(0, 1 - r / 1.8);
+        return a > 0.05 ? [...hex('#e0ecff'), a] : null;
+      }, { ax: 2, ay: 2 }));
     }
     return out;
   },
@@ -152,7 +153,7 @@ export default {
       full[name].data.set(o.img.data, o.band * V.W * 4);
     }
     TWINKLES.length = 0;
-    TWINKLES.push(...findBasins(full.far, full.fg));
+    TWINKLES.push(...findBasins(full.town, full.fg));
     // Where the Rim's top is at the moon's column, so it starts just hidden behind it.
     const top = (x) => { for (let y = 0; y < V.H; y++) if (full.far.data[(y * V.W + x) * 4 + 3]) return y; return V.H; };
     const mx = 438;
@@ -165,7 +166,7 @@ export default {
     twinkles: TWINKLES,
     picture: true,
     size: [V.W, V.H],
-    order: ['sky', 'glow', 'moon_halo', 'moon', 'far', 'path', 'fg', 'twinkle'],
+    order: ['sky', 'glow', 'moon_halo', 'moon', 'far', 'path', 'town', 'fg', 'twinkle'],
     // Where things are, in picture pixels: the Gate's notch (bottom of the V), where the
     // glow and moon rise (right of the Gate, outside the pins), and the moon's climb.
     ...RISE,

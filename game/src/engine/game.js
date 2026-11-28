@@ -37,6 +37,7 @@ export class Game {
     this.rng = makeRng(this.debug.seed ?? Date.now());
     // The presentation: the SNES view, or the isometric one (?view=iso).
     this.view = makeView(chooseView());
+    this.view.attach?.(this);
     this.display = new Display(parent, this.view.display);
     this.input = new Input(this.display);
     this.input.onGesture = unlockAudio;
