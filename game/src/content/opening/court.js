@@ -639,7 +639,7 @@ const neighborDefs = [
   { id: 'neighbor_morning', x: 14, y: 3, facing: 'up', sprite: { sheet: neighbor }, when: morning },
 ].map((d) => ({
   ...d,
-  name: 'Neighbor',
+  name: 'Her Next Door', // the speaker tab says what Cheryl calls her (writer, after the iso playtest)
   interact: talking(neighbor, neighborTalk),
   use: Object.fromEntries(Object.entries(neighborUse).map(([k, fn]) => [k, talking(neighbor, fn)])),
 }));

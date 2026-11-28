@@ -29,7 +29,8 @@ function soft(name, w, h, ax, ay, f) {
   };
 }
 
-const drop = mat('#c8e8f8', { tag: 'fx', spec: 1.2, shin: 50, emit: 0.3 });
+const drop = mat('#8cc8f0', { tag: 'fx', spec: 1.6, shin: 60, emit: 0.35 });
+const tear = (x, y, z, r) => roundCone([x, y, z], [x - r * 0.4, y, z + r * 2.4], r, r * 0.15, drop);
 const bird = (body, wing, flap) => {
   const b = mat(body, { tag: 'fx', spec: 0.2 }), wg = mat(wing, { tag: 'fx', spec: 0.1 });
   return union(
@@ -49,8 +50,9 @@ export default {
       return r < 1 ? [24, 16, 40, 0.5 * Math.min(1, (1 - r) * 2.2)] : null;
     }),
     // Sweat drops flying off the Kid.
-    frame('sweat_0', () => union(move(sphere(0.03, drop), 0, 0, 1.2), move(sphere(0.022, drop), 0.12, 0.05, 1.28)), { post: POST.prop }),
-    frame('sweat_1', () => union(move(sphere(0.026, drop), 0.05, 0.02, 1.12), move(sphere(0.018, drop), 0.2, 0.08, 1.18)), { post: POST.prop }),
+    // Teardrops (round below, pointed above), pale blue with no dark rim: a ringed white sphere read as a ball.
+    frame('sweat_0', () => union(tear(0, 0, 1.2, 0.034), tear(0.12, 0.05, 1.3, 0.026)), { post: POST.arch }),
+    frame('sweat_1', () => union(tear(0.05, 0.02, 1.12, 0.03), tear(0.2, 0.08, 1.2, 0.022)), { post: POST.arch }),
     // The well's cold breath: a pale plume, three frames.
     ...[0, 1, 2].map((k) => soft(`mist_${k}`, 72, 96, 36, 92, (x, y) => {
       const t = (92 - y) / 92; // 0 at the well's mouth, 1 at the top

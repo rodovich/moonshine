@@ -57,7 +57,8 @@ function scene(g) {
       if (x === W - 1 || x === 6) e = roofRow ? [['facade_e_plain', STOREY], ['course24_e', 24]] : [['facade_e_plain', STOREY]];
       column(x, y, 0, s, e, roofRow ? [deckFloor(x, y), DECK] : null);
     }
-    if (x !== 7) add(C, 'pent_roof', x, 10, STOREY, 1, 2, 1);
+    // At a house's east end (x6 by the stair, and the last column) the roof closes with its gable.
+    if (x !== 7) add(C, x === 6 || x === W - 1 ? 'pent_roof_end_e' : 'pent_roof', x, 10, STOREY, 1, 2, 1);
   }
   // Parapets, the low wall at x9 (its gap at y5), the stair down at x7.
   for (let x = 0; x < W; x++) add(C, x === 0 || x === W - 1 ? 'parapet_pier' : 'parapet_x', x, 1, DECK);
@@ -104,7 +105,8 @@ function scene(g) {
   if (moved || stage >= 6) line = `backline_sheets${grey}`;
   else if (stage >= 3) line = ['backline_prop', 'backline_one', 'backline_two'][stage - 3];
   if (f('fx.backline') === 'swung') line = `backline_swung${grey}`;
-  add(C, line, 11, 2, DECK, 8, 1);
+  // In one-tile slices, so whoever stands in front of the line on row 3 is drawn over it.
+  for (let i = 0; i < 8; i++) add(C, `${line}_x${i}`, 11 + i, 2, DECK);
 
   // ---- The court (rows 12-23).
   for (let y = 12; y <= 23; y++) {

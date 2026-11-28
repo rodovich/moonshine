@@ -121,6 +121,12 @@ export function cutaway(dir = 'x', { door = false, hook = false } = {}) {
   const parts = [];
   const H = 0.4;
   const run = (a, b) => (dir === 'x' ? boxAt(a, -0.18, 0, b, 0.18, H, pl) : boxAt(-0.18, a, 0, 0.18, b, H, pl));
+  if (dir === 'corner') {
+    // The south-east corner, where the two stubs meet: a short post with its cut top.
+    // An L reaching back along both walls to the neighboring stubs.
+    return union(boxAt(-0.5, -0.18, 0, 0.18, 0.18, H, pl), boxAt(-0.18, -0.5, 0, 0.18, 0.18, H, pl),
+      boxAt(-0.5, -0.18, H - 0.01, 0.18, 0.18, H + 0.005, top), boxAt(-0.18, -0.5, H - 0.01, 0.18, 0.18, H + 0.005, top));
+  }
   if (door) {
     // The doorway: a stone threshold between two jamb stubs, and the door standing open inward.
     parts.push(run(-0.5, -0.36), run(0.36, 0.5));
@@ -157,8 +163,16 @@ export function counter(side, { item = true } = {}) {
     parts.push(move(union(frustum(0.05, 0.04, 0, 0.2, pm, 0.01), move(sphere(0.045, pm), 0, 0, 0.22), move(sphere(0.012, m('#c8c8d0', { spec: 1 })), 0, 0, 0.27)), 0.05, 0.05, 0.92));
   }
   if (item && side === 'r') {
-    const red = m('#d84838', { spec: 0.5 });
-    parts.push(move(union(place(cylinder(0.08, -0.035, 0.035, red, 0.015), { at: [0, 0, 0.09], rx: PI / 2, rz: PI / 4 }), move(sphere(0.025, brass()), 0, 0, 0.18)), -0.05, 0.08, 0.92));
+    // The egg timer: a key item, so drawn larger than life (about 1.8×, as faces are) to read at 1×:
+    // a fat red tomato-shaped dial with a cream face toward the room and a brass knob.
+    const red = m('#e03c2c', { spec: 0.7, shin: 30 });
+    const face = m('#f6eed8', { spec: 0.4 });
+    parts.push(move(union(
+      ellipsoid(0.14, 0.14, 0.12, red),
+      place(cylinder(0.105, -0.012, 0.012, face, 0.008), { at: [0.07, 0.07, 0.02], rx: PI / 2, rz: PI / 4 }),
+      move(cylinder(0.035, 0.1, 0.16, m('#3a7a3a', { spec: 0.3 }), 0.01), 0, 0, 0),
+      move(sphere(0.035, brass()), 0, 0, 0.17),
+    ), -0.04, 0.06, 1.04));
   }
   return union(parts);
 }

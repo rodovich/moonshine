@@ -20,7 +20,7 @@
 <div class="bar">
   Scene: <a href="?only=court&cam=roof">roof</a><a href="?only=court&cam=court">court</a><a href="?only=court&cam=all&zoom=1">whole map</a>
   <a href="?only=court&cam=roof&tint=dusk">roof at dusk</a><a href="?only=court&cam=court&state=morning&tint=day">morning</a>
-  <a href="?only=court&cam=roof&tint=night">night</a><a href="?only=court&cam=flat&tint=dusk">flat at dusk</a><a href="?only=court&map=lamp_street&cam=map&zoom=1">Lamp Street</a><a href="?only=court&cam=flat&state=morning&tint=day">flat, morning</a>
+  <a href="?only=court&cam=roof&tint=night">night</a><a href="?only=court&cam=flat&tint=dusk">flat at dusk</a><a href="?only=court&map=lamp_street&cam=map&zoom=1">Lamp Street</a><a href="?only=court&map=rooms&cam=map">rooms</a><a href="?only=court&cam=flat&state=morning&tint=day">flat, morning</a>
   · Pictures: <a href="?only=pictures">moonrise</a> · UI: <a href="?only=ui">ui</a> · <a href="?only=sheets">all sheets</a> · <a href="?">everything</a>
 </div>
 <p class="note">Rendered by <code>npm run art:iso</code> from the models in <code>iso-art/</code>. See <code>docs/iso-art-direction.md</code>. Params: <code>only=court|sheets|pictures|ui|&lt;sheet&gt;</code>, <code>cam=roof|court|all</code>, <code>tint=dusk|night|day</code>, <code>state=morning</code>, <code>zoom=n</code>, <code>bg=rrggbb</code>.</p>
@@ -30,7 +30,8 @@ import manifest from '../assets/iso/manifest.js';
 import { court, draw, proj, W, H } from './iso-court.js';
 import { flat } from './iso-flat.js';
 import { lampStreetIso } from '../src/content/act2/lamp_street-iso.js';
-const MAPS = { lamp_street: lampStreetIso };
+import { roomsIso } from './iso-rooms.js';
+const MAPS = { lamp_street: lampStreetIso, rooms: roomsIso };
 import { ISO_TINTS, applyTint } from '../assets/iso/tints.js';
 
 const q = new URLSearchParams(location.search);

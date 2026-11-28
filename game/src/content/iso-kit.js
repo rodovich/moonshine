@@ -47,6 +47,7 @@ const SIDE_UP = { '#': 'plain', w: 'window', b: 'window', c: 'window_closed', B:
 export function isoScene() {
   const out = [];
   const heights = new Map(); // walkable tiles' z
+  const floorTop = new Map(); // the highest floor laid on each tile, walkable or not
   const key = (x, y) => `${x},${y}`;
   const add = (s, f, x, y, z = 0, fw = 1, fd = 1, layer = 1) => { out.push({ s, f, x: x + fw / 2, y: y + fd / 2, z, fw, fd, layer }); };
   const S = {
@@ -57,15 +58,16 @@ export function isoScene() {
     floor(x0, y0, w, h, { z = 0, kind = 'pave', walk = true, sheet = T } = {}) {
       for (let y = y0; y < y0 + h; y++) for (let x = x0; x < x0 + w; x++) {
         add(sheet, floorFrame(kind, x, y), x, y, z, 1, 1, 0);
+        floorTop.set(key(x, y), Math.max(z, floorTop.get(key(x, y)) ?? -Infinity));
         if (walk) heights.set(key(x, y), z); else heights.delete(key(x, y));
       }
     },
     /** One column: south faces then east faces stacked from z0, then a top at its height. */
     column(x, y, z0, south = [], east = [], top = null, sheet = T) {
       let z = z0;
-      for (const [f, h] of south) { add(sheet, f, x, y, z, 1, 1, 0.1); z += h; }
+      for (const [f, h] of south) { add(sheet, f, x, y, z, 1, 1, 0.1); out[out.length - 1].face = ['s', x, y, z + h]; z += h; }
       z = z0;
-      for (const [f, h] of east) { add(sheet, f, x, y, z, 1, 1, 0.1); z += h; }
+      for (const [f, h] of east) { add(sheet, f, x, y, z, 1, 1, 0.1); out[out.length - 1].face = ['e', x, y, z + h]; z += h; }
       if (top) add(sheet, top[0], x, y, top[1], 1, 1, 0.2);
     },
     /**
@@ -158,15 +160,68 @@ export function isoScene() {
     replay(calls, extra = () => ({})) {
       calls.forEach((c, i) => {
         const e = extra(c, i) || {};
-        if (c.fn === 'house') { const [, x0, y0, o] = c.args; S.snesHouse(x0, y0, o, e); }
+        // house args as layout() records them, [x0, y0, opts], or as house() takes them, [L, x0, y0, opts].
+        if (c.fn === 'house') { const [x0, y0, o] = typeof c.args[0] === 'number' ? c.args : c.args.slice(1); S.snesHouse(x0, y0, o, e); }
         else if (c.fn === 'lamp') S.lamp(c.args[0], c.args[1], e.z ?? 0, e);
         else if (c.fn === 'pot') S.pot(c.args[0], c.args[1], c.args[2] ?? 'pot_geranium', e.z ?? 0);
         else if (c.fn === 'bench') S.bench(c.args[0], c.args[1], e.z ?? 0);
       });
     },
+    /**
+     * A room, cut away as the era drew rooms (sheet `rooms`). The floor covers x0…x0+w−1 by
+     * y0…y0+h−1; the north wall stands on row y0−1 and the west wall on column x0−1, both at full
+     * height showing their inner faces; the south wall (row y0+h) and the east wall (column x0+w)
+     * are 16 px stubs. set: shop | archive | crypt | lamp. doors and windows: [[x, y]] on any of
+     * those wall tiles (windows only on the north and west walls; a door in a stub is a threshold,
+     * walkable). floor: a frame name to use for every floor tile instead of the set's.
+     */
+    room(x0, y0, w, h, { set = 'shop', z = 0, doors = [], windows = [], floor = null } = {}) {
+      const R = 'rooms';
+      const has = (list, x, y) => list.some(([a, b]) => a === x && b === y);
+      const kind = (x, y) => (has(doors, x, y) ? 'door' : has(windows, x, y) ? 'window' : 'plain');
+      for (let y = y0; y < y0 + h; y++) for (let x = x0; x < x0 + w; x++) {
+        add(R, floor ?? `${set}_floor_${hash(x, y, 5) < 0.3 ? 1 : 0}`, x, y, z, 1, 1, 0);
+        heights.set(key(x, y), z);
+      }
+      // The back walls and their cut tops.
+      add(R, `${set}_corner`, x0 - 1, y0 - 1, z, 1, 1, 0.1);
+      add('flat', 'wall_cap_corner', x0 - 1, y0 - 1, z, 1, 1, 0.2);
+      for (let x = x0; x < x0 + w; x++) {
+        add(R, `${set}_s_${kind(x, y0 - 1)}`, x, y0 - 1, z, 1, 1, 0.1);
+        add('flat', 'wall_cap_s', x, y0 - 1, z, 1, 1, 0.2);
+        heights.delete(key(x, y0 - 1));
+      }
+      for (let y = y0; y < y0 + h; y++) {
+        add(R, `${set}_e_${kind(x0 - 1, y)}`, x0 - 1, y, z, 1, 1, 0.1);
+        add('flat', 'wall_cap_e', x0 - 1, y, z, 1, 1, 0.2);
+        heights.delete(key(x0 - 1, y));
+      }
+      // The near walls, cut to stubs; a door is a threshold on a floor tile.
+      const stub = (x, y, dir) => {
+        const door = has(doors, x, y);
+        if (door) { add(R, `${set}_floor_0`, x, y, z, 1, 1, 0); heights.set(key(x, y), z); } else heights.delete(key(x, y));
+        add(R, `${set}_cut_${door ? 'door_' : ''}${dir}`, x, y, z);
+      };
+      for (let x = x0; x < x0 + w; x++) stub(x, y0 + h, 'x');
+      for (let y = y0 - 1; y < y0 + h; y++) stub(x0 + w, y, 'y');
+      add(R, `${set}_cut_corner`, x0 + w, y0 + h, z);
+      heights.delete(key(x0 + w, y0 + h));
+    },
     /** Where characters stand: z for each walkable tile recorded, else `fallback`. */
     floorHeight(fallback = 0) { const m = new Map(heights); return (x, y) => m.get(key(x, y)) ?? fallback; },
-    done() { return out; },
+    /**
+     * The drawables. A wall face is dropped when the tile in front of it has a floor at or above
+     * the face's top: the floor's ground hides it, but the engine draws every face after every
+     * floor, so it would show through (the seam between two terraces at one height, say).
+     */
+    done() {
+      return out.filter((d) => {
+        if (!d.face) return true;
+        const [dir, x, y, top] = d.face;
+        const front = floorTop.get(dir === 's' ? key(x, y + 1) : key(x + 1, y));
+        return !(front >= top);
+      }).map(({ face, ...d }) => d);
+    },
   };
   return S;
 }
