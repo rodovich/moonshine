@@ -24,5 +24,8 @@ export default {
     ...characterAnims({ idle: false, ms: 110 }),
     ...Object.fromEntries(DIRS.map((d) => [`smooth_${d}`, { frames: [`smooth_${d}_0`, `smooth_${d}_1`], ms: [900, 900] }])),
     ...Object.fromEntries(DIRS.map((d) => [`reach_${d}`, { frames: [`reach_${d}_0`, `reach_${d}_1`], ms: 400 }])),
+    // Her idle in the court (opening/court.js neighborIdle, frame 'tend'): smoothing the sheet
+    // three times, then stepping back to admire it, at the SNES timings.
+    tend: { frames: ['smooth_left_0', 'smooth_left_1', 'smooth_left_0', 'smooth_left_1', 'smooth_left_0', 'smooth_left_1', 'admire_left'], ms: [450, 450, 450, 450, 450, 450, 2200] },
   },
 };

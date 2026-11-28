@@ -38,6 +38,40 @@ export function frame(name, build, opts = {}) {
 }
 
 /**
+ * A long thin prop along x (n tiles by 1), cut into one-tile slices `${name}_x0` … `_x<n−1>`,
+ * west to east, each anchored at its own tile's center, so each sorts with its own tile (an
+ * 8-tile frame sorts by its far end and draws over people standing in front of its near end).
+ * Valid for things that stay within their row (the cut is by screen x: a tile is 64 px wide on
+ * screen along x, 32 px per half). The whole prop's shadow rides on slice 0.
+ */
+export function sliceX(name, build, n, opts = {}) {
+  return {
+    name,
+    render() {
+      const fr = render(build(), { ss: opts.ss ?? 3, ground: opts.shadow ? 0 : null });
+      const img = toImage(fr, opts.post ?? POST.prop);
+      const out = [];
+      for (let i = 0; i < n; i++) {
+        // Tile i spans world x from i − n/2 to i + 1 − n/2 of the footprint's center; on the row's
+        // center line (y = 0) that is screen x from 32·(i − n/2) to 32·(i + 1 − n/2), at any height.
+        const a = 32 * (i - n / 2), b = 32 * (i + 1 - n / 2);
+        const masked = maskImage(img, fr, (p, k) => {
+          const sx = (k % fr.w) - fr.ax + 0.5;
+          return (i === 0 || sx >= a) && (i === n - 1 || sx < b);
+        });
+        const dx = 32 * (i + 0.5 - n / 2), dy = 16 * (i + 0.5 - n / 2);
+        const t = trim(masked);
+        const shifted = { ...t, ax: t.ax + dx, ay: t.ay + dy };
+        const f = { name: `${name}_x${i}`, img: shifted, fp: [1, 1], h: opts.h };
+        if (i === 0 && opts.shadow) { const s = trim(shadowImage(fr)); f.shadow = { ...s, ax: s.ax + dx, ay: s.ay + dy }; }
+        out.push(f);
+      }
+      return out;
+    },
+  };
+}
+
+/**
  * Several frames from one render, split by a classifier on each pixel's render
  * data (and screen x relative to the anchor). `parts` maps frame names to
  * predicates (p, sx, sy) → bool, where sx, sy are pixel offsets from the anchor.

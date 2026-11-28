@@ -31,3 +31,10 @@ The client asked for a second version of Moonshine: "a 640x480 version with a 2:
 
 - **Narrow slice first:** the opening (Cistern Court, Cheryl's flat, the moonrise and its picture at 640×480) built to high quality in the isometric view, reviewed (code, art, a real-browser playtest by a first-time player), and fixed, before widening act by act.
 - **`main` stays playable in both views.** The usual rule holds: merge only on a green full suite. The isometric view adds its own smoke tests and screenshots.
+
+## Later acts' changes to earlier acts' maps
+
+Later acts change earlier acts' maps (patches, variants, overlays: Act 4's flood stages and dry canal, Act 5's risen Harbor). A hand-built isometric scene can't see those tile changes on its own. Decision (orchestrator, raised by the Act 2 builder):
+
+- **Each act's builder owns the isometric side of its own changes.** A later act supplies an `iso` hook for the maps it changes, given the base scene's kit, that adds or replaces drawables; the engine composes it with the base scene.
+- **The engine keeps a safety net:** for any cell whose current tile differs from the tile the base scene was built for, it draws the converter's version of that cell, so a later act's change always shows (roughly) in the isometric view until that act hand-builds it.

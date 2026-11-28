@@ -563,12 +563,13 @@ export function pathSteps({ seed = 2 } = {}) {
   }, [-0.5, -0.5, -0.05, 0.5, 0.5, 1.05], mat((x, y, z, lx, ly, lz, nx, ny, nz) => (nz > 0.8 && fbm(x * 7, y * 7, seed, 2) > 0.62 ? earth : rock).color(x, y, z, lx, ly, lz, nx, ny, nz), { tag: 'floor', spec: 0.04 }));
 }
 
-const rockMat = (seed = 1, base = '#bfb49c') => mat((x, y, z, lx, ly, lz, nx, ny, nz) => {
-  const n = fbm(x * 6 + seed, y * 6, z * 6, 3);
+// periodic: noise over (x + y, z) repeating every unit, for pieces that tile along a face and stack in courses.
+const rockMat = (seed = 1, base = '#bfb49c', periodic = false) => mat((x, y, z, lx, ly, lz, nx, ny, nz) => {
+  const n = periodic ? fbm((x + y) * 6 + seed * 6, z * 6, 0, 3, 6) : fbm(x * 6 + seed, y * 6, z * 6, 3);
   let c = tint(hex(base), 0.84 + n * 0.22);
   // Bedding lines, lichen on the tops, a dark wet streak here and there.
   if (((z + n * 0.15) * 7) % 1 < 0.07) c = tint(c, 0.78);
-  const li = vnoise(x * 14, y * 14, z * 14 + seed);
+  const li = periodic ? vnoise((x + y) * 14 + seed * 14, z * 14, 0, 14) : vnoise(x * 14, y * 14, z * 14 + seed);
   if (nz > 0.3 && li > 0.8) c = mix(c, hex('#c0a848'), 0.45);
   else if (li < 0.14) c = mix(c, hex('#7a8a6a'), 0.45);
   return c;
@@ -583,9 +584,22 @@ function rough(node, amp = 0.06, freq = 5) {
   };
 }
 
-/** A rock face column (1×1, 1 tall): splits into its south and east faces. */
-export function cliffFace({ h = 1, seed = 3 } = {}) {
-  return intersect(rough(boxAt(-0.5, -0.5, -0.1, 0.42, 0.42, h, rockMat(seed, '#c4bca6'), 0.04), 0.07, 6), boxAt(-0.5, -0.5, 0, 0.5, 0.5, h + 0.2, rockMat(seed)));
+/**
+ * A rock face, one tile wide and one course (40 px) tall: face 's' (its south face) or 'e' (its
+ * east face). The rock runs past the tile's ends and is clipped at them, and its roughness repeats
+ * every tile along the face and every course up it, so neighbors and stacked courses meet without
+ * a seam. (It used to stop short of the tile's far end, and the sea showed through the gap.)
+ */
+export function cliffFace({ face = 's', seed = 3 } = {}) {
+  const amp = 0.07, f = 6;
+  const box = face === 's' ? boxAt(-0.7, -0.7, -0.2, 0.7, 0.42, 1.2, rockMat(seed, '#c4bca6', true), 0.04) : boxAt(-0.7, -0.7, -0.2, 0.42, 0.7, 1.2, rockMat(seed, '#c4bca6', true), 0.04);
+  const r = {
+    b: box.b.map((v, i) => (i < 3 ? v - amp : v + amp)),
+    // (x + y) and z, each periodic over one unit (fbm's period wraps its first two arguments).
+    dist(x, y, z) { return (box.dist(x, y, z) + (fbm((x + y) * f, z * f, 0, 3, f) - 0.5) * amp * 2) * 0.8; },
+    near(x, y, z) { return box.near(x, y, z); },
+  };
+  return intersect(r, boxAt(-0.5, -0.5, 0, 0.5, 0.5, 1, rockMat(seed, '#c4bca6', true)));
 }
 
 /** A lichened limestone outcrop: 'a' (1×1, a waist-high boulder) or 'b' (2×1, a long ledge of rock). */
