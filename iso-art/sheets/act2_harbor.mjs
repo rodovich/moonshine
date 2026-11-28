@@ -97,10 +97,18 @@ export default {
     for (const v of ['a', 'b', 'c']) out.push(floor(`path_${v}`, () => H.pathEarth({ variant: v })));
     out.push(floor('rock_shelf', () => H.rockShelf()));
     out.push(arch('path_steps', () => H.pathSteps(), [1, 1], 40));
-    // The faces stand 0.08 in from the tile's edge (room for their roughness), so each reaches
-    // about 2.6 px past the anchor's screen x: cut at 3 px, or neighbors leave a gap between them.
-    out.push(split('cliff_s', () => H.cliffFace({ face: 's' }), { cliff_s: (p, sx) => sx < 3 }, { fp: [1, 1], h: 40 }));
-    out.push(split('cliff_e', () => H.cliffFace({ face: 'e' }), { cliff_e: (p, sx) => sx >= -3 }, { fp: [1, 1], h: 40 }));
+    // The cliff is modeled as a periodic sheet around the tile (crags bulge up to ~0.17 out of the
+    // tile's face plane and cut back into it), and each frame keeps one tile-course's screen band:
+    // the south face from 32 px left of the anchor to the anchor, the east face from the anchor to
+    // 32 px right, between the course's base edge line and its top edge line (trimTop). The
+    // neighbors' bands are the same band shifted (±32, ±16) along the face and 40 up a stack, so
+    // they meet exactly: no seam, no gap, no overlap. Variants _1, _2 differ only inside the band.
+    const band = (face) => (p, sx, sy) => (face === 's' ? sx > -32 && sx < 0 : sx > 0 && sx < 32) && sy < 15.5 - Math.abs(sx) / 2;
+    for (const face of ['s', 'e']) for (const v of [0, 1, 2]) {
+      const n = `cliff_${face}${v ? `_${v}` : ''}`;
+      out.push(split(n, () => H.cliffFace({ face, variant: v }), { [n]: band(face) },
+        { fp: [1, 1], h: 40, trimTop: true, render: { rect: face === 's' ? [-33, -43, 35, 62] : [-2, -43, 35, 62] } }));
+    }
     out.push(prop('rock_a', () => H.rockOutcrop('a'), [1, 1], 26));
     out.push(prop('rock_b', () => H.rockOutcrop('b'), [2, 1], 28));
     out.push(prop('gorse_a', () => H.bush('gorse', 1), [1, 1], 22));

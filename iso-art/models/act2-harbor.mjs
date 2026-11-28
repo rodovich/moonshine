@@ -544,23 +544,60 @@ export function rockShelf({ seed = 5 } = {}) {
   return heightfield(f, m);
 }
 
-/** Rough cut steps down south across one tile (z = 1 at the north edge, 0 at the south), earth on the treads. */
+/**
+ * Rough steps down south across one tile (z = 1 at the north edge, 0 at the south): four
+ * irregular limestone slabs, each a little tilted, with rounded worn edges, set into packed
+ * earth that fills between and beside them. The earth's surface depends only on y at the tile's
+ * sides (x = ±0.5), so steps tile side by side; it is level at z = 1 along the north edge and at
+ * z = 0 along the south edge, so they join path floors above and below and each other in a flight.
+ * Risers sit at y ≈ −0.375, −0.125, 0.125, 0.375 (a quarter tile, 10 px, each): bright tread,
+ * a stone nosing, then dark earth tucked under it. No fine texture: at 1× a tread is ~4 px deep.
+ */
 export function pathSteps({ seed = 2 } = {}) {
-  const steps = 4, run = 1 / steps, rise = 1 / steps;
-  const rock = mat((x, y, z) => {
-    const n = fbm(x * 9, y * 9, z * 9 + seed, 3);
-    return tint(hex('#c8bea8'), 0.82 + n * 0.22);
-  }, { tag: 'floor', spec: 0.04 });
-  const earth = mat((x, y, z) => tint(hex('#9a6c52'), 0.85 + fbm(x * 14, y * 14, seed, 2) * 0.2), { tag: 'floor', spec: 0.03 });
-  return custom((x, y, z) => {
-    const i = clamp(Math.floor((y + 0.5) / run), 0, steps - 1);
-    // Irregular nosings and tread tops.
-    const edge = -0.5 + (i + 1) * run + (vnoise(x * 6, i * 3, seed) - 0.5) * 0.08;
-    const top = 1 - i * rise + (vnoise(x * 5, y * 5, seed + i) - 0.5) * 0.03;
-    const below = y > edge ? 1 - (i + 1) * rise : top;
-    const h = y > edge ? Math.max(below, top - (y - edge) * 6) : top;
-    return Math.max((z - h) * 0.5, -z - 0.05, Math.abs(x) - 0.5, Math.abs(y) - 0.5);
-  }, [-0.5, -0.5, -0.05, 0.5, 0.5, 1.05], mat((x, y, z, lx, ly, lz, nx, ny, nz) => (nz > 0.8 && fbm(x * 7, y * 7, seed, 2) > 0.62 ? earth : rock).color(x, y, z, lx, ly, lz, nx, ny, nz), { tag: 'floor', spec: 0.04 }));
+  const R = [-0.375, -0.125, 0.125, 0.375];
+  // The earth: a soft staircase a little below the stones' tops, its risers sloped and set back.
+  const earthZ = (x, y) => {
+    let h = 1;
+    for (let k = 0; k < 4; k++) h -= 0.25 * sstep(R[k] - 0.05, R[k] + 0.04, y);
+    // Worn down a little round the stones, but level along the north and south edges.
+    const mid = Math.sin(PI * (y + 0.5)) ** 2;
+    return h - 0.025 * mid + (pfbm(x, y, 3, 2, seed + 7) - 0.5) * 0.02 * mid;
+  };
+  const earthM = mat((x, y, z, lx, ly, lz, nx, ny, nz) => {
+    const n = pfbm(x, y, 4, 2, seed + 11);
+    let c = tint(mix(hex(earthTones[0]), hex(earthTones[1]), n), 0.92 + (pfbm(x, y, 9, 1, seed) - 0.5) * 0.12);
+    // The risers under the slabs: damp, darker, cooler earth.
+    if (nz < 0.75) c = mix(tint(c, 0.5), hex('#4a3634'), 0.3);
+    return c;
+  }, { tag: 'floor', spec: 0.03, shin: 8 });
+  const earth = custom((x, y, z) => Math.max((z - earthZ(x, y)) * 0.35, -z, Math.abs(x) - 0.5, Math.abs(y) - 0.5), [-0.5, -0.5, 0, 0.5, 0.5, 1.02], earthM);
+  const R2 = rng(seed * 7 + 3);
+  const stones = [];
+  for (let k = 0; k < 4; k++) {
+    const top = 1 - 0.25 * k - 0.005;
+    const front = R[k] + (R2() - 0.5) * 0.04;
+    const back = k === 0 ? -0.62 : R[k - 1] - 0.06;
+    const x0 = -0.44 + R2() * 0.14, x1 = 0.3 + R2() * 0.14;
+    const tone = mix(hex('#d4ccbc'), hex('#c4bca8'), R2());
+    const m = mat((x, y, z, lx, ly, lz, nx, ny, nz) => {
+      const n = pfbm(x + 0.5, y + 0.5, 3, 2, seed + 20 + k);
+      let c = tint(tone, 0.9 + (n - 0.5) * 0.2);
+      if (nz > 0.7) c = mix(c, hex('#e2dccc'), 0.25); // worn pale on the treads
+      else if (ny > 0.5) c = tint(c, 0.86); // the nosing's face
+      if (pnoise((x + 0.5) * 6 + k, (y + 0.5) * 6, 6, seed + 30 + k) > 0.8) c = mix(c, hex('#a8a888'), 0.35); // lichen
+      return c;
+    }, { tag: 'floor', spec: 0.05, shin: 10 });
+    // A slab 0.14 thick, rounded, tilted a little about all three axes; the third is laid as a
+    // pair of smaller stones with earth between.
+    const pieces = k === 2 ?(() => { const xm = -0.1 + R2() * 0.25; return [[x0, xm - 0.03], [xm + 0.03, x1]]; })() : [[x0, x1]];
+    for (const [a, b] of pieces) {
+      const f = front + (R2() - 0.5) * 0.04;
+      const hx = (b - a) / 2, hy = (f - back) / 2, hz = 0.07;
+      stones.push(place(box(hx, hy, hz, m, 0.04), { at: [(a + b) / 2, (f + back) / 2, top - hz - R2() * 0.01], rz: (R2() - 0.5) * 0.16, rx: (R2() - 0.5) * 0.06, ry: (R2() - 0.5) * 0.08 }));
+    }
+  }
+  // Clip to the tile (the top stone at z = 1, flush with the path above).
+  return intersect(union(earth, ...stones), boxAt(-0.5, -0.5, 0, 0.5, 0.5, 1, earthM));
 }
 
 // periodic: noise over (x + y, z) repeating every unit, for pieces that tile along a face and stack in courses.
@@ -584,22 +621,136 @@ function rough(node, amp = 0.06, freq = 5) {
   };
 }
 
+// ---- The cliff faces: craggy limestone, periodic over one tile along the face and one course up it.
+
+const fade5 = (t) => t * t * t * (t * (t * 6 - 15) + 10);
+const wrapi = (i, p) => ((i % p) + p) % p;
+/** 2D value noise with a quintic fade (smooth slope: no creases on the lattice), periodic over p cells in both axes. */
+function pnoise(x, y, p, seed) {
+  const xi = Math.floor(x), yi = Math.floor(y), xf = fade5(x - xi), yf = fade5(y - yi);
+  const w = (i, j) => hash3(wrapi(xi + i, p), wrapi(yi + j, p), seed);
+  const a = w(0, 0) + (w(1, 0) - w(0, 0)) * xf, b = w(0, 1) + (w(1, 1) - w(0, 1)) * xf;
+  return a + (b - a) * yf;
+}
+/** Fractal pnoise over (u, z), periodic over one unit in each; f cells per unit at the first octave. */
+function pfbm(u, z, f, oct, seed) {
+  let s = 0, a = 0.5, n = 0, k = f;
+  for (let i = 0; i < oct; i++) { s += a * pnoise(u * k, z * k, k, seed + i * 17); n += a; a *= 0.5; k *= 2; }
+  return s / n;
+}
+const wrapc = (t) => t - Math.round(t); // to [−0.5, 0.5)
+
 /**
- * A rock face, one tile wide and one course (40 px) tall: face 's' (its south face) or 'e' (its
- * east face). The rock runs past the tile's ends and is clipped at them, and its roughness repeats
- * every tile along the face and every course up it, so neighbors and stacked courses meet without
- * a seam. (It used to stop short of the tile's far end, and the sea showed through the gap.)
+ * The crag field of one cliff variant: how far the rock stands out of its mean plane at (u, z),
+ * u running along the face, both periodic over one unit. Bulges, two beds of ledges per course
+ * (lit tops, small overhangs under them) that wander up and down and come and go along the face,
+ * and short slanting cracks. Returns { o, crev } (crev: 0–1, how deep in a crevice).
  */
-export function cliffFace({ face = 's', seed = 3 } = {}) {
-  const amp = 0.07, f = 6;
-  const box = face === 's' ? boxAt(-0.7, -0.7, -0.2, 0.7, 0.42, 1.2, rockMat(seed, '#c4bca6', true), 0.04) : boxAt(-0.7, -0.7, -0.2, 0.42, 0.7, 1.2, rockMat(seed, '#c4bca6', true), 0.04);
-  const r = {
-    b: box.b.map((v, i) => (i < 3 ? v - amp : v + amp)),
-    // (x + y) and z, each periodic over one unit (fbm's period wraps its first two arguments).
-    dist(x, y, z) { return (box.dist(x, y, z) + (fbm((x + y) * f, z * f, 0, 3, f) - 0.5) * amp * 2) * 0.8; },
-    near(x, y, z) { return box.near(x, y, z); },
+function crags(u, z, seed) {
+  // Blocks: a periodic Voronoi of jittered cells (3 × 3 per tile-course, the lattice warped),
+  // each a tilted plane, softly blended at the joints, so the face breaks into facets that catch
+  // the light differently, with steps and small overhangs between them.
+  const N = 3, wu = u * N + (pfbm(u, z, 2, 2, seed + 3) - 0.5) * 1.2, wz = z * N + (pfbm(u, z, 2, 2, seed + 5) - 0.5) * 0.8;
+  const iu = Math.floor(wu), iz = Math.floor(wz);
+  let sw = 0, so = 0, f1 = 9, f2 = 9, cid = 0;
+  const ds = [];
+  for (let j = -1; j <= 1; j++) for (let i = -1; i <= 1; i++) {
+    const cu = iu + i, cz = iz + j, hu = wrapi(cu, N), hz = wrapi(cz, N);
+    const pu = cu + 0.5 + (hash3(hu, hz, seed + 81) - 0.5) * 0.85, pz = cz + 0.5 + (hash3(hu, hz, seed + 82) - 0.5) * 0.7;
+    const d = Math.hypot(wu - pu, (wz - pz) * 1.15);
+    const id = hash3(hu, hz, seed + 83);
+    const plane = (id - 0.5) * 0.16 + (hash3(hu, hz, seed + 84) - 0.5) * 0.24 * (wu - pu) + (hash3(hu, hz, seed + 85) - 0.4) * 0.26 * (wz - pz);
+    ds.push([d, plane]);
+    if (d < f1) { f2 = f1; f1 = d; cid = id; } else if (d < f2) f2 = d;
+  }
+  for (const [d, plane] of ds) { const w = Math.exp(-(d - f1) / 0.05); sw += w; so += w * plane; }
+  let o = so / sw + (pfbm(u, z, 2, 2, seed) - 0.5) * 0.12;
+  // A narrow dark joint along some block edges.
+  const joint = sstep(0.08, 0.0, f2 - f1);
+  o -= 0.025 * joint;
+  let crev = joint * 0.5;
+  void cid;
+  for (let j = 0; j < 1; j++) {
+    const S = sstep(0.4, 0.66, pnoise(u * 3, j * 5 + 0.5, 3, seed + 31 + j));
+    if (S <= 0) continue;
+    const h = hash3(seed, j, 3) +(pfbm(u, j * 0.37, 2, 2, seed + 41 + j) - 0.5) * 0.36;
+    const t = wrapc(z - h);
+    const jut = sstep(-0.25, -0.15, t) * sstep(0.0, -0.035, t);
+    const back = sstep(-0.005, 0.03, t) * sstep(0.3, 0.08, t);
+    o += S * (0.11 * jut - 0.04 * back);
+    // The shadowed notch under the lip.
+    crev = Math.max(crev, S * sstep(-0.3, -0.24, t) * sstep(-0.14, -0.22, t));
+  }
+  for (let i = 0; i < 3; i++) {
+    const u0 = hash3(seed, i, 51), z0 = hash3(seed, i, 52), L = 0.22 + hash3(seed, i, 53) * 0.25, k = (hash3(seed, i, 54) - 0.5) * 0.5;
+    const zz = ((z - z0) % 1 + 1) % 1;
+    if (zz > L) continue;
+    const du = wrapc(u - u0 - k * zz - Math.sin(zz * 17 + i) * 0.012);
+    const c = Math.exp(-(du * du) / (0.032 * 0.032)) * sstep(0, 0.06, zz) * sstep(L, L - 0.08, zz);
+    o -= 0.075 * c;
+    crev = Math.max(crev, c);
+  }
+  return { o, crev };
+}
+
+/**
+ * The cliff in an infinite periodic sheet (variant v): the face's plane at 0.47 from the tile's
+ * center ('s': y, 'e': x), rock behind it. Variants 1, 2 blend a second crag field into the
+ * middle of each tile-course, weighted by sin²·sin² in screen-aligned coordinates (u = x − y, the
+ * screen column; z measured from the course's cut lines), so it vanishes on the lines where
+ * neighbors are cut apart and every variant's edges are variant 0's.
+ */
+function cliffField(face, v) {
+  const seeds = face === 's' ? [3, 13, 23] : [7, 17, 27];
+  // Like sin²(πt) but flatter-topped: zero within 0.02 of each edge, one from 0.32 to 0.68, so
+  // most of the tile is the second field (with plain sin², a third of the tile was shared and every
+  // tile showed the same edge features), while the ramp stays gentle enough not to fold the rock
+  // into a ridge along the tile's edge (a ramp of 0.15 did).
+  const win = (t) => sstep(0.02, 0.32, t) * sstep(0.98, 0.68, t);
+  return (x, y, z) => {
+    const u = x + y;
+    const a = crags(u, z, seeds[0]);
+    a.w = 0;
+    if (!v) return a;
+    const zc = z - 0.8 * ((face === 's' ? y : x) - 0.5);
+    const w = win(((x - y) % 1 + 1) % 1) * win(((zc % 1) + 1) % 1);
+    if (w <= 0) return a;
+    const b = crags(u + 0.37 * v, z + 0.21 * v, seeds[v]);
+    return { o: a.o + (b.o - a.o) * w, crev: a.crev + (b.crev - a.crev) * w, w };
   };
-  return intersect(r, boxAt(-0.5, -0.5, 0, 0.5, 0.5, 1, rockMat(seed, '#c4bca6', true)));
+}
+
+/**
+ * A rock face course (one tile wide, 40 px tall): face 's' (south) or 'e' (east), variant 0–2.
+ * The model is the whole periodic cliff around the tile (so light, shadows and occlusion
+ * continue across neighbors); the sheet keeps only this tile-course's screen band, cut along
+ * straight screen lines that the neighbors' bands meet exactly (a partition, so no seams or gaps).
+ */
+export function cliffFace({ face = 's', variant = 0 } = {}) {
+  const F = cliffField(face, variant);
+  const Y0 = 0.47;
+  const rock = mat((x, y, z, lx, ly, lz, nx, ny, nz) => {
+    const u = x + y, { o, crev, w } = F(x, y, z);
+    // Color noise, blended to the variant's own in the middle like the shape.
+    const pn = (f, s) => { const a = pnoise(u * f, z * f, f, s); return w ? a + (pnoise((u + 0.37 * variant) * f, (z + 0.21 * variant) * f, f, s + 100 * variant) - a) * w : a; };
+    const n = pn(3, 61), n2 = pn(6, 67);
+    let c = tint(mix(hex('#d4ccbb'), hex('#bfb6a2'), n), 0.95 + (n2 - 0.5) * 0.1);
+    // Proud rock is warmer (iron-stained); recesses and crevices darker and cooler.
+    c = mix(c, hex('#cbb894'), clamp((o - 0.05) * 4, 0, 0.3));
+    c = mix(c, hex('#8a8a98'), clamp(crev * 0.45 + clamp(-o - 0.05, 0, 0.1) * 2, 0, 0.45));
+    // Ledge tops: paler, with scrub and lichen here and there.
+    if (nz > 0.5) {
+      c = mix(c, hex('#e6dfcc'), 0.4);
+      const s = pn(5, 71);
+      if (s > 0.64) c = mix(hex('#5a6c3c'), hex('#7a8a4c'), pn(12, 73));
+      else if (s < 0.2) c = mix(c, hex('#c4ac50'), 0.35);
+    } else if (pn(4, 75) > 0.78) c = mix(c, hex('#98a084'), 0.25); // grey-green lichen on the face
+    return c;
+  }, { tag: 'wall', spec: 0.04, shin: 10 });
+  const fn = face === 's'
+    ? (x, y, z) => Math.max((y - Y0 - F(x, y, z).o) * 0.3, Math.abs(x) - 2.2, -0.7 - y, Math.abs(z - 0.5) - 1.9)
+    : (x, y, z) => Math.max((x - Y0 - F(x, y, z).o) * 0.3, Math.abs(y) - 2.2, -0.7 - x, Math.abs(z - 0.5) - 1.9);
+  return custom(fn, face === 's' ? [-2.2, -0.7, -1.4, 2.2, 0.75, 2.4] : [-0.7, -2.2, -1.4, 0.75, 2.2, 2.4], rock);
 }
 
 /** A lichened limestone outcrop: 'a' (1×1, a waist-high boulder) or 'b' (2×1, a long ledge of rock). */

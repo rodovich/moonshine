@@ -24,7 +24,8 @@ function build() {
   for (let y = 0; y <= 3; y++) for (let x = 0; x < W; x++) {
     if ((x >= 5 && x <= 22) || (x >= 26 && x <= 29)) continue; // the terrace and the lighthouse
     const z = 240 - y * 40;
-    S.column(x, y, 0, Array.from({ length: z / 40 }, () => ['cliff_s', 40]), x === W - 1 || x === 4 || x === 25 ? Array.from({ length: z / 40 }, () => ['cliff_e', 40]) : [], ['rock_shelf', z], H2);
+    const crag = (f) => Array.from({ length: z / 40 }, (_, i) => [[f, `${f}_1`, `${f}_2`][(x * 7 + y * 13 + i * 5) % 3], 40]); // a crag variant by position
+    S.column(x, y, 0, crag('cliff_s'), x === W - 1 || x === 4 || x === 25 ? crag('cliff_e') : [], ['rock_shelf', z], H2);
   }
   // The harbor-front terrace (x5-22), two storeys against the rock; doors at x6, x12 (the Harbor Office), x18.
   const front = Array.from({ length: 18 }, (_, i) => { const x = 5 + i; return x === 5 || x === 22 ? '#' : DOORS[x] ? 'D' : x % 3 === 0 ? 'w' : '#'; }).join('');
