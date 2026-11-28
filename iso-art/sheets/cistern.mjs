@@ -153,6 +153,9 @@ export default {
     out.push(prop('stool', () => P.stool(), [1, 1], 18));
     out.push(prop('gerald_chair', () => P.woodChair({ face: PI }), [1, 1], 38));
     out.push(prop('well', () => P.well(), [2, 2], 30));
+    // Act 6's dawn: the grate lifting (1) and lifted open (2) so Cheryl can climb out (fx.wellGrate).
+    out.push(prop('well_grate_1', () => P.well({ grate: 1 }), [2, 2], 50));
+    out.push(prop('well_grate_2', () => P.well({ grate: 2 }), [2, 2], 60));
     out.push(prop('hurdle', () => P.hurdle(), [3, 1], 22));
     out.push(prop('pots_bare', () => P.hurdle({ prop: false }), [3, 1], 22));
     for (let i = 0; i < 3; i++) out.push(prop(`geraniums_${i}`, () => P.pot({ plant: 'geranium', r: 0.2, h: 0.34, seed: 20 + i }), [1, 1], 24));
@@ -167,6 +170,8 @@ export default {
     out.push(prop('lowhouse_terra_2x2', () => lowHouse({ w: 2, d: 2, roof: 'terra', seed: 2, color: COLORS.ochre }), [2, 2], 80, { shadow: false, post: POST.arch }));
     out.push(prop('lowhouse_flat_2x2', () => lowHouse({ w: 2, d: 2, roof: 'flat' }), [2, 2], 70, { shadow: false, post: POST.arch }));
     out.push(prop('lowhouse_flat_3x2', () => lowHouse({ w: 3, d: 2, roof: 'flat', color: COLORS.rose }), [3, 2], 70, { shadow: false, post: POST.arch }));
+    out.push(prop('lowhouse_flat_1x2', () => lowHouse({ w: 1, d: 2, roof: 'flat', color: COLORS.ochre }), [1, 2], 70, { shadow: false, post: POST.arch }));
+    out.push(prop('lowhouse_terra_1x2', () => lowHouse({ w: 1, d: 2, roof: 'terra', seed: 5 }), [1, 2], 80, { shadow: false, post: POST.arch }));
     out.push(prop('lowhouse_flat_2x2_tall', () => lowHouse({ w: 2, d: 2, roof: 'flat', wallH: 3 }), [2, 2], 130, { shadow: false, post: POST.arch }));
     out.push(prop('lowhouse_terra_3x2_tall', () => lowHouse({ w: 3, d: 2, roof: 'terra', seed: 4, wallH: 3 }), [3, 2], 140, { shadow: false, post: POST.arch }));
     out.push(prop('stair_scraped', () => move(stairFlight(1, { below: 0, scraped: true }), 0, 0, 1), [1, 1], 40, { shadow: false, post: POST.arch }));

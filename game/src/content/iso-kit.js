@@ -127,16 +127,42 @@ export function isoScene() {
     /** The roofs of the houses below a street's edge (cistern's lowhouse props), from x0 for w tiles. */
     lowRoofs(x0, y0, w, { z = -80, skip = [] } = {}) {
       const kinds = ['lowhouse_terra_3x2', 'lowhouse_flat_2x2', 'lowhouse_flat_3x2', 'lowhouse_terra_2x2'];
+      const narrower = { 3: ['lowhouse_flat_3x2', 'lowhouse_terra_3x2'], 2: ['lowhouse_flat_2x2', 'lowhouse_terra_2x2'], 1: ['lowhouse_flat_1x2', 'lowhouse_terra_1x2'] };
       let x = x0, i = 0;
       while (x < x0 + w) {
         if (skip.includes(x)) { x++; continue; }
-        let k = kinds[(i++ + x0) % kinds.length];
-        let kw = k.includes('3x2') ? 3 : 2;
-        while (skip.some((s) => s >= x && s < x + kw) || x + kw > x0 + w) { kw--; k = kw >= 2 ? 'lowhouse_flat_2x2' : null; if (!k) break; }
-        if (!k) { x++; continue; }
+        const k0 = kinds[(i++ + x0) % kinds.length];
+        let kw = k0.includes('3x2') ? 3 : 2;
+        // Narrow the house until it fits before the next gap or the map's edge (down to one tile).
+        while (kw > 1 && (skip.some((s) => s >= x && s < x + kw) || x + kw > x0 + w)) kw--;
+        const k = kw === (k0.includes('3x2') ? 3 : 2) ? k0 : narrower[kw][i % 2];
         add('cistern', k, x, y0, z - 60, kw, 2, 1);
         x += kw;
       }
+    },
+    /**
+     * The SNES house() call, replayed: house(L, x0, y0, { top, mid, base, roofRows, palette })
+     * from act2/common.js becomes a block w = top.length wide and roofRows + (mid ? 1 : 0) + 2
+     * deep, its ground storey from `top`, an upper storey from `mid`, its plaster from `palette`.
+     * `iso` adds what the SNES call can't say: { z, roof, side }.
+     */
+    snesHouse(x0, y0, { top, mid = null, roofRows = 1, palette = null } = {}, iso = {}) {
+      const plaster = { white_sage: 'sage', sky: 'sky', ochre: 'ochre', rose: 'rose' }[palette] || 'white';
+      const d = roofRows + (mid ? 1 : 0) + 2;
+      S.house(x0, y0, top.length, d, { front: top, upper: mid ? [mid] : [], plaster, roof: 'flat', ...iso });
+    },
+    /**
+     * Replay a list of recorded layout calls ({ fn, args } with fn one of house, lamp, pot, bench),
+     * as layout() could record them, with per-call iso extras from `extra(call, i)`.
+     */
+    replay(calls, extra = () => ({})) {
+      calls.forEach((c, i) => {
+        const e = extra(c, i) || {};
+        if (c.fn === 'house') { const [, x0, y0, o] = c.args; S.snesHouse(x0, y0, o, e); }
+        else if (c.fn === 'lamp') S.lamp(c.args[0], c.args[1], e.z ?? 0, e);
+        else if (c.fn === 'pot') S.pot(c.args[0], c.args[1], c.args[2] ?? 'pot_geranium', e.z ?? 0);
+        else if (c.fn === 'bench') S.bench(c.args[0], c.args[1], e.z ?? 0);
+      });
     },
     /** Where characters stand: z for each walkable tile recorded, else `fallback`. */
     floorHeight(fallback = 0) { const m = new Map(heights); return (x, y) => m.get(key(x, y)) ?? fallback; },

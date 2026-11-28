@@ -373,7 +373,7 @@ export function stool() {
 }
 
 /** The well (2×2): a ring of fitted stones with an iron grate across the top. */
-export function well({ breath = 0 } = {}) {
+export function well({ breath = 0, grate = 0 } = {}) {
   const R = 0.78, h = 0.62;
   const stone = mat((x, y, z, lx, ly, lz) => {
     const a = Math.atan2(y, x), course = Math.floor(z / 0.155);
@@ -398,7 +398,12 @@ export function well({ breath = 0 } = {}) {
   // Darkness inside.
   const dark = move(cylinder(R - 0.2, 0.02, h - 0.3, mat('#100c14', { tag: 'prop' })), 0, 0, 0);
   void breath;
-  return union(ring, coping, dark, ...bars);
+  // grate: 0 shut; 1 lifting (hinged at its south edge, 40° up, its face toward the camera); 2 open (~100°, leaning on the rim).
+  if (!grate) return union(ring, coping, dark, ...bars);
+  const ang = grate === 1 ? 0.7 : 1.75;
+  const hinge = [0, R - 0.12, h + 0.07];
+  const lifted = place(move(union(bars), 0, -hinge[1], -hinge[2]), { at: hinge, rx: -ang });
+  return union(ring, coping, dark, lifted);
 }
 
 /** A stone bench (2×1 along x). */
