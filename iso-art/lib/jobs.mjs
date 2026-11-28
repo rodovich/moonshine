@@ -83,7 +83,14 @@ export function split(name, build, parts, opts = {}) {
       const fr = render(build(), { ss: opts.ss ?? 3, ...opts.render });
       const img = toImage(fr, opts.post ?? POST.arch);
       return Object.entries(parts).map(([n, keep]) => {
-        const masked = maskImage(img, fr, (p, i) => keep(p, (i % fr.w) - fr.ax + 0.5, Math.floor(i / fr.w) - fr.ay + 0.5));
+        // trimTop: a wall face (a half of a column render) keeps nothing above its top edge, so the
+        // column's lit top doesn't come with it (it showed over roofs the engine draws first).
+        // The top edges run from the tile's south corner (0, 16) up h px and out half a px per px.
+        const top = (sx, sy) => !opts.trimTop || sy >= 16 - opts.h - Math.abs(sx) / 2 - 0.5;
+        const masked = maskImage(img, fr, (p, i) => {
+          const sx = (i % fr.w) - fr.ax + 0.5, sy = Math.floor(i / fr.w) - fr.ay + 0.5;
+          return keep(p, sx, sy) && top(sx, sy);
+        });
         return { name: n, img: trim(masked), fp: opts.fp, h: opts.h };
       });
     },
