@@ -69,7 +69,7 @@ function build() {
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
     const z = heightAt(x, y);
     const below = y + 1 < H ? heightAt(x, y + 1) : SEA;
-    const east = x + 1 < W ? heightAt(x + 1, y) : SEA;
+    const east = x + 1 < W ? heightAt(x + 1, y) : z; // the map's east edge: the hill goes on, no face
     const courses = (to, f) => Array.from({ length: Math.max(0, Math.ceil((z - to) / 40)) }, () => [f, 40]);
     if (z === SEA) { S.add('town', 'water', x, y, SEA, 1, 1, 0); continue; }
     const step = isPath(x, y) && stepRect(x, y);
