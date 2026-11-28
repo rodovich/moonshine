@@ -56,9 +56,11 @@ function build() {
   // The sign east to the Harbor, on the south bank.
   S.prop(H2, 'sign_harbor', 29, 10, 0, 3, 1);
 
-  // ---- The south quay's west end, flooded ankle-deep (x0-5, rows 11-12). STAND-IN: shaded
-  // paving until there's a shallow-flood piece.
-  S.floor(0, 11, 6, 2, { kind: 'pave_shade' });
+  // ---- The south quay's west end, flooded ankle-deep (x0-5, rows 11-12), lapping onto x6.
+  for (let y = 11; y <= 12; y++) {
+    for (let x = 0; x <= 5; x++) S.add(H2, 'flood', x, y, 0, 1, 1, 0);
+    S.add(H2, 'flood_edge_e', 6, y, 0, 1, 1, 0);
+  }
 
   // ---- South: the edge over the roofs below.
   for (let x = 0; x < W; x++) {

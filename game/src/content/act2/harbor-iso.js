@@ -39,13 +39,17 @@ function build() {
   S.prop(H2, 'bollard_rope', 8, 8, 0); S.prop(H2, 'bollard_rope', 18, 8, 0);
   S.prop(H2, 'bollard', 13, 8, 0);
 
-  // ---- The quay edge (row 9) and the sea (rows 10-13). The Keyhole (30-31, 9) and the
-  // culvert (1-2, 9) have no isometric pieces yet: STAND-IN, plain quay edge.
+  // ---- The quay edge (row 9) and the sea (rows 10-13); the culvert (1-2, 9) where the canal
+  // runs out under the quay, and the Keyhole (30-31, 9) worn through the rock under the lighthouse.
+  const faced = (x) => x === 1 || x === 2 || x === 30 || x === 31;
   for (let x = 0; x < W; x++) {
-    S.column(x, 9, SEA, [['quay_s', 40]], [], ['pave_nw', 0]);
+    S.column(x, 9, SEA, faced(x) ? [] : [['quay_s', 40]], [], ['pave_nw', 0]);
     S.prop('town', 'lip_x', x, 9, 0);
-    for (let y = 10; y <= 13; y++) S.add('town', 'water', x, y, SEA, 1, 1, 0);
+    for (let y = 10; y <= 13; y++) if (!(y === 10 && (x === 1 || x === 2))) S.add('town', 'water', x, y, SEA, 1, 1, 0);
   }
+  S.add(H2, 'culvert', 1, 9, SEA, 2, 1, 0.1);
+  S.add(H2, 'outflow', 1, 10, SEA, 2, 1, 0);
+  S.add(H2, 'keyhole', 30, 9, SEA, 2, 1, 0.1);
   // Mott's ferry, the Persistence, alongside (bobbing).
   S.add(H2, 'persistence', 8, 9.1, SEA, 10, 3, 1);
   return S;
