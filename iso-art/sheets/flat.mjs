@@ -34,6 +34,7 @@ export default {
     prop('cut_y', () => F.cutaway('y'), [1, 1], 16, { shadow: false, post: POST.arch }),
     prop('cut_door', () => F.cutaway('x', { door: true }), [1, 1], 16, { shadow: false, post: POST.arch }),
     prop('cut_hook', () => F.cutaway('x', { hook: true }), [1, 1], 16, { shadow: false, post: POST.arch }),
+    prop('cut_corner', () => F.cutaway('corner'), [1, 1], 16, { shadow: false, post: POST.arch }),
     // Furniture.
     prop('counter_l_mill', () => F.counter('l'), [1, 1], 44),
     prop('counter_l', () => F.counter('l', { item: false }), [1, 1], 37),

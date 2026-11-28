@@ -65,3 +65,23 @@ export function voronoi(x, y, period = 0, jitter = 0.8, seed = 0) {
   }
   return { f1, f2, id };
 }
+
+// Value noise with a quintic fade: its gradient is smooth too, so normals bent by it (bump
+// maps) don't crease along the lattice planes, which read as straight seams on a big surface.
+const fade5 = (t) => t * t * t * (t * (t * 6 - 15) + 10);
+export function vnoiseQ(x, y, z = 0) {
+  const xi = Math.floor(x), yi = Math.floor(y), zi = Math.floor(z);
+  const xf = fade5(x - xi), yf = fade5(y - yi), zf = fade5(z - zi);
+  const w = (i, j, k) => hash3(xi + i, yi + j, zi + k);
+  const l = (a, b, t) => a + (b - a) * t;
+  return l(
+    l(l(w(0, 0, 0), w(1, 0, 0), xf), l(w(0, 1, 0), w(1, 1, 0), xf), yf),
+    l(l(w(0, 0, 1), w(1, 0, 1), xf), l(w(0, 1, 1), w(1, 1, 1), xf), yf),
+    zf,
+  );
+}
+export function fbmQ(x, y, z = 0, oct = 4) {
+  let s = 0, a = 0.5, n = 0, f = 1;
+  for (let i = 0; i < oct; i++) { s += a * vnoiseQ(x * f, y * f, z * f); n += a; a *= 0.5; f *= 2; }
+  return s / n;
+}

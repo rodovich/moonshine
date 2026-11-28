@@ -158,6 +158,7 @@ export function facade(face, h, kind = 'plain', opts = {}) {
   if (kind.startsWith('window')) feature = windowFeature({ color: opts.color, flowerBox: kind === 'window_box', closed: kind === 'window_closed', z0: opts.z0 ?? 0.95, z1: opts.z1 ?? Math.min(h - 0.3, 2.0) });
   if (kind.startsWith('door')) feature = doorFeature({ color: opts.color, open: kind === 'door_open', z1: opts.z1 ?? Math.min(h - 0.2, 2.12) });
   if (kind === 'gate') feature = gateFeature({ z1: Math.min(h - 0.15, 2.1) });
+  if (opts.feature) feature = opts.feature; // a feature built elsewhere (the town kit's balcony, shopfront, archway)
   if (feature) {
     body = subtract(body, onFace(feature.cut, face), plaster('#cfc8bc', { tag: 'wall' }));
     if (kind.startsWith('window')) {
@@ -201,11 +202,11 @@ export function parapetPier(h = 0.9, { color = COLORS.whitewash, ox = 0, oy = 0,
 }
 
 /** A flight of outside stairs descending toward +y across one tile: from z = 0 at the north edge to −drop at the south edge. */
-export function stairFlight(drop = 1, { steps = 5, w = 1, stone = '#dccab0', below = 0.2, scraped = false } = {}) {
+export function stairFlight(drop = 1, { steps = 5, w = 1, stone = '#dccab0', below = 0.2, scraped = false, noseColor = '#ece0c8' } = {}) {
   const lime = limestone(stone, { tag: 'floor' });
   // The morning after: long scrapes down every step where the piano went.
   const m = scraped ? mat((x, y, z, lx, ly, lz) => (Math.abs(x - 0.08 + Math.sin(y * 7) * 0.03) < 0.05 || Math.abs(x + 0.22) < 0.025 ? hex('#a89478') : lime.color(x, y, z, lx, ly, lz)), { tag: 'floor', spec: 0.04 }) : lime;
-  const nose = mat('#ece0c8', { tag: 'floor', spec: 0.05 });
+  const nose = mat(noseColor, { tag: 'floor', spec: 0.05 });
   const parts = [];
   const run = 1 / steps, rise = drop / steps;
   for (let i = 0; i < steps; i++) {

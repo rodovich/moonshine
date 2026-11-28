@@ -266,13 +266,27 @@ export function sheetsX(opts) {
 }
 
 /** A bronze sighting pin: a short post with a slotted vane, set into a wall top. */
-export function sightPin() {
-  const b = bronze('#b08040');
-  return union(
-    cylinder(0.025, 0, 0.18, b, 0.005),
-    move(box(0.012, 0.05, 0.05, b, 0.004), 0, 0, 0.2),
-    move(cylinder(0.05, 0, 0.02, b, 0.005), 0, 0, 0),
-  );
+/**
+ * A bronze sighting pin. They are what the moonrise turns on, so they're drawn larger than life
+ * (about 1.8×, as key items are) and bright: 'ring' (the near pin, a ring sight you look through
+ * east toward the Gate) or 'blade' (the far pin, a post with a blade on top). Both on a round plate.
+ */
+export function sightPin(kind = 'blade') {
+  const b = bronze('#c89048');
+  const cap = mat('#f0c060', { tag: 'prop', spec: 1.6, shin: 70, emit: 0.12 });
+  const parts = [
+    move(cylinder(0.08, 0, 0.03, b, 0.008), 0, 0, 0),
+    cylinder(0.035, 0, 0.3, b, 0.008),
+  ];
+  if (kind === 'ring') {
+    // A ring standing across the line of sight (its axis east–west).
+    parts.push(place(torus(0.085, 0.022, b), { at: [0, 0, 0.39], ry: PI / 2 }));
+    parts.push(move(sphere(0.03, cap), 0, 0, 0.3));
+  } else {
+    parts.push(move(box(0.018, 0.07, 0.07, b, 0.006), 0, 0, 0.36));
+    parts.push(move(sphere(0.026, cap), 0, 0, 0.44));
+  }
+  return union(parts);
 }
 
 /** The lemon tree: trunk at the origin, canopy about 3 tiles across. Its three lemons are drawn. */
@@ -373,7 +387,7 @@ export function stool() {
 }
 
 /** The well (2×2): a ring of fitted stones with an iron grate across the top. */
-export function well({ breath = 0 } = {}) {
+export function well({ breath = 0, grate = 0 } = {}) {
   const R = 0.78, h = 0.62;
   const stone = mat((x, y, z, lx, ly, lz) => {
     const a = Math.atan2(y, x), course = Math.floor(z / 0.155);
@@ -398,7 +412,12 @@ export function well({ breath = 0 } = {}) {
   // Darkness inside.
   const dark = move(cylinder(R - 0.2, 0.02, h - 0.3, mat('#100c14', { tag: 'prop' })), 0, 0, 0);
   void breath;
-  return union(ring, coping, dark, ...bars);
+  // grate: 0 shut; 1 lifting (hinged at its south edge, 40° up, its face toward the camera); 2 open (~100°, leaning on the rim).
+  if (!grate) return union(ring, coping, dark, ...bars);
+  const ang = grate === 1 ? 0.7 : 1.75;
+  const hinge = [0, R - 0.12, h + 0.07];
+  const lifted = place(move(union(bars), 0, -hinge[1], -hinge[2]), { at: hinge, rx: -ang });
+  return union(ring, coping, dark, lifted);
 }
 
 /** A stone bench (2×1 along x). */
@@ -441,7 +460,8 @@ export function piano({ angle = 0.35, tilt = 0.08 } = {}) {
 }
 
 /** A terracotta pent roof sloping down toward +y over a 1×2 footprint (from y = −1 to +1), rising `rise`. */
-export function pentRoof({ rise = 0.6, len = 1 } = {}) {
+/** A pent (lean-to) roof over a 1×2 run; gable: 'e' closes the triangle under it at the east end with plaster. */
+export function pentRoof({ rise = 0.6, len = 1, gable = null } = {}) {
   const tile = mat((x, y, z, lx, ly, lz) => {
     // Barrel tiles: ridges along the slope, courses across it.
     const c = hex('#c4643e');
@@ -458,7 +478,12 @@ export function pentRoof({ rise = 0.6, len = 1 } = {}) {
     const ridges = Math.abs(Math.sin((x + 10) * PI * 5)) * 0.025;
     return Math.max(dz - ridges, -0.06 - dz, Math.abs(x) - len / 2, Math.abs(y) - 1.06);
   }, [-len / 2, -1.06, -0.2, len / 2, 1.06, rise + 0.05], tile);
-  return roof;
+  if (gable !== 'e') return roof;
+  // The gable end: the wall carried up under the slope, so the eave doesn't show a dark triangle.
+  const pl = plaster(COLORS.whitewash, { axis: 'y' });
+  const end = custom((x, y, z) => Math.max(0.3 - x, x - len / 2, Math.abs(y) - 1, -z - 0.02, z - (rise - (y + 1) * slope - 0.03)),
+    [0.3, -1, -0.02, len / 2, 1, rise], pl);
+  return union(roof, end);
 }
 
 export { TUB };

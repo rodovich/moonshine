@@ -20,7 +20,7 @@
 <div class="bar">
   Scene: <a href="?only=court&cam=roof">roof</a><a href="?only=court&cam=court">court</a><a href="?only=court&cam=all&zoom=1">whole map</a>
   <a href="?only=court&cam=roof&tint=dusk">roof at dusk</a><a href="?only=court&cam=court&state=morning&tint=day">morning</a>
-  <a href="?only=court&cam=roof&tint=night">night</a><a href="?only=court&cam=flat&tint=dusk">flat at dusk</a><a href="?only=court&cam=flat&state=morning&tint=day">flat, morning</a>
+  <a href="?only=court&cam=roof&tint=night">night</a><a href="?only=court&cam=flat&tint=dusk">flat at dusk</a><a href="?only=court&map=lamp_street&cam=map&zoom=1">Lamp Street</a><a href="?only=court&map=rooms&cam=map">rooms</a><a href="?only=court&cam=flat&state=morning&tint=day">flat, morning</a>
   · Pictures: <a href="?only=pictures">moonrise</a> · UI: <a href="?only=ui">ui</a> · <a href="?only=sheets">all sheets</a> · <a href="?">everything</a>
 </div>
 <p class="note">Rendered by <code>npm run art:iso</code> from the models in <code>iso-art/</code>. See <code>docs/iso-art-direction.md</code>. Params: <code>only=court|sheets|pictures|ui|&lt;sheet&gt;</code>, <code>cam=roof|court|all</code>, <code>tint=dusk|night|day</code>, <code>state=morning</code>, <code>zoom=n</code>, <code>bg=rrggbb</code>.</p>
@@ -29,6 +29,9 @@
 import manifest from '../assets/iso/manifest.js';
 import { court, draw, proj, W, H } from './iso-court.js';
 import { flat } from './iso-flat.js';
+import { lampStreetIso } from '../src/content/act2/lamp_street-iso.js';
+import { roomsIso } from './iso-rooms.js';
+const MAPS = { lamp_street: lampStreetIso, rooms: roomsIso };
 import { ISO_TINTS, applyTint } from '../assets/iso/tints.js';
 
 const q = new URLSearchParams(location.search);
@@ -53,14 +56,18 @@ function section(title) {
 if (!only || only === 'court') {
   const cam = q.get('cam') || 'roof';
   const state = { morning: q.get('state') === 'morning' };
-  const list = cam === 'flat' ? flat(state) : court(state);
+  const mapIso = MAPS[q.get('map')];
+  const list = mapIso ? mapIso.scene({ flag: () => false }) : cam === 'flat' ? flat(state) : court(state);
   const div = section(`Cistern Court (${cam}${state.morning ? ', morning' : ''}${q.get('tint') ? ', ' + q.get('tint') : ''})`);
   let cw = 640, ch = 480, cx, cy;
   const centerOn = (x, y, z) => { const [sx, sy] = proj(x, y, z); cx = Math.round(sx - cw / 2); cy = Math.round(sy - ch / 2); };
-  if (cam === 'all') {
+  if (mapIso && (cam === 'all' || cam === 'map')) {
+    const xs = list.map((d) => proj(d.x, d.y, d.z)[0]), ys = list.map((d) => proj(d.x, d.y, d.z)[1]);
+    cx = Math.min(...xs) - 80; cy = Math.min(...ys) - 260; cw = Math.max(...xs) - cx + 80; ch = Math.max(...ys) - cy + 80;
+  } else if (cam === 'all') {
     cw = (W + H) * 32 + 64; ch = (W + H) * 16 + 420;
     cx = -H * 32 - 32; cy = -380;
-  } else if (cam === 'court') centerOn(8.5, 17.5, 30);
+  } else if (mapIso) centerOn(+(q.get('x') || 12), +(q.get('y') || 8), 40); else if (cam === 'court') centerOn(8.5, 17.5, 30);
   else if (cam === 'flat') centerOn(6, 4.5, 40);
   else centerOn(6.5, 5.5, 160);
   const c = document.createElement('canvas');

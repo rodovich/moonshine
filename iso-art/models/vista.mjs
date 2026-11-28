@@ -11,7 +11,7 @@
 
 import { custom, union, move, place, boxAt, box, cylinder, torus, capsule, sphere, frustum } from '../lib/sdf.mjs';
 import { mat, hex, mix } from '../lib/render.mjs';
-import { fbm, vnoise, hash3 } from '../lib/noise.mjs';
+import { fbm, fbmQ, vnoise, hash3 } from '../lib/noise.mjs';
 import { figure } from './figure.mjs';
 import { cherylLook } from './cheryl.mjs';
 import { vistaCheryl } from './vista-cheryl.mjs';
@@ -67,7 +67,8 @@ export const GATE_TH = 0.004, GATE_SADDLE = 34;
 
 /** The skyline height at bearing th: broken, with buttresses, and the Gate's worn saddle. */
 export function skyline(th) {
-  let H = 380 + 220 * (fbm(th * 2.2 + 5, 1.1, 0, 3) - 0.5) + 60 * (fbm(th * 9, 3.3, 0, 3) - 0.5) + 25 * (fbm(th * 30, 4.4, 0, 2) - 0.5);
+  // (Quintic-faded noise: the height scales the whole cliff, so a crease in its slope ran down the face as a seam.)
+  let H = 380 + 220 * (fbmQ(th * 2.2 + 5, 1.1, 0, 3) - 0.5) + 60 * (fbmQ(th * 9, 3.3, 0, 3) - 0.5) + 25 * (fbmQ(th * 30, 4.4, 0, 2) - 0.5);
   const b = ridged(vnoise(th * 18, 5.5, 0)); H += 40 * b ** 6; // a few towers
   H -= 45 * Math.pow(Math.max(0, ridged(vnoise(th * 30 + 7, 2.2, 1)) - 0.7) / 0.3, 2); // small notches
   const g = th - GATE_TH;
@@ -86,7 +87,7 @@ function rimH(th, r, rs) {
   if (t > 1) return H + Math.min(40, (t - 1) * 60) + 10 * (fbm(th * 60, r * 0.01, 6, 2) - 0.5);
   // The cliff: ledges and steep risers, beds of rock stepping back.
   // Ledges run along the Rim and fade slowly in and out (a fast-changing offset cut the face into vertical seams).
-  const q = t * 5 + 0.6 * fbm(th * 6, 2, 7, 2), fl = Math.floor(q), fr = q - fl;
+  const q = t * 5 + 0.6 * fbmQ(th * 6, 2, 7, 2), fl = Math.floor(q), fr = q - fl;
   const step = Math.min(1, (fl + sstep(0.45, 1, fr)) / 5);
   return H * (0.13 + 0.87 * step);
 }
@@ -95,7 +96,7 @@ export function rim() {
   const rock = [hex('#c8a892'), hex('#b8a6a8'), hex('#dcc8b4'), hex('#a68478'), hex('#cdb4a4')];
   const cliff = mat((x, y, z, lx, ly, lz, nx, ny, nz) => {
     const th = Math.atan2(y, x);
-    const bed = fbm(z * 0.012 + th * 9 + Math.sin(th * 14) * 0.8, th * 6, 1, 3); // beds tilting along the Rim
+    const bed = fbmQ(z * 0.012 + th * 9 + Math.sin(th * 14) * 0.8, th * 6, 1, 3); // beds tilting along the Rim
     const i = Math.floor(bed * rock.length * 1.4) % rock.length;
     let c = lerp3(rock[i], rock[(i + 1) % rock.length], (bed * rock.length * 1.4) % 1);
     c = lerp3(c, hex('#d0987c'), Math.max(0, fbm(th * 6, z * 0.004, 11, 3) - 0.55) * 1.6); // warmer, iron-stained rock in places
@@ -108,7 +109,7 @@ export function rim() {
     layer: 'far', tag: 'rim',
     // Crags: the rock's surface broken at two scales, by bending the normal rather than the shape.
     bump: (x, y, z, n) => {
-      const e = 5, f = (a, b, c) => fbm(a * 0.05, b * 0.05, c * 0.06, 2) + 0.6 * fbm(a * 0.012, b * 0.012, c * 0.02, 2);
+      const e = 5, f = (a, b, c) => fbmQ(a * 0.05, b * 0.05, c * 0.06, 2) + 0.6 * fbmQ(a * 0.012, b * 0.012, c * 0.02, 2);
       const g0 = f(x, y, z);
       const gx = (f(x + e, y, z) - g0) / e, gy = (f(x, y + e, z) - g0) / e, gz = (f(x, y, z + e) - g0) / e;
       const k = 20;
@@ -121,9 +122,9 @@ export function rim() {
     // ahead, which are no nearer than the gap to them and no higher than ~650 m.
     if (r < 2500) return Math.min(z + 6, Math.max(2600 - r, z - 650));
     const th = Math.atan2(y, x);
-    const butt = 150 * (fbm(th * 13 + 4, 0.7, 3, 3) - 0.5) * 2; // great buttresses standing out, bays falling back
-    const g = sstep(0.55, 0.95, ridged(vnoise(th * 40 + fbm(th * 15, 1, 2, 2) * 2, 1.5, 9)));
-    const rs = shoreR(th) - butt + 45 * g; // and a few broad gullies
+    const butt = 150 * (fbmQ(th * 13 + 4, 0.7, 3, 3) - 0.5) * 2; // great buttresses standing out, bays falling back
+    // (No gullies: narrow ridged-noise gullies read as straight vertical seams down the face.)
+    const rs = shoreR(th) - butt;
     // (Only while well short of the cliffs; close to them the heightfield bound takes over,
     // or rays above the scree would creep up to the guard's edge and stop there.)
     const gap = rs - 0.22 * SPAN - 40 - r;
@@ -295,15 +296,17 @@ export function foreground() {
   const farWall = mat('#ece4d6', { tag: 'town', layer: 'town', noShadow: true });
   parts.push(boxAt(FX - 4, -4, FZ - 9, FX + 4, 4, FZ, farWall, 0.1));
   parts.push(boxAt(FX - 4.2, -4.2, FZ, FX + 4.2, 4.2, FZ + 0.6, mat('#f4eee4', { tag: 'town', layer: 'town', noShadow: true }), 0.1));
-  const pinM = fg(mat('#b88a48', { spec: 0.9, shin: 30 }));
+  const pinM = fg(mat('#d09c54', { spec: 1.3, shin: 40, emit: 0.1 }));
   const pin = (x, base, top, R) => union(
     capsule([x, 0, base], [x, 0, top - R * 1.05], R * 0.22, pinM),
     place(torus(R, R * 0.2, pinM), { at: [x, 0, top], ry: Math.PI / 2 }),
   );
-  const farPinM = mat('#c8964e', { spec: 0.9, shin: 30, layer: 'town', noShadow: true });
-  parts.push(pin(5.5, D + 0.2, D + 0.36, 0.14)); // a little smaller and lower, so town shows between the pins
-  // (Drawn larger than life so it reads as the far pin at this distance: a few pixels.)
-  parts.push(union(capsule([FX - 3.6, 0, FZ + 0.6], [FX - 3.6, 0, FZ + 5], 0.5, farPinM), place(torus(2.4, 0.65, farPinM), { at: [FX - 3.6, 0, FZ + 7.4], ry: Math.PI / 2 })));
+  // The far pin catches the last light: brighter bronze, a little self-lit, so it reads as a marker.
+  const farPinM = mat('#e0aa58', { spec: 1.2, shin: 40, emit: 0.3, layer: 'town', noShadow: true });
+  // Both larger than life (playtest: they read as specks). The near pin is the ring sight;
+  // the far pin a post with a bead, which sits in the ring when they line up.
+  parts.push(pin(5.5, D + 0.2, D + 0.46, 0.2));
+  parts.push(union(capsule([FX - 3.6, 0, FZ + 0.6], [FX - 3.6, 0, FZ + 9], 1.4, farPinM), move(sphere(3.2, farPinM), FX - 3.6, 0, FZ + 11.5)));
   // The tub, and Cheryl on its rim in her costume, from behind.
   const stillWater = mat((x, y, z) => {
     const far = Math.max(0, Math.min(1, (x + 0.8) / 1.6));
