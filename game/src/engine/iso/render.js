@@ -7,7 +7,7 @@
 // SNES sprites at 2×. iso/sprites.js swaps in real art per sheet when it
 // exists.
 
-import { TILE } from '../tilemap.js';
+import { TILE, TileMap } from '../tilemap.js';
 import { colorOf } from '../art.js';
 import { safeCall, isInteractable } from '../world.js';
 import { ISO_W, ISO_H, HW, HH, TW, TH, proj, inDiamond } from './project.js';
@@ -218,7 +218,7 @@ export class IsoRenderer {
         items.push(d.layer < 0.1 ? { type: 'd', key: -1e6 + d.layer * 1e5 + k, order: 0, d } : { type: 'd', key: k, order: d.layer, d });
       }
     }
-    for (const c of scene ? [] : iso.cells) {
+    for (const c of scene ? iso.cells.filter((c) => this.netCells?.has(`${c.x},${c.y}`)) : iso.cells) {
       const T = this.top(c);
       if (T == null) continue;
       const p = proj(c.x, c.y, T, ox);
@@ -227,7 +227,7 @@ export class IsoRenderer {
       items.push({ type: 'cell', key: c.x + c.y, order: 0, c, T });
       if (c.over && c.kind !== 'block') items.push({ type: 'slab', key: c.x + c.y, order: 2, c });
     }
-    for (const pr of scene ? [] : iso.props) items.push({ type: 'prop', key: pr.x1 + pr.y1, order: 1, pr });
+    for (const pr of scene ? iso.props.filter((p) => p.cells.some((c) => this.netCells?.has(`${c.x},${c.y}`))) : iso.props) items.push({ type: 'prop', key: pr.x1 + pr.y1, order: 1, pr });
     const p = world.player;
     for (const e of world.entities) {
       if (!e.visible) continue;
@@ -414,17 +414,64 @@ export class IsoRenderer {
     // Scenes follow the flags (and the player's pose: Cheryl seated on the tub).
     const key = JSON.stringify(world.state.flags) + (world.player.pose || '');
     if (this.sceneCache && this.sceneCache.def === world.mapDef.iso && this.sceneCache.key === key) return this.sceneCache.list;
-    const list = (safeCall(world.mapDef.iso.scene, world.api) || []).map((d) => {
+    const iso = world.mapDef.iso;
+    const norm = (d) => {
       const fw = d.fw || 1;
       const fd = d.fd || 1;
       return { ...d, fw, fd, x0: Math.round(d.x - fw / 2), y0: Math.round(d.y - fd / 2), z: d.z || 0, layer: d.layer ?? 1 };
-    });
+    };
+    let list = safeCall(iso.scene, world.api) || [];
+    // Later acts extend an earlier act's scene for the maps they change:
+    // iso.extend: [(g, drawables, kit) => drawables].
+    for (const fn of iso.extend || []) list = safeCall(fn, world.api, list, sceneKit()) || list;
+    list = list.map(norm);
+    // The safety net: cells whose tiles differ from what the scene was built
+    // for (a later act's patch, variant, or overlay) drop the scene's pieces
+    // and show the converter's version instead.
+    this.netCells = this.changedCells(world);
+    if (this.netCells.size) list = list.filter((d) => !footprint(d).some((k) => this.netCells.has(k)));
     this.sceneCache = { def: world.mapDef.iso, key, list };
     // Entities the scene draws itself (their own sprites are hidden).
     let hide = world.mapDef.iso.hide || [];
     if (typeof hide === 'function') hide = safeCall(hide, world.api) || [];
     this.hidden = new Set(hide);
     return list;
+  }
+
+  // Cells whose tiles differ from the map as its scene knows it: the map
+  // rebuilt with only the flags the scene follows (iso.follows: names, or
+  // prefixes ending in '*'). Without `follows`, nothing is checked.
+  changedCells(world) {
+    const out = new Set();
+    const follows = world.mapDef.iso.follows;
+    if (!follows) return out;
+    const keep = (name) => follows.some((f) => (f.endsWith('*') ? name.startsWith(f.slice(0, -1)) : name === f));
+    const all = world.state.flags;
+    const saved = { variant: world.variant, map: world.map, patched: world.patched };
+    let base;
+    try {
+      world.state.flags = Object.fromEntries(Object.entries(all).filter(([k]) => keep(k)));
+      world.variant = world.pickVariant(world.mapDef);
+      world.map = new TileMap(world.layerDef());
+      world.patched = [];
+      const fn = world.mapDef.patches;
+      for (const [layer, x0, y0, value, w = 1, h = 1] of (fn && safeCall(fn, world.api)) || []) {
+        for (let y = y0; y < y0 + h; y++) for (let x = x0; x < x0 + w; x++) world.map.setTile(layer, x, y, value);
+      }
+      base = world.map;
+    } finally {
+      world.state.flags = all;
+      Object.assign(world, saved);
+    }
+    const now = world.map;
+    const name = (m, l, x, y) => { const t = m.tile(l, x, y); return t ? t.name : ''; };
+    for (let y = 0; y < now.h; y++) {
+      for (let x = 0; x < now.w; x++) {
+        const same = ['ground', 'detail', 'overhead'].every((l) => name(base, l, x, y) === name(now, l, x, y)) && base.solid(x, y) === now.solid(x, y);
+        if (!same) out.add(`${x},${y}`);
+      }
+    }
+    return out;
   }
 
   // One drawable: its frame (or animation) with its anchor on the
@@ -687,6 +734,46 @@ function drawAnchored(ctx, f, x, y, flip = false) {
   ctx.scale(-1, 1);
   ctx.drawImage(f.img, -dx - f.img.width, dy);
   ctx.restore();
+}
+
+// The tiles a drawable stands on, as 'x,y' keys.
+function footprint(d) {
+  const out = [];
+  for (let y = d.y0; y < d.y0 + d.fd; y++) for (let x = d.x0; x < d.x0 + d.fw; x++) out.push(`${x},${y}`);
+  return out;
+}
+
+// Helpers for building drawables (what iso.extend functions receive).
+function sceneKit() {
+  const add = (list, s, f, x, y, z = 0, fw = 1, fd = 1, layer = 1) => {
+    const d = { s, f, x: x + fw / 2, y: y + fd / 2, z, fw, fd, layer };
+    list.push(d);
+    return d;
+  };
+  return {
+    // A piece on tile (x, y)'s footprint (top-left tile, like the scenes' add()).
+    add,
+    // A wall column: face pieces [frame, heightPx] stacked from z0, then its top [frame, z].
+    column(list, s, x, y, z0, sFaces = [], eFaces = [], top = null) {
+      let z = z0;
+      for (const [f, h] of sFaces) { add(list, s, f, x, y, z, 1, 1, 0.1); z += h; }
+      z = z0;
+      for (const [f, h] of eFaces) { add(list, s, f, x, y, z, 1, 1, 0.1); z += h; }
+      if (top) add(list, s, top[0], x, y, top[1], 1, 1, 0.2);
+    },
+    // Remove the pieces standing on any of these tiles ([[x, y], ...]).
+    clear(list, tiles) {
+      const keys = new Set(tiles.map(([x, y]) => `${x},${y}`));
+      return list.filter((d) => {
+        const fw = d.fw || 1;
+        const fd = d.fd || 1;
+        const x0 = Math.round(d.x - fw / 2);
+        const y0 = Math.round(d.y - fd / 2);
+        for (let y = y0; y < y0 + fd; y++) for (let x = x0; x < x0 + fw; x++) if (keys.has(`${x},${y}`)) return false;
+        return true;
+      });
+    },
+  };
 }
 
 function overlap(a, b) {
