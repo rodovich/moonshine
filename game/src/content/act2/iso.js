@@ -12,6 +12,7 @@ import { mott, boatman } from '../../art/act4_sprites.js';
 import { mott_jug } from '../../art/act6_sprites.js';
 import { keeper, fishmonger } from '../../art/act5_sprites.js';
 import { fish } from '../../art/landmarks.js';
+import { piano } from '../../art/act2_objects.js';
 
 export const act2IsoSheets = {
   counting_woman, mover, tourist, mayor, ambrose, basin_woman, girl, rope,
@@ -19,4 +20,12 @@ export const act2IsoSheets = {
   goat, ottilie, shopkeeper, mott, boatman, mott_jug, keeper, fishmonger,
   // The Fountain's bronze fish (the 'fish' entity in square.js), cut out of the fountain's renders.
   act2_landmarks: fish,
+  // The piano: the opening's rendered upright (cistern:piano) for every SNES pose. STAND-IN for
+  // the poses (wedged in the arch, sliding, at rest against the Fountain) until the art has them.
+  cistern: piano,
+};
+
+// SNES frame names drawn by a differently named isometric frame (content.iso.aliases, by isometric sheet).
+export const act2IsoAliases = {
+  cistern: { piano_front: 'piano', piano_back: 'piano', piano_level: 'piano', piano_slide: 'piano' },
 };

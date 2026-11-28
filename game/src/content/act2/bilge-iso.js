@@ -9,14 +9,17 @@
 // the stair up to the Square climbs 40 a row to 160 at row 0.
 
 import { isoScene } from '../iso-kit.js';
-import { townBeyond } from './iso-edges.js';
+import { townBeyond, townBelow } from './iso-edges.js';
 import { composeBilge, BILGE_LAYOUT } from './bilge.js';
 
 const W = 32;
 const H2 = 'act2_harbor';
 const PLASTER = { white_sage: 'sage', sky: 'sky', ochre: 'ochre', rose: 'rose' };
 const { STALLS, POSTS } = BILGE_LAYOUT;
-const CANAL = -40;
+// The canal's water stands 24 px below the quays (as the Water Stairs' art has it); the quay
+// walls go down to BED, 40 px below.
+const CANAL = -24;
+const BED = -40;
 
 function build() {
   const S = isoScene();
@@ -39,21 +42,23 @@ function build() {
 
   // ---- The canal (rows 8-9) between its banks (rows 7, 10).
   for (let x = 0; x < W; x++) {
-    if (x < 22 || x > 25) { S.column(x, 7, CANAL, [['quay_s', 40]], [], ['pave_nw', 0]); S.prop('town', 'lip_x', x, 7, 0); }
+    if (x < 22 || x > 25) { S.column(x, 7, BED, [['quay_s', 40]], [], ['pave_nw', 0]); S.prop('town', 'lip_x', x, 7, 0); }
+    else S.add('town', 'water_n', x, 7, CANAL, 1, 1, 0); // the canal comes up under the Water Stairs
+    // Things on the canal (the Boatman in his boat) float at the water's level.
+    if (x < 12 || x > 13) S.floor(x, 8, 1, 2, { z: CANAL, kind: 'none' });
     S.add('town', 'water_n', x, 8, CANAL, 1, 1, 0); // along the north quay wall: its shadow and reflection
     S.add('town', 'water', x, 9, CANAL, 1, 1, 0);
-    S.column(x, 10, CANAL, [], [], ['pave_nw', 0]);
+    S.column(x, 10, BED, [], [], ['pave_nw', 0]);
   }
   // The stepped bridge (x12-13); the deck stands a little above the quays.
   for (const x of [12, 13]) for (let y = 7; y <= 10; y++) S.floor(x, y, 1, 1, { z: y === 8 || y === 9 ? 20 : 0, kind: 'none' });
-  S.prop('town', 'bridge_y', 12, 7, CANAL, 2, 4);
+  S.prop('town', 'bridge_y', 12, 7, BED, 2, 4);
   // The Water Stairs (x22-25): broad steps down from the north quay into the canal and on under it.
   S.add(H2, 'wstairs_top', 22, 6, 0, 4, 1, 0.3);
   S.add(H2, 'wstairs_wet', 22, 7, 0, 4, 1, 0.3);
-  // Boats: the Boatman's rowboat (he sits in it) and two moored canal boats.
-  S.prop(H2, 'rowboat', 14, 9, CANAL, 2, 1);
+  // Two moored canal boats (the Boatman's own boat comes with him, on his sheet).
   S.prop(H2, 'canal_boat_blue', 4, 8, CANAL, 2, 1);
-  S.prop(H2, 'canal_boat_green', 28, 8, CANAL, 2, 1);
+  S.prop(H2, 'canal_boat_green', 19, 8, CANAL, 2, 1);
   // The sign east to the Harbor, on the south bank.
   S.prop(H2, 'sign_harbor', 29, 10, 0, 3, 1);
 
@@ -69,6 +74,7 @@ function build() {
     S.prop('cistern', 'parapet_x', x, 14, 0);
   }
   S.lowRoofs(0, 15, W, { z: -80 });
+  townBelow(S, { y: 15, w: W });
   // East, toward the Harbor: the town's lowest roofs.
   townBeyond(S, { side: 'east', x: W - 1, y0: 4, y1: 13 });
   return S;

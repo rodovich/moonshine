@@ -9,7 +9,7 @@
 // the town below the parapet at -80; the stair down at x11-12.
 
 import { isoScene, STOREY } from '../iso-kit.js';
-import { townBeyond } from './iso-edges.js';
+import { townBeyond, townBelow, stairWell } from './iso-edges.js';
 import { composeCrown, CROWN_MOON_EYES } from './crown.js';
 
 const W = 24;
@@ -51,6 +51,8 @@ function build(g) {
     S.prop('cistern', x === 10 || x === 13 ? 'parapet_pier' : 'parapet_x', x, 14, 0);
   }
   S.lowRoofs(0, 15, W, { z: -80, skip: [11, 12] });
+  townBelow(S, { y: 15, w: W });
+  stairWell(S, { xs: [11, 12], rows: [[14, 0], [15, -40]] });
   // The summit looks out over the town on both sides.
   townBeyond(S, { side: 'east', x: W - 1, y0: 7, y1: 13 });
   townBeyond(S, { side: 'west', x: 0, y0: 7, y1: 13 });

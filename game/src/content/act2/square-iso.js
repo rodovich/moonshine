@@ -9,7 +9,7 @@
 // roofs below the south edge at -80; the stair down at x11-12.
 
 import { isoScene } from '../iso-kit.js';
-import { townBeyond } from './iso-edges.js';
+import { townBeyond, townBelow, stairWell } from './iso-edges.js';
 import { composeSquare } from './square.js';
 
 const W = 24;
@@ -62,6 +62,8 @@ function build(g) {
     S.prop('cistern', x === 10 || x === 13 ? 'parapet_pier' : 'parapet_x', x, 16, 0);
   }
   S.lowRoofs(0, 17, W, { z: -80, skip: [11, 12] });
+  townBelow(S, { y: 17, w: W });
+  stairWell(S, { xs: [11, 12], rows: [[16, 0], [17, -40]] });
   // The town beyond the square's east and west sides.
   townBeyond(S, { side: 'east', x: W - 1, y0: 4, y1: 15 });
   townBeyond(S, { side: 'west', x: 0, y0: 4, y1: 15 });

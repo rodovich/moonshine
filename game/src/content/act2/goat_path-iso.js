@@ -48,7 +48,12 @@ const PZ = pathHeights();
 // rock at the height of the nearest path (ties go to the higher), so the
 // hillside follows the path and the cliffs stand between neighboring legs.
 const PATH_TILES = [...PZ].map(([k, z]) => { const [x, y] = k.split(',').map(Number); return [x, y, z - (stepRect(x, y) ? 40 : 0)]; });
+// Past the map's east edge the hill goes on up, 40 px a tile (EAST tiles of it drawn, so
+// the screen there isn't black); at the bottom, the Bilge's quay goes on at 0.
+const EAST = 4;
+const QUAY = (x, y) => y >= 39 && x >= 9;
 function heightAt(x, y) {
+  if (x >= W) return y >= 39 ? 0 : heightAt(W - 1, y) + 40 * (x - W + 1);
   if (PZ.has(`${x},${y}`)) {
     const s = stepRect(x, y);
     return s ? PZ.get(`${x},${y}`) - 40 : PZ.get(`${x},${y}`); // a step tile's low edge
@@ -66,10 +71,10 @@ function heightAt(x, y) {
 
 function build() {
   const S = isoScene();
-  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+  for (let y = 0; y < H; y++) for (let x = 0; x < W + EAST; x++) {
     const z = heightAt(x, y);
     const below = y + 1 < H ? heightAt(x, y + 1) : SEA;
-    const east = x + 1 < W ? heightAt(x + 1, y) : z; // the map's east edge: the hill goes on, no face
+    const east = x + 1 < W + EAST ? heightAt(x + 1, y) : z; // the last drawn column: no face
     // Rock courses, each a crag variant picked by position so the face doesn't repeat tile by tile.
     const courses = (to, f) => Array.from({ length: Math.max(0, Math.ceil((z - to) / 40)) }, (_, i) => [[f, `${f}_1`, `${f}_2`][(x * 7 + y * 13 + i * 5) % 3], 40]);
     if (z === SEA) { S.add('town', 'water', x, y, SEA, 1, 1, 0); continue; }
@@ -84,9 +89,10 @@ function build() {
     }
     if (step) {
       S.add(H2, 'path_steps', x, y, top - 40, 1, 1, 0.3);
+    } else if (x >= W && QUAY(x, y)) {
+      S.add('town', 'pave_nw', x, y, 0, 1, 1, 0);
     } else if (isPath(x, y)) {
-      const quay = y >= 39 && x >= 9;
-      if (quay) S.floor(x, y, 1, 1, { z, kind: 'pave' });
+      if (QUAY(x, y)) S.floor(x, y, 1, 1, { z, kind: 'pave' });
       else S.add(H2, hash(x, y, 3) < 0.12 ? 'path_c' : hash(x, y, 4) < 0.5 ? 'path_a' : 'path_b', x, y, z, 1, 1, 0);
     } else {
       S.add(H2, 'rock_shelf', x, y, z, 1, 1, 0);

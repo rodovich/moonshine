@@ -13,7 +13,7 @@
 // (x6-7, rows 0-6) up to Lamp Street, 1120 at row 0.
 
 import { isoScene } from '../iso-kit.js';
-import { townBeyond } from './iso-edges.js';
+import { townBeyond, townBelow } from './iso-edges.js';
 import { composeSteps, STEPS_LAYOUT } from './steps.js';
 
 const W = 16;
@@ -101,10 +101,12 @@ function build(g) {
     const [x0, y0, { top, palette }] = c.args;
     const b = HOUSE_BLOCKS[`${x0},${y0}`];
     if (!b) continue;
-    S.house(x0, b.y0, top.length, b.d, { z: b.z, front: top, storeys: 2, plaster: PLASTER[palette] || 'white', roof: 'flat' });
+    // Windows (and a door near the front) on the side the climb sees, too.
+    const side = Array.from({ length: b.d }, (_, i) => (i === b.d - 2 && b.d > 3 ? 'D' : i % 2 ? 'w' : '#')).join('');
+    S.house(x0, b.y0, top.length, b.d, { z: b.z, front: top, upper: top.replace(/D/g, 'w'), side, storeys: 2, plaster: PLASTER[palette] || 'white', roof: 'flat' });
   }
   // The block west of flight 2 (x0, rows 11-15).
-  S.house(0, 11, 1, 5, { z: 600, storeys: 2, plaster: 'white', roof: 'flat' });
+  S.house(0, 11, 1, 5, { z: 600, storeys: 2, side: '#w#w#', plaster: 'white', roof: 'flat' });
 
   // ---- The view parapet on landing 3's east edge.
   for (let y = 26; y <= 28; y++) S.prop('cistern', 'parapet_y', 15, y, 360);
@@ -124,6 +126,9 @@ function build(g) {
     townBeyond(S, { side: 'east', x: W - 1, y0, y1, z, faces: false });
     townBeyond(S, { side: 'west', x: 0, y0, y1, z });
   }
+
+  S.lowRoofs(0, 42, W, { z: -80 });
+  townBelow(S, { y: 42, w: W });
 
   // ---- Pots and the bench, on their landings.
   S.replay(calls.filter((c) => c.fn !== 'house'), (c) => ({ z: landingZ(c.args[1]) }));
