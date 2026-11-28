@@ -17,6 +17,7 @@ Run the game with `npm run serve` (or `python3 -m http.server -d game`) and open
 - [Debug parameters](#debug-parameters)
 - [Tests and screenshots](#tests-and-screenshots)
 - [Engine decisions](#engine-decisions)
+- [Isometric view](#isometric-view)
 - [Module map](#module-map)
 
 ## How it fits together
@@ -386,6 +387,36 @@ node tests/shot.js "?map=test_street" out.png 800 ArrowRight z   # one screensho
 - **Browsers.** The suite runs in Chromium and WebKit, plus Pixel 7 and iPhone 13 touch profiles (`npx playwright test --project=webkit`, `--project=iphone`). Audio unlocking is retried on every key and pointer gesture (down and up) until it succeeds, since iOS Safari only honors some gestures. Known limit: on iPhones with the ringer switch on silent, Web Audio is muted by the system.
 - **Performance.** `tests/perf.spec.js` walks the 64×48 stress map (`?map=test_big`, 40 wandering people, night lighting with lamps) and measures our CPU time per frame: about 1 ms in Chromium and 0.3 ms in WebKit; 2-2.5 ms with darkness, a hue shift, and the wobble all on; and 6 ms walking (9 ms with effects) with Chromium's CPU throttled 6× (roughly a low-end phone), against a 16.7 ms budget. `?debug=1` shows live update and draw times.
 
+## Isometric view
+
+The same game can be drawn a second way: 640×480 in 2:1 dimetric, benchmarked against mid/late-90s PC games (docs/iso.md has the project decisions). Open it with `?view=iso` (`?view=snes` goes back); the choice is remembered in `localStorage`. The title screen doesn't offer it yet.
+
+**One game, two views.** Content, the world, scripts, saves, pathfinding, and what keys and clicks mean are shared; a save made in one view continues in the other. A *view* (`view.js`) is everything that depends on how the game looks: the display size, the scene drawing, the text box, bag, and title, the camera, turning a click into an entity or tile, the HUD, and how arrow keys map to grid directions. `SnesView` (in `view.js`) is the original presentation, unchanged; `IsoView` (`iso/view.js`) is the new one. Nothing in content needs to know which view is on.
+
+**Projection.** One tile is a 64×32 floor diamond. The grid's axes run along the screen's diagonals: the game's *up* (y − 1) is up-right on screen, *right* (x + 1) down-right, *down* down-left, *left* up-left. Heights are screen pixels. Everything sorts back to front by grid position (x + y), with floors before blocks before characters before overhead slabs on the same row.
+
+**Keys.** Each arrow walks along the diagonal 45° clockwise of it: Up goes up-right, Right down-right, Down down-left, Left up-left, so each arrow is the grid direction of the same name and opposite keys stay opposite. `?keys=ccw` tries the other turn (Up goes up-left). Z, X, and the bag work as in the SNES view.
+
+**Clicks** go to the front-most thing drawn under the pointer: a character or prop, else a tile's top or wall face, then the same walking and interaction as the SNES view. A door set into a wall is drawn on the wall's face; a click on that face walks to the exit.
+
+**Walls in the way.** Walls along a map's front edges (nothing walkable beyond them to the south or east) are drawn low, so rooms show. A wall or overhead slab that would cover Cheryl is cut down to a stub while it does; anything else in front of her (another character, a prop) lets her show through at half strength.
+
+**Maps.** Every map renders from its SNES layers: `iso/convert.js` drafts per-tile kinds (`floor`, `stair`, `block`, `door`, `water`, `void`) and heights, and the renderer draws the SNES tiles themselves sheared onto floor diamonds and wall faces until a map has isometric art. The draft's rules:
+- Tiles named like water, canals, or the sea that block are water, a little below the floor.
+- Walkable tiles named like stairs or steps are stairs. Floor areas joined only through stairs differ in height by the stair's length (rows − 1) × 24 px; the largest area is at 0.
+- A run of blocks directly south of a raised floor holds it up (flush with it); a tile named like a parapet or edge is a lip 12 px above the floor beside it. Other blocks stand on the floor south of them, 32–96 px tall by the length of their run.
+- Things on the floor drawn by the detail layer (a chair, the well) are props: their SNES tiles put back together and stood upright at 2×. Low walls and fences are 28 px blocks.
+- Overhead tiles over the floor are slabs 64 px up (awnings, canopies, washing).
+- An exit set into a wall is a door, drawn in the wall.
+
+Correct a map by hand with overrides on the map definition: `iso: { cells: [[x, y, w, h, { kind, z, h, top, south, east, over }], ...], rise }`. Any subset of props; `z` is a floor's height (or a block's base), `h` a block's height; `top`, `south`, `east`, and `over` are tile references like a legend's (`'sheet:frame'`), or `null` for nothing. In the console, `copy(JSON.stringify(window.moonshine.view.draft()))` copies the current map's draft as override rows to start from.
+
+**Art.** Isometric art comes as PNG sheets under `game/assets/iso/`, made by code by the art task, each listed with a manifest in `game/assets/iso/index.js`. The manifest format is in `iso/sprites.js`: frames as `[x, y, w, h, anchorX, anchorY]` with the anchor on the floor under the thing, named like the SNES frames they replace (characters by `replaces: '<SNES sheet name>'` and `<anim>_<dir>_<n>`, tiles by `'sheet:frame'`). Anything without isometric art yet is drawn with its SNES art (sprites at 2×). The UI's look is a *skin* (`iso/ui.js`): panel drawing, fonts, icons, and inventory slots, which the art task replaces with `setIsoSkin({...})`; the stand-in skin draws bevelled panels in the SNES UI colors and the SNES font at 2×. A full-screen picture shows at 2× in the middle of the screen unless its spec has an `iso: (ctx, ms) => {}` drawing of its own at 640×480.
+
+**Lighting and effects.** Lighting presets, tints, the hue shift, flicker, the wobble, fades, shakes (2.5× as far), and tilts apply to the whole isometric frame. Darkness works as in the SNES view, with light pools as ellipses on the floor. Not yet: emissive pixels that skip lighting, and the dimmer lighting on characters than on the map.
+
+**Tests.** `tests/iso.spec.js` boots the view, walks by keyboard and by click, talks, uses an item, goes through a door, saves in one view and continues in the other, and shows a picture; its screenshots are `tests/screenshots/iso-*.png`.
+
 ## Module map
 
 | File | Role |
@@ -409,5 +440,12 @@ node tests/shot.js "?map=test_street" out.png 800 ArrowRight z   # one screensho
 | `save.js` | Game state and `localStorage` |
 | `debug.js` | Debug URL parameters |
 | `ui.js` | Box drawing and UI styles |
+| `view.js` | Choosing a view; the view interface and the SNES view |
+| `iso/view.js` | The isometric view: scene, camera, picking, keys, darkness, pictures |
+| `iso/render.js` | Isometric drawing, depth sorting, cut-away, picking data |
+| `iso/convert.js` | Drafting a map's isometric description, and its overrides |
+| `iso/project.js` | The 2:1 projection |
+| `iso/ui.js` | The isometric text box, bag, title, HUD, and the skin interface |
+| `iso/sprites.js` | Isometric PNG sheets and their manifests |
 
 The inventory shows two rows of eight and scrolls (arrows, or the `<` `>` buttons) when there are more. Descriptions longer than four lines are cut off, with a console warning.
