@@ -295,7 +295,7 @@ Lines are Cheryl's descriptions unless labeled otherwise. Each line is one text 
 - Use **soap** on it: "Not now. It isn't going anywhere."
 - Walking or clicking into the blocked Squeeze: "I'm not climbing over a piano I didn't order. Besides, I'm not going anywhere tonight."
 
-**The Squeeze** (morning): First: "The Squeeze is clear. There's a long scrape down every step, and at the bottom, a lot of surprised geraniums." Walking into the exit leaves the slice, after one last thought before the fade: *Down, then.* (It echoes Act 4's *Up, then.*)
+**The Squeeze** (morning): First: "The Squeeze is clear. There's a long scrape down every step, and at the bottom, a lot of surprised geraniums." (It plays once, on the first look or the first step onto it, whichever comes first; the repeat look is "Clear, and scraped all the way down.") Walking into the exit leaves the slice, after one last thought before the fade: *Down, then.* (It echoes Act 4's *Up, then.*)
 
 **The drain grate** (6, 20): Dusk: "The court drain. Tomorrow every basin in Tessel gets tipped out, and it all goes downhill. Somewhere." Morning: "The drain's making a noise like somebody breathing through a straw. It never used to make any noise at all."
 
@@ -311,7 +311,7 @@ Lines are Cheryl's descriptions unless labeled otherwise. Each line is one text 
 
 **Stove** (3, 2): "The stove. No kettle tonight. Cold baths only on Moonshine Night. That's the rule."
 
-**Clock** (4, 1): Dusk: "Nearly moonrise. Roughly. That clock has never once been right, but it's always been confident." Morning: "Half past something."
+**Clock** (4, 1): Dusk: "Nearly moonrise. Roughly. That clock has never once been right, but it's always been confident." Morning: "Half past something." At dusk, once the Kid has asked for a timer and the egg timer is still on the counter (isometric playtest, YWjuxKBTTu): "It ticks, but it isn't going anywhere. My egg timer ticks too, and it fits in a pocket."
 
 **Window** (5–6, 1): "My window looks at the Pelletiers' wall. I didn't buy this house for the window. I bought it for the roof."
 

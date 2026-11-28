@@ -446,7 +446,7 @@ NPCs:
 
 ## Text conventions
 
-- NPC lines show the speaker's label in capitals (OLD MAN, NEIGHBOR, AMBROSE).
+- NPC lines show the speaker's label in capitals (OLD MAN, HER NEXT DOOR, AMBROSE). Her Next Door's tab reads HER NEXT DOOR, matching what Cheryl calls her (isometric playtest, YWjuxKBTTu); the design docs' "NEIGHBOR:" prefixes mean the same speaker.
 - Cheryl's descriptions have no label.
 - Internal monologue is in italics or a distinct soft color, with no label (the engine's choice).
 - Ambrose's lines are always written in capitals. Nobody else shouts like that except at peak moments (one word, rarely).
