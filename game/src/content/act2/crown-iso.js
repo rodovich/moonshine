@@ -9,13 +9,10 @@
 // the town below the parapet at -80; the stair down at x11-12.
 
 import { isoScene, STOREY } from '../iso-kit.js';
-import { composeCrown } from './crown.js';
+import { composeCrown, CROWN_MOON_EYES } from './crown.js';
 
 const W = 24;
 const LM = 'act2_landmarks';
-
-// iso-kit's replay() reads a house call's args as house()'s own (L first).
-const asHouseArgs = (calls) => calls.map((c) => (c.fn === 'house' ? { ...c, args: [null, ...c.args] } : c));
 
 // Wall faces at the given tiles and height, for a landmark front to replace.
 const isFace = (d, tiles, z) => d.layer === 0.1 && d.z === z && tiles.some(([x, y]) => d.x === x + 0.5 && d.y === y + 0.5);
@@ -26,10 +23,13 @@ function build(g) {
 
   // ---- The plaza, and behind the north buildings the roofs of the far side, lower down.
   S.floor(0, 7, W, 7, { kind: 'pave' });
+  // The moon-eye studs in the paving. (Act 3 lights them at dusk with its own
+  // patches, so the lit frame, town:pave_moon_eye_lit, is Act 3's iso hook to place.)
+  for (const [x, y] of CROWN_MOON_EYES) S.add('town', 'pave_moon_eye', x, y, 0, 1, 1, 0);
   S.lowRoofs(0, 0, W, { z: -40 });
 
   // ---- The north edge: the small houses and the Clockmaker's (crown.js's house() calls).
-  S.replay(asHouseArgs(calls.filter((c) => c.fn === 'house')), (c) => ({ roof: c.args[1] === 9 ? 'hip' : 'flat' }));
+  S.replay(calls.filter((c) => c.fn === 'house'), (c) => ({ roof: c.args[0] === 9 ? 'hip' : 'flat' }));
   // The Bell Tower (x2-7, rows 3-6), its door on row 6.
   S.prop(LM, 'bell_tower', 2, 3, 0, 6, 4);
   // The Archive under the Blue Dome: a deep two-storey block (x15-22, rows 0-6), the dome on its roof.

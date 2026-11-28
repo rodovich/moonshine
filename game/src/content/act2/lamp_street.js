@@ -15,13 +15,13 @@
 
 import { composedMap, blankGrid } from '../opening/grid.js';
 import { act2Tiles } from './tiles.js';
-import { lampStreetIso } from './lamp_street-iso.js';
 import { layout, house, pave, lowRoof, LOOKS, bump, firstMeet, cherylDeclines, actWrongness, getItem } from './common.js';
 import { props } from '../../art/props.js';
 
 const W = 32, H = 16;
 
-function compose(g) {
+// Exported for the isometric scene (lamp_street-iso.js), which replays its layout calls.
+export function composeLampStreet(g) {
   const L = layout(W, H, blankGrid);
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) L.set('ground', x, y, pave(x, y));
 
@@ -248,7 +248,7 @@ const cat = {
 
 // ---------------------------------------------------------------------------
 
-export const lampStreetMap = composedMap(compose, {
+export const lampStreetMap = composedMap(composeLampStreet, {
   id: 'lamp_street',
   name: 'Lamp Street',
   tileset: act2Tiles,
@@ -296,6 +296,4 @@ export const lampStreetMap = composedMap(compose, {
     },
   ],
   entities: [...objects, ...girls, rope, wateringWoman, benchMan, cat],
-  // The isometric view's scene, from the art task's town kit (lamp_street-iso.js).
-  iso: lampStreetIso,
 });
