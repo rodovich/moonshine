@@ -12,7 +12,7 @@ import { colorOf } from '../art.js';
 import { safeCall, isInteractable } from '../world.js';
 import { ISO_W, ISO_H, HW, HH, TW, TH, proj, inDiamond } from './project.js';
 import { convertMap } from './convert.js';
-import { isoFrameFor, isoSheet } from './sprites.js';
+import { isoFrameFor, isoSheet, isoFrameForSheet } from './sprites.js';
 
 const warnedFrames = new Set();
 
@@ -590,9 +590,16 @@ export class IsoRenderer {
   }
 
   drawFx(ctx, world, fx) {
-    const img = fx.art.frameAt(fx.frame, fx.t * (1000 / 60));
-    if (!img) return;
+    const ms = fx.t * (1000 / 60);
     const q = this.worldToMap(world, fx.x + fx.offset[0], fx.y + fx.offset[1]);
+    // The art's version, standing at its point (raised by the effect's z, in px).
+    const art = isoFrameForSheet(fx.art.sheet, fx.frame, ms);
+    if (art) {
+      drawAnchored(ctx, art, q.x - this.cx, q.y - (fx.z || 0) - this.cy);
+      return;
+    }
+    const img = fx.art.frameAt(fx.frame, ms);
+    if (!img) return;
     ctx.drawImage(img, Math.round(q.x - img.width - this.cx), Math.round(q.y - img.height - this.cy), img.width * 2, img.height * 2);
   }
 

@@ -14,6 +14,7 @@ import { act6Start } from './act6/climax.js';
 import { cheryl, cheryl_swim } from '../art/cheryl.js';
 import { old_man_seated, neighbor, sweaty_kid } from '../art/opening_npcs.js';
 import { props } from '../art/props.js';
+import { fx, fx_mist } from '../art/fx.js';
 
 // Each later act lays its states over earlier acts' maps (by id), in act order:
 // Act 3 (the crypt, the Archive, the Crown at dusk), Act 4 (its states of the
@@ -54,8 +55,8 @@ export default {
   // draws each SNES sheet's characters.
   // aliases: SNES frame names with a different isometric name ({dir} is the facing).
   iso: {
-    sheets: { cheryl, cheryl_swim, old_man_seated, neighbor, sweaty_kid, cat: props },
-    aliases: { neighbor: { tend: 'smooth_{dir}' } },
+    sheets: { cheryl, cheryl_swim, old_man_seated, neighbor, sweaty_kid, cat: props, fx: [fx, fx_mist] },
+    aliases: { neighbor: { tend: 'smooth_{dir}' }, fx: { sweat_drop: 'sweat' } },
   },
   player: { name: 'Cheryl', sprite: { sheet: cheryl }, poseOffsets: { sit_right: [0, -4], rise_right: [0, -2] } },
 

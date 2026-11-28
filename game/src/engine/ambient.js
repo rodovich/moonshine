@@ -48,7 +48,8 @@ export class Ambient {
 
   // { sprite: { sheet, frame, palette }, path: [[tx, ty], ...] or at: [tx, ty],
   //   speed (px per tick, default 0.5), seconds (lifetime if not moving),
-  //   offset: [dx, dy], layer: 'ground' | 'top' }. Resolves when it's gone.
+  //   offset: [dx, dy], layer: 'ground' | 'top', z (isometric view: px above
+  //   the floor) }. Resolves when it's gone.
   spawnEffect(opts) {
     return new Promise((resolve) => {
       const pts = (opts.path || [opts.at]).map(([x, y]) => [x * TILE + TILE / 2, y * TILE + TILE / 2]);
@@ -56,7 +57,7 @@ export class Ambient {
       this.effects.push({
         art, frame: opts.sprite.frame, pts, seg: 0, segT: 0, x: pts[0][0], y: pts[0][1],
         speed: opts.speed ?? 0.5, life: opts.seconds != null ? Math.round(opts.seconds * 60) : null, t: 0,
-        offset: opts.offset || [0, 0], layer: opts.layer || 'ground', resolve,
+        offset: opts.offset || [0, 0], layer: opts.layer || 'ground', z: opts.z || 0, resolve,
       });
     });
   }

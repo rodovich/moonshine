@@ -863,7 +863,7 @@ export const courtMap = composedMap(compose, {
       every: [5, 8], when: morning,
       run: (g) => {
         g.sfx('well_breath');
-        g.spawnEffect({ sprite: { sheet: fx_mist, frame: 'mist' }, at: [9.5, 16.5], seconds: 1.8, layer: 'top' });
+        g.spawnEffect({ sprite: { sheet: fx_mist, frame: 'mist' }, at: [9.5, 16.5], seconds: 1.8, layer: 'top', z: 26 });
       },
     },
   ],
