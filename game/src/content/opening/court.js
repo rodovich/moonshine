@@ -639,7 +639,7 @@ const neighborDefs = [
   { id: 'neighbor_morning', x: 14, y: 3, facing: 'up', sprite: { sheet: neighbor }, when: morning },
 ].map((d) => ({
   ...d,
-  name: 'Neighbor',
+  name: 'Her Next Door', // the speaker tab says what Cheryl calls her (writer, after the iso playtest)
   interact: talking(neighbor, neighborTalk),
   use: Object.fromEntries(Object.entries(neighborUse).map(([k, fn]) => [k, talking(neighbor, fn)])),
 }));
@@ -652,7 +652,7 @@ let laps = 0;
 // Sweat flies off him at the corners.
 function sweat(g, self) {
   const side = self.facing === 'left' ? 0.35 : -0.35;
-  g.spawnEffect({ sprite: { sheet: fx, frame: 'sweat_drop' }, path: [[self.x, self.y - 1.1], [self.x + side, self.y - 1.3]], speed: 0.35, layer: 'top' });
+  g.spawnEffect({ sprite: { sheet: fx, frame: 'sweat_drop' }, path: [[self.x, self.y - 1.1], [self.x + side, self.y - 1.3]], speed: 0.35, layer: 'top', lift: 1.1 });
 }
 
 function onKidWaypoint(g, self, next) {

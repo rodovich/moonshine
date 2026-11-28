@@ -109,7 +109,7 @@ export async function moonrise(g) {
   g.setSprite('player', { sheet: cheryl_swim });
   await g.wait(0.6);
   g.facePlayer('down');
-  await g.say('Neighbor', 'Not looking.', { auto: 1.1 });
+  await g.say('Her Next Door', 'Not looking.', { auto: 1.1 });
   await g.movePlayer([3, 5]);
   g.facePlayer('right');
   await g.wait(0.3);
@@ -170,7 +170,7 @@ export async function moonrise(g) {
   g.sfx('rattle');
   g.setFlag('fx.backline', 'swung');
   await g.say('Sweaty Kid', 'WHOA!', { auto: 0.8 });
-  await g.say('Neighbor', 'My SHEETS!', { auto: 0.9 });
+  await g.say('Her Next Door', 'My SHEETS!', { auto: 0.9 });
   await groan;
   g.setFlag('fx.chimney', null);
 
