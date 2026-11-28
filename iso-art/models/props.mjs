@@ -50,7 +50,7 @@ function tubShell() {
  * The tub in a state: 'empty' (drain hole), 'plugged', 'full', 'filling' (level 0–1),
  * 'slosh' (tilt), 'whirl' (drain vortex, the Wrongness). `t` is the animation phase 0–1.
  */
-export function tub(state = 'empty', { t = 0, level = 1, grey = false } = {}) {
+export function tub(state = 'empty', { t = 0, level = 1, grey = false, still = false, waterMat = null } = {}) {
   const { L, W, z0, z1 } = TUB;
   const parts = [tubShell()];
   const floorZ = z0 + 0.08;
@@ -68,23 +68,28 @@ export function tub(state = 'empty', { t = 0, level = 1, grey = false } = {}) {
   if (lvl !== null) {
     const water = mat((x, y, z, lx, ly, lz, nx, ny, nz) => {
       // Cool sky in the water, with moving ripples.
+      // Depth: dark toward the far (north and west) walls, the sky's reflection
+      // brightening toward the near rim, and ripples catching the light.
       const r = vnoise(x * 9 + t * 6, y * 9, t * 3);
-      const base = mix(hex('#7aa8c8'), hex('#c8e0e8'), r * 0.5);
+      const near = Math.max(0, Math.min(1, (x + y + 0.9) / 1.6));
+      let base = mix(hex('#22405a'), hex('#6a92b4'), near * 0.8 + r * 0.2);
+      if (r > 0.78) base = mix(base, hex('#d8ecf4'), (r - 0.78) * 3);
       if (state === 'whirl') {
         const a = Math.atan2(y, x - drainX), rr = Math.hypot(x - drainX, y);
         const sp = Math.sin(a * 3 + rr * 30 - t * 12);
         return sp > 0.3 ? mix(hex('#b830c8'), hex('#100010'), Math.min(1, rr * 2)) : mix(base, hex('#304060'), 0.5);
       }
       return base;
-    }, { tag: 'prop', spec: 1.3, shin: 70 });
+    }, { tag: 'prop', spec: 1.6, shin: 110 });
+    const wm = waterMat || water;
     const tilt = state === 'slosh' ? Math.sin(t * PI * 2) * 0.12 : 0;
     const surf = custom((x, y, z) => {
       let h = lvl + x * tilt * 0.3;
-      if (state !== 'whirl') h += (vnoise(x * 14 + t * 5, y * 14, t * 2) - 0.5) * 0.008;
+      if (state !== 'whirl' && !still) h += (vnoise(x * 14 + t * 5, y * 14, t * 2) - 0.5) * 0.012;
       else { const rr = Math.hypot(x - drainX, y); h -= Math.max(0, 0.12 - rr) * 0.8; }
       return (z - h) * 0.7;
-    }, [-L, -W, floorZ, L, W, lvl + 0.05], water);
-    parts.push(intersect(surf, move(box(L - 0.06, W - 0.06, 0.4, water, 0.17), 0, 0, (z0 + z1) / 2 + 0.06)));
+    }, [-L, -W, floorZ, L, W, lvl + 0.05], wm);
+    parts.push(intersect(surf, move(box(L - 0.06, W - 0.06, 0.4, wm, 0.17), 0, 0, (z0 + z1) / 2 + 0.06)));
   }
   void grey;
   return union(parts);
@@ -125,9 +130,22 @@ export function foldingChair({ face = 0, cardigan = false } = {}) {
   // Backrest slats.
   for (let i = 0; i < 2; i++) parts.push(place(boxAt(-0.018, -0.2, 0.62 + i * 0.16, 0.018, 0.2, 0.72 + i * 0.16, w, 0.01), { at: [-0.25, 0, 0], ry: -0.12 }));
   if (cardigan) {
-    const knitM = mat((x, y, z, lx, ly, lz) => { const n = fbm(lx * 30, ly * 30, lz * 60, 2); const c = hex('#d05848'); return [c[0] * (0.9 + n * 0.2), c[1] * (0.9 + n * 0.2), c[2] * (0.9 + n * 0.2)]; }, { tag: 'prop', spec: 0.03 });
-    parts.push(move(box(0.15, 0.17, 0.03, knitM, 0.03), 0.02, 0, 0.51));
-    parts.push(move(box(0.13, 0.15, 0.025, knitM, 0.025), 0.03, 0.01, 0.56));
+    // Her cardigan, folded: coral knit with a ribbed hem showing along the front,
+    // one sleeve hanging over the seat's edge.
+    const coral = hex('#e0684e');
+    const knitM = mat((x, y, z, lx, ly, lz) => {
+      const n = fbm(lx * 30, ly * 30, lz * 60, 2);
+      return coral.map((v) => v * (0.9 + n * 0.18));
+    }, { tag: 'prop', spec: 0.03 });
+    const ribM = mat((x, y, z, lx, ly, lz) => coral.map((v) => v * (Math.sin(ly * 160) > 0 ? 0.82 : 1.0)), { tag: 'prop', spec: 0.03 });
+    parts.push(move(box(0.15, 0.17, 0.028, knitM, 0.03), 0.02, 0, 0.51));
+    parts.push(move(box(0.14, 0.16, 0.024, knitM, 0.025), 0.03, 0.005, 0.56));
+    parts.push(move(box(0.018, 0.16, 0.026, ribM, 0.012), 0.16, 0.005, 0.555)); // the ribbed hem along the fold
+    parts.push(move(sphere(0.012, mat('#f0d8b0', { tag: 'prop', spec: 0.5 })), 0.12, -0.06, 0.585)); // a button
+    // The sleeve: over the front edge and down.
+    parts.push(capsule([0.1, 0.1, 0.56], [0.22, 0.12, 0.52], 0.032, knitM));
+    parts.push(capsule([0.22, 0.12, 0.52], [0.25, 0.13, 0.32], 0.03, knitM));
+    parts.push(move(cylinder(0.031, -0.025, 0.0, ribM), 0.25, 0.13, 0.32));
   }
   return place(union(parts), { rz: face });
 }
@@ -182,7 +200,7 @@ export function clothesProp(a, b) {
 
 /** Chimney stack (2×1 along x) with two pots in little tin hats. */
 export function chimney({ rattle = 0 } = {}) {
-  const pl = plaster('#e6e0d4', { axis: 'x' });
+  const pl = plaster('#e6e0d4', { axis: 'x', top: 0.9, stain: '#8a8080' });
   const parts = [boxAt(-0.9, -0.36, 0, 0.9, 0.36, 0.9, pl, 0.03), boxAt(-0.95, -0.41, 0.88, 0.95, 0.41, 0.98, mat('#f0eae0', { tag: 'wall' }), 0.03)];
   const tc = terracotta('#b8603a');
   const tin = mat('#9aa0a8', { tag: 'prop', spec: 0.7, shin: 30 });
@@ -217,9 +235,9 @@ export function sheetsY({ y0 = -1.5, y1 = 1.5, zl = 1.85, t = 0, swing = 0, grey
   const col = grey ? hex('#b4b0ac') : hex('#f8f6f0');
   const m = mat((x, y, z, lx, ly, lz) => {
     const fold = Math.sin(ly * 22 + t * 4) * 0.5 + 0.5;
-    const k = 0.94 + fold * 0.06;
+    const k = 0.92 + fold * 0.1;
     return [col[0] * k, col[1] * k, col[2] * k];
-  }, { tag: 'cloth', spec: 0.05, shin: 8 });
+  }, { tag: 'cloth', spec: 0.05, shin: 8, emit: 0.18 }); // thin cloth: some light comes through
   const lineM = mat('#d8d0c0', { tag: 'cloth' });
   const parts = [capsule([0, y0 - 0.2, zl + 0.02], [0, y1 + 0.2, zl + 0.02], 0.008, lineM)];
   const gap = 0.06, each = (y1 - y0 - gap * (n - 1)) / n;

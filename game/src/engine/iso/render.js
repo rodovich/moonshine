@@ -12,7 +12,9 @@ import { colorOf } from '../art.js';
 import { safeCall, isInteractable } from '../world.js';
 import { ISO_W, ISO_H, HW, HH, TW, TH, proj, inDiamond } from './project.js';
 import { convertMap } from './convert.js';
-import { isoFrameFor } from './sprites.js';
+import { isoFrameFor, isoSheet } from './sprites.js';
+
+const warnedFrames = new Set();
 
 const SPRITE_SCALE = 2; // SNES sprites as stand-ins
 const SLAB_Z = 64;
@@ -132,6 +134,7 @@ export class IsoRenderer {
   constructor() {
     this.hits = [];
     this.modelFor = null;
+    this.hidden = new Set(); // entity ids the map's scene draws itself
   }
 
   // The map's isometric description, rebuilt when the map or its tiles change.
@@ -149,6 +152,8 @@ export class IsoRenderer {
   // Height of the walkable surface at grid point (gx, gy).
   floorZ(world, gx, gy) {
     const iso = this.model(world);
+    const fl = world.mapDef.iso && world.mapDef.iso.floor;
+    if (fl && this.sceneReady(world)) return fl(Math.floor(gx), Math.floor(gy), world.api) ?? 0;
     const c = iso.at(Math.floor(gx), Math.floor(gy));
     if (!c) return 0;
     return c.kind === 'block' ? c.z + c.h : c.z; // (a door's floor is its z)
@@ -204,7 +209,16 @@ export class IsoRenderer {
     const items = [];
     const ox = this.ox;
     // Cull to cells whose diamond could reach the screen.
-    for (const c of iso.cells) {
+    const scene = this.sceneFor(world);
+    if (scene) {
+      for (const d of scene) {
+        const k = d.x0 + d.fw - 1 + d.y0 + d.fd - 1;
+        // Floors (layer 0) go down before anything stands on them.
+        // Floors and decals on them (layer < 0.1) go down before anything stands on them.
+        items.push(d.layer < 0.1 ? { type: 'd', key: -1e6 + d.layer * 1e5 + k, order: 0, d } : { type: 'd', key: k, order: d.layer, d });
+      }
+    }
+    for (const c of scene ? [] : iso.cells) {
       const T = this.top(c);
       if (T == null) continue;
       const p = proj(c.x, c.y, T, ox);
@@ -213,13 +227,13 @@ export class IsoRenderer {
       items.push({ type: 'cell', key: c.x + c.y, order: 0, c, T });
       if (c.over && c.kind !== 'block') items.push({ type: 'slab', key: c.x + c.y, order: 2, c });
     }
-    for (const pr of iso.props) items.push({ type: 'prop', key: pr.x1 + pr.y1, order: 1, pr });
+    for (const pr of scene ? [] : iso.props) items.push({ type: 'prop', key: pr.x1 + pr.y1, order: 1, pr });
     const p = world.player;
     for (const e of world.entities) {
       if (!e.visible) continue;
       const k1 = e.x + e.w - 1 + e.y + e.h - 1;
       const k0 = e.fromX + e.w - 1 + e.fromY + e.h - 1;
-      items.push({ type: 'ent', key: Math.max(k0, k1), order: e.layer === 'ground' ? -0.5 : 1, e });
+      items.push({ type: 'ent', key: Math.max(k0, k1), order: e.layer === 'ground' ? -0.5 : 1.5, e });
     }
     for (const fx of world.ambient.effects) {
       items.push({ type: 'fx', key: Math.floor(fx.x / TILE) + Math.floor(fx.y / TILE), order: fx.layer === 'ground' ? -0.4 : 1.5, fx });
@@ -230,11 +244,19 @@ export class IsoRenderer {
     // low (or not at all), as the era's games did with walls.
     const pr = this.entityRect(world, p);
     const pk = Math.max(p.x + p.y, p.fromX + p.fromY);
+    const pz = this.floorZ(world, p.px / TILE + 0.5, p.py / TILE + 0.5);
     const cut = new Set();
     if (pr && p.visible) {
       // The area around her, so the floor she'd walk or click on next shows too.
       const zone = { x: pr.x - CUT_X, y: pr.y - CUT_Y, w: pr.w + 2 * CUT_X, h: pr.h + 2 * CUT_Y };
       for (const it of items) {
+        if (it.type === 'd') {
+          // A wall, roof, or big prop in front of her fades while she's behind it.
+          if (it.key <= pk || it.d.layer < 0.1 || !it.d.rect) continue;
+          if (it.d.topZ != null && it.d.topZ <= pz + 20) continue; // below her feet: a floor she can see over
+          if (overlap(it.d.rect, it.d.layer < 1 ? zone : pr)) cut.add(it);
+          continue;
+        }
         if (it.type !== 'cell' && it.type !== 'slab') continue;
         if (it.key <= pk) continue;
         const r = this.cellRect(it);
@@ -245,8 +267,16 @@ export class IsoRenderer {
     this.hits = [];
     let hidden = false;
     let drawnPlayer = false;
+    let shadowsDone = !scene;
     for (const it of items) {
-      if (it.type === 'cell') this.drawCell(ctx, world, it, ms, cut.has(it));
+      // Every cast shadow goes down after the floors and before anything
+      // stands on them, so no floor tile paints over one.
+      if (!shadowsDone && !(it.type === 'd' && it.d.layer < 0.1)) {
+        this.drawShadows(ctx, world, items, ms, cut);
+        shadowsDone = true;
+      }
+      if (it.type === 'd') this.drawDrawable(ctx, it.d, ms, cut.has(it));
+      else if (it.type === 'cell') this.drawCell(ctx, world, it, ms, cut.has(it));
       else if (it.type === 'slab') { if (!cut.has(it)) this.drawSlab(ctx, world, it.c, ms); }
       else if (it.type === 'fx') this.drawFx(ctx, world, it.fx);
       else if (it.type === 'prop') {
@@ -268,6 +298,7 @@ export class IsoRenderer {
     if (it.type === 'ent') return it.e.py;
     if (it.type === 'fx') return it.fx.y;
     if (it.type === 'prop') return it.pr.y1 * TILE;
+    if (it.type === 'd') return it.d.y * TILE;
     return it.c.y * TILE;
   }
 
@@ -357,6 +388,115 @@ export class IsoRenderer {
     this.hits.push({ type: 'cell', c, T, sh, eh });
   }
 
+  // ---- Hand-described maps (map.iso.scene) ----
+
+  // Are the scene's art sheets loaded? (Until then, the converter's draft.)
+  sceneReady(world) {
+    const def = world.mapDef.iso;
+    if (!def || !def.scene) return false;
+    if (this.sceneSheetsFor !== def) {
+      this.sceneSheetsFor = def;
+      this.sceneSheets = null;
+    }
+    if (!this.sceneSheets) {
+      const names = new Set(safeCall(def.scene, world.api).map((d) => d.s));
+      this.sceneSheets = [...names].map((n) => isoSheet(n)).filter(Boolean);
+    }
+    return this.sceneSheets.every((s) => s.ready);
+  }
+
+  // The scene's drawables for the current flags (cached until a flag changes).
+  sceneFor(world) {
+    if (!this.sceneReady(world)) {
+      this.hidden = new Set();
+      return null;
+    }
+    // Scenes follow the flags (and the player's pose: Cheryl seated on the tub).
+    const key = JSON.stringify(world.state.flags) + (world.player.pose || '');
+    if (this.sceneCache && this.sceneCache.def === world.mapDef.iso && this.sceneCache.key === key) return this.sceneCache.list;
+    const list = (safeCall(world.mapDef.iso.scene, world.api) || []).map((d) => {
+      const fw = d.fw || 1;
+      const fd = d.fd || 1;
+      return { ...d, fw, fd, x0: Math.round(d.x - fw / 2), y0: Math.round(d.y - fd / 2), z: d.z || 0, layer: d.layer ?? 1 };
+    });
+    this.sceneCache = { def: world.mapDef.iso, key, list };
+    // Entities the scene draws itself (their own sprites are hidden).
+    let hide = world.mapDef.iso.hide || [];
+    if (typeof hide === 'function') hide = safeCall(hide, world.api) || [];
+    this.hidden = new Set(hide);
+    return list;
+  }
+
+  // One drawable: its frame (or animation) with its anchor on the
+  // footprint's center at its base height, its cast shadow first.
+  drawDrawable(ctx, d, ms, faded) {
+    const sheet = isoSheet(d.s);
+    if (!sheet) return;
+    const f = sheet.m.anims && sheet.m.anims[d.f] ? sheet.frameAt(d.f, ms) : sheet.frame(d.f);
+    if (!f) {
+      if (!warnedFrames.has(`${d.s}:${d.f}`)) { warnedFrames.add(`${d.s}:${d.f}`); console.warn(`[iso art] no frame ${d.s}:${d.f}`); }
+      return;
+    }
+    const q = proj(d.x, d.y, d.z, this.ox);
+    const x = q.x - this.cx;
+    const y = q.y - this.cy;
+    if (faded) ctx.globalAlpha = 0.3;
+    drawAnchored(ctx, f, x, y);
+    ctx.globalAlpha = 1;
+    d.topZ = d.z + (f.hpx || Math.max(0, f.ay - HH)); // how high it rises
+    d.rect = { x: Math.round(x - f.ax), y: Math.round(y - f.ay), w: f.img.width, h: f.img.height, img: f.img, flip: false, scale: 1 };
+    if (!faded || d.layer < 0.1) this.hits.push({ type: 'd', d, rect: d.rect });
+  }
+
+  // The shadow pass: drawables' and characters' cast shadows.
+  drawShadows(ctx, world, items, ms, cut) {
+    for (const it of items) {
+      if (cut.has(it)) continue;
+      if (it.type === 'd') {
+        if (it.d.layer < 0.1) continue;
+        const sheet = isoSheet(it.d.s);
+        if (!sheet) continue;
+        const f = sheet.m.anims && sheet.m.anims[it.d.f] ? sheet.frameAt(it.d.f, ms) : sheet.frame(it.d.f);
+        const sh = f && sheet.frame(`${f.name}.shadow`);
+        if (!sh) continue;
+        const q = proj(it.d.x, it.d.y, it.d.z, this.ox);
+        drawAnchored(ctx, sh, q.x - this.cx, q.y - this.cy);
+      } else if (it.type === 'ent') {
+        const e = it.e;
+        if (!e.visible || e.def.shadow === false || this.hidden.has(e.id)) continue;
+        const f = isoFrameFor(e);
+        if (!f || !f.shadow) continue;
+        const b = this.entityBase(world, e);
+        drawAnchored(ctx, f.shadow, b.x, b.y, f.flip);
+      }
+    }
+  }
+
+  // Where an entity's anchor (the footprint's center at its floor) is on screen.
+  entityBase(world, e) {
+    const gx = e.px / TILE + e.w / 2;
+    const gy = e.py / TILE + e.h / 2;
+    const zFrom = this.floorZ(world, e.fromX + e.w / 2, e.fromY + e.h / 2);
+    const zTo = this.floorZ(world, e.x + e.w / 2, e.y + e.h / 2);
+    const k = e.moving ? e.t / e.stepTicks : 1;
+    const q = proj(gx, gy, Math.round(zFrom + (zTo - zFrom) * k), this.ox);
+    return { x: q.x - this.cx, y: q.y - this.cy };
+  }
+
+  // The tile of a drawable's footprint nearest a map-space point.
+  cellUnder(d, mx, my) {
+    let best = null;
+    let bestD = Infinity;
+    for (let y = d.y0; y < d.y0 + d.fd; y++) {
+      for (let x = d.x0; x < d.x0 + d.fw; x++) {
+        const q = proj(x + 0.5, y + 0.5, d.z, this.ox);
+        const dist = Math.hypot((q.x - mx) / 2, q.y - my);
+        if (dist < bestD) { bestD = dist; best = { x, y }; }
+      }
+    }
+    return best;
+  }
+
   // A prop: its SNES detail tiles put back together, upright, at 2×.
   drawProp(ctx, world, pr, ms) {
     const w = pr.x1 - pr.x0 + 1;
@@ -399,20 +539,27 @@ export class IsoRenderer {
     const base = proj(gx, gy, z, this.ox);
     const bx = base.x - this.cx;
     const by = base.y - this.cy;
-    if (e.directional && e.def.shadow !== false) ctx.drawImage(shadow(), Math.round(bx - 14), Math.round(by - 6));
-    let f = isoFrameFor(e);
+    let f = e.visible && !this.hidden.has(e.id) ? isoFrameFor(e) : null;
     let scale = 1;
-    if (!f) {
+    let drop = 0;
+    if (f) {
+      // Isometric art: its own cast shadow, under it (in a scene, the shadow pass drew it).
+      if (f.shadow && e.def.shadow !== false && !this.sceneCache?.list) drawAnchored(ctx, f.shadow, bx, by, f.flip);
+    } else {
+      if (this.hidden.has(e.id)) return; // the map's scene draws it
+      if (e.directional && e.def.shadow !== false) ctx.drawImage(shadow(), Math.round(bx - 14), Math.round(by - 6));
       const sf = e.art && e.currentFrame();
       if (!sf || !sf.img) return;
       f = { img: sf.img, flip: sf.flip, ax: sf.img.width / 2, ay: sf.img.height };
       scale = SPRITE_SCALE;
+      // SNES sprites stand at the bottom of their tile: feet a little below its center.
+      drop = e.directional ? 6 : (e.h * TH) / 4;
     }
     const w = f.img.width * scale;
     const h = f.img.height * scale;
-    const x = Math.round(bx - f.ax * scale);
-    // Feet a little below the tile's center, as SNES sprites stand at the bottom of their tile.
-    const y = Math.round(by - f.ay * scale + (e.directional ? 6 : (e.h * TH) / 4));
+    // A flipped frame mirrors its anchor too.
+    const x = Math.round(bx - (f.flip ? f.img.width - f.ax : f.ax) * scale);
+    const y = Math.round(by - f.ay * scale + drop);
     ctx.save();
     if (e.clipBelow) {
       ctx.beginPath();
@@ -480,6 +627,11 @@ export class IsoRenderer {
     let entity = null;
     for (let i = this.hits.length - 1; i >= 0; i--) {
       const h = this.hits[i];
+      if (h.type === 'd') {
+        if (tile || !hitRect(h.rect, sx, sy)) continue;
+        tile = this.cellUnder(h.d, mx, my);
+        continue;
+      }
       if (h.type === 'prop') {
         if (tile || !hitRect(h.rect, sx, sy)) continue;
         // The prop's cell under the pointer's column (front row first).
@@ -517,6 +669,17 @@ function plainTop() {
     ctx.fill();
     return c;
   });
+}
+
+// A frame { img, ax, ay } with its anchor at (x, y), optionally mirrored.
+function drawAnchored(ctx, f, x, y, flip = false) {
+  const dx = Math.round(x - (flip ? f.img.width - f.ax : f.ax));
+  const dy = Math.round(y - f.ay);
+  if (!flip) { ctx.drawImage(f.img, dx, dy); return; }
+  ctx.save();
+  ctx.scale(-1, 1);
+  ctx.drawImage(f.img, -dx - f.img.width, dy);
+  ctx.restore();
 }
 
 function overlap(a, b) {

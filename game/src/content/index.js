@@ -11,7 +11,9 @@ import { act4Maps, act4Items, act4Scripts, shipPlanAct4, seaCave, withAct4, star
 import { act5Maps, act5Items, act5Scripts, withAct5, standInItems, startAct5, act5, shipPlanAct5, telescopeAct5 } from './act5/index.js';
 import { act6Maps, act6Items, act6Scripts, addAct6 } from './act6/index.js';
 import { act6Start } from './act6/climax.js';
-import { cheryl } from '../art/cheryl.js';
+import { cheryl, cheryl_swim } from '../art/cheryl.js';
+import { old_man_seated, neighbor, sweaty_kid } from '../art/opening_npcs.js';
+import { props } from '../art/props.js';
 
 // Each later act lays its states over earlier acts' maps (by id), in act order:
 // Act 3 (the crypt, the Archive, the Crown at dusk), Act 4 (its states of the
@@ -48,6 +50,13 @@ export default {
   start: { map: 'cistern_court', x: 3, y: 6, facing: 'down' }, // facing the player (client feedback)
 
   // Sitting on the tub's edge, she sits on its rim, a little above her tile.
+  // The isometric view: which isometric art sheet (game/assets/iso/manifest.js)
+  // draws each SNES sheet's characters.
+  // aliases: SNES frame names with a different isometric name ({dir} is the facing).
+  iso: {
+    sheets: { cheryl, cheryl_swim, old_man_seated, neighbor, sweaty_kid, cat: props },
+    aliases: { neighbor: { tend: 'smooth_{dir}' } },
+  },
   player: { name: 'Cheryl', sprite: { sheet: cheryl }, poseOffsets: { sit_right: [0, -4], rise_right: [0, -2] } },
 
   maps,

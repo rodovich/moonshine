@@ -9,7 +9,7 @@
 export const W = 20, H = 26;
 export const DECK = 120; // the roof terraces, 3 m above the court
 export const STOREY = 96; // the facades' first storey (to the pent roof)
-export const LOW = -120; // the roofs of the houses below the court
+export const LOW = -80; // the eaves of the houses below the court // the roofs of the houses below the court
 
 /**
  * Build the court's drawables. Each is { s: sheet, f: frame, x, y, z, fw, fd, layer }
@@ -85,7 +85,7 @@ export function court(state = {}) {
   // ---- The court (rows 12–23).
   for (let y = 12; y <= 23; y++) for (let x = 1; x <= 18; x++) {
     const f = x === 6 && y === 20 ? 'cobble_drain' : `cobble_${(x * 7 + y * 3 + ((x * y) % 5)) % 4}`;
-    if (y === 23) column(x, y, LOW, [['retain_s', 40], ['retain_s', 40], ['retain_s', 40]], [], [f, 0]);
+    if (y === 23) column(x, y, -160, [['retain_s', 40], ['retain_s', 40], ['retain_s', 40], ['retain_s', 40]], [], [f, 0]);
     else add(C, f, x, y, 0, 1, 1, 0);
   }
   // West: the Pelletiers' house, two storeys, shutters closed; the gate at y19.
@@ -107,12 +107,14 @@ export function court(state = {}) {
   if (!morning) add(C, 'piano', 15, 22, 0, 2, 2);
 
   // ---- Below: the roofs of the next houses down, and the Squeeze between them.
-  for (let y = 24; y <= 25; y++) for (let x = 0; x < W; x++) {
-    if (x === 15 || x === 16) continue;
-    add(C, (x * 5 + y) % 3 ? 'lowroof_terra' : 'lowroof_flat', x, y, LOW, 1, 1, 0.5);
+  // Their walls stand 60 px from LOW - 60 to the eaves at LOW (the two flanking the Squeeze, at x15–16, a storey taller).
+  for (const [x, f] of [[0, 'lowhouse_terra_3x2'], [3, 'lowhouse_flat_2x2'], [5, 'lowhouse_flat_3x2'], [8, 'lowhouse_terra_2x2'], [10, 'lowhouse_terra_3x2'], [13, 'lowhouse_flat_2x2_tall'], [17, 'lowhouse_terra_3x2_tall']]) {
+    const w = f.includes('3x2') ? 3 : 2;
+    add(C, f, x, 24, LOW - 60, w, 2, 1);
   }
-  add(C, 'stair', 15, 24, -40, 1, 1, 0.3); add(C, 'stair', 16, 24, -40, 1, 1, 0.3);
-  add(C, 'stair', 15, 25, -80, 1, 1, 0.3); add(C, 'stair', 16, 25, -80, 1, 1, 0.3);
+  const st = morning ? 'stair_scraped' : 'stair';
+  add(C, st, 15, 24, -40, 1, 1, 0.3); add(C, st, 16, 24, -40, 1, 1, 0.3);
+  add(C, st, 15, 25, -80, 1, 1, 0.3); add(C, st, 16, 25, -80, 1, 1, 0.3);
 
   // ---- People.
   if (state.people !== false) {
@@ -148,25 +150,29 @@ export const proj = (wx, wy, z = 0) => [(wx - wy) * 32, (wx + wy) * 16 - z];
 export function sortDrawables(list) {
   return list.slice().sort((a, b) => {
     const da = a.x0 + a.fw - 1 + a.y0 + a.fd - 1, db = b.x0 + b.fw - 1 + b.y0 + b.fd - 1;
-    if (a.layer === 0 && b.layer !== 0) return -1; // ground floors first
-    if (b.layer === 0 && a.layer !== 0) return 1;
+    // Ground floors first, then ground decals (rugs) over them (layer < 0.1), then everything else.
+    const ga = a.layer < 0.1, gb = b.layer < 0.1;
+    if (ga !== gb) return ga ? -1 : 1;
+    if (ga && a.layer !== b.layer) return a.layer - b.layer;
     return da - db || a.z - b.z || a.layer - b.layer;
   });
 }
 
 /** Draw drawables to a 2D context with the camera's top-left at (cx, cy) in screen px. */
 export function draw(ctx, list, images, manifest, cx, cy, opts = {}) {
-  for (const d of sortDrawables(list)) {
+  // Three passes, so a cast shadow is never painted over by a floor tile that
+  // sorts after its caster: (1) ground, wall faces, and floors (layer < 1);
+  // (2) every cast shadow; (3) props and people, back to front.
+  const sorted = sortDrawables(list);
+  const blit = (d, suffix = '') => {
     const sheet = manifest.sheets[d.s];
-    if (!sheet) continue;
-    const fr = sheet.frames[d.f];
-    if (!fr) { if (opts.missing) opts.missing(d); continue; }
+    if (!sheet) return;
+    const fr = sheet.frames[d.f + suffix];
+    if (!fr) { if (!suffix && opts.missing) opts.missing(d); return; }
     const [sx, sy] = proj(d.x, d.y, d.z);
-    const img = images[d.s];
-    if (opts.shadows !== false && sheet.frames[d.f + '.shadow']) {
-      const sh = sheet.frames[d.f + '.shadow'];
-      ctx.drawImage(img, sh[0], sh[1], sh[2], sh[3], Math.round(sx - cx - sh[4]), Math.round(sy - cy - sh[5]), sh[2], sh[3]);
-    }
-    ctx.drawImage(img, fr[0], fr[1], fr[2], fr[3], Math.round(sx - cx - fr[4]), Math.round(sy - cy - fr[5]), fr[2], fr[3]);
-  }
+    ctx.drawImage(images[d.s], fr[0], fr[1], fr[2], fr[3], Math.round(sx - cx - fr[4]), Math.round(sy - cy - fr[5]), fr[2], fr[3]);
+  };
+  for (const d of sorted) if (d.layer < 1) blit(d);
+  if (opts.shadows !== false) for (const d of sorted) blit(d, '.shadow');
+  for (const d of sorted) if (d.layer >= 1) blit(d);
 }

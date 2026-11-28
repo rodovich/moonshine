@@ -18,17 +18,32 @@ const wrap = (v) => ((v + 0.5) % 1 + 1) % 1;
  */
 export function plaster(base = '#ece8dc', opts = {}) {
   const c = hex(base);
-  const stain = hex(opts.stain ?? '#c8b89c');
+  const stain = hex(opts.stain ?? '#b8a88c');
+  const grime = hex('#9a9088');
+  const weather = opts.weather ?? true;
   return mat((x, y, z) => {
     const u = opts.axis === 'y' ? wrap(y) : opts.axis === 'x' ? wrap(x) : wrap(x + y);
     const n = fbm(u * 6, z * 6, 3.1, 3, 6);
     const fine = vnoise(u * 40, z * 40, 1.7, 40);
     let col = tint(c, 0.94 + n * 0.1 + (fine - 0.5) * 0.03);
+    if (weather) {
+      // Broad, low-contrast weathering, as a 90s texture map would carry it:
+      // patches of newer plaster, rain streaks running down from above, and a
+      // damp, darker band at the foot of the wall.
+      const patch = fbm(u * 2.5 + 7, z * 2.2, 5.3, 2, 3);
+      if (patch > 0.6) col = tint(col, 1.0 + Math.min(0.05, (patch - 0.6) * 0.3));
+      const streak = fbm(u * 16, z * 0.9 + 3, 8.1, 2, 16);
+      if (streak > 0.56) col = mix(col, tint(grime, 1.05), Math.min(0.16, (streak - 0.56) * 0.7));
+      const foot = Math.max(0, 1 - (z - (opts.base ?? 0)) / 0.35) * (0.6 + n * 0.5);
+      col = mix(col, tint(stain, 0.9), Math.min(0.32, foot * 0.32));
+    }
     // Damp and dust at the foot of the wall.
     if (opts.stainHeight) {
       const t = Math.max(0, 1 - (z - (opts.base ?? 0)) / opts.stainHeight) * (0.5 + n * 0.6);
-      col = mix(col, tint(stain, 0.95), Math.min(0.45, t * 0.45));
+      col = mix(col, tint(stain, 0.95), Math.min(0.4, t * 0.4));
     }
+    // A drip line under an eave or a pent roof.
+    if (opts.top != null && z > opts.top - 0.2) col = mix(col, tint(grime, 0.95), Math.min(0.3, ((z - (opts.top - 0.2)) / 0.2) * 0.3 * (0.6 + n * 0.6)));
     return col;
   }, { tag: opts.tag ?? 'wall', spec: 0.02, shin: 6 });
 }

@@ -221,7 +221,8 @@ export class World {
   }
 
   setLighting(name, seconds = 0) {
-    const presets = { ...LIGHTING, ...(this.content.lighting || {}) };
+    // A view may light its own art differently (the isometric tints).
+    const presets = { ...LIGHTING, ...(this.content.lighting || {}), ...(this.game.view.lighting || {}) };
     if (name && !presets[name]) console.warn(`[world] unknown lighting "${name}"`);
     this.lighting = name;
     return this.effects.setLight(name ? presets[name] || [] : [], seconds);

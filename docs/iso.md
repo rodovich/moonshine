@@ -12,7 +12,7 @@ The client asked for a second version of Moonshine: "a 640x480 version with a 2:
 ## Projection and display
 
 - **640×480 internal resolution**, scaled by whole numbers where possible and letterboxed, like the SNES version's 256×224.
-- **2:1 dimetric projection.** One map tile is a floor diamond 64 px wide and 32 px tall (starting point; the engine and art tasks may adjust it together and record the change here). Heights are drawn in the same pixel scale.
+- **2:1 dimetric projection.** One map tile is a floor diamond 64 px wide and 32 px tall. Heights are screen pixels: a tile edge's worth of height is 40 px, a storey 120 (agreed by the engine and art tasks). The art's manifest format is in the engine README, "Isometric view", and docs/iso-art-direction.md.
 - **Grid directions stay the game's four directions.** On screen they run along the diagonals: the game's up is up-right on screen, right is down-right. Each arrow key walks the grid direction of the same name, which turns it 45° clockwise on screen (Up walks up-right); `?keys=ccw` offers the other turn for playtesting. Decided by the engine task: it keeps every arrow on one grid direction and opposite keys opposite; revisit if playtests disagree. Details in the engine README, "Isometric view".
 - **Depth sorting:** tiles, walls, props, and characters sort back to front by their position on the grid (and height), so Cheryl walks behind buildings and in front of them correctly. Where a wall would hide her, the renderer cuts it away or shows her outline, as games of the era did. Walls along a map's front edges are always drawn low, so rooms show; a wall or slab that would cover Cheryl drops to a stub while it does, and a character or prop in front of her lets her show through at half strength.
 - **Clicks and taps** map from the screen back to the grid tile under the pointer (accounting for height), then use the shared pathfinding.
@@ -20,7 +20,7 @@ The client asked for a second version of Moonshine: "a 640x480 version with a 2:
 ## Maps
 
 - **Each map may carry an `iso` description** alongside its layers: per-tile heights and kinds (floor, step, wall block, roof, water) and which isometric art to draw. Content tasks write it per map.
-- **A converter drafts it** from the map's existing layers and collision, so every map renders in the isometric view from the start (roughly), and content tasks hand-correct each map to full quality act by act. The whole game stays playable in both views at all times. The description is `iso: { cells: [[x, y, w, h, { kind, z, h, top, south, east, over }]] }` on the map: overrides on top of the converter's draft (engine README, "Isometric view"). Until a map has isometric art, its SNES tiles are drawn sheared onto the floor diamonds and wall faces, and its characters and props at 2×.
+- **A converter drafts it** from the map's existing layers and collision, so every map renders in the isometric view from the start (roughly), and content tasks hand-correct each map to full quality act by act. The whole game stays playable in both views at all times. A map with isometric art is described by a scene, `iso: { scene: (g) => [drawables], floor: (x, y) => z }`, agreed between the engine and art tasks: drawables are the art's frames placed at footprint centers and base heights, walls are columns of stacked face pieces, and the scene follows the story's flags. Without one, the converter's draft shows, correctable with `iso: { cells: [...] }` overrides. Both formats are in the engine README, "Isometric view". Until a map has isometric art, its SNES tiles are drawn sheared onto the floor diamonds and wall faces, and its characters and props at 2×.
 
 ## Art
 
@@ -31,3 +31,10 @@ The client asked for a second version of Moonshine: "a 640x480 version with a 2:
 
 - **Narrow slice first:** the opening (Cistern Court, Cheryl's flat, the moonrise and its picture at 640×480) built to high quality in the isometric view, reviewed (code, art, a real-browser playtest by a first-time player), and fixed, before widening act by act.
 - **`main` stays playable in both views.** The usual rule holds: merge only on a green full suite. The isometric view adds its own smoke tests and screenshots.
+
+## Later acts' changes to earlier acts' maps
+
+Later acts change earlier acts' maps (patches, variants, overlays: Act 4's flood stages and dry canal, Act 5's risen Harbor). A hand-built isometric scene can't see those tile changes on its own. Decision (orchestrator, raised by the Act 2 builder):
+
+- **Each act's builder owns the isometric side of its own changes.** A later act supplies an `iso` hook for the maps it changes, given the base scene's kit, that adds or replaces drawables; the engine composes it with the base scene.
+- **The engine keeps a safety net:** for any cell whose current tile differs from the tile the base scene was built for, it draws the converter's version of that cell, so a later act's change always shows (roughly) in the isometric view until that act hand-builds it.

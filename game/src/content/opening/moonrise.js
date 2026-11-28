@@ -6,6 +6,7 @@ import { fx } from '../../art/fx.js';
 import { vista_pins } from '../../art/pins.js';
 import { vista, vista_gate_cold, vista_rim, vista_glow, vista_moon, vista_path, vista_twinkle, vista_cheryl, VISTA_BASINS } from '../../art/vista.js';
 import { cheryl, cheryl_swim } from '../../art/cheryl.js';
+import { isoSheet } from '../../engine/iso/sprites.js';
 
 // The vista, drawn each frame per docs/art-opening.md. The script moves it
 // along by setting times on `scene` (in the picture's own milliseconds).
@@ -51,7 +52,47 @@ function makeVista(g) {
     ctx.drawImage(art.pins.frame('pins'), 0, 0);
     ctx.drawImage(art.cheryl.frame('cheryl_tub'), 0, 128);
   };
+  scene.draw.iso = (ctx, ms) => isoVista(scene, ctx, ms);
   return scene;
+}
+
+// The isometric view's moonrise (the art task's 640×480 layers, sheet
+// 'moonrise'), on the same timeline as the SNES vista above.
+const MOON_CLIMB_SECONDS = 16; // from the ridge to as high as it gets here
+function isoVista(scene, ctx, ms) {
+  const sheet = isoSheet('moonrise');
+  const m = sheet && sheet.m;
+  if (!m || !sheet.ready) {
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, 640, 480);
+    return;
+  }
+  const blit = (name, x, y, alpha = 1) => {
+    const f = sheet.raw(name);
+    if (!f) return;
+    ctx.globalAlpha = alpha;
+    ctx.drawImage(f.img, f.sx, f.sy, f.w, f.h, Math.round(x - f.ax), Math.round(y - f.ay), f.w, f.h);
+    ctx.globalAlpha = 1;
+  };
+  const sec = scene.moonAt != null && ms >= scene.moonAt ? (ms - scene.moonAt) / 1000 : -1;
+  const t = sec < 0 ? -1 : Math.min(0.6, (sec / MOON_CLIMB_SECONDS) * 0.6);
+  const { from, to } = m.moonRise;
+  const mx = from[0] + (to[0] - from[0]) * Math.max(0, t);
+  const my = from[1] + (to[1] - from[1]) * Math.max(0, t);
+  // The layers in the sheet's own order (sky, glow, moon_halo, moon, far, path, town, fg, twinkle).
+  const layers = {
+    glow: () => scene.glowAt != null && ms >= scene.glowAt && blit('glow', m.glowAt[0], m.glowAt[1], sec >= 0 ? 0.6 : Math.min(1, (ms - scene.glowAt) / 1200)),
+    moon_halo: () => t >= 0 && blit('moon_halo', mx, my, 0.9),
+    moon: () => t >= 0 && blit(t < 0.18 ? 'moon_peach' : t < 0.42 ? 'moon_cream' : 'moon_white', mx, my),
+    path: () => t >= 0 && blit('path', mx, m.pathTop, Math.min(1, t * 4)),
+    twinkle: () => (m.twinkles || []).forEach(([x, y], i) => {
+      if (Math.floor((ms + i * 677) / 400) % 3 === 0) blit(`twinkle_${i % 3}`, x, y);
+    }),
+  };
+  for (const name of m.order || ['sky', 'glow', 'moon_halo', 'moon', 'far', 'path', 'town', 'fg', 'twinkle']) {
+    if (layers[name]) layers[name]();
+    else blit(name, 0, 0); // a full-screen layer
+  }
 }
 
 export async function moonrise(g) {
