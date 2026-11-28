@@ -20,7 +20,7 @@
 <div class="bar">
   Scene: <a href="?only=court&cam=roof">roof</a><a href="?only=court&cam=court">court</a><a href="?only=court&cam=all&zoom=1">whole map</a>
   <a href="?only=court&cam=roof&tint=dusk">roof at dusk</a><a href="?only=court&cam=court&state=morning&tint=day">morning</a>
-  <a href="?only=court&cam=roof&tint=night">night</a>
+  <a href="?only=court&cam=roof&tint=night">night</a><a href="?only=court&cam=flat&tint=dusk">flat at dusk</a><a href="?only=court&cam=flat&state=morning&tint=day">flat, morning</a>
   · Pictures: <a href="?only=pictures">moonrise</a> · UI: <a href="?only=ui">ui</a> · <a href="?only=sheets">all sheets</a> · <a href="?">everything</a>
 </div>
 <p class="note">Rendered by <code>npm run art:iso</code> from the models in <code>iso-art/</code>. See <code>docs/iso-art-direction.md</code>. Params: <code>only=court|sheets|pictures|ui|&lt;sheet&gt;</code>, <code>cam=roof|court|all</code>, <code>tint=dusk|night|day</code>, <code>state=morning</code>, <code>zoom=n</code>, <code>bg=rrggbb</code>.</p>
@@ -28,6 +28,7 @@
 <script type="module">
 import manifest from '../assets/iso/manifest.js';
 import { court, draw, proj, W, H } from './iso-court.js';
+import { flat } from './iso-flat.js';
 import { ISO_TINTS, applyTint } from '../assets/iso/tints.js';
 
 const q = new URLSearchParams(location.search);
@@ -52,7 +53,7 @@ function section(title) {
 if (!only || only === 'court') {
   const cam = q.get('cam') || 'roof';
   const state = { morning: q.get('state') === 'morning' };
-  const list = court(state);
+  const list = cam === 'flat' ? flat(state) : court(state);
   const div = section(`Cistern Court (${cam}${state.morning ? ', morning' : ''}${q.get('tint') ? ', ' + q.get('tint') : ''})`);
   let cw = 640, ch = 480, cx, cy;
   const centerOn = (x, y, z) => { const [sx, sy] = proj(x, y, z); cx = Math.round(sx - cw / 2); cy = Math.round(sy - ch / 2); };
@@ -60,6 +61,7 @@ if (!only || only === 'court') {
     cw = (W + H) * 32 + 64; ch = (W + H) * 16 + 420;
     cx = -H * 32 - 32; cy = -380;
   } else if (cam === 'court') centerOn(8.5, 17.5, 30);
+  else if (cam === 'flat') centerOn(6, 4.5, 40);
   else centerOn(6.5, 5.5, 160);
   const c = document.createElement('canvas');
   c.width = cw; c.height = ch;
@@ -135,7 +137,7 @@ if ((!only || only === 'ui') && manifest.fonts && manifest.sheets.ui) {
     },
     inventory: (ctx) => {
       nine(ctx, 'panel_inventory', 120, 110, 400, 250);
-      text(ctx, 'label', 'Satchel', 144, 128);
+      text(ctx, 'label', 'SATCHEL', 144, 128);
       const items = ['pepper_mill', 'egg_timer', 'bath_plug', 'soap', 'clothes_prop', 'moon_chart'];
       items.forEach((it, i) => {
         const x = 146 + (i % 6) * 58, y = 160;
@@ -188,6 +190,7 @@ if (!only || only === 'pictures') {
       if (t >= 0) { blit('moon_halo', mx, my, 0.9); blit(t < 0.3 ? 'moon_peach' : t < 0.7 ? 'moon_cream' : 'moon_white', mx, my); }
       blit('far', 0, 0);
       if (t >= 0) blit('path', mx, sheet.pathTop, Math.min(1, t * 4));
+      blit('town', 0, 0);
       blit('fg', 0, 0);
       (sheet.twinkles || []).forEach(([x, y], i) => { if ((i * 7 + stages.indexOf(stage)) % 3 === 0) blit(`twinkle_${i % 3}`, x, y); });
       const cell = document.createElement('div'); cell.className = 'cell';

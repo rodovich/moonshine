@@ -45,7 +45,7 @@ const L = (() => { const v = [-0.75, 0.55, 1.0]; const l = Math.hypot(...v); ret
 export const LIGHT = {
   dir: L,
   key: [1.0, 0.95, 0.86],
-  sky: [0.36, 0.42, 0.56],
+  sky: [0.3, 0.38, 0.64],
   bounce: [0.2, 0.16, 0.12],
 };
 
@@ -115,7 +115,13 @@ export function render(scene, opts = {}) {
   const ss = opts.ss ?? 3;
   let rect = opts.rect;
   if (!rect) {
-    const [x0, y0, x1, y1] = screenBounds(scene.b);
+    let bb = scene.b;
+    if (opts.ground != null) {
+      // Room for the cast shadow: the light falls ~0.75 east and 0.55 north per unit of height.
+      const hgt = Math.max(0, bb[5] - opts.ground);
+      bb = [bb[0] - 0.1, bb[1] - hgt * 0.6 - 0.25, bb[2], bb[3] + hgt * 0.8 + 0.25, bb[4] + 0.1, bb[5]];
+    }
+    const [x0, y0, x1, y1] = screenBounds(bb);
     const m = opts.margin ?? 1;
     rect = [Math.floor(x0) - m, Math.floor(y0) - m, Math.ceil(x1) - Math.floor(x0) + 2 * m, Math.ceil(y1) - Math.floor(y0) + 2 * m];
   }
@@ -185,9 +191,15 @@ export function render(scene, opts = {}) {
           // Shadow on the invisible floor.
           const t = (ground - p0[2]) / VIEW[2];
           const gx = p0[0] + VIEW[0] * t, gy = p0[1] + VIEW[1] * t;
-          const shad = softShadow(scene, gx, gy, ground + 0.002, shadowK, shadowMaxT);
-          const ao = ambientOcclusion(scene, gx, gy, ground, [0, 0, 1], aoStr);
-          sh += Math.min(1, (1 - shad) * 0.75 + (1 - ao) * 0.9);
+          // A run of wall casts with its neighbors present (shadowScene), keeping only
+          // the part of the shadow that belongs to this piece (shadowClip), so the
+          // pieces' shadows join into one continuous band.
+          if (!opts.shadowClip || opts.shadowClip(gx, gy)) {
+            const ss2 = opts.shadowScene || scene;
+            const shad = softShadow(ss2, gx, gy, ground + 0.002, shadowK, shadowMaxT);
+            const ao = ambientOcclusion(ss2, gx, gy, ground, [0, 0, 1], aoStr);
+            sh += Math.min(1, (1 - shad) * 0.75 + (1 - ao) * 0.9);
+          }
         }
       }
       const n2 = ss * ss;
