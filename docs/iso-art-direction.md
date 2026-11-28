@@ -138,6 +138,12 @@ From Act 2 the surface maps are assembled from a modular kit rather than drawn o
 - **Stairs:** one 40 px run across a tile, descending in each grid direction (`stairs_down` toward +y, and up, left, right).
 - **Street furniture:** lamps (unlit and lit), bench, geranium and bay pots, crate, barrel, awnings and hanging signs (coral, blue, green), iron railings, laundry lines across a street, a stepped canal bridge, mooring posts.
 - **Assembly:** `isoScene()` returns a builder: `floor`, `house` (front, upper storeys, and side as letter strings: `#` wall, `w` window, `b` window box, `c` closed, `D` door, `S` shopfront, `A` archway, `B` balcony), `terrace` (a raised floor with its retaining faces), `stairs`, `column`, `hipRoof`, `lamp`, `bench`, `pot`, `lowRoofs`, `prop`, and `floorHeight()` for the map's `floor(x, y)`. A house's faces show only where the camera sees them (its south front and east side); everything else is a top.
+- **Roofs dress themselves:** a flat roof is whitewashed slabs (the court's deck) with a parapet and coping round its edge, and `house()` scatters a few roof things on it by position (chimneys, a Moonshine basin, a water tank, a hatch, a pot); `roofProps: false` for a bare one. A hipped roof has no flat top under it, and its eave overhangs the walls by 0.18. (Act 2 art review A1, A3: blank roof planes were the biggest drop from the opening.)
+- **Long facades vary themselves:** `house()` turns some plain windows into closed shutters, window boxes or (upstairs) balconies, and some plain wall into a drainpipe or a walled-up arch, by position; `vary: false` keeps a facade as written. (Review A8.)
+- **Flights of steps have sloping walls** (`flight_side`, `flight_side_foot`, `flight_newel`): one continuous wall with a parapet and coping down each side, not a block per step. (Review A4.)
+- **The lower-roof bands beyond a map's edge mix ten houses by position**, including gabled roofs, washing, domes and chimney stacks. (Review A7.)
+- **Water along a quay wall** (`water_n`, `water_w`) darkens in the wall's shadow and reflects the stone. (Review A12.)
+- **The lamp room is a lantern:** glazed panels all round its back walls and a chamfered corner (`rooms:lamp_*_glazed`, `lamp_corner_chamfer`). (Review A14.)
 - **Ownership:** the art task keeps the kit and adds pieces when a map needs one; content builders write each map's `*-iso.js` with it.
 
 ## The pipeline

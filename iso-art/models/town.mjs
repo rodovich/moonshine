@@ -7,7 +7,7 @@ import { box, boxAt, union, subtract, move, place, cylinder, sphere, capsule, cu
 import { mat, hex, mix } from '../lib/render.mjs';
 import { plaster, limestone, wood, iron, terracotta, leaf, brass, bronze, fbm, vnoise } from './materials.mjs';
 import { hash3, rng } from '../lib/noise.mjs';
-import { heightfield, sstep } from './ground.mjs';
+import { heightfield, sstep, deck } from './ground.mjs';
 import { COLORS, windowFeature, doorFeature, onFace, wallColumn, stairFlight } from './arch.mjs';
 
 const PI = Math.PI;
@@ -77,11 +77,27 @@ export function yard({ seed = 0, base = '#c8a878' } = {}) {
 }
 
 /** Canal water at its surface (z = 0), animated by phase t. Seen from above: dark, green-teal, with sky glints. */
-export function water({ t = 0 } = {}) {
+/**
+ * Canal and harbor water (a floor tile; t is the animation phase). edge: null, or the side a quay
+ * wall stands on ('n', 'w'): the water darkens in the wall's shadow and carries a broken, wavering
+ * pale reflection of the stone along it.
+ */
+export function water({ t = 0, edge = null } = {}) {
   const f = (x, y) => (vnoise((x + 0.5) * 3 + t * 2, (y + 0.5) * 3, t * 3, 3) - 0.5) * 0.02 + (vnoise((x + 0.5) * 9, (y + 0.5) * 9 - t * 3, 1, 9) - 0.5) * 0.008;
   const mt = mat((x, y) => {
     const n = vnoise((x + 0.5) * 4 + t, (y + 0.5) * 4, 7, 4);
-    return mix(hex('#1e4a52'), hex('#3a7a80'), n * 0.6);
+    let c = mix(hex('#1e4a52'), hex('#3a7a80'), n * 0.6);
+    // Sparse ripple highlights: short bright crests that drift with the phase.
+    const r = vnoise((x + 0.5) * 10 + t * 3, (y + 0.5) * 24 - t * 2, 3, 10);
+    if (r > 0.8) c = mix(c, hex('#cfe6e6'), Math.min(1, (r - 0.8) * 6));
+    if (edge) {
+      const d = edge === 'n' ? y + 0.5 : x + 0.5; // distance from the wall
+      const u = edge === 'n' ? x : y;
+      c = mix(hex('#10262c'), c, Math.min(1, 0.35 + d * 1.1)); // the wall's shadow on the water
+      const band = 0.16 + 0.05 * Math.sin((u + 0.5) * Math.PI * 4 + t * Math.PI * 2);
+      if (d < band && vnoise((u + 0.5) * 14 + t * 4, 2, 5, 14) > 0.35) c = mix(c, hex('#a89c84'), 0.55); // the stone's reflection
+    }
+    return c;
   }, { tag: 'floor', spec: 1.4, shin: 80 });
   return heightfield(f, mt);
 }
@@ -116,10 +132,32 @@ export function shopFeature({ color = COLORS.cobalt } = {}) {
 
 /** An open archway through the wall: a round-headed opening into shade. */
 export function archFeature({ w = 0.9, z1 = 2.2 } = {}) {
+  // A deep arch into the arcade: the opening runs most of the way through the column, its far end
+  // closed by the arcade's back wall in shadow, darkening toward the floor (a lit plaster wall seen
+  // straight through read as a blank white hole).
+  const r = w / 2, back = -0.42;
+  const cut = union(boxAt(-r, back, -0.1, r, 0.2, z1 - r, null), place(cylinder(r, back, 0.2, null), { at: [0, 0, z1 - r], rx: PI / 2 }));
+  const dark = mat((x, y, z) => mix(hex('#1e1a26'), hex('#4a4250'), Math.max(0, Math.min(1, z / z1)) * 0.6), { tag: 'wall', spec: 0 });
+  return { cut, parts: [boxAt(-r, back - 0.02, -0.02, r, back + 0.01, z1, dark)] };
+}
+
+/** A cast-iron drainpipe down the face from a hopper at the eaves, held by brackets; h is the piece's height. */
+export function pipeFeature({ h = 2.4, top = true } = {}) {
+  const ir = iron('#4a4a52');
+  const x = 0.36, y = 0.07;
+  const parts = [move(cylinder(0.035, 0, h, ir, 0.01), x, y, 0)];
+  for (const z of [0.5, 1.4, 2.2].filter((z) => z < h - 0.1)) parts.push(boxAt(x - 0.05, 0, z, x + 0.05, y + 0.04, z + 0.04, ir));
+  if (top) parts.push(move(frustum(0.05, 0.09, h - 0.22, h - 0.05, ir, 0.01), x, y, 0));
+  // A dark rain streak down the plaster beside it.
+  parts.push(boxAt(x - 0.12, -0.002, 0.2, x - 0.05, 0.004, h - 0.3, mat('#a8a090', { tag: 'wall', spec: 0 })));
+  return { cut: boxAt(9, 9, 9, 9.01, 9.01, 9.01, null), parts };
+}
+
+/** A blind bay: a shallow arched recess with a plain sill, where a window was walled up. */
+export function blindFeature({ w = 0.62, z0 = 0.95, z1 = 2.05 } = {}) {
   const r = w / 2;
-  const cut = union(boxAt(-r, -1.2, -0.1, r, 0.2, z1 - r, null), place(cylinder(r, -1.2, 0.2, null), { at: [0, 0, z1 - r], rx: PI / 2 }));
-  const dark = mat('#2a2430', { tag: 'wall' });
-  return { cut, parts: [boxAt(-r, -1.05, -0.02, r, -1.0, z1, dark)] };
+  const cut = union(boxAt(-r, -0.05, z0, r, 0.2, z1 - r, null), place(cylinder(r, -0.05, 0.2, null), { at: [0, 0, z1 - r], rx: PI / 2 }));
+  return { cut, parts: [boxAt(-r - 0.05, -0.05, z0 - 0.06, r + 0.05, 0.06, z0, limestone('#e0d0b4', { tag: 'wall' }), 0.01)] };
 }
 
 // ---------------------------------------------------------------------------
@@ -127,7 +165,8 @@ export function archFeature({ w = 0.9, z1 = 2.2 } = {}) {
 
 /** A hipped terracotta roof over a w×d block, eaves just past the walls; base at z = 0. */
 export function hipRoof(w, d, { rise = 0.55, seed = 1 } = {}) {
-  const hw = w / 2, hd = d / 2, ov = 0.1;
+  // The eave overhangs the walls by 0.18 (a shadow line under it), its edge a thick course of tiles.
+  const hw = w / 2, hd = d / 2, ov = 0.18;
   const m0 = Math.min(hw, hd);
   const tile = mat((x, y, z) => {
     const c = hex('#c4643e');
@@ -143,8 +182,8 @@ export function hipRoof(w, d, { rise = 0.55, seed = 1 } = {}) {
   return custom((x, y, z) => {
     const t = Math.min(hw + ov - Math.abs(x), hd + ov - Math.abs(y)) / m0;
     const top = 0.02 + Math.max(0, Math.min(1, t)) * rise * Math.min(1, m0 / 1.2);
-    return Math.max((z - top) * 0.6, -0.1 - z, Math.abs(x) - hw - ov, Math.abs(y) - hd - ov);
-  }, [-hw - ov, -hd - ov, -0.12, hw + ov, hd + ov, rise + 0.05], tile);
+    return Math.max((z - top) * 0.6, -0.14 - z, Math.abs(x) - hw - ov, Math.abs(y) - hd - ov);
+  }, [-hw - ov, -hd - ov, -0.16, hw + ov, hd + ov, rise + 0.05], tile);
 }
 
 /** A flat roof's edge: a low whitewashed lip along x or y (as a 1-tile prop). */
@@ -289,9 +328,106 @@ export const mooringPost = () => union(roundCone([0, 0, -0.6], [0, 0, 0.6], 0.09
 
 void box; void smooth; void leaf; void ellipsoid; void bronze; void stairFlight; void onFace; void wallColumn; void doorFeature;
 
-/** A flat roof's top in a plaster's own white (an unwalkable roof seen from above). */
+const toHex = (c) => '#' + c.map((v) => Math.round(Math.max(0, Math.min(1, v)) * 255).toString(16).padStart(2, '0')).join('');
+
+/** A flat roof's top: whitewashed slabs as on the court's roof terraces, tinted a little toward the house's plaster. */
 export function roofTopFor(color) {
-  return boxAt(-1.5, -1.5, -0.2, 1.5, 1.5, 0, plaster(color, { tag: 'floor' }));
+  return deck({ q: 'nw', base: toHex(mix(hex('#d8d0c2'), hex(color), 0.3)) });
+}
+
+/**
+ * A flat roof's parapet along one edge of a tile ('n', 's', 'e', 'w'): a low wall in the house's
+ * plaster with a limestone coping, its outer face flush with the wall below. Origin at the tile's
+ * center on the roof (z 0).
+ */
+export function roofParapet(edge, color) {
+  const axis = edge === 'n' || edge === 's' ? 'x' : 'y';
+  const pl = plaster(color, { axis, weather: false });
+  const cope = limestone('#e4d8c0', { tag: 'wall' });
+  const H = 0.32, t = 0.16;
+  const along = (a0, a1, b0, b1, z0, z1, m, r) => (axis === 'x' ? boxAt(a0, b0, z0, a1, b1, z1, m, r) : boxAt(b0, a0, z0, b1, a1, z1, m, r));
+  const [b0, b1] = edge === 's' || edge === 'e' ? [0.5 - t, 0.5] : [-0.5, -0.5 + t];
+  return union(along(-0.5, 0.5, b0, b1, 0, H, pl), along(-0.5, 0.5, b0 - 0.025, b1 + 0.025, H, H + 0.06, cope, 0.015));
+}
+
+/** A chimney stack on a flat roof: a plastered stack with a coping and two terracotta pots. */
+export function roofChimney({ seed = 1 } = {}) {
+  const pl = plaster('#e8e2d6', { axis: 'x', top: 0.95, stain: '#7a7270' });
+  const tc = terracotta('#b8603a');
+  const R = rng(seed);
+  const parts = [boxAt(-0.3, -0.22, 0, 0.3, 0.22, 0.95, pl, 0.03), boxAt(-0.34, -0.26, 0.93, 0.34, 0.26, 1.02, mat('#f0eae0', { tag: 'wall' }), 0.03)];
+  for (const px of [-0.13, 0.13]) {
+    const h = 0.22 + R() * 0.12;
+    parts.push(move(frustum(0.09, 0.075, 1.02, 1.02 + h, tc, 0.01), px, 0, 0), move(torus(0.08, 0.016, tc), px, 0, 1.02 + h));
+  }
+  return union(parts);
+}
+
+/** The Moonshine Night basin set out on a roof: a shallow tin basin of water on a slab. */
+export function roofBasin() {
+  const tin = mat('#8a9098', { tag: 'prop', spec: 0.7, shin: 30 });
+  const water = mat('#b8c8e0', { tag: 'prop', spec: 1.4, shin: 60 });
+  return union(
+    cylinder(0.32, 0, 0.03, limestone('#d8ccb4', { tag: 'prop' }), 0.01),
+    subtract(cylinder(0.26, 0.03, 0.17, tin, 0.02), cylinder(0.23, 0.06, 0.3, tin), tin),
+    cylinder(0.23, 0.12, 0.13, water),
+  );
+}
+
+/** A galvanized water tank on an iron stand. */
+export function roofTank() {
+  const gal = mat((x, y, z) => mix(hex('#9aa2a8'), hex('#7e868c'), (Math.sin(z * 40) * 0.5 + 0.5) * 0.4), { tag: 'prop', spec: 0.8, shin: 30 });
+  const ir = iron('#3a3a42');
+  const parts = [cylinder(0.36, 0.32, 0.98, gal, 0.03), move(frustum(0.37, 0.08, 0.98, 1.1, gal, 0.01), 0, 0, 0)];
+  for (const [x, y] of [[-0.26, -0.26], [0.26, -0.26], [-0.26, 0.26], [0.26, 0.26]]) parts.push(boxAt(x - 0.03, y - 0.03, 0, x + 0.03, y + 0.03, 0.34, ir));
+  parts.push(boxAt(-0.32, -0.32, 0.3, 0.32, 0.32, 0.34, ir));
+  // A rust streak and a pipe running down.
+  parts.push(capsule([0.3, 0.2, 0.5], [0.42, 0.3, 0.02], 0.02, ir));
+  return union(parts);
+}
+
+/** A roof hatch: a raised curb with a planked lid. */
+export function roofHatch() {
+  const w = wood('#7a5638', { grain: 'x' });
+  return union(
+    subtract(boxAt(-0.34, -0.34, 0, 0.34, 0.34, 0.12, plaster('#e0d8ca'), 0.02), boxAt(-0.26, -0.26, 0.04, 0.26, 0.26, 0.3, null)),
+    boxAt(-0.29, -0.29, 0.1, 0.29, 0.29, 0.15, w, 0.01),
+    boxAt(-0.04, -0.2, 0.15, 0.04, 0.2, 0.17, iron('#3a3a42')),
+  );
+}
+
+/**
+ * The wall beside a flight of steps (1×1, beside a tile of stairs descending one 40 px run toward
+ * +y): ashlar rising from 40 px below the flight's low edge to a top that slopes with the flight,
+ * capped by a sloping parapet with a coping, so a column of these makes one continuous wall down
+ * the flight. Origin at the tile's center, at the flight's low edge minus 40 px. foot: the last tile
+ * of a flight, built from its own low edge (origin there) so it doesn't drop below the landing.
+ */
+export function flightSide({ foot = false } = {}) {
+  const st = mat((x, y, z, lx, ly, lz, nx, ny, nz) => {
+    const u = Math.abs(nx) > Math.abs(ny) ? y : x;
+    const course = Math.floor((z + 100) / 0.4), off = course % 2 ? 0.5 : 0;
+    const bu = (u + 10) * 2 + off, blk = Math.floor(bu), fu = bu - blk, fz = ((z + 100) / 0.4) % 1;
+    const joint = Math.min(fu, 1 - fu) < 0.035 || Math.min(fz, 1 - fz) < 0.05;
+    const c = mix(hex('#cdb898'), hex('#dcc8a8'), hash3(blk, course, 23));
+    return c.map((v) => v * (joint ? 0.74 : 1) * (0.9 + fbm((u + 0.5) * 8, z * 8, 1, 3, 8) * 0.14));
+  }, { tag: 'wall', spec: 0.06 });
+  const pl = plaster('#ece6d8', { axis: 'y', weather: false });
+  const cope = limestone('#e8dcc4', { tag: 'wall' });
+  const base = foot ? 0 : 1; // the flight's low edge above the origin
+  const top = (y) => base + 0.5 - y; // the flight's surface: 1 above the low edge at the north edge, 0 at the south
+  const slope = (H) => custom((x, y, z) => Math.max(Math.abs(x) - 0.5, Math.abs(y) - 0.5, -z, (z - top(y) - H) / 1.12), [-0.5, -0.5, 0, 0.5, 0.5, base + 1 + H + 0.1], st);
+  const wall = slope(0);
+  const para = custom((x, y, z) => Math.max(Math.abs(x) - 0.09, Math.abs(y) - 0.5, top(y) - 0.02 - z, (z - top(y) - 0.34) / 1.12), [-0.1, -0.5, base - 0.02, 0.1, 0.5, base + 1.4], pl);
+  const coping = custom((x, y, z) => Math.max(Math.abs(x) - 0.13, Math.abs(y) - 0.5, top(y) + 0.33 - z, (z - top(y) - 0.4) / 1.12), [-0.14, -0.5, base + 0.3, 0.14, 0.5, base + 1.45], cope);
+  return union(wall, para, coping);
+}
+
+/** A newel post at the head or foot of a flight's wall: a square pier with a cap and a ball. */
+export function flightNewel() {
+  const pl = plaster('#ece6d8', { axis: 'x', weather: false });
+  const cope = limestone('#e8dcc4', { tag: 'wall' });
+  return union(boxAt(-0.16, -0.16, 0, 0.16, 0.16, 0.62, pl, 0.02), boxAt(-0.2, -0.2, 0.62, 0.2, 0.2, 0.7, cope, 0.02), move(sphere(0.11, cope), 0, 0, 0.8));
 }
 
 /** A quay wall at a canal: limestone blocks darkened and greened toward the water, with a tide line. */

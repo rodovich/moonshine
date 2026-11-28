@@ -3,15 +3,20 @@
 //
 // Frame names:
 //   Floors (64×32 diamonds, h 0): pave_<q>, pave2_<q> (q = nw|ne|sw|se, a 2×2 macro), pave_shade,
-//     pave_crack, pave_moon_eye, pave_moon_eye_lit, cobble_0..3, yard_0..2, water_0..2 (anim water)
+//     pave_crack, pave_moon_eye, pave_moon_eye_lit, cobble_0..3, yard_0..2, water_0..2 (anim water),
+//     water_n_*, water_w_* (anims water_n, water_w: water with a quay wall to its north or west)
 //   Ground storeys (96 px, with a plinth): w_<plaster>_s_<kind> on a south face, w_<plaster>_e_<kind> on an east face
-//     s kinds: plain window window_box window_closed door shop arch; e kinds: plain window window_closed door
-//   Upper storeys (96 px): u_<plaster>_s_<kind> (plain window window_box window_closed balcony), u_<plaster>_e_<kind> (plain window window_closed)
+//     s kinds: plain window window_box window_closed door shop arch pipe (a drainpipe) blind (a walled-up arch); e kinds: plain window window_closed door
+//   Upper storeys (96 px): u_<plaster>_s_<kind> (plain window window_box window_closed balcony pipe blind), u_<plaster>_e_<kind> (plain window window_closed)
 //   Courses (40 px): c_<plaster>_s, c_<plaster>_e; retain_s/e (ashlar), quay_s/e (wet stone at a canal)
 //   plaster = white | ochre | rose | sky | sage (the SNES swaps; each wears its own shutters)
 //   Roofs: roof_<plaster> (a flat roof's top, 64×32), lip_x, lip_y (its edge), hip_<w>x<d> (terracotta, w and d 1–6; base at the walls' top)
 //   Domes: dome_1x1, dome_2x2
 //   Stairs (40 px drop across a tile): stairs_down, stairs_up, stairs_right, stairs_left (named by the way they descend)
+//   Parapets on flat roofs: parapet_<plaster>_<n|s|e|w> (a low wall with coping on that edge of the tile; house() adds them)
+//   Roof props: roof_chimney_0/1, roof_basin, roof_tank, roof_hatch (house() scatters them on flat roofs)
+//   Flight walls: flight_side (1×1, beside a stairs tile: origin 40 px below the flight's low edge, top sloping with the flight,
+//     a parapet on it), flight_side_foot (the flight's last tile, origin at its low edge), flight_newel (a post at a wall's end)
 //   Props: lamp, lamp_lit, bench (2×1), pot_geranium, pot_bay, crate, barrel, awning_<coral|blue|green>,
 //     sign_<blue|green|coral>, railing_x, railing_y, laundry_3, laundry_4, bridge_y (2×4), mooring_post
 import { frame, split, POST } from '../lib/jobs.mjs';
@@ -29,19 +34,21 @@ const floor = (name, build) => frame(name, build, { diamond: [1], fp: [1, 1], h:
 const prop = (name, build, fp = [1, 1], h = 40, opts = {}) => frame(name, build, { post: POST.prop, shadow: true, fp, h, ...opts });
 const arch = (name, build, fp = [1, 1], h = 40) => frame(name, build, { post: POST.arch, shadow: false, fp, h });
 
-const S_KINDS = ['window', 'window_box', 'window_closed', 'door', 'shop', 'arch'];
+const S_KINDS = ['window', 'window_box', 'window_closed', 'door', 'shop', 'arch', 'pipe', 'blind'];
 const E_KINDS = ['window', 'window_closed', 'door'];
-const U_S = ['window', 'window_box', 'window_closed', 'balcony'];
+const U_S = ['window', 'window_box', 'window_closed', 'balcony', 'pipe', 'blind'];
 const U_E = ['window', 'window_closed'];
 
-function feature(kind, P) {
+function feature(kind, P, h) {
   if (kind === 'shop') return T.shopFeature({ color: P.shutters });
   if (kind === 'arch') return T.archFeature();
   if (kind === 'balcony') return T.balconyFeature();
+  if (kind === 'pipe') return T.pipeFeature({ h });
+  if (kind === 'blind') return T.blindFeature();
   return null;
 }
-const piece = (name, face, h, kind, P, plinth) => split(name, () => facade(face, h, ['shop', 'arch', 'balcony'].includes(kind) ? 'custom' : kind, {
-  color: P.shutters, wall: P.wall, plinth, feature: feature(kind, P), ...(plinth ? {} : { z0: 0.7, z1: 1.85 }),
+const piece = (name, face, h, kind, P, plinth) => split(name, () => facade(face, h, ['shop', 'arch', 'balcony', 'pipe', 'blind'].includes(kind) ? 'custom' : kind, {
+  color: P.shutters, wall: P.wall, plinth, feature: feature(kind, P, h), ...(plinth ? {} : { z0: 0.7, z1: 1.85 }),
 }), { [name]: face === 's' ? left : right }, { trimTop: true, fp: [1, 1], h: Math.round(h * 40) });
 
 export default {
@@ -60,6 +67,8 @@ export default {
     for (let s = 0; s < 4; s++) out.push(floor(`cobble_${s}`, () => cobbles({ seed: s })));
     for (let s = 0; s < 3; s++) out.push(floor(`yard_${s}`, () => T.yard({ seed: s })));
     for (let i = 0; i < 3; i++) out.push(floor(`water_${i}`, () => T.water({ t: i / 3 })));
+    // Water along a quay wall to its north or west: darker in the wall's shadow, the stone reflected.
+    for (const e of ['n', 'w']) for (let i = 0; i < 3; i++) out.push(floor(`water_${e}_${i}`, () => T.water({ t: i / 3, edge: e })));
 
     // ---- Walls in each plaster
     for (const [name, P] of Object.entries(T.PLASTERS)) {
@@ -71,6 +80,7 @@ export default {
       for (const k of U_E) out.push(piece(`u_${name}_e_${k}`, 'e', STOREY, k, P, 0));
       out.push(split(`c_${name}`, () => facade('s', 1, 'plain', { wall: P.wall, plinth: 0 }), { [`c_${name}_s`]: left, [`c_${name}_e`]: right }, { trimTop: true, fp: [1, 1], h: 40 }));
       out.push(floor(`roof_${name}`, () => T.roofTopFor(P.wall)));
+      for (const e of ['n', 's', 'e', 'w']) out.push(arch(`parapet_${name}_${e}`, () => T.roofParapet(e, P.wall), [1, 1], 16));
     }
     out.push(split('retain', () => retainingWall(1), { retain_s: left, retain_e: right }, { trimTop: true, fp: [1, 1], h: 40 }));
     out.push(split('quay', () => T.quayWall(1), { quay_s: left, quay_e: right }, { trimTop: true, fp: [1, 1], h: 40 }));
@@ -103,8 +113,19 @@ export default {
     out.push(prop('laundry_4', () => T.laundryLine(4, { seed: 4 }), [4, 1], 130, { shadow: false }));
     out.push(prop('bridge_y', () => T.bridge(), [2, 4], 54));
     out.push(prop('mooring_post', () => T.mooringPost(), [1, 1], 26));
+    // ---- On flat roofs (house() scatters them): chimneys, a Moonshine basin, a water tank, a hatch.
+    out.push(prop('roof_chimney_0', () => T.roofChimney({ seed: 1 }), [1, 1], 54), prop('roof_chimney_1', () => T.roofChimney({ seed: 5 }), [1, 1], 54));
+    out.push(prop('roof_basin', () => T.roofBasin(), [1, 1], 8), prop('roof_tank', () => T.roofTank(), [1, 1], 46), prop('roof_hatch', () => T.roofHatch(), [1, 1], 7));
+    // ---- The walls beside a flight of steps, sloping with it, and the newel posts at their ends.
+    out.push(arch('flight_side', () => T.flightSide(), [1, 1], 110, { shadow: false }));
+    out.push(arch('flight_side_foot', () => T.flightSide({ foot: true }), [1, 1], 70, { shadow: false }));
+    out.push(prop('flight_newel', () => T.flightNewel(), [1, 1], 36));
     return out;
   },
-  anims: { water: { frames: ['water_0', 'water_1', 'water_2'], ms: 300 } },
+  anims: {
+    water: { frames: ['water_0', 'water_1', 'water_2'], ms: 300 },
+    water_n: { frames: ['water_n_0', 'water_n_1', 'water_n_2'], ms: 300 },
+    water_w: { frames: ['water_w_0', 'water_w_1', 'water_w_2'], ms: 300 },
+  },
 };
 void union;

@@ -80,11 +80,18 @@ function build(g) {
         const foot = FOOT[y0];
         const courses = (n) => Array.from({ length: n }, () => ['retain_e', 40]);
         const n = Math.max(1, Math.ceil((z - foot) / 40));
-        S.column(fx - 1, y, z - n * 40, [], courses(n), ['pave_nw', z]);
-        S.column(fx + 2, y, z - n * 40, y === y1 ? Array.from({ length: n }, () => ['retain_s', 40]) : [], [], ['pave_nw', z]);
-        S.prop('cistern', 'parapet_y', fx - 1, y, z); S.prop('cistern', 'parapet_y', fx + 2, y, z);
+        // The walls beside the flight, sloping with it (town:flight_side), on retaining courses down to the foot.
+        const last = y === y1;
+        const base = last ? z - 40 : z - 80;
+        const m = Math.max(0, Math.ceil((base - foot) / 40));
+        S.column(fx - 1, y, base - m * 40, [], courses(m), null);
+        S.column(fx + 2, y, base - m * 40, last ? Array.from({ length: m }, () => ['retain_s', 40]) : [], [], null);
+        for (const x of [fx - 1, fx + 2]) S.add('town', last ? 'flight_side_foot' : 'flight_side', x, y, base, 1, 1, 1);
+        void n;
       }
     }
+    // Newel posts where the walls meet the landing at the flight's head.
+    if (y0 > 0) for (const x of [fx - 1, fx + 2]) S.add('town', 'flight_newel', x, y0, FLIGHT_TOP[y0], 1, 1, 1);
   }
   // Flight 2's walls run on past the houses (x1 and x4, rows 11-15) in the SNES; the flight's own walls do here.
 

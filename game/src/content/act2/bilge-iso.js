@@ -39,7 +39,7 @@ function build() {
   // ---- The canal (rows 8-9) between its banks (rows 7, 10).
   for (let x = 0; x < W; x++) {
     if (x < 22 || x > 25) { S.column(x, 7, CANAL, [['quay_s', 40]], [], ['pave_nw', 0]); S.prop('town', 'lip_x', x, 7, 0); }
-    S.add('town', 'water', x, 8, CANAL, 1, 1, 0);
+    S.add('town', 'water_n', x, 8, CANAL, 1, 1, 0); // along the north quay wall: its shadow and reflection
     S.add('town', 'water', x, 9, CANAL, 1, 1, 0);
     S.column(x, 10, CANAL, [], [], ['pave_nw', 0]);
   }

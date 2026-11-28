@@ -45,7 +45,7 @@ function build() {
   for (let x = 0; x < W; x++) {
     S.column(x, 9, SEA, faced(x) ? [] : [['quay_s', 40]], [], ['pave_nw', 0]);
     S.prop('town', 'lip_x', x, 9, 0);
-    for (let y = 10; y <= 13; y++) if (!(y === 10 && (x === 1 || x === 2))) S.add('town', 'water', x, y, SEA, 1, 1, 0);
+    for (let y = 10; y <= 13; y++) if (!(y === 10 && (x === 1 || x === 2))) S.add('town', y === 10 ? 'water_n' : 'water', x, y, SEA, 1, 1, 0);
   }
   S.add(H2, 'culvert', 1, 9, SEA, 2, 1, 0.1);
   S.add(H2, 'outflow', 1, 10, SEA, 2, 1, 0);

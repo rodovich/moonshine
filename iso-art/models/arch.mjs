@@ -301,11 +301,26 @@ export function crownWall(h, { buttress = false } = {}) {
  * terracotta roof) or 'flat' (a whitewashed terrace with a lip, a chimney, and
  * a basin of water set out for Moonshine Night).
  */
-export function lowHouse({ w = 2, d = 2, wallH = 1.5, roof = 'terra', color = COLORS.whitewash, seed = 1 } = {}) {
+export function lowHouse({ w = 2, d = 2, wallH = 1.5, roof = 'terra', color = COLORS.whitewash, seed = 1, extra = null } = {}) {
   const hw = w / 2, hd = d / 2;
   const pl = plaster(color, { axis: 'x' });
   const parts = [boxAt(-hw, -hd, 0, hw, hd, wallH, pl)];
-  if (roof === 'terra') {
+  if (roof === 'gable') {
+    // A terracotta roof with its ridge along x, falling to eaves north and south, its east and west
+    // ends plastered gables.
+    const tile = mat((x, y, z) => {
+      const c = hex('#c26440');
+      const ridge = Math.abs(Math.sin((x + 10) * Math.PI * 5));
+      const course = ((Math.abs(y) + 10) * 4.5) % 1;
+      const n = vnoise(Math.floor((x + 10) * 5), Math.floor((Math.abs(y) + 10) * 4.5), seed);
+      const k = (0.72 + ridge * 0.3) * (course > 0.88 ? 0.75 : 1) * (0.9 + n * 0.2);
+      return [c[0] * k, c[1] * k, c[2] * k];
+    }, { tag: 'roof', spec: 0.12 });
+    const rise = 0.6;
+    const top = (y) => wallH + 0.02 + Math.max(0, 1 - Math.abs(y) / (hd + 0.1)) * rise;
+    parts.push(custom((x, y, z) => Math.max((z - top(y)) * 0.6, wallH - 0.08 - z, Math.abs(x) - hw - 0.06, Math.abs(y) - hd - 0.1), [-hw - 0.08, -hd - 0.12, wallH - 0.1, hw + 0.08, hd + 0.12, wallH + rise + 0.05], tile));
+    parts.push(custom((x, y, z) => Math.max(Math.abs(x) - hw, Math.abs(y) - hd, wallH - 0.01 - z, z - top(y) + 0.04), [-hw, -hd, wallH - 0.02, hw, hd, wallH + rise], pl));
+  } else if (roof === 'terra') {
     const tile = mat((x, y, z) => {
       const c = hex('#c4643e');
       const onX = Math.abs(x) / hw > Math.abs(y) / hd; // which slope: tiles run down each
@@ -334,6 +349,31 @@ export function lowHouse({ w = 2, d = 2, wallH = 1.5, roof = 'terra', color = CO
     const tin = mat('#8a9098', { tag: 'prop', spec: 0.7, shin: 30 });
     parts.push(move(subtract(cylinder(0.24, wallH, wallH + 0.14, tin, 0.02), cylinder(0.21, wallH + 0.03, wallH + 0.3, tin), tin), -0.2, 0.15, 0));
     parts.push(move(cylinder(0.21, wallH + 0.09, wallH + 0.1, mat('#b8c8e0', { tag: 'prop', spec: 1.4, shin: 60 })), -0.2, 0.15, 0));
+  }
+  const top = wallH + 0.02;
+  if (extra === 'washing') {
+    // A roof terrace with washing: two posts and a line of sheets and shirts across it.
+    const post = wood('#7a5a3c', { grain: 'z' });
+    parts.push(boxAt(-hw + 0.25, -0.04, top, -hw + 0.31, 0.04, top + 1.2, post), boxAt(hw - 0.31, -0.04, top, hw - 0.25, 0.04, top + 1.2, post));
+    const cols = ['#f4f0e8', '#e8a090', '#a8c8d8', '#f0e0a0', '#f4f0e8'];
+    const R = rng(seed + 7);
+    for (let i = 0; i < 4; i++) {
+      const x0 = -hw + 0.4 + i * ((w - 0.8) / 4), wd = (w - 0.8) / 4 - 0.06, dr = 0.35 + R() * 0.3;
+      parts.push(boxAt(x0, -0.01, top + 1.15 - dr, x0 + wd, 0.01, top + 1.15, mat(cols[i % cols.length], { tag: 'prop', spec: 0.05 })));
+    }
+  }
+  if (extra === 'dome') {
+    // A small Tessel dome on a drum, blue, with a moon finial.
+    const blue = mat('#3a6cc0', { tag: 'roof', spec: 0.6, shin: 30 });
+    parts.push(cylinder(0.5, top, top + 0.3, plaster('#ece6da'), 0.02));
+    parts.push(intersect(sphere(0.52, blue), boxAt(-0.6, -0.6, 0, 0.6, 0.6, 0.6, blue)));
+    parts[parts.length - 1] = move(parts[parts.length - 1], 0, 0, top + 0.3);
+    parts.push(move(sphere(0.05, mat('#d8b048', { tag: 'prop', spec: 1 })), 0, 0, top + 0.86));
+  }
+  if (extra === 'stack') {
+    // A tall chimney stack with three pots.
+    parts.push(boxAt(hw - 0.75, -0.25, top, hw - 0.2, 0.25, top + 1.5, plaster('#e8e2d6', { axis: 'x' }), 0.03));
+    for (const px of [-0.15, 0, 0.15]) parts.push(move(cylinder(0.06, top + 1.5, top + 1.75, terracotta('#b8603a'), 0.01), hw - 0.475 + px, 0, 0));
   }
   return union(parts);
 }
