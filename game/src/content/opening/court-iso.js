@@ -4,12 +4,12 @@
 //
 // Heights (px): the roof terraces at 120 over rows 1-9, the facades a
 // 96 px storey on row 11's south faces under pent roofs, the court at 0,
-// the lower roofs beyond row 23 at -120.
+// the eaves of the houses below it at -80.
 
 const W = 20;
 const DECK = 120;
 const STOREY = 96;
-const LOW = -120;
+const LOW = -80; // the eaves of the houses below the court
 const C = 'cistern';
 
 const deckFloor = (x, y) => {
@@ -106,7 +106,7 @@ function scene(g) {
   for (let y = 12; y <= 23; y++) {
     for (let x = 1; x <= 18; x++) {
       const fr = x === 6 && y === 20 ? 'cobble_drain' : `cobble_${(x * 7 + y * 3 + ((x * y) % 5)) % 4}`;
-      if (y === 23) column(x, y, LOW, [['retain_s', 40], ['retain_s', 40], ['retain_s', 40]], [], [fr, 0]);
+      if (y === 23) column(x, y, -160, [['retain_s', 40], ['retain_s', 40], ['retain_s', 40], ['retain_s', 40]], [], [fr, 0]);
       else add(C, fr, x, y, 0, 1, 1, 0);
     }
   }
@@ -129,15 +129,14 @@ function scene(g) {
   if (!(am || f('piano.gone'))) add(C, 'piano', 15, 22, 0, 2, 2);
 
   // ---- Below: the roofs of the next houses down, and the Squeeze between them.
-  for (let y = 24; y <= 25; y++) {
-    for (let x = 0; x < W; x++) {
-      if (x === 15 || x === 16) continue;
-      add(C, (x * 5 + y) % 3 ? 'lowroof_terra' : 'lowroof_flat', x, y, LOW, 1, 1, 0.5);
-    }
+  // Their walls stand 60 px from LOW - 60 to the eaves (the two beside the Squeeze a storey taller).
+  for (const [x, fr] of [[0, 'lowhouse_terra_3x2'], [3, 'lowhouse_flat_2x2'], [5, 'lowhouse_flat_3x2'], [8, 'lowhouse_terra_2x2'], [10, 'lowhouse_terra_3x2'], [13, 'lowhouse_flat_2x2_tall'], [17, 'lowhouse_terra_3x2_tall']]) {
+    add(C, fr, x, 24, LOW - 60, fr.includes('3x2') ? 3 : 2, 2, 1);
   }
+  const step = am || f('piano.gone') ? 'stair_scraped' : 'stair';
   for (const x of [15, 16]) {
-    add(C, 'stair', x, 24, -40, 1, 1, 0.3);
-    add(C, 'stair', x, 25, -80, 1, 1, 0.3);
+    add(C, step, x, 24, -40, 1, 1, 0.3);
+    add(C, step, x, 25, -80, 1, 1, 0.3);
   }
   return out;
 }

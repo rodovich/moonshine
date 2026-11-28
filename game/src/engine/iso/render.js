@@ -214,7 +214,8 @@ export class IsoRenderer {
       for (const d of scene) {
         const k = d.x0 + d.fw - 1 + d.y0 + d.fd - 1;
         // Floors (layer 0) go down before anything stands on them.
-        items.push(d.layer === 0 ? { type: 'd', key: -1e6 + k, order: 0, d } : { type: 'd', key: k, order: d.layer, d });
+        // Floors and decals on them (layer < 0.1) go down before anything stands on them.
+        items.push(d.layer < 0.1 ? { type: 'd', key: -1e6 + d.layer * 1e5 + k, order: 0, d } : { type: 'd', key: k, order: d.layer, d });
       }
     }
     for (const c of scene ? [] : iso.cells) {
@@ -251,7 +252,7 @@ export class IsoRenderer {
       for (const it of items) {
         if (it.type === 'd') {
           // A wall, roof, or big prop in front of her fades while she's behind it.
-          if (it.key <= pk || it.d.layer === 0 || !it.d.rect) continue;
+          if (it.key <= pk || it.d.layer < 0.1 || !it.d.rect) continue;
           if (it.d.topZ != null && it.d.topZ <= pz + 20) continue; // below her feet: a floor she can see over
           if (overlap(it.d.rect, it.d.layer < 1 ? zone : pr)) cut.add(it);
           continue;
@@ -266,7 +267,14 @@ export class IsoRenderer {
     this.hits = [];
     let hidden = false;
     let drawnPlayer = false;
+    let shadowsDone = !scene;
     for (const it of items) {
+      // Every cast shadow goes down after the floors and before anything
+      // stands on them, so no floor tile paints over one.
+      if (!shadowsDone && !(it.type === 'd' && it.d.layer < 0.1)) {
+        this.drawShadows(ctx, world, items, ms, cut);
+        shadowsDone = true;
+      }
       if (it.type === 'd') this.drawDrawable(ctx, it.d, ms, cut.has(it));
       else if (it.type === 'cell') this.drawCell(ctx, world, it, ms, cut.has(it));
       else if (it.type === 'slab') { if (!cut.has(it)) this.drawSlab(ctx, world, it.c, ms); }
@@ -425,13 +433,46 @@ export class IsoRenderer {
     const x = q.x - this.cx;
     const y = q.y - this.cy;
     if (faded) ctx.globalAlpha = 0.3;
-    const sh = sheet.frame(`${f.name}.shadow`);
-    if (sh && !faded) drawAnchored(ctx, sh, x, y);
     drawAnchored(ctx, f, x, y);
     ctx.globalAlpha = 1;
     d.topZ = d.z + (f.hpx || Math.max(0, f.ay - HH)); // how high it rises
     d.rect = { x: Math.round(x - f.ax), y: Math.round(y - f.ay), w: f.img.width, h: f.img.height, img: f.img, flip: false, scale: 1 };
-    if (!faded || d.layer === 0) this.hits.push({ type: 'd', d, rect: d.rect });
+    if (!faded || d.layer < 0.1) this.hits.push({ type: 'd', d, rect: d.rect });
+  }
+
+  // The shadow pass: drawables' and characters' cast shadows.
+  drawShadows(ctx, world, items, ms, cut) {
+    for (const it of items) {
+      if (cut.has(it)) continue;
+      if (it.type === 'd') {
+        if (it.d.layer < 0.1) continue;
+        const sheet = isoSheet(it.d.s);
+        if (!sheet) continue;
+        const f = sheet.m.anims && sheet.m.anims[it.d.f] ? sheet.frameAt(it.d.f, ms) : sheet.frame(it.d.f);
+        const sh = f && sheet.frame(`${f.name}.shadow`);
+        if (!sh) continue;
+        const q = proj(it.d.x, it.d.y, it.d.z, this.ox);
+        drawAnchored(ctx, sh, q.x - this.cx, q.y - this.cy);
+      } else if (it.type === 'ent') {
+        const e = it.e;
+        if (!e.visible || e.def.shadow === false || this.hidden.has(e.id)) continue;
+        const f = isoFrameFor(e);
+        if (!f || !f.shadow) continue;
+        const b = this.entityBase(world, e);
+        drawAnchored(ctx, f.shadow, b.x, b.y, f.flip);
+      }
+    }
+  }
+
+  // Where an entity's anchor (the footprint's center at its floor) is on screen.
+  entityBase(world, e) {
+    const gx = e.px / TILE + e.w / 2;
+    const gy = e.py / TILE + e.h / 2;
+    const zFrom = this.floorZ(world, e.fromX + e.w / 2, e.fromY + e.h / 2);
+    const zTo = this.floorZ(world, e.x + e.w / 2, e.y + e.h / 2);
+    const k = e.moving ? e.t / e.stepTicks : 1;
+    const q = proj(gx, gy, Math.round(zFrom + (zTo - zFrom) * k), this.ox);
+    return { x: q.x - this.cx, y: q.y - this.cy };
   }
 
   // The tile of a drawable's footprint nearest a map-space point.
@@ -494,8 +535,8 @@ export class IsoRenderer {
     let scale = 1;
     let drop = 0;
     if (f) {
-      // Isometric art: its own cast shadow, under it.
-      if (f.shadow && e.def.shadow !== false) drawAnchored(ctx, f.shadow, bx, by, f.flip);
+      // Isometric art: its own cast shadow, under it (in a scene, the shadow pass drew it).
+      if (f.shadow && e.def.shadow !== false && !this.sceneCache?.list) drawAnchored(ctx, f.shadow, bx, by, f.flip);
     } else {
       if (this.hidden.has(e.id)) return; // the map's scene draws it
       if (e.directional && e.def.shadow !== false) ctx.drawImage(shadow(), Math.round(bx - 14), Math.round(by - 6));
