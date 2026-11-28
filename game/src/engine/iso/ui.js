@@ -100,6 +100,8 @@ const standIn = {
 export const skin = { ...standIn };
 
 // The art task's hook: replace any part of the skin.
+export { standIn };
+
 export function setIsoSkin(parts) {
   Object.assign(skin, parts);
 }
@@ -171,7 +173,7 @@ export class IsoTextBox extends TextBox {
     const h = F.lineHeight + 14;
     const lx = this.bx + 14;
     const ly = pos === 'top' ? boxY + this.boxH - 4 : boxY - h + 4;
-    skin.panel(ctx, lx, ly, w, h, this.active.styleName);
+    skin.panel(ctx, lx, ly, w, h, 'label');
     F.draw(ctx, speaker, lx + 14, ly + 8, { color: 'ui_label' });
   }
 
@@ -233,7 +235,7 @@ export class IsoInventory extends Inventory {
     const L = this.L;
     ctx.fillStyle = 'rgba(8, 8, 16, 0.55)';
     ctx.fillRect(0, 0, ISO_W, ISO_H);
-    skin.panel(ctx, PANEL.x, PANEL.y, PANEL.w, PANEL.h, 'npc');
+    skin.panel(ctx, PANEL.x, PANEL.y, PANEL.w, PANEL.h, 'inventory');
     const title = 'Belongings';
     F.draw(ctx, title, PANEL.x + PANEL.w / 2 - F.measure(title) / 2, PANEL.y + 14, { color: 'ui_label' });
     for (let k = 0; k < COLS * ROWS; k++) {
@@ -244,10 +246,13 @@ export class IsoInventory extends Inventory {
     s.owned.forEach((id, i) => {
       const r = this.slotRect(i);
       if (!r) return;
+      // The art's selected slot goes under the icon; the stand-in frame over it.
+      const under = i === s.index && s.button < 0 && skin.slotSelected && skin.slotSelected(ctx, r.x, r.y, r.w, r.h);
       const img = this.icon(id);
-      if (img) ctx.drawImage(img, r.x + 8, r.y + 8, 32, 32);
+      const k = img && img.width > 16 ? 1 : 2; // the art's icons at 1×, SNES icons at 2×
+      if (img) ctx.drawImage(img, Math.round(r.x + (r.w - img.width * k) / 2), Math.round(r.y + (r.h - img.height * k) / 2), img.width * k, img.height * k);
       else F.draw(ctx, '?', r.x + r.w / 2 - 6, r.y + 12);
-      if (i === s.index) this.drawSelection(ctx, r, s.button >= 0);
+      if (i === s.index && !under) this.drawSelection(ctx, r, s.button >= 0);
     });
     if (this.rowCount() > ROWS) {
       this.drawButton(ctx, UP_BTN, '<', s.scroll > 0);
@@ -265,6 +270,11 @@ export class IsoInventory extends Inventory {
     F.draw(ctx, def.name || s.owned[s.index], DESC.x + 22, DESC.y + 16, { color: 'ui_label' });
     const lines = F.wrap(def.description || '', DESC.w - 44).slice(0, 4);
     lines.forEach((line, i) => F.draw(ctx, line, DESC.x + 22, DESC.y + 16 + (i + 1) * F.lineHeight, { color: STYLES.cheryl.text }));
+  }
+
+  // The art's 40×40 item icon, else the SNES icon.
+  icon(id) {
+    return (skin.itemIcon && skin.itemIcon(id)) || super.icon(id);
   }
 
   drawSelection(ctx, r, dim = false) {

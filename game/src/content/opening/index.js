@@ -5,6 +5,10 @@ import { flatMap } from './flat.js';
 import { openingItems } from './common.js';
 import { moonrise } from './moonrise.js';
 
+import { courtIso } from './court-iso.js';
+
+// The court's isometric composition (court-iso.js).
+courtMap.iso = courtIso;
 export const openingMaps = { cistern_court: courtMap, flat: flatMap };
 export { openingItems, opening };
 

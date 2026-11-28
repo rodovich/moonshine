@@ -8,7 +8,10 @@ import { inRect } from '../ui.js';
 import { ISO_W, ISO_H, HW, proj } from './project.js';
 import { IsoRenderer } from './render.js';
 import { draftOverrides } from './convert.js';
-import { IsoTextBox, IsoInventory, IsoTitle, drawHud, drawBark, drawHint, drawCard, BAG_BTN, BANNER } from './ui.js';
+import { bindSnesSheets } from './sprites.js';
+import { artSkin } from './artskin.js';
+import { ISO_TINTS } from '../../../assets/iso/tints.js';
+import { IsoTextBox, IsoInventory, IsoTitle, drawHud, drawBark, drawHint, drawCard, BAG_BTN, BANNER, setIsoSkin, standIn } from './ui.js';
 
 // Arrow keys -> grid directions. The grid's axes run along the screen's
 // diagonals; 'cw' (the default) turns each arrow 45° clockwise: Up walks
@@ -31,12 +34,21 @@ export class IsoView {
     this.keymap = KEYMAPS[keys] || KEYMAPS.cw;
     this.picCanvas = null;
     this.bagButton = BAG_BTN;
+    // Lighting presets for the isometric art (game/assets/iso/tints.js), by
+    // the same names as the SNES ones they replace.
+    this.lighting = Object.fromEntries(Object.entries(ISO_TINTS).map(([k, t]) => [k, (Array.isArray(t) ? t : [t]).filter((p) => (p.amount ?? 1) > 0)]));
   }
 
   // The current map's converter draft as override rows (for the console).
   draft() {
     const w = window.moonshine.world;
     return draftOverrides(this.renderer.model(w));
+  }
+
+  // Called once the game exists: content says which art draws what.
+  attach(game) {
+    bindSnesSheets(game.content.iso?.sheets, game.content.iso?.aliases);
+    setIsoSkin(artSkin(standIn));
   }
 
   makeTextBox() { return new IsoTextBox(); }
@@ -134,7 +146,7 @@ export class IsoView {
     const r = this.renderer;
     r.model(world);
     const c = r.iso.at(tx, ty);
-    const z = c ? r.top(c) ?? 0 : 0;
+    const z = r.sceneReady(world) && world.mapDef.iso.floor ? r.floorZ(world, tx + 0.5, ty + 0.5) : c ? r.top(c) ?? 0 : 0;
     const q = proj(tx + 0.5, ty + 0.5, z, r.ox);
     return { x: q.x - world.cam.x, y: q.y - world.cam.y };
   }
