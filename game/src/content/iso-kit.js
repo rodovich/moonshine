@@ -127,13 +127,15 @@ export function isoScene() {
     /** The roofs of the houses below a street's edge (cistern's lowhouse props), from x0 for w tiles. */
     lowRoofs(x0, y0, w, { z = -80, skip = [] } = {}) {
       const kinds = ['lowhouse_terra_3x2', 'lowhouse_flat_2x2', 'lowhouse_flat_3x2', 'lowhouse_terra_2x2'];
+      const narrower = { 3: ['lowhouse_flat_3x2', 'lowhouse_terra_3x2'], 2: ['lowhouse_flat_2x2', 'lowhouse_terra_2x2'], 1: ['lowhouse_flat_1x2', 'lowhouse_terra_1x2'] };
       let x = x0, i = 0;
       while (x < x0 + w) {
         if (skip.includes(x)) { x++; continue; }
-        let k = kinds[(i++ + x0) % kinds.length];
-        let kw = k.includes('3x2') ? 3 : 2;
-        while (skip.some((s) => s >= x && s < x + kw) || x + kw > x0 + w) { kw--; k = kw >= 2 ? 'lowhouse_flat_2x2' : null; if (!k) break; }
-        if (!k) { x++; continue; }
+        const k0 = kinds[(i++ + x0) % kinds.length];
+        let kw = k0.includes('3x2') ? 3 : 2;
+        // Narrow the house until it fits before the next gap or the map's edge (down to one tile).
+        while (kw > 1 && (skip.some((s) => s >= x && s < x + kw) || x + kw > x0 + w)) kw--;
+        const k = kw === (k0.includes('3x2') ? 3 : 2) ? k0 : narrower[kw][i % 2];
         add('cistern', k, x, y0, z - 60, kw, 2, 1);
         x += kw;
       }
