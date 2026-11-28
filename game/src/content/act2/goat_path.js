@@ -159,4 +159,4 @@ export const goatPathMap = composedMap(compose, {
 });
 
 // For tests: the path's rectangles.
-export const GOAT_PATH = { PATH, W, H };
+export const GOAT_PATH = { PATH, STEPS, W, H };

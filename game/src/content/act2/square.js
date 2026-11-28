@@ -21,7 +21,8 @@ const W = 24, H = 18;
 const slid = (g) => !!g.flag('piano.slid');
 const counted = (g) => !!g.flag('counter.left');
 
-function compose(g) {
+// Exported for the isometric scene (square-iso.js), which replays its layout calls.
+export function composeSquare(g) {
   const L = layout(W, H, blankGrid);
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) L.set('ground', x, y, pave(x, y));
 
@@ -285,7 +286,7 @@ const tourist = {
 
 // ---------------------------------------------------------------------------
 
-export const squareMap = composedMap(compose, {
+export const squareMap = composedMap(composeSquare, {
   id: 'fountain_square',
   name: 'Fountain Square',
   tileset: act2Tiles,

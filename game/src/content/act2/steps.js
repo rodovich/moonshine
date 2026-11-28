@@ -41,7 +41,9 @@ const FLIGHTS = [[6, 0, 6], [2, 10, 15], [9, 20, 25], [4, 29, 37]];
 const MOON_RISERS = [[6, 3], [2, 12], [9, 22], [4, 32], [4, 35]];
 const MOON_PAVING = [[13, 8], [1, 26], [14, 39]];
 
-function compose(g) {
+// Exported for the isometric scene (steps-iso.js), which replays its layout calls.
+export const STEPS_LAYOUT = { FLIGHTS, MOON_RISERS, MOON_PAVING };
+export function composeSteps(g) {
   const L = layout(W, H, blankGrid);
   // Roofs everywhere, then cut the landings and flights out of them.
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) L.set('ground', x, y, lowRoof(x, y), true);
@@ -580,7 +582,7 @@ export const act2 = { stepTo: null };
 
 // ---------------------------------------------------------------------------
 
-export const stepsMap = composedMap(compose, {
+export const stepsMap = composedMap(composeSteps, {
   id: 'hundred_steps',
   name: 'The Hundred Steps',
   tileset: act2Tiles,

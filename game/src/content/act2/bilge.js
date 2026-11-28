@@ -64,7 +64,9 @@ export function bilgeTopRows(L) {
   for (const [x, y] of POSTS) L.set('detail', x, y, 'canal:mooring_post', true);
 }
 
-function compose() {
+// Exported for the isometric scene (bilge-iso.js), which replays its layout calls.
+export const BILGE_LAYOUT = { STALLS, POSTS };
+export function composeBilge() {
   const L = layout(W, H, blankGrid);
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) L.set('ground', x, y, pave(x, y));
   bilgeTopRows(L);
@@ -192,7 +194,7 @@ const cat = {
 
 // ---------------------------------------------------------------------------
 
-export const bilgeMap = composedMap(compose, {
+export const bilgeMap = composedMap(composeBilge, {
   id: 'bilge',
   name: 'The Bilge',
   tileset: act2Tiles,

@@ -85,6 +85,7 @@ export function lowRoof(x, y) {
 // closed shutters. `roofRows` rows of roof above. Puts everything on `ground`
 // and marks it solid, except doors listed in `open` (exits).
 export function house(L, x0, y0, { top, mid, base, roofRows = 1, palette, open = [] }) {
+  if (L.calls) L.calls.push({ fn: 'house', args: [x0, y0, { top, mid, base, roofRows, palette }] });
   const p = palette ? `@${palette}` : '';
   const w = top.length;
   let yTop = y0 + roofRows;
@@ -117,8 +118,13 @@ export function house(L, x0, y0, { top, mid, base, roofRows = 1, palette, open =
 }
 
 // A layout under construction: layers plus solidity, with a `set` helper.
+// It also records the semantic calls (house, lamp, pot, bench) in `calls`, as
+// { fn, args }, so the isometric view can replay them with the town kit
+// (iso-kit.js, S.replay) instead of placing them a second time.
 export function layout(W, H, blankGrid) {
+  const calls = [];
   const L = {
+    calls,
     ground: blankGrid(W, H), detail: blankGrid(W, H), overhead: blankGrid(W, H),
     solid: blankGrid(W, H, false), counter: blankGrid(W, H, false), step: blankGrid(W, H),
     set(layer, x, y, ref, solid) {
@@ -127,10 +133,10 @@ export function layout(W, H, blankGrid) {
       if (solid !== undefined) L.solid[y][x] = solid;
     },
     block(x, y, s = true) { if (x >= 0 && y >= 0 && x < W && y < H) L.solid[y][x] = s; },
-    lamp(x, y) { L.set('detail', x, y, 'props:lamp_post', true); L.set('overhead', x, y - 1, 'props:over_lamp_top'); },
-    pot(x, y, kind = 'pot_geranium') { L.set('detail', x, y, `props:${kind}`, true); },
-    bench(x, y) { L.set('detail', x, y, 'props:bench_l', true); L.set('detail', x + 1, y, 'props:bench_r', true); },
-    done() { return { ground: L.ground, detail: L.detail, overhead: L.overhead, solid: L.solid, counter: L.counter, step: L.step }; },
+    lamp(x, y) { calls.push({ fn: 'lamp', args: [x, y] }); L.set('detail', x, y, 'props:lamp_post', true); L.set('overhead', x, y - 1, 'props:over_lamp_top'); },
+    pot(x, y, kind = 'pot_geranium') { calls.push({ fn: 'pot', args: [x, y, kind] }); L.set('detail', x, y, `props:${kind}`, true); },
+    bench(x, y) { calls.push({ fn: 'bench', args: [x, y] }); L.set('detail', x, y, 'props:bench_l', true); L.set('detail', x + 1, y, 'props:bench_r', true); },
+    done() { return { ground: L.ground, detail: L.detail, overhead: L.overhead, solid: L.solid, counter: L.counter, step: L.step, calls }; },
   };
   return L;
 }

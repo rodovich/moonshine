@@ -20,7 +20,8 @@ import { props } from '../../art/props.js';
 
 const W = 32, H = 16;
 
-function compose(g) {
+// Exported for the isometric scene (lamp_street-iso.js), which replays its layout calls.
+export function composeLampStreet(g) {
   const L = layout(W, H, blankGrid);
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) L.set('ground', x, y, pave(x, y));
 
@@ -247,7 +248,7 @@ const cat = {
 
 // ---------------------------------------------------------------------------
 
-export const lampStreetMap = composedMap(compose, {
+export const lampStreetMap = composedMap(composeLampStreet, {
   id: 'lamp_street',
   name: 'Lamp Street',
   tileset: act2Tiles,
