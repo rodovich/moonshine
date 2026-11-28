@@ -10,8 +10,12 @@
 //   <set>_cut_x, <set>_cut_door_x                the south wall, cut to a 16 px stub (a door is a threshold)
 //   <set>_cut_y, <set>_cut_door_y                the east wall, cut the same way
 //   <set>_cut_corner                             the stub at the south-east corner
+//   crypt_stairs_down/_up/_right/_left           the crypt's cellar steps (h 40), named like the town kit's stairs_* by the way they descend
 import { frame, split, POST } from '../lib/jobs.mjs';
+import { place } from '../lib/sdf.mjs';
 import * as R from '../models/rooms.mjs';
+
+const PI = Math.PI;
 
 const left = (p, sx) => sx < 0;
 const right = (p, sx) => sx >= 0;
@@ -31,6 +35,8 @@ export default {
       out.push(cut(`${s}_cut_door_x`, () => R.roomCut(s, 'x', { door: true })), cut(`${s}_cut_door_y`, () => R.roomCut(s, 'y', { door: true })));
       out.push(cut(`${s}_cut_corner`, () => R.roomCut(s, 'corner')));
     }
+    const turns = { down: 0, up: PI, left: PI / 2, right: -PI / 2 };
+    for (const [d, rz] of Object.entries(turns)) out.push(frame(`crypt_stairs_${d}`, () => place(R.cryptStairs(), { rz }), { post: POST.arch, fp: [1, 1], h: 40 }));
     return out;
   },
 };

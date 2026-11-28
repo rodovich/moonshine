@@ -40,6 +40,7 @@
 //                                the hollow step at (9–10, 19), flush with landing 2: dry, wet (water in the joint,
 //                                the trickle running in), open (the east half's slab gone: the shaft and its ladder).
 //                                The map puts steps_l beside the open half; hollow_open_l is the dry slab.
+//   lid_boarded_l/_r, lid_chalked_l/_r [1,1] h0  the same tiles from Act 4 on: boarded over, MIND / THE / STEP; chalked 100! in the epilogue
 // THE CRYPT (content/act2/archive.js, composeCrypt)
 //   founders_door [2,1] h96 .... (5–6, 1–2) in the north wall: dark slate, 45° chamfers, no handle, cyan at the seams
 //   founders_door_open [2,1] h96  the same once unbolted (Act 3 on; SNES chartroom founders_door_open): steps down into the dark
@@ -109,6 +110,8 @@ export default {
     }
     out.push(floor('hollow_open_l', () => A.landingTile('l', { hollow: 'dry' })));
     out.push(floor('hollow_open_r', () => A.landingTile('r', { hollow: 'open' })));
+    // Acts 4–6: the hole boarded over (SNES steps_lid:boarded_l/_r), and chalked in the epilogue (chalked_l/_r).
+    for (const h of ['l', 'r']) out.push(floor(`lid_boarded_${h}`, () => A.landingTile(h, { hollow: 'boarded' })), floor(`lid_chalked_${h}`, () => A.landingTile(h, { hollow: 'chalked' })));
     // ---- The Founders' Door
     out.push(front('founders_door', () => A.foundersDoor()));
     out.push(front('founders_door_open', () => A.foundersDoor({ open: true })));
