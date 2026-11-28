@@ -103,7 +103,7 @@ const entities = [
     interact: (g) => {
       if (morning(g)) return g.describe('Half past something.');
       // A nudge toward the egg timer while the Kid wants something that ticks (iso playtest).
-      if (g.flag('kid.wantsTimer') && !g.flag('got.egg_timer')) return g.describe("It ticks, but it isn't going anywhere. The egg timer, though, is portable.");
+      if (g.flag('kid.wantsTimer') && !g.flag('got.egg_timer')) return g.describe("It ticks, but it isn't going anywhere. My egg timer ticks too, and it fits in a pocket.");
       return g.describe("Nearly moonrise. Roughly. That clock has never once been right, but it's always been confident.");
     },
   },
