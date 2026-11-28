@@ -301,7 +301,7 @@ export function foreground() {
     place(torus(R, R * 0.2, pinM), { at: [x, 0, top], ry: Math.PI / 2 }),
   );
   const farPinM = mat('#c8964e', { spec: 0.9, shin: 30, layer: 'town', noShadow: true });
-  parts.push(pin(5.5, D + 0.2, D + 0.44, 0.17));
+  parts.push(pin(5.5, D + 0.2, D + 0.36, 0.14)); // a little smaller and lower, so town shows between the pins
   // (Drawn larger than life so it reads as the far pin at this distance: a few pixels.)
   parts.push(union(capsule([FX - 3.6, 0, FZ + 0.6], [FX - 3.6, 0, FZ + 5], 0.5, farPinM), place(torus(2.4, 0.65, farPinM), { at: [FX - 3.6, 0, FZ + 7.4], ry: Math.PI / 2 })));
   // The tub, and Cheryl on its rim in her costume, from behind.

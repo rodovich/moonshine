@@ -42,7 +42,7 @@ const navyM = mat(C.navy, { tag: 'body', spec: 0.08, layer: 'fg' });
 /** The cap: navy rubber with fine horizontal ribbing, a cream band at the edge. */
 const capM = mat((x, y, z) => {
   const rib = Math.sin(z * 520) > 0.2 ? 0.9 : 1;
-  return C.navy.map((v) => v * rib);
+  return C.navy.map((v) => v * rib * 1.35); // lifted, so it reads as a cap and not dark hair
 }, { tag: 'hair', spec: 0.12, shin: 24, layer: 'fg' }); // navy rubber, a soft sheen
 const bandM = mat(C.cream, { tag: 'hair', spec: 0.3, shin: 20, layer: 'fg' });
 const hairM = mat((x, y, z) => mix(C.hair, C.hairSilver, vnoise(x * 900, z * 80, 1) > 0.6 ? 0.6 : 0.1), { tag: 'hair', spec: 0.3, layer: 'fg' });
@@ -140,8 +140,8 @@ export function vistaCheryl() {
     return 0.003 * Math.sin(Math.atan2(y, x + 0.1) * 9 + z * 30) * Math.min(1, back * 20) + 0.0012 * Math.sin(z * 520);
   };
   const cap = displace(intersect(capShape, capCut), folds);
-  const capBand = intersect(move(ellipsoid(0.113, 0.099, 0.125, bandM), 0.02, 0, 0.8 + HZ),
-    custom((x, y, z) => { const e = edgeAt(x, y); return Math.max(e - 0.002 - z, z - e - 0.017); }, [-0.3, -0.3, 0.5, 0.3, 0.3, 1.0], bandM));
+  const capBand = intersect(move(ellipsoid(0.116, 0.102, 0.128, bandM), 0.02, 0, 0.8 + HZ),
+    custom((x, y, z) => { const e = edgeAt(x, y); return Math.max(e - 0.002 - z, z - e - 0.024); }, [-0.3, -0.3, 0.5, 0.3, 0.3, 1.0], bandM));
   // Loose strands of ash hair escaping at the nape and behind the ears.
   const strands = [];
   for (let i = 0; i < 7; i++) {
