@@ -104,12 +104,11 @@ export class IsoView {
     const b = r.bounds(world);
     const bw = b.x1 - b.x0;
     const bh = b.y1 - b.y0;
-    // Following Cheryl, look a little toward the middle of the map, so near
-    // its edge less of the screen is the void beyond it. (Scripted pans and
-    // follows aim exactly.)
-    const lean = world.camPan || world.camFollow ? 0 : 0.3;
-    let x = Math.round(t.x + ((b.x0 + b.x1) / 2 - t.x) * lean - ISO_W / 2);
-    let y = Math.round(t.y + ((b.y0 + b.y1) / 2 - t.y) * lean - ISO_H / 2);
+    // (Leaning the camera toward the map's middle hid things at the map's
+    // edge, like the Crown's tower door; the void beyond an edge is for the
+    // art to fill with scenery.)
+    let x = Math.round(t.x - ISO_W / 2);
+    let y = Math.round(t.y - ISO_H / 2);
     // Stop a little short of the map's bounding box (its corners are empty
     // triangles), but never so short that the target leaves the screen.
     const IX = 128;
@@ -117,7 +116,7 @@ export class IsoView {
     if (bw <= ISO_W) x = Math.round(b.x0 - (ISO_W - bw) / 2);
     else {
       x = Math.max(b.x0 + Math.min(IX, (bw - ISO_W) / 2), Math.min(b.x1 - ISO_W - Math.min(IX, (bw - ISO_W) / 2), x));
-      x = Math.min(Math.max(x, t.x - ISO_W + 96), t.x - 96); // clear of the edges
+      x = Math.min(Math.max(x, t.x - ISO_W + 160), t.x - 160); // well clear of the edges
     }
     if (bh <= ISO_H) y = Math.round(b.y0 - (ISO_H - bh) / 2);
     else {
