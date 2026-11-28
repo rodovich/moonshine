@@ -113,12 +113,12 @@ export class IsoView {
     if (bw <= ISO_W) x = Math.round(b.x0 - (ISO_W - bw) / 2);
     else {
       x = Math.max(b.x0 + Math.min(IX, (bw - ISO_W) / 2), Math.min(b.x1 - ISO_W - Math.min(IX, (bw - ISO_W) / 2), x));
-      x = Math.min(Math.max(x, t.x - ISO_W + 64), t.x - 64);
+      x = Math.min(Math.max(x, t.x - ISO_W + 160), t.x - 160); // well clear of the edges and the HUD
     }
     if (bh <= ISO_H) y = Math.round(b.y0 - (ISO_H - bh) / 2);
     else {
       y = Math.max(b.y0 + Math.min(IY, (bh - ISO_H) / 2), Math.min(b.y1 - ISO_H - Math.min(IY, (bh - ISO_H) / 2), y));
-      y = Math.min(Math.max(y, t.y - ISO_H + 72), t.y - 96);
+      y = Math.min(Math.max(y, t.y - ISO_H + 120), t.y - 140);
     }
     return { x: Math.round(x), y: Math.round(y) };
   }
