@@ -57,7 +57,11 @@ function build(g) {
 
   // The landmark fronts replace the town kit's ground-storey faces where they stand.
   const fronts = [[10, 6], [11, 6], [18, 6], [19, 6]];
-  const list = S.done();
+  // A click on the tower goes to its door hotspot, which the tower's piece covers.
+  // (Act 4 swaps Act 2's 'tower_door' for its own while Act 4 runs.)
+  const flag = (f) => !!(g && g.flag && g.flag(f));
+  const door = flag('act4.started') && !flag('act5.started') && !flag('epilogue') ? 'tower_door_a4' : 'tower_door';
+  const list = S.done().map((d) => (d.s === LM && d.f === 'bell_tower' ? { ...d, pick: door } : d));
   return { S, list: list.filter((d) => !isFace(d, fronts, 0)) };
 }
 

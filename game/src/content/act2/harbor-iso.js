@@ -52,13 +52,12 @@ function build() {
   S.add(H2, 'keyhole', 30, 9, SEA, 2, 1, 0.1);
   // Mott's ferry, the Persistence, alongside (bobbing).
   S.add(H2, 'persistence', 8, 9.1, SEA, 10, 3, 1);
-  // A click on the boat goes to the ferry hotspot it covers.
-  const ferry = S.done().at(-1); ferry.pick = 'ferry';
   return S;
 }
 
 const base = build();
-const list = base.done();
+// A click on the boat goes to the ferry hotspot it covers.
+const list = base.done().map((d) => (d.s === H2 && d.f === 'persistence' ? { ...d, pick: 'ferry' } : d));
 // follows: the Harbor doesn't change in Act 2 (Act 5's risen Harbor falls back to the converter).
 // hide: the ferry's SNES sprite (the scene draws the Persistence itself).
 export const harborIso = { scene: () => list, floor: base.floorHeight(0), follows: [], hide: ['ferry_sprite'] };

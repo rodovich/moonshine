@@ -218,11 +218,15 @@ export async function ptrInteract(page, id) {
       const w = window.moonshine.world;
       const en = w.entity(id);
       if (!en) return { missing: `${w.state.map} has no entity "${id}" (present: ${w.entities.map((x) => x.id).join(', ')})` };
-      return { x: en.x, y: en.y };
+      return { x: en.x, y: en.y, w: en.w || 1, h: en.h || 1 };
     }, id);
     if (e.missing) throw new Error(e.missing);
-    if (await onScreen(page, e.x, e.y)) {
-      await clickTileAt(page, e.x, e.y);
+    // Click the footprint's lowest on-screen tile, as a player would click the visible part of a
+    // tall thing (in the isometric view a tower's top row can be far off the top of the screen).
+    let hit = null;
+    for (let y = e.y + e.h - 1; y >= e.y && !hit; y--) for (let x = e.x; x < e.x + e.w && !hit; x++) if (await onScreen(page, x, y)) hit = [x, y];
+    if (hit) {
+      await clickTileAt(page, hit[0], hit[1]);
       await waitFor(page, () => window.moonshine.snapshot().busy || !!window.moonshine.snapshot().text, null, 10000);
       return;
     }

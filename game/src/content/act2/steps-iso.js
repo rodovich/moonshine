@@ -101,8 +101,13 @@ function build(g) {
   // ---- The view parapet on landing 3's east edge.
   for (let y = 26; y <= 28; y++) S.prop('cistern', 'parapet_y', 15, y, 360);
 
-  // ---- The south wall and its arch through to Fountain Square (x6-7).
-  S.house(0, 41, W, 1, { front: '######AA########', plaster: 'ochre', roof: 'flat' });
+  // ---- The south edge, a low wall with the way through to Fountain Square at x6-7. (A
+  // full storey here would stand in front of landing 4 and hide it, at the map's near edge.)
+  for (let x = 0; x < W; x++) {
+    if (x === 6 || x === 7) continue;
+    S.column(x, 41, 0, [], [], ['pave_nw', 0]);
+    S.prop('cistern', 'parapet_x', x, 41, 0);
+  }
   S.floor(6, 41, 2, 1, { kind: 'pave_shade' });
 
   // ---- Pots and the bench, on their landings.
