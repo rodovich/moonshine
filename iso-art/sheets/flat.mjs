@@ -20,7 +20,10 @@ export default {
     wall('room_s_plain', 's', 'plain'),
     wall('room_e_plain', 'e', 'plain'),
     // The cut top of a wall (a section, as rooms were drawn cut away in the era).
-    floor('wall_cap', () => F.wallCap()),
+    frame('wall_cap_s', () => F.wallCap('s'), { fp: [1, 1], h: 96 }),
+    frame('wall_cap_e', () => F.wallCap('e'), { fp: [1, 1], h: 96 }),
+    frame('wall_cap_corner', () => F.wallCap('corner'), { fp: [1, 1], h: 96 }),
+    frame('room_corner', () => F.roomCorner(), { fp: [1, 1], h: 96 }),
     wall('room_s_window_l', 's', 'window', { half: 'l' }),
     wall('room_s_window_r', 's', 'window', { half: 'r' }),
     wall('room_s_clock', 's', 'clock'),

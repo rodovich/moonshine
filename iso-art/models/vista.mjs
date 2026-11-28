@@ -14,12 +14,12 @@ import { mat, hex, mix } from '../lib/render.mjs';
 import { fbm, vnoise, hash3 } from '../lib/noise.mjs';
 import { figure } from './figure.mjs';
 import { cherylLook } from './cheryl.mjs';
-import { tub } from './props.mjs';
+import { tub, foldingChair } from './props.mjs';
 import { plaster } from './materials.mjs';
 
 export const D = 95; // deck height above the sea: the Upper Terraces, near the summit
 export const W = 640, H = 480;
-export const CAM = { pos: [-3.0, 0, D + 1.8], yaw: 0, pitch: -Math.atan(10 / 640), f: 640 };
+export const CAM = { pos: [-3.6, 0, D + 1.8], yaw: 0, pitch: -Math.atan(10 / 560), f: 560 };
 const RIM_R = 3500;
 const GATE = 0; // bearing of the Gate (east)
 
@@ -211,12 +211,13 @@ export function town() {
 // The foreground: Cheryl's roof, the tub, Cheryl in her costume, the pins.
 
 export function foreground() {
-  const slabPl = plaster('#d6cec0', { tag: 'fg', weather: false });
+  const slabPl = plaster('#e2d6c6', { tag: 'fg', weather: false });
   const deckM = mat((x, y, z, lx, ly, lz, nx, ny, nz) => {
     const c = slabPl.color(x, y, z, lx, ly, lz, nx, ny, nz);
-    const row = Math.floor(y * 2), sx = x * 2 + (row % 2 ? 0.5 : 0);
-    const fx = sx - Math.floor(sx), fy = y * 2 - row;
-    return Math.min(fx, 1 - fx, fy, 1 - fy) < 0.03 ? c.map((v) => v * 0.82) : c;
+    const row = Math.floor(x * 2), sy = y + (row % 2 ? 0.5 : 0);
+    const fy = sy - Math.floor(sy), fx = x * 2 - row;
+    const tone = 0.96 + hash3(row, Math.floor(sy), 3) * 0.06;
+    return Math.min(fx * 0.5, (1 - fx) * 0.5, fy, 1 - fy) < 0.012 ? c.map((v) => v * 0.86) : c.map((v) => v * tone);
   }, { tag: 'fg', layer: 'fg', spec: 0.03 });
   const fg = (m) => { m.layer = 'fg'; return m; };
   const wallM = fg(plaster('#ece6d8'));
@@ -249,6 +250,9 @@ export function foreground() {
   const pose = { bob: 0.75 - 0.86, hipL: a, hipR: a - 0.06, kneeL: a + 0.1, kneeR: a + 0.05, shL: 0.35, elL: 0.6, outL: 0.3, shR: 0.05, elR: 0.25, outR: 0.55, lean: 0.06, nod: -0.04 };
   const her = figure(cherylLook({ swim: true }), pose);
   const herNode = move(her, -0.74, TY - 0.14, D);
+  // "Two chairs. I only sit in the one." Her cardigan lies folded on the nearer.
+  const chairs = union(move(foldingChair({ face: 0.3, cardigan: true }), 0.1, 0.75, 0), move(foldingChair({ face: -0.2 }), 1.0, 1.45, 0));
+  parts.push({ b: [chairs.b[0], chairs.b[1], chairs.b[2] + D, chairs.b[3], chairs.b[4], chairs.b[5] + D], dist: (x, y, z) => chairs.dist(x, y, z - D), near: (x, y, z) => chairs.near(x, y, z - D) });
   parts.push(herNode);
   return union(parts);
 }

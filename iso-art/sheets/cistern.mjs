@@ -47,6 +47,19 @@ function tubSitting(state, t) {
   return union(parts);
 }
 
+
+// Parapet runs: each piece casts its shadow with its neighbors in place and keeps
+// only its own share (traced back along the light to the wall's line), so a run's
+// shadow is one continuous band. The light falls 0.75 east and 0.55 north per unit of height.
+function runShadow(dir, build) {
+  const run = union([-2, -1, 0, 1, 2].map((k) => (dir === 'x' ? move(build(), k, 0, 0) : move(build(), 0, k, 0))));
+  const clip = dir === 'x'
+    ? (gx, gy) => Math.abs(gx + (0.75 * gy) / 0.55) < 0.5
+    : (gx, gy) => Math.abs(gy + (0.55 * gx) / 0.75) < 0.5;
+  return { shadowScene: run, shadowClip: clip };
+}
+const runProp = (name, dir, build, h) => frame(name, build, { post: POST.arch, shadow: true, fp: [1, 1], h, render: runShadow(dir, () => parapet(dir, dir === 'y' && h < 30 ? 0.55 : 0.9, h < 30 ? { thick: 0.28 } : {})) });
+
 export default {
   name: 'cistern',
   frames: () => {
@@ -84,11 +97,11 @@ export default {
     out.push(split('house_plain', () => facade('s', 3, 'plain', { plinth: 0 }), { house_s_plain: left, house_e_plain: right }, { fp: [1, 1], h: 120 }));
 
     // ---- Roof terraces: parapets (36 px), the low wall (22 px), sighting pins, stairs, pent roof
-    out.push(prop('parapet_x', () => parapet('x', 0.9), [1, 1], 36, { shadow: true, post: POST.arch }));
-    out.push(prop('parapet_y', () => parapet('y', 0.9), [1, 1], 36, { shadow: true, post: POST.arch }));
+    out.push(runProp('parapet_x', 'x', () => parapet('x', 0.9), 36));
+    out.push(runProp('parapet_y', 'y', () => parapet('y', 0.9), 36));
     out.push(prop('parapet_pier', () => parapetPier(0.95), [1, 1], 38, { shadow: true, post: POST.arch }));
-    out.push(prop('parapet_y_pin', () => union(parapet('y', 0.9), move(sightPin(), 0, 0, 0.9)), [1, 1], 44, { shadow: true, post: POST.arch }));
-    out.push(prop('lowwall_y', () => parapet('y', 0.55, { thick: 0.28 }), [1, 1], 22, { shadow: true, post: POST.arch }));
+    out.push(runProp('parapet_y_pin', 'y', () => union(parapet('y', 0.9), move(sightPin(), 0, 0, 0.9)), 44));
+    out.push(runProp('lowwall_y', 'y', () => parapet('y', 0.55, { thick: 0.28 }), 22));
     // The low wall's ends at its gap: end_s ends the northern run at its south end (pier to +y), end_n starts the southern run.
     out.push(prop('lowwall_end_s', () => union(parapet('y', 0.55, { thick: 0.28, from: -0.5, to: 0.36 }), parapetPier(0.6, { oy: 0.32, w: 0.34 })), [1, 1], 24, { shadow: true, post: POST.arch }));
     out.push(prop('lowwall_end_s_pin', () => union(parapet('y', 0.55, { thick: 0.28, from: -0.5, to: 0.36 }), parapetPier(0.6, { oy: 0.32, w: 0.34 }), move(sightPin(), 0, 0.32, 0.6)), [1, 1], 32, { shadow: true, post: POST.arch }));

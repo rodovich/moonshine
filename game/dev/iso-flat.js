@@ -14,13 +14,17 @@ export function flat(state = {}) {
   add(F, 'floor_0', 5, 8, 0, 1, 1, 0);
   // North wall (row 1's south faces), with the shelf, clock, and window; west wall (column 0's east faces).
   const north = { 1: 'room_s_shelf_l', 2: 'room_s_shelf_r', 4: 'room_s_clock', 5: 'room_s_window_l', 6: 'room_s_window_r' };
-  for (let x = 0; x <= 11; x++) add(F, north[x] || 'room_s_plain', x, 1, 0, 1, 1, 0.1);
+  // Walls stop at the room's corners: the north wall runs x1–10, the west wall y2–7, with a corner post.
+  add(F, 'room_corner', 0, 1, 0, 1, 1, 0.1);
+  for (let x = 1; x <= 10; x++) add(F, north[x] || 'room_s_plain', x, 1, 0, 1, 1, 0.1);
   for (let y = 2; y <= 7; y++) add(F, 'room_e_plain', 0, y, 0, 1, 1, 0.1);
-  for (let x = 0; x <= 11; x++) add(F, 'wall_cap', x, 1, 96, 1, 1, 0.2);
-  for (let y = 2; y <= 8; y++) add(F, 'wall_cap', 0, y, 96, 1, 1, 0.2);
+  // Section caps on the cut walls (drawn at the walls' base; the frames carry their own height).
+  for (let x = 1; x <= 10; x++) add(F, 'wall_cap_s', x, 1, 0, 1, 1, 0.2);
+  add(F, 'wall_cap_corner', 0, 1, 0, 1, 1, 0.2);
+  for (let y = 2; y <= 7; y++) add(F, 'wall_cap_e', 0, y, 0, 1, 1, 0.2);
   // Near walls cut away.
-  for (let x = 0; x <= 11; x++) add(F, x === 5 ? 'cut_door' : x === 6 ? 'cut_hook' : 'cut_x', x, 8, 0);
-  for (let y = 2; y <= 7; y++) add(F, 'cut_y', 11, y, 0);
+  for (let x = 1; x <= 10; x++) add(F, x === 5 ? 'cut_door' : x === 6 ? 'cut_hook' : 'cut_x', x, 8, 0);
+  for (let y = 1; y <= 7; y++) add(F, 'cut_y', 11, y, 0);
   // Furniture.
   add(F, 'bookshelf_l', 9, 1); add(F, 'bookshelf_r', 10, 1);
   add(F, state.gotMill ? 'counter_l' : 'counter_l_mill', 1, 2);

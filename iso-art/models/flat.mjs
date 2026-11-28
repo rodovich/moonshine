@@ -50,7 +50,8 @@ function roomWall(face, h = ROOM_H) {
     return c.map((v) => v * (0.9 + n * 0.14));
   }, { tag: 'wall', spec: 0.15, shin: 14 });
   const rail = m('#e8dcc4', { tag: 'wall' });
-  const parts = [boxAt(-0.5, -0.5, 0, 0.5, 0.5, h, pl)];
+  // A thin wall (0.3 m) standing on the tile's room-side edge, so its cut top is a narrow section.
+  const parts = [face === 's' ? boxAt(-0.5, 0.2, 0, 0.5, 0.5, h, pl) : boxAt(0.2, -0.5, 0, 0.5, 0.5, h, pl)];
   parts.push(onFace(boxAt(-0.5, -0.03, 0.08, 0.5, 0.012, DADO, dado), face));
   parts.push(onFace(boxAt(-0.5, -0.03, DADO, 0.5, 0.03, DADO + 0.05, rail, 0.01), face));
   parts.push(onFace(boxAt(-0.5, -0.03, 0, 0.5, 0.03, 0.09, wood('#5a3a24', { grain: 'x' }), 0.01), face));
@@ -68,7 +69,8 @@ export function wallPiece(face, kind = 'plain', { half } = {}) {
     const cut = move(f.cut, off, 0, 0);
     wall = subtract(wall, onFace(cut, face), plaster('#e0d6c4'));
     // Evening light in the glass: the outside, brighter than the room.
-    const sky = mat((x, y, z) => mix(hex('#c8b0a8'), hex('#f0d8b8'), Math.max(0, Math.min(1, (z - 1) / 1.1))), { tag: 'glass', emit: 0.6, spec: 0.4 });
+    // The window is the brightest thing in the room: the evening outside.
+    const sky = mat((x, y, z) => mix(hex('#fff0d0'), hex('#ffe4b8'), Math.max(0, Math.min(1, (z - 1) / 1.1))), { tag: 'glass', emit: 1 });
     parts.push(onFace(boxAt(-0.45 + off, -0.16, 1.0, 0.45 + off, -0.12, 2.15, sky), face));
     parts.push(onFace(boxAt(-0.015 + off, -0.13, 1.0, 0.015 + off, -0.1, 2.1, m('#e8e4d8', { tag: 'wall' })), face));
     parts.push(onFace(boxAt(-0.45 + off, -0.13, 1.55, 0.45 + off, -0.1, 1.58, m('#e8e4d8', { tag: 'wall' })), face));
@@ -308,9 +310,18 @@ export function rug() {
   return boxAt(-1.4, -0.9, 0, 1.4, 0.9, 0.02, mt, 0.01);
 }
 
-/** The top of a cut wall: a flat, dark warm-grey section. */
-export function wallCap() {
-  return boxAt(-1.5, -1.5, -0.2, 1.5, 1.5, 0, mat((x, y) => hex('#6a5650').map((c) => c * (0.95 + vnoise(x * 12, y * 12, 3) * 0.1)), { tag: 'floor' }));
+/** The top of a cut wall: a flat, dark warm-grey section over the wall's 0.3 m thickness ('s', 'e', or 'corner'). */
+export function wallCap(which = 's') {
+  const m = mat((x, y) => hex('#6a5650').map((c) => c * (0.95 + vnoise(x * 12, y * 12, 3) * 0.1)), { tag: 'floor' });
+  const z0 = ROOM_H - 0.01, z1 = ROOM_H + 0.01;
+  if (which === 's') return boxAt(-0.5, 0.2, z0, 0.5, 0.5, z1, m);
+  if (which === 'e') return boxAt(0.2, -0.5, z0, 0.5, 0.5, z1, m);
+  return boxAt(0.2, 0.2, z0, 0.5, 0.5, z1, m);
+}
+
+/** The inside corner where the north and west walls meet: a 0.3 m post of wall. */
+export function roomCorner() {
+  return boxAt(0.2, 0.2, 0, 0.5, 0.5, ROOM_H, plaster('#f0e8da'));
 }
 
 export { clayFloor as floor };

@@ -107,6 +107,16 @@ export function figure(look, pose = {}) {
     const bell = squash(frustum(look.hemR ?? 0.2 * k * W, 0.15 * k * W, hem - 0.05, waistZ, look.skirt, 0.012), 0.82, 1, 1);
     const drape = thighs.map(([a, b]) => capsule(a, b, 0.115 * k * W, look.skirt));
     let skirt = intersect(smooth(0.1 * k, bell, ...drape), boxAt(-1, -1, hem, 1, 1, waistZ + 0.05, look.skirt));
+    if (Math.max(p.hipL, p.hipR) > 1.0) {
+      // Seated: the cloth lies along the thighs and falls a hand's width from the knees,
+      // so the shins show below the hem.
+      const seat = move(ellipsoid(0.17 * k, 0.19 * k * W, 0.12 * k, look.skirt), 0, 0, hipZ + 0.02 * k);
+      const laps = thighs.map(([a, b]) => {
+        const kn = [a[0] + (b[0] - a[0]) * 0.8, a[1] + (b[1] - a[1]) * 0.8, a[2] + (b[2] - a[2]) * 0.8];
+        return smooth(0.05 * k, capsule(a, kn, 0.1 * k * W, look.skirt), capsule(kn, [kn[0] + 0.03 * k, kn[1], kn[2] - 0.11 * k], 0.085 * k * W, look.skirt));
+      });
+      skirt = smooth(0.08 * k, seat, ...laps);
+    }
     if (p.sway) {
       // Shear the cloth so the hem leads and trails the step while the waist stays put.
       const sw = p.sway * k, base = skirt;
@@ -181,10 +191,11 @@ function headNode(look, s, p) {
     const lx = lx0 + ox, lz = lz0 + oz;
     if (lx > 0.04 * s) {
       for (const ey of [-0.036 * s, 0.036 * s]) {
-        const dy = ly - ey, dz = lz - 0.012 * s;
+        const ez = (look.eyeZ ?? 0.012) * s;
+        const dy = ly - ey, dz = lz - ez;
         if (blink) { if (Math.abs(dz + 0.004 * s) < 0.009 * s * fs && Math.abs(dy) < 0.02 * s * fs) return mix(skinC, eyeCol, 0.75); }
         else if (dy * dy / (0.016 * s * fs) ** 2 + dz * dz / (0.019 * s * fs) ** 2 < 1) return eyeCol;
-        if (look.brows !== false && Math.abs(lz - (0.022 + 0.03 * fs) * s) < 0.006 * s * fs && Math.abs(dy) < 0.026 * s * fs) return mix(skinC, browCol, 0.85);
+        if (look.brows !== false && Math.abs(lz - ez - (0.012 + 0.016 * fs) * s) < 0.006 * s * fs && Math.abs(dy) < 0.026 * s * fs) return mix(skinC, browCol, 0.85);
       }
       if (Math.abs(lz + 0.045 * s) < 0.007 * s * fs && Math.abs(ly) < 0.024 * s) return mix(skinC, hex(look.mouth ?? '#a05050'), 0.65);
       if (Math.hypot(Math.abs(ly) - 0.052 * s, lz + 0.022 * s) < 0.02 * s) return blush;

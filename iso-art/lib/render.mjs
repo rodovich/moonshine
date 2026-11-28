@@ -191,9 +191,15 @@ export function render(scene, opts = {}) {
           // Shadow on the invisible floor.
           const t = (ground - p0[2]) / VIEW[2];
           const gx = p0[0] + VIEW[0] * t, gy = p0[1] + VIEW[1] * t;
-          const shad = softShadow(scene, gx, gy, ground + 0.002, shadowK, shadowMaxT);
-          const ao = ambientOcclusion(scene, gx, gy, ground, [0, 0, 1], aoStr);
-          sh += Math.min(1, (1 - shad) * 0.75 + (1 - ao) * 0.9);
+          // A run of wall casts with its neighbors present (shadowScene), keeping only
+          // the part of the shadow that belongs to this piece (shadowClip), so the
+          // pieces' shadows join into one continuous band.
+          if (!opts.shadowClip || opts.shadowClip(gx, gy)) {
+            const ss2 = opts.shadowScene || scene;
+            const shad = softShadow(ss2, gx, gy, ground + 0.002, shadowK, shadowMaxT);
+            const ao = ambientOcclusion(ss2, gx, gy, ground, [0, 0, 1], aoStr);
+            sh += Math.min(1, (1 - shad) * 0.75 + (1 - ao) * 0.9);
+          }
         }
       }
       const n2 = ss * ss;

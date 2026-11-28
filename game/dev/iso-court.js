@@ -160,17 +160,19 @@ export function sortDrawables(list) {
 
 /** Draw drawables to a 2D context with the camera's top-left at (cx, cy) in screen px. */
 export function draw(ctx, list, images, manifest, cx, cy, opts = {}) {
-  for (const d of sortDrawables(list)) {
+  // Three passes, so a cast shadow is never painted over by a floor tile that
+  // sorts after its caster: (1) ground, wall faces, and floors (layer < 1);
+  // (2) every cast shadow; (3) props and people, back to front.
+  const sorted = sortDrawables(list);
+  const blit = (d, suffix = '') => {
     const sheet = manifest.sheets[d.s];
-    if (!sheet) continue;
-    const fr = sheet.frames[d.f];
-    if (!fr) { if (opts.missing) opts.missing(d); continue; }
+    if (!sheet) return;
+    const fr = sheet.frames[d.f + suffix];
+    if (!fr) { if (!suffix && opts.missing) opts.missing(d); return; }
     const [sx, sy] = proj(d.x, d.y, d.z);
-    const img = images[d.s];
-    if (opts.shadows !== false && sheet.frames[d.f + '.shadow']) {
-      const sh = sheet.frames[d.f + '.shadow'];
-      ctx.drawImage(img, sh[0], sh[1], sh[2], sh[3], Math.round(sx - cx - sh[4]), Math.round(sy - cy - sh[5]), sh[2], sh[3]);
-    }
-    ctx.drawImage(img, fr[0], fr[1], fr[2], fr[3], Math.round(sx - cx - fr[4]), Math.round(sy - cy - fr[5]), fr[2], fr[3]);
-  }
+    ctx.drawImage(images[d.s], fr[0], fr[1], fr[2], fr[3], Math.round(sx - cx - fr[4]), Math.round(sy - cy - fr[5]), fr[2], fr[3]);
+  };
+  for (const d of sorted) if (d.layer < 1) blit(d);
+  if (opts.shadows !== false) for (const d of sorted) blit(d, '.shadow');
+  for (const d of sorted) if (d.layer >= 1) blit(d);
 }
