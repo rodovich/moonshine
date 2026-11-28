@@ -455,7 +455,12 @@ const objects = [
   {
     // Morning: the top of the Squeeze, walkable; the exit is the row below.
     id: 'squeeze', x: 15, y: 24, w: 2, solid: false, when: morning,
-    look: 'The Squeeze is clear. There\'s a long scrape down every step, and at the bottom, a lot of surprised geraniums.',
+    // The first look and the first step onto it share the line, and say it once (iso playtest).
+    interact: async (g) => {
+      if (g.flag('n.squeezeSeen')) return g.describe('Clear, and scraped all the way down.');
+      g.setFlag('n.squeezeSeen', 1);
+      return g.describe('The Squeeze is clear. There\'s a long scrape down every step, and at the bottom, a lot of surprised geraniums.');
+    },
   },
 ];
 
