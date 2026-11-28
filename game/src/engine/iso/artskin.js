@@ -24,8 +24,9 @@ function fontStyle(opts = {}) {
   return 'text';
 }
 
-function artFont(fallback) {
-  const metric = isoFonts.text;
+// A font from the art. `only` draws every string in that style (the title).
+function artFont(fallback, only = null) {
+  const metric = (only && isoFonts[only]) || isoFonts.text;
   const glyph = (f, ch) => f.glyphs[ch] || f.glyphs['?'];
   const advance = (f, ch) => (ch === ' ' && !f.glyphs[' '] ? Math.round(f.lineHeight / 4) : glyph(f, ch)[4]);
   const measure = (text) => [...normalize(text)].reduce((w, ch) => w + advance(metric, ch), 0);
@@ -46,7 +47,7 @@ function artFont(fallback) {
       return out;
     },
     draw(ctx, text, x, y, opts = {}) {
-      const f = isoFonts[fontStyle(opts)] || metric;
+      const f = only ? metric : isoFonts[fontStyle(opts)] || metric;
       const rec = fontImage(f);
       if (!rec.ready) return fallback.draw(ctx, text, x, y, opts);
       const count = opts.count == null ? Infinity : opts.count;
@@ -66,6 +67,7 @@ export function artSkin(standIn) {
   const ui = isoSheet('ui');
   if (!ui || !isoFonts.text) return {};
   const skin = { font: artFont(standIn.font) };
+  if (isoFonts.title) skin.bigFont = artFont(standIn.bigFont, 'title');
   skin.panel = (ctx, x, y, w, h, styleName = 'npc') => {
     const name = PANELS[styleName] || 'panel_dialog';
     const r = ui.ready && ui.raw(name);

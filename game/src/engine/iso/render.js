@@ -407,8 +407,12 @@ export class IsoRenderer {
 
   // The scene's drawables for the current flags (cached until a flag changes).
   sceneFor(world) {
-    if (!this.sceneReady(world)) return null;
-    const key = JSON.stringify(world.state.flags);
+    if (!this.sceneReady(world)) {
+      this.hidden = new Set();
+      return null;
+    }
+    // Scenes follow the flags (and the player's pose: Cheryl seated on the tub).
+    const key = JSON.stringify(world.state.flags) + (world.player.pose || '');
     if (this.sceneCache && this.sceneCache.def === world.mapDef.iso && this.sceneCache.key === key) return this.sceneCache.list;
     const list = (safeCall(world.mapDef.iso.scene, world.api) || []).map((d) => {
       const fw = d.fw || 1;
@@ -416,6 +420,10 @@ export class IsoRenderer {
       return { ...d, fw, fd, x0: Math.round(d.x - fw / 2), y0: Math.round(d.y - fd / 2), z: d.z || 0, layer: d.layer ?? 1 };
     });
     this.sceneCache = { def: world.mapDef.iso, key, list };
+    // Entities the scene draws itself (their own sprites are hidden).
+    let hide = world.mapDef.iso.hide || [];
+    if (typeof hide === 'function') hide = safeCall(hide, world.api) || [];
+    this.hidden = new Set(hide);
     return list;
   }
 
