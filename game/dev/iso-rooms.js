@@ -26,6 +26,24 @@ export const roomsIso = {
       S.column(x, y, 0, south, east, null, 'act2_harbor');
       S.add('act2_harbor', 'rock_shelf', x, y, 120, 1, 1, 0);
     }
+    // A stretch of quay edge with the culvert, its outflow, and the Keyhole; and the Bilge's flood
+    // lapping at dry paving (act2_harbor; this page draws frames, so one frame of each animation).
+    S.floor(23, 0, 8, 3, { kind: 'pave' });
+    for (let x = 23; x <= 30; x++) {
+      const special = x === 24 || x === 25 || x === 28 || x === 29;
+      S.column(x, 3, -40, special ? [] : [['quay_s', 40]], x === 30 ? [['quay_e', 40]] : [], ['pave_nw', 0]);
+      S.prop('town', 'lip_x', x, 3, 0);
+      if (x !== 24 && x !== 25) S.add('town', 'water_0', x, 4, -40, 1, 1, 0);
+    }
+    S.add('act2_harbor', 'culvert_0', 24, 3, -40, 2, 1, 0.1);
+    S.add('act2_harbor', 'outflow_0', 24, 4, -40, 2, 1, 0);
+    S.add('act2_harbor', 'keyhole_2', 28, 3, -40, 2, 1, 0.1);
+    for (let y = 7; y <= 8; y++) for (let x = 23; x <= 30; x++) {
+      const f = x <= 27 ? 'flood_0' : x === 28 ? 'flood_edge_e_0' : null;
+      if (f) S.add('act2_harbor', f, x, y, 0, 1, 1, 0); else S.floor(x, y, 1, 1, { kind: 'pave' });
+    }
+    S.floor(23, 6, 8, 1, { kind: 'pave' });
+    S.floor(23, 9, 8, 1, { kind: 'pave' });
     return S.done();
   },
 };

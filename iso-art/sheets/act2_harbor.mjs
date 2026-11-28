@@ -12,6 +12,12 @@
 //   sign_bilge [3,1] h52 ......... centered on (2, 4) (spans 1–3); '< THE BILGE'   signpost:bilge_0/1/2
 //   persistence_0/1 [10,3] h168 .. Mott's ferry alongside the quay, waterline z=0, centered at world (13, 10.6)
 //                                  (map object 10–15, 9–11; SNES ferry_level:persistence_level). Anim: bob.
+//   keyhole_0..3 [2,1] h40 (anim keyhole) ... the quay face at (30–31, 9) in place of its quay_s course, from sea level:
+//                                  the hole worn through the rock, the sea breathing in and out (foam spills at the top)
+//   culvert_0..2 [2,1] h40 (anim culvert) ... the quay face at (1–2, 9) in place of quay_s: the canal's arch, its water
+//                                  sliding out and down into the sea
+//   outflow_0..2 [2,1] h0 (anim outflow) ... the sea at (1–2, 10) in place of town:water: the canal's water fanning out
+//   (For all three: add at the two tiles' west tile with fw 2, z = the sea's height; keep the pave tops and lips.)
 //   lighthouse [4,4] h390 ........ (26–29, 0–3), center at world (28, 2); its door faces south onto (27–28, 3)
 //                                  (lighthouse:lighthouse_x<x>y<y>, rows 0–3 as one piece)
 // THE BILGE (content/act2/bilge.js, 32×16)
@@ -26,6 +32,10 @@
 //                                  (reveal:wstairs_top_l/m/m/r)
 //   wstairs_wet_0..3 [4,1] h0 .... (22–25, 7): from 18 px below the quay on down under the canal water
 //                                  (24 px below the quay), the lower steps seen through it (bilge_flood:wstairs_wet_*)
+//   flood_0..2 [1,1] h0 (anim flood) ... the south quay's west end under ankle-deep water (x0–5, rows 11–12): paving
+//                                  seen through it, ripples drifting (SNES bilge_flood:flood1_*)
+//   flood_edge_e_0..2 [1,1] h0 (anim flood_edge_e) ... the tile east of the flood (x6): the water lapping in over its
+//                                  west part, a foam line, wet stone beyond (bilge_flood:flood1_lap_w)
 //   sign_harbor [3,1] h52 ........ centered on (30, 10) (spans 29–31); 'HARBOR >'   signpost:harbor_0/1/2
 // THE GOAT PATH (content/act2/goat_path.js, 16×42; the SNES painted it as one picture, GOAT_PATH_TILES)
 //   path_a, path_b, path_c [1,1] h0 ... floor diamonds: the path's '.' cells (c: hoof-scuffed)
@@ -67,9 +77,17 @@ export default {
     out.push(prop('sign_harbor', () => H.signBoard('HARBOR >'), [3, 1], 52));
     for (let i = 0; i < 2; i++) out.push(prop(`persistence_${i}`, () => H.persistence({ t: i * 0.5 }), [10, 3], 168));
     out.push(prop('lighthouse', () => H.lighthouse(), [4, 4], 390));
+    // The Keyhole and the culvert: two-tile quay faces (keep the south face: screen x left of +16),
+    // and the culvert's outflow on the sea below it.
+    const face2 = (name, build) => split(name, build, { [name]: (p, sx) => sx < 17 }, { fp: [2, 1], h: 40 });
+    for (let i = 0; i < 4; i++) out.push(face2(`keyhole_${i}`, () => H.keyhole({ t: i / 4 })));
+    for (let i = 0; i < 3; i++) out.push(face2(`culvert_${i}`, () => H.culvert({ t: i / 3 })));
+    for (let i = 0; i < 3; i++) out.push(arch(`outflow_${i}`, () => H.outflow({ t: i / 3 }), [2, 1], 0));
     // ---- The Bilge
     for (const [n, c] of [['fish_stall', '#d05848'], ['fish_stall_blue', '#3870c8'], ['fish_stall_green', '#78a870']]) out.push(prop(n, () => H.fishStall({ stripe: c }), [2, 2], 96));
     // The Bilge's mooring posts are the town kit's `town:mooring_post`.
+    // The south quay's west end under an ankle-deep flood, and its lapping east edge.
+    for (let i = 0; i < 3; i++) out.push(floor(`flood_${i}`, () => H.shallowFlood({ t: i / 3 })), floor(`flood_edge_e_${i}`, () => H.shallowFlood({ t: i / 3, edge: 'e' })));
     out.push(prop('rowboat', () => H.rowboat(), [2, 1], 20));
     out.push(prop('canal_boat_blue', () => H.canalBoat({ side: '#3870c8', band: '#f0e8d0' }), [2, 1], 22));
     out.push(prop('canal_boat_green', () => H.canalBoat({ side: '#5a8a58', band: '#e8b868', cover: '#b8a888' }), [2, 1], 22));
@@ -103,6 +121,11 @@ export default {
       wstairs_wet: { frames: [0, 1, 2, 3].map((i) => `wstairs_wet_${i}`), ms: 280 },
       mott_shack: { frames: ['mott_shack_0', 'mott_shack_1'], ms: [1600, 400] },
       sea_cave: { frames: [0, 1, 2, 3].map((i) => `sea_cave_${i}`), ms: 300 },
+      keyhole: { frames: [0, 1, 2, 3].map((i) => `keyhole_${i}`), ms: [700, 500, 300, 600] },
+      culvert: { frames: [0, 1, 2].map((i) => `culvert_${i}`), ms: 160 },
+      outflow: { frames: [0, 1, 2].map((i) => `outflow_${i}`), ms: 300 },
+      flood: { frames: [0, 1, 2].map((i) => `flood_${i}`), ms: 380 },
+      flood_edge_e: { frames: [0, 1, 2].map((i) => `flood_edge_e_${i}`), ms: 380 },
     };
     return a;
   })(),
