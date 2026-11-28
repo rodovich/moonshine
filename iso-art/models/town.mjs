@@ -308,3 +308,17 @@ export function quayWall(h) {
   }, { tag: 'wall', spec: 0.08 });
   return boxAt(-0.5, -0.5, 0, 0.5, 0.5, h, mt);
 }
+
+/**
+ * A flagstone with a moon-eye set in it: a round blue glass stud, the top of a
+ * Founders' light-pipe. lit: it glows relic cyan (Act 3 on, at dusk and night).
+ */
+export function moonEyeStone({ lit = false } = {}) {
+  const glass = lit ? mat('#68f0e0', { tag: 'floor', emit: 1 }) : mat('#4a88c8', { tag: 'floor', spec: 1.2, shin: 60, emit: 0.15 });
+  const rim = mat('#a89070', { tag: 'floor', spec: 0.4 });
+  return union(
+    flagstones({ q: 'nw' }),
+    cylinder(0.11, -0.03, 0.002, rim, 0.01),
+    intersect(sphere(0.085, glass), boxAt(-0.1, -0.1, -0.01, 0.1, 0.1, 0.05, glass)),
+  );
+}
