@@ -469,7 +469,7 @@ const objects = [
 
 // A sheet of the neighbor's frames plus her idle: smoothing a sheet a few
 // times, then stepping back to admire it.
-const neighborIdle = {
+export const neighborIdle = {
   ...neighbor,
   frames: {
     ...neighbor.frames,
