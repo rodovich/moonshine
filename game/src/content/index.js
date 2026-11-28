@@ -14,6 +14,7 @@ import { act6Maps, act6Items, act6Scripts, addAct6 } from './act6/index.js';
 import { act6Start } from './act6/climax.js';
 import { cheryl, cheryl_swim } from '../art/cheryl.js';
 import { old_man_seated, neighbor, sweaty_kid } from '../art/opening_npcs.js';
+import { neighborIdle } from './opening/court.js';
 import { props } from '../art/props.js';
 import { fx, fx_mist } from '../art/fx.js';
 
@@ -56,7 +57,8 @@ export default {
   // draws each SNES sheet's characters.
   // aliases: SNES frame names with a different isometric name ({dir} is the facing).
   iso: {
-    sheets: { cheryl, cheryl_swim, old_man_seated, neighbor, sweaty_kid, cat: props, fx, fx_mist, ...act2IsoSheets },
+    // Her Next Door's tending idle is a second SNES sheet; both draw from her isometric art.
+    sheets: { cheryl, cheryl_swim, old_man_seated, neighbor: [neighbor, neighborIdle], sweaty_kid, cat: props, fx, fx_mist, ...act2IsoSheets },
     aliases: {},
   },
   player: { name: 'Cheryl', sprite: { sheet: cheryl }, poseOffsets: { sit_right: [0, -4], rise_right: [0, -2] } },
