@@ -7,6 +7,7 @@ import { safeCall } from '../world.js';
 import { inRect } from '../ui.js';
 import { ISO_W, ISO_H, HW, proj } from './project.js';
 import { IsoRenderer } from './render.js';
+import { draftOverrides } from './convert.js';
 import { IsoTextBox, IsoInventory, IsoTitle, drawHud, drawBark, drawHint, drawCard, BAG_BTN, BANNER } from './ui.js';
 
 // Arrow keys -> grid directions. The grid's axes run along the screen's
@@ -29,6 +30,12 @@ export class IsoView {
     try { keys = new URLSearchParams(location.search).get('keys') || 'cw'; } catch { /* ignore */ }
     this.keymap = KEYMAPS[keys] || KEYMAPS.cw;
     this.picCanvas = null;
+  }
+
+  // The current map's converter draft as override rows (for the console).
+  draft() {
+    const w = window.moonshine.world;
+    return draftOverrides(this.renderer.model(w));
   }
 
   makeTextBox() { return new IsoTextBox(); }
