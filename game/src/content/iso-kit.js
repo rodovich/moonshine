@@ -140,6 +140,30 @@ export function isoScene() {
         x += kw;
       }
     },
+    /**
+     * The SNES house() call, replayed: house(L, x0, y0, { top, mid, base, roofRows, palette })
+     * from act2/common.js becomes a block w = top.length wide and roofRows + (mid ? 1 : 0) + 2
+     * deep, its ground storey from `top`, an upper storey from `mid`, its plaster from `palette`.
+     * `iso` adds what the SNES call can't say: { z, roof, side }.
+     */
+    snesHouse(x0, y0, { top, mid = null, roofRows = 1, palette = null } = {}, iso = {}) {
+      const plaster = { white_sage: 'sage', sky: 'sky', ochre: 'ochre', rose: 'rose' }[palette] || 'white';
+      const d = roofRows + (mid ? 1 : 0) + 2;
+      S.house(x0, y0, top.length, d, { front: top, upper: mid ? [mid] : [], plaster, roof: 'flat', ...iso });
+    },
+    /**
+     * Replay a list of recorded layout calls ({ fn, args } with fn one of house, lamp, pot, bench),
+     * as layout() could record them, with per-call iso extras from `extra(call, i)`.
+     */
+    replay(calls, extra = () => ({})) {
+      calls.forEach((c, i) => {
+        const e = extra(c, i) || {};
+        if (c.fn === 'house') { const [, x0, y0, o] = c.args; S.snesHouse(x0, y0, o, e); }
+        else if (c.fn === 'lamp') S.lamp(c.args[0], c.args[1], e.z ?? 0, e);
+        else if (c.fn === 'pot') S.pot(c.args[0], c.args[1], c.args[2] ?? 'pot_geranium', e.z ?? 0);
+        else if (c.fn === 'bench') S.bench(c.args[0], c.args[1], e.z ?? 0);
+      });
+    },
     /** Where characters stand: z for each walkable tile recorded, else `fallback`. */
     floorHeight(fallback = 0) { const m = new Map(heights); return (x, y) => m.get(key(x, y)) ?? fallback; },
     done() { return out; },
