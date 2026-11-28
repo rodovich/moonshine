@@ -128,4 +128,5 @@ function floorOf() {
   for (const [fx, y0, y1] of FLIGHTS) for (let y = y0; y <= y1; y++) for (const x of [fx, fx + 1]) S.stairs(x, y, { z: stairZ(y0, y) });
   return S.floorHeight(0);
 }
-export const stepsIso = { scene: (g) => build(g), floor: floorOf() };
+// follows: the flags whose changes to the map this scene draws itself (the hollow step's states).
+export const stepsIso = { scene: (g) => build(g), floor: floorOf(), follows: ['step.open', 'counter.left', 'act4.started', 'epilogue'] };

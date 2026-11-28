@@ -53,7 +53,7 @@ function build(g) {
   for (const x of [11, 12]) { S.stairs(x, 14, { dir: 'down', z: 0 }); S.stairs(x, 15, { dir: 'down', z: -40 }); }
 
   // ---- Lamps, benches, pots (crown.js's own calls).
-  S.replay(calls.filter((c) => c.fn !== 'house'), (c) => (c.fn === 'lamp' ? { lit: !!(g && g.flag && g.flag('lighting.dusk')) } : {}));
+  S.replay(calls.filter((c) => c.fn !== 'house'));
 
   // The landmark fronts replace the town kit's ground-storey faces where they stand.
   const fronts = [[10, 6], [11, 6], [18, 6], [19, 6]];
@@ -62,4 +62,4 @@ function build(g) {
 }
 
 const base = build(null);
-export const crownIso = { scene: (g) => build(g).list, floor: base.S.floorHeight(0) };
+export const crownIso = { scene: (g) => build(g).list, floor: base.S.floorHeight(0), follows: [] };

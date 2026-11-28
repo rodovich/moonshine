@@ -14,9 +14,10 @@ const flagOf = (g) => (f) => !!(g && g.flag && g.flag(f));
 // Wall faces on the given tiles, for a piece in the wall to replace.
 const notFaceAt = (tiles) => (d) => !(d.layer === 0.1 && tiles.some(([x, y]) => d.x === x + 0.5 && d.y === y + 0.5));
 
-const sceneOf = (build) => {
+// follows: the flags whose changes to the map the scene draws itself (engine README, "Isometric view").
+const sceneOf = (build, follows = []) => {
   const base = build(null);
-  return { scene: (g) => build(g).list, floor: base.S.floorHeight(0) };
+  return { scene: (g) => build(g).list, floor: base.S.floorHeight(0), follows };
 };
 
 // The Shop (10 × 8): floor x1-8, rows 1-6; the door at (4-5, 7).
@@ -31,7 +32,7 @@ export const shopIso = sceneOf((g) => {
   S.prop(I, 'marble_jar', 1, 5, 0);
   S.prop(I, flag('window.telescope') ? 'display_scope' : 'display_hat', 7, 5, 0, 2, 1);
   return { S, list: S.done() };
-});
+}, ['window.telescope']);
 
 // The Archive (16 × 14): floor x1-14, rows 2-12; the high windows at (7-8, 1); the door at (7-8, 13).
 export const archiveIso = sceneOf(() => {
@@ -73,4 +74,4 @@ export const lampRoomIso = sceneOf((g) => {
   S.prop(I, flag('got.telescope') || flag('telescope.migrated') ? 'sheet_empty' : 'scope_sheet', 6, 5, 0);
   S.prop(I, 'polish_tin', 1, 6, 0);
   return { S, list: S.done() };
-});
+}, ['got.telescope', 'telescope.migrated']);

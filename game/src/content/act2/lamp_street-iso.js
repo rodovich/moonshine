@@ -29,7 +29,6 @@ const HOUSE_ISO = {
 function build(g) {
   const S = isoScene();
   const { calls } = composeLampStreet(g);
-  const lit = !!(g && g.flag && g.flag('lighting.dusk'));
 
   // ---- The street and the school yard.
   S.floor(1, 5, W - 1, 8, { kind: 'pave' });
@@ -37,7 +36,7 @@ function build(g) {
   S.floor(8, 5, 10, 3, { kind: 'yard' });
 
   // ---- The houses, the lamps, the bench and the pots (lamp_street.js's calls).
-  S.replay(calls, (c) => (c.fn === 'house' ? HOUSE_ISO[c.args[0]] : c.fn === 'lamp' ? { lit } : {}));
+  S.replay(calls, (c) => (c.fn === 'house' ? HOUSE_ISO[c.args[0]] : {}));
   // The Little School's bell-cote: a small dome on its roof.
   S.prop('town', 'dome_1x1', 12, 1, 2 * 96);
 
@@ -69,4 +68,4 @@ function build(g) {
 }
 
 const base = build(null);
-export const lampStreetIso = { scene: (g) => build(g).done(), floor: base.floorHeight(0) };
+export const lampStreetIso = { scene: (g) => build(g).done(), floor: base.floorHeight(0), follows: [] };

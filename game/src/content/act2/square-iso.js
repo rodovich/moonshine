@@ -34,7 +34,7 @@ function build(g) {
   S.floor(0, 4, W, 12, { kind: 'pave' });
 
   // ---- North: the Shop, two houses, the Mayor's office (square.js's calls), the lamps.
-  S.replay(calls, (c) => (c.fn === 'house' ? HOUSE_ISO[c.args[0]] : c.fn === 'lamp' ? { lit: flag('lighting.dusk') } : {}));
+  S.replay(calls, (c) => (c.fn === 'house' ? HOUSE_ISO[c.args[0]] : {}));
   // The arch between the houses: a one-storey block over the passage, open beneath.
   S.house(11, 0, 2, 4, { front: 'AA', plaster: 'ochre', roof: 'flat' });
   S.floor(11, 0, 2, 4, { kind: 'pave_shade' });
@@ -69,4 +69,5 @@ function build(g) {
 }
 
 const base = build(null);
-export const squareIso = { scene: (g) => build(g).list, floor: base.S.floorHeight(0) };
+// follows: the flags this scene shows (none: the Square's own map doesn't change in Act 2).
+export const squareIso = { scene: (g) => build(g).list, floor: base.S.floorHeight(0), follows: [] };
