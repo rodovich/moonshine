@@ -5,7 +5,7 @@ This file records the project's technical and process decisions. Creative decisi
 ## Sources
 
 - The client's brief is in [brief.md](brief.md). It is the root authority for what the game must be.
-- The isometric 640×480 version (client request): [iso.md](iso.md).
+- The isometric 640×480 version (client request): [iso.md](iso.md); its visual identity and art pipeline: [iso-art-direction.md](iso-art-direction.md).
 - Creative direction: [story-bible.md](story-bible.md), [art-direction.md](art-direction.md), [audio-direction.md](audio-direction.md) (each written by the task that owns it).
 - Game design: [design/overview.md](design/overview.md) (world map, gating, puzzle dependencies, interaction rules) and one build-ready document per slice, starting with [design/01-opening.md](design/01-opening.md).
 
