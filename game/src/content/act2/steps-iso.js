@@ -13,6 +13,7 @@
 // (x6-7, rows 0-6) up to Lamp Street, 1120 at row 0.
 
 import { isoScene } from '../iso-kit.js';
+import { townBeyond } from './iso-edges.js';
 import { composeSteps, STEPS_LAYOUT } from './steps.js';
 
 const W = 16;
@@ -109,6 +110,13 @@ function build(g) {
     S.prop('cistern', 'parapet_x', x, 41, 0);
   }
   S.floor(6, 41, 2, 1, { kind: 'pave_shade' });
+
+  // ---- The town either side of the Steps, stepping down the hill with them (the
+  // houses at the edges have their own faces).
+  for (const [y0, y1, z] of [[0, 10, 840], [11, 19, 600], [20, 29, 360], [30, 41, 0]]) {
+    townBeyond(S, { side: 'east', x: W - 1, y0, y1, z, faces: false });
+    townBeyond(S, { side: 'west', x: 0, y0, y1, z });
+  }
 
   // ---- Pots and the bench, on their landings.
   S.replay(calls.filter((c) => c.fn !== 'house'), (c) => ({ z: landingZ(c.args[1]) }));

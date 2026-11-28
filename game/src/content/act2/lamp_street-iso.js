@@ -12,6 +12,7 @@
 // eaves at -80.
 
 import { isoScene } from '../iso-kit.js';
+import { townBeyond } from './iso-edges.js';
 import { composeLampStreet } from './lamp_street.js';
 
 const W = 32;
@@ -59,6 +60,8 @@ function build(g) {
     S.prop('cistern', 'parapet_x', x, 13, 0);
   }
   S.lowRoofs(0, 14, W, { z: -80, skip: [27, 28] });
+  // The town beyond the street's east end.
+  townBeyond(S, { side: 'east', x: W - 1, y0: 5, y1: 12 });
   for (const x of [27, 28]) {
     S.stairs(x, 13, { dir: 'down', z: 0 });
     S.stairs(x, 14, { dir: 'down', z: -40 });

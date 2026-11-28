@@ -9,6 +9,7 @@
 // the stair up to the Square climbs 40 a row to 160 at row 0.
 
 import { isoScene } from '../iso-kit.js';
+import { townBeyond } from './iso-edges.js';
 import { composeBilge, BILGE_LAYOUT } from './bilge.js';
 
 const W = 32;
@@ -68,6 +69,8 @@ function build() {
     S.prop('cistern', 'parapet_x', x, 14, 0);
   }
   S.lowRoofs(0, 15, W, { z: -80 });
+  // East, toward the Harbor: the town's lowest roofs.
+  townBeyond(S, { side: 'east', x: W - 1, y0: 4, y1: 13 });
   return S;
 }
 
