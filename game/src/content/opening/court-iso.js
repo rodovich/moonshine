@@ -84,6 +84,9 @@ function scene(g) {
     const fx = f('fx.tub');
     if (fx) tub = { filling: 'tub_filling', slosh: 'tub_slosh', whirl: 'tub_whirl_wrong', empty: 'tub_empty' }[fx];
   }
+  // Seated on the rim, she's drawn with the tub, so the rim covers her shins
+  // (the player's own sprite is hidden then; see `hide` below).
+  if (seated(g)) tub = { tub_full: 'tub_sit_full', tub_plugged: 'tub_sit_full', tub_filling: 'tub_sit_full', tub_slosh: 'tub_sit_slosh', tub_whirl_wrong: 'tub_sit_whirl_wrong', tub_empty: 'tub_sit_empty' }[tub] || 'tub_sit_full';
   add(C, tub, 3, 4, DECK, 2, 1);
 
   // ---- Her Next Door's roof: the line posts, the sheets, the back line.
@@ -153,4 +156,6 @@ function floor(x, y) {
   return 0;
 }
 
-export const courtIso = { scene, floor };
+const seated = (g) => g.player.pose === 'sit_tub_right';
+
+export const courtIso = { scene, floor, hide: (g) => (seated(g) ? ['player'] : []) };

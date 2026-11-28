@@ -79,18 +79,20 @@ function isoVista(scene, ctx, ms) {
   const { from, to } = m.moonRise;
   const mx = from[0] + (to[0] - from[0]) * Math.max(0, t);
   const my = from[1] + (to[1] - from[1]) * Math.max(0, t);
-  blit('sky', 0, 0);
-  if (scene.glowAt != null && ms >= scene.glowAt) blit('glow', m.glowAt[0], m.glowAt[1], sec >= 0 ? 0.6 : Math.min(1, (ms - scene.glowAt) / 1200));
-  if (t >= 0) {
-    blit('moon_halo', mx, my, 0.9);
-    blit(t < 0.18 ? 'moon_peach' : t < 0.42 ? 'moon_cream' : 'moon_white', mx, my);
+  // The layers in the sheet's own order (sky, glow, moon_halo, moon, far, path, town, fg, twinkle).
+  const layers = {
+    glow: () => scene.glowAt != null && ms >= scene.glowAt && blit('glow', m.glowAt[0], m.glowAt[1], sec >= 0 ? 0.6 : Math.min(1, (ms - scene.glowAt) / 1200)),
+    moon_halo: () => t >= 0 && blit('moon_halo', mx, my, 0.9),
+    moon: () => t >= 0 && blit(t < 0.18 ? 'moon_peach' : t < 0.42 ? 'moon_cream' : 'moon_white', mx, my),
+    path: () => t >= 0 && blit('path', mx, m.pathTop, Math.min(1, t * 4)),
+    twinkle: () => (m.twinkles || []).forEach(([x, y], i) => {
+      if (Math.floor((ms + i * 677) / 400) % 3 === 0) blit(`twinkle_${i % 3}`, x, y);
+    }),
+  };
+  for (const name of m.order || ['sky', 'glow', 'moon_halo', 'moon', 'far', 'path', 'town', 'fg', 'twinkle']) {
+    if (layers[name]) layers[name]();
+    else blit(name, 0, 0); // a full-screen layer
   }
-  blit('far', 0, 0);
-  if (t >= 0) blit('path', mx, m.pathTop, Math.min(1, t * 4));
-  blit('fg', 0, 0);
-  (m.twinkles || []).forEach(([x, y], i) => {
-    if (Math.floor((ms + i * 677) / 400) % 3 === 0) blit(`twinkle_${i % 3}`, x, y);
-  });
 }
 
 export async function moonrise(g) {
