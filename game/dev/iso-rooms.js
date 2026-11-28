@@ -19,6 +19,13 @@ export const roomsIso = {
     // The hundredth step's lid, Acts 4–6 and the epilogue, on a strip of landing.
     for (const [x, f] of [[17, 'landing_l'], [18, 'landing_r'], [19, 'landing_l'], [20, 'landing_r']]) for (const y of [3, 5]) S.add('act2_landmarks', f, x, y, 0, 1, 1, 0);
     for (const [x, f] of [[17, 'lid_boarded_l'], [18, 'lid_boarded_r'], [19, 'lid_chalked_l'], [20, 'lid_chalked_r']]) S.add('act2_landmarks', f, x, 4, 0, 1, 1, 0);
+    // A Goat Path cliff: a 4×2 shelf three courses up, faced south and east (act2_harbor:cliff_s/_e).
+    for (let x = 17; x < 21; x++) for (let y = 10; y < 12; y++) {
+      const south = y === 11 ? [0, 1, 2].map(() => ['cliff_s', 40]) : [];
+      const east = x === 20 ? [0, 1, 2].map(() => ['cliff_e', 40]) : [];
+      S.column(x, y, 0, south, east, null, 'act2_harbor');
+      S.add('act2_harbor', 'rock_shelf', x, y, 120, 1, 1, 0);
+    }
     return S.done();
   },
 };

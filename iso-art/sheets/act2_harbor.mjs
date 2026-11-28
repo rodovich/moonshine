@@ -31,7 +31,7 @@
 //   path_a, path_b, path_c [1,1] h0 ... floor diamonds: the path's '.' cells (c: hoof-scuffed)
 //   rock_shelf [1,1] h0 .......... bare limestone (the viewpoint ledge 1, 21–22; shelves beside the path)
 //   path_steps [1,1] h40 ......... the 's' cells (STEPS rectangles: 2–3,4–7; 2–3,18–21; …), down south one tile
-//   cliff_s, cliff_e [1,1] h40 ... rock face under a shelf's lower edge: south face (left half), east face (right half);
+//   cliff_s, cliff_e [1,1] h40 ... one 40 px course of rock face under a shelf's edge: south face, east face (seamless along a face and up a stack);
 //                                  stack like wall courses (the '#' rock cells)
 //   rock_a [1,1] h26, rock_b [2,1] h28 ... lichened outcrops the path goes round (e.g. 12–13, 9; 3–12, 29)
 //   gorse_a, gorse_b [1,1] h22, thyme [1,1] h8 ... on rock and earth cells off the path
@@ -79,7 +79,10 @@ export default {
     for (const v of ['a', 'b', 'c']) out.push(floor(`path_${v}`, () => H.pathEarth({ variant: v })));
     out.push(floor('rock_shelf', () => H.rockShelf()));
     out.push(arch('path_steps', () => H.pathSteps(), [1, 1], 40));
-    out.push(split('cliff', () => H.cliffFace(), { cliff_s: (p, sx) => sx < 0, cliff_e: (p, sx) => sx >= 0 }, { fp: [1, 1], h: 40 }));
+    // The faces stand 0.08 in from the tile's edge (room for their roughness), so each reaches
+    // about 2.6 px past the anchor's screen x: cut at 3 px, or neighbors leave a gap between them.
+    out.push(split('cliff_s', () => H.cliffFace({ face: 's' }), { cliff_s: (p, sx) => sx < 3 }, { fp: [1, 1], h: 40 }));
+    out.push(split('cliff_e', () => H.cliffFace({ face: 'e' }), { cliff_e: (p, sx) => sx >= -3 }, { fp: [1, 1], h: 40 }));
     out.push(prop('rock_a', () => H.rockOutcrop('a'), [1, 1], 26));
     out.push(prop('rock_b', () => H.rockOutcrop('b'), [2, 1], 28));
     out.push(prop('gorse_a', () => H.bush('gorse', 1), [1, 1], 22));
