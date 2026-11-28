@@ -55,8 +55,8 @@ export default {
   // draws each SNES sheet's characters.
   // aliases: SNES frame names with a different isometric name ({dir} is the facing).
   iso: {
-    sheets: { cheryl, cheryl_swim, old_man_seated, neighbor, sweaty_kid, cat: props, fx: [fx, fx_mist] },
-    aliases: { neighbor: { tend: 'smooth_{dir}' }, fx: { sweat_drop: 'sweat' } },
+    sheets: { cheryl, cheryl_swim, old_man_seated, neighbor, sweaty_kid, cat: props, fx, fx_mist },
+    aliases: { neighbor: { tend: 'smooth_{dir}' } },
   },
   player: { name: 'Cheryl', sprite: { sheet: cheryl }, poseOffsets: { sit_right: [0, -4], rise_right: [0, -2] } },
 
