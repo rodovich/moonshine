@@ -31,6 +31,12 @@ Set pieces drive the art with short-lived flags that `compose` reads: `fx.tap`, 
 - The morning: `?map=flat&x=8&y=4&flags=act1.moonrise`
 - Mid-puzzle: add `items=pepper_mill,egg_timer` or flags such as `oldMan.hasPepperKing,kid.hasTimer` (give items to match)
 
+## The isometric view
+
+`court-iso.js` and `flat-iso.js` describe the two maps for `?view=iso` (the engine README's "Isometric view"), after the art task's compositions, and `moonrise.js`'s picture has its own 640×480 drawing (`draw.iso`) on the same timeline. Each scene reads the same flags as the map's `compose(g)`, so **a flag that changes how the court or flat looks has to change both**, as do Act 6's epilogue states (the white back line, the well's grate on `fx.wellGrate`). The piano stands over rows 23–24, wedged at the top of the Squeeze as on the SNES map, so Cheryl's spot in front of it (15–16, 22) stays clear.
+
+`node tests/iso-audit.mjs "<query>" …` checks, for each interactable in a state, that clicks on its drawn art reach it in the isometric view, and lists drawn pieces with no hotspot. `node tests/film.mjs "<query>" <prefix> [count] [ms]` plays a scene and saves a screenshot every `ms`, advancing text, at 640×480 for `?view=iso`.
+
 ## Tests
 
 `tests/opening.spec.js` plays the whole opening twice, by keyboard alone (the plug thread first) and by pointer alone (the view thread first), and saves screenshots of key moments as `tests/screenshots/opening-*.png`. `node tests/play.mjs "<query>" step …` is a small dev tool for poking at a scene and taking screenshots (see its header).

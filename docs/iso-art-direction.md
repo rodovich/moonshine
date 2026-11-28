@@ -126,6 +126,18 @@ Pictures are rendered in true perspective at 640×480 by `iso-art/lib/persp.mjs`
 - **Don't** use `wrong_*` colors outside the Wrongness.
 - **Don't** imitate a particular game's interface, characters, or art; don't use downloaded models, textures, or fonts.
 
+## The town kit (Act 2 onward)
+
+From Act 2 the surface maps are assembled from a modular kit rather than drawn one by one. The art is the `town` sheet (frame list at the top of `iso-art/sheets/town.mjs`); the assembly is `game/src/content/iso-kit.js`, a small shipping module whose calls mirror the SNES layout helpers in `act2/common.js`, so a map's iso scene reads like its `compose()`. `game/src/content/act2/lamp_street-iso.js` is the worked example; the dev page shows it at `/dev/iso-art.html?only=court&map=lamp_street&cam=map&zoom=1`.
+
+- **Floors:** limestone flagstones in a 2×2 macro with a second slab layout (`pave_*`, `pave2_*`, picked as the SNES `pave()` does), a shaded slab for arches and doorways, a cracked slab, cobbles, packed-earth yard, and canal water (animated).
+- **Walls:** a ground storey (96 px, with a plinth) and an upper storey (96 px) in five plasters (white, ochre, rose, sky, sage, the SNES swaps, each wearing its own shutters), with south-face kinds plain, window, window box, closed shutters, door, shopfront, and archway (upper: plain, window, window box, closed, balcony) and east-face kinds plain, window, closed, door; 40 px courses; ashlar retaining faces; quay faces wet and green toward the water.
+- **Roofs:** a flat roof's top in each plaster; low lips; hipped terracotta roofs as single pieces for blocks up to 6×6; Tessel domes (1×1, 2×2).
+- **Stairs:** one 40 px run across a tile, descending in each grid direction (`stairs_down` toward +y, and up, left, right).
+- **Street furniture:** lamps (unlit and lit), bench, geranium and bay pots, crate, barrel, awnings and hanging signs (coral, blue, green), iron railings, laundry lines across a street, a stepped canal bridge, mooring posts.
+- **Assembly:** `isoScene()` returns a builder: `floor`, `house` (front, upper storeys, and side as letter strings: `#` wall, `w` window, `b` window box, `c` closed, `D` door, `S` shopfront, `A` archway, `B` balcony), `terrace` (a raised floor with its retaining faces), `stairs`, `column`, `hipRoof`, `lamp`, `bench`, `pot`, `lowRoofs`, `prop`, and `floorHeight()` for the map's `floor(x, y)`. A house's faces show only where the camera sees them (its south front and east side); everything else is a top.
+- **Ownership:** the art task keeps the kit and adds pieces when a map needs one; content builders write each map's `*-iso.js` with it.
+
 ## The pipeline
 
 All isometric art is made by code in `iso-art/` and rendered to PNG atlases plus `game/assets/iso/manifest.js`. Node only; no dependencies beyond the dev-only Playwright (for screenshots).
@@ -155,6 +167,8 @@ Add or change a model in `iso-art/models/`, list its frames in a sheet in `iso-a
 | `flat` | Cheryl's flat: terracotta floor, the north and west walls' inner faces (plain, window, clock, kitchen shelf), cut wall caps and stubs (door, plug hook), counter (with and without the mill or the timer), stove, bed, side table with the photograph face down, table (with the chart, bare), chairs, wardrobe, washstand (with and without the soap), bookshelf, rug |
 | `cat` | the Pelletiers' cat: sitting with a slow tail flick (`cat_0…3`), and asleep (`cat_sleep_0/1`) |
 | `fx` | blob shadow, sweat drops, the well's breath, dust, swifts, a gull |
+| `town` | the town kit: floors, wall storeys in five plasters, courses, retaining and quay faces, roofs and domes, stairs in four directions, street furniture (see "The town kit") |
+| `fx_mist` | the well's breath, under the SNES sheet's name |
 | `moonrise` | the moonrise picture in layers |
 | `ui` | panels, slots, choice marker, pointer, bag button, item icons, fonts |
 

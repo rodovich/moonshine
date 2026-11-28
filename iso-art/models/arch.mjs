@@ -158,6 +158,7 @@ export function facade(face, h, kind = 'plain', opts = {}) {
   if (kind.startsWith('window')) feature = windowFeature({ color: opts.color, flowerBox: kind === 'window_box', closed: kind === 'window_closed', z0: opts.z0 ?? 0.95, z1: opts.z1 ?? Math.min(h - 0.3, 2.0) });
   if (kind.startsWith('door')) feature = doorFeature({ color: opts.color, open: kind === 'door_open', z1: opts.z1 ?? Math.min(h - 0.2, 2.12) });
   if (kind === 'gate') feature = gateFeature({ z1: Math.min(h - 0.15, 2.1) });
+  if (opts.feature) feature = opts.feature; // a feature built elsewhere (the town kit's balcony, shopfront, archway)
   if (feature) {
     body = subtract(body, onFace(feature.cut, face), plaster('#cfc8bc', { tag: 'wall' }));
     if (kind.startsWith('window')) {
