@@ -3,7 +3,7 @@
 //
 // Frame names:
 //   Floors (64×32 diamonds, h 0): pave_<q>, pave2_<q> (q = nw|ne|sw|se, a 2×2 macro), pave_shade,
-//     pave_crack, cobble_0..3, yard_0..2, water_0..2 (anim water)
+//     pave_crack, pave_moon_eye, pave_moon_eye_lit, cobble_0..3, yard_0..2, water_0..2 (anim water)
 //   Ground storeys (96 px, with a plinth): w_<plaster>_s_<kind> on a south face, w_<plaster>_e_<kind> on an east face
 //     s kinds: plain window window_box window_closed door shop arch; e kinds: plain window window_closed door
 //   Upper storeys (96 px): u_<plaster>_s_<kind> (plain window window_box window_closed balcony), u_<plaster>_e_<kind> (plain window window_closed)
@@ -55,6 +55,8 @@ export default {
     }
     out.push(floor('pave_shade', () => T.flagstones({ q: 'nw', variant: 'shade' })));
     out.push(floor('pave_crack', () => T.flagstones({ q: 'se', variant: 'crack' })));
+    // The moon-eyes set in the Crown's paving (CROWN_MOON_EYES); lit from Act 3 at dusk.
+    out.push(floor('pave_moon_eye', () => T.moonEyeStone()), floor('pave_moon_eye_lit', () => T.moonEyeStone({ lit: true })));
     for (let s = 0; s < 4; s++) out.push(floor(`cobble_${s}`, () => cobbles({ seed: s })));
     for (let s = 0; s < 3; s++) out.push(floor(`yard_${s}`, () => T.yard({ seed: s })));
     for (let i = 0; i < 3; i++) out.push(floor(`water_${i}`, () => T.water({ t: i / 3 })));

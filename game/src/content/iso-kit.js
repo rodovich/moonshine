@@ -158,7 +158,8 @@ export function isoScene() {
     replay(calls, extra = () => ({})) {
       calls.forEach((c, i) => {
         const e = extra(c, i) || {};
-        if (c.fn === 'house') { const [, x0, y0, o] = c.args; S.snesHouse(x0, y0, o, e); }
+        // house args as layout() records them, [x0, y0, opts], or as house() takes them, [L, x0, y0, opts].
+        if (c.fn === 'house') { const [x0, y0, o] = typeof c.args[0] === 'number' ? c.args : c.args.slice(1); S.snesHouse(x0, y0, o, e); }
         else if (c.fn === 'lamp') S.lamp(c.args[0], c.args[1], e.z ?? 0, e);
         else if (c.fn === 'pot') S.pot(c.args[0], c.args[1], c.args[2] ?? 'pot_geranium', e.z ?? 0);
         else if (c.fn === 'bench') S.bench(c.args[0], c.args[1], e.z ?? 0);
