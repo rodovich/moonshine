@@ -131,20 +131,32 @@ export const fontImage = (font) => image(font.image);
 // The isometric frame for an entity's current state, as { img, ax, ay,
 // flip, shadow }, or null (draw the SNES sprite instead). Mirrors
 // entity.currentFrame()'s choices.
-const bySnes = new WeakMap(); // SNES sheet object -> isometric sheet name
+const bySnes = new WeakMap(); // SNES sheet object -> isometric sheet names
 
 // Content says which isometric sheet draws which SNES sheet:
 // content.iso.sheets = { isoSheetName: snesSheet }.
 let aliases = {};
 export function bindSnesSheets(map = {}, frameAliases = {}) {
-  for (const [name, snes] of Object.entries(map)) if (snes) bySnes.set(snes, name);
+  for (const [name, snes] of Object.entries(map)) {
+    if (!snes) continue;
+    // Several isometric sheets may draw one shared SNES sheet's objects (the cat, from props).
+    bySnes.set(snes, [...(bySnes.get(snes) || []), name]);
+  }
   aliases = frameAliases;
 }
 
 export function isoFrameFor(e) {
-  const name = e.sprite && e.sprite.sheet && bySnes.get(e.sprite.sheet);
-  const s = name && sheets.get(name);
-  if (!s || !s.ready) return null;
+  const names = (e.sprite && e.sprite.sheet && bySnes.get(e.sprite.sheet)) || [];
+  for (const name of names) {
+    const s = sheets.get(name);
+    if (!s || !s.ready) continue;
+    const f = frameIn(e, s, name);
+    if (f) return f;
+  }
+  return null;
+}
+
+function frameIn(e, s, name) {
   const ms = e.animMs + e.phase;
   const withShadow = (f, flip) => f && { ...f, flip, shadow: s.frame(`${f.name}.shadow`) };
   const pick = (fn) => {

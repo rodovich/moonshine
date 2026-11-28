@@ -129,9 +129,22 @@ export function foldingChair({ face = 0, cardigan = false } = {}) {
   // Backrest slats.
   for (let i = 0; i < 2; i++) parts.push(place(boxAt(-0.018, -0.2, 0.62 + i * 0.16, 0.018, 0.2, 0.72 + i * 0.16, w, 0.01), { at: [-0.25, 0, 0], ry: -0.12 }));
   if (cardigan) {
-    const knitM = mat((x, y, z, lx, ly, lz) => { const n = fbm(lx * 30, ly * 30, lz * 60, 2); const c = hex('#d05848'); return [c[0] * (0.9 + n * 0.2), c[1] * (0.9 + n * 0.2), c[2] * (0.9 + n * 0.2)]; }, { tag: 'prop', spec: 0.03 });
-    parts.push(move(box(0.15, 0.17, 0.03, knitM, 0.03), 0.02, 0, 0.51));
-    parts.push(move(box(0.13, 0.15, 0.025, knitM, 0.025), 0.03, 0.01, 0.56));
+    // Her cardigan, folded: coral knit with a ribbed hem showing along the front,
+    // one sleeve hanging over the seat's edge.
+    const coral = hex('#e0684e');
+    const knitM = mat((x, y, z, lx, ly, lz) => {
+      const n = fbm(lx * 30, ly * 30, lz * 60, 2);
+      return coral.map((v) => v * (0.9 + n * 0.18));
+    }, { tag: 'prop', spec: 0.03 });
+    const ribM = mat((x, y, z, lx, ly, lz) => coral.map((v) => v * (Math.sin(ly * 160) > 0 ? 0.82 : 1.0)), { tag: 'prop', spec: 0.03 });
+    parts.push(move(box(0.15, 0.17, 0.028, knitM, 0.03), 0.02, 0, 0.51));
+    parts.push(move(box(0.14, 0.16, 0.024, knitM, 0.025), 0.03, 0.005, 0.56));
+    parts.push(move(box(0.018, 0.16, 0.026, ribM, 0.012), 0.16, 0.005, 0.555)); // the ribbed hem along the fold
+    parts.push(move(sphere(0.012, mat('#f0d8b0', { tag: 'prop', spec: 0.5 })), 0.12, -0.06, 0.585)); // a button
+    // The sleeve: over the front edge and down.
+    parts.push(capsule([0.1, 0.1, 0.56], [0.22, 0.12, 0.52], 0.032, knitM));
+    parts.push(capsule([0.22, 0.12, 0.52], [0.25, 0.13, 0.32], 0.03, knitM));
+    parts.push(move(cylinder(0.031, -0.025, 0.0, ribM), 0.25, 0.13, 0.32));
   }
   return place(union(parts), { rz: face });
 }

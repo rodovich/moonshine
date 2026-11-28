@@ -262,6 +262,79 @@ function glyph(ch, style) {
   return c;
 }
 
+
+// ---------------------------------------------------------------------------
+// The title font: the SNES face grown to 6×, cast in gold with a rounded bevel
+// lit from the upper left, an ink outline, and a soft drop shadow, the way a
+// late-90s title logo was rendered. Pre-colored; for the title screen's name.
+
+const TS = 6, TPAD = 6;
+function titleGlyph(ch) {
+  const rows = snesFont.frames[ch];
+  const g0 = rows.map((r) => [...r].map((c) => (c === '.' ? 0 : 1)));
+  const keep = cornerMask(g0, 8, 9);
+  let g = scale2x(g0, 8, 9, keep);
+  let k2 = up2(keep);
+  g = scale2x(g, 16, 18, k2); k2 = up2(k2);
+  g = scale2x(g, 32, 36, k2); // 8× (64×72)
+  const HW = 64, HH = 72;
+  // Distance from each inside hi-res pixel to the outside (chamfer, two passes).
+  const D = Array.from({ length: HH }, (_, y) => Array.from({ length: HW }, (_, x) => (g[y][x] ? 1e9 : 0)));
+  for (let y = 0; y < HH; y++) for (let x = 0; x < HW; x++) if (D[y][x]) {
+    const a = y > 0 ? D[y - 1][x] + 1 : 1, b = x > 0 ? D[y][x - 1] + 1 : 1;
+    const c = y > 0 && x > 0 ? D[y - 1][x - 1] + 1.414 : 1.414, d = y > 0 && x < HW - 1 ? D[y - 1][x + 1] + 1.414 : 1.414;
+    D[y][x] = Math.min(D[y][x], a, b, c, d);
+  }
+  for (let y = HH - 1; y >= 0; y--) for (let x = HW - 1; x >= 0; x--) if (D[y][x]) {
+    const a = y < HH - 1 ? D[y + 1][x] + 1 : 1, b = x < HW - 1 ? D[y][x + 1] + 1 : 1;
+    const c = y < HH - 1 && x < HW - 1 ? D[y + 1][x + 1] + 1.414 : 1.414, d = y < HH - 1 && x > 0 ? D[y + 1][x - 1] + 1.414 : 1.414;
+    D[y][x] = Math.min(D[y][x], a, b, c, d);
+  }
+  const bevel = 5; // hi-res px
+  const H = (x, y) => (x < 0 || y < 0 || x >= HW || y >= HH ? 0 : Math.min(D[y][x], bevel) / bevel);
+  const W = Math.ceil(HW * TS / 8) + TPAD * 2, Hh = Math.ceil(HH * TS / 8) + TPAD * 2;
+  const c = canvas(W, Hh);
+  const gold = [rgb('#6a3c10'), rgb('#b87a28'), rgb('#e8b848'), rgb('#fff2b8')];
+  const ramp = (t) => { t = Math.max(0, Math.min(0.999, t)) * 3; const i = Math.floor(t); return mixc(gold[i], gold[i + 1], t - i); };
+  const sample = (tx, ty) => {
+    // Average a 3×3 grid of hi-res samples inside the target pixel.
+    let cov = 0, shade = 0, n = 0;
+    for (let j = 0; j < 3; j++) for (let i = 0; i < 3; i++) {
+      const hx = Math.floor(((tx - TPAD) + (i + 0.5) / 3) * 8 / TS), hy = Math.floor(((ty - TPAD) + (j + 0.5) / 3) * 8 / TS);
+      n++;
+      if (hx < 0 || hy < 0 || hx >= HW || hy >= HH || !g[hy][hx]) continue;
+      cov++;
+      const nx = H(hx - 1, hy) - H(hx + 1, hy), ny = H(hx, hy - 1) - H(hx, hy + 1);
+      const len = Math.hypot(nx * 3, ny * 3, 1);
+      const lit = ((nx * 3) * 0.6 + (ny * 3) * 0.6 + 0.55) / len; // light from the upper left
+      shade += lit;
+    }
+    return { cov: cov / n, shade: cov ? shade / cov : 0 };
+  };
+  const cells = [];
+  for (let y = 0; y < Hh; y++) for (let x = 0; x < W; x++) cells.push(sample(x, y));
+  const at = (x, y) => (x < 0 || y < 0 || x >= W || y >= Hh ? { cov: 0 } : cells[y * W + x]);
+  // Drop shadow, then the outline, then the gold.
+  for (let y = 0; y < Hh; y++) for (let x = 0; x < W; x++) { const s0 = at(x - 3, y - 3); if (s0.cov > 0.3) c.set(x, y, P.shadow, 0.55); }
+  for (let y = 0; y < Hh; y++) for (let x = 0; x < W; x++) {
+    const s0 = at(x, y);
+    if (s0.cov >= 0.5) continue;
+    let near = 0;
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [1, -1], [-1, 1]]) near = Math.max(near, at(x + dx, y + dy).cov);
+    if (near >= 0.5) c.set(x, y, P.ink, 0.9);
+  }
+  for (let y = 0; y < Hh; y++) for (let x = 0; x < W; x++) {
+    const s0 = at(x, y);
+    if (s0.cov < 0.5) continue;
+    const vert = 1 - (y - TPAD) / (7 * TS); // brighter toward the top of the caps
+    c.set(x, y, ramp(0.25 + s0.shade * 0.55 + vert * 0.2));
+  }
+  let right = -1;
+  for (const r of rows) for (let x = 0; x < 8; x++) if (r[x] !== '.') right = Math.max(right, x);
+  c.advance = (right + 2) * TS;
+  return c;
+}
+
 const FONT_CHARS = Object.keys(snesFont.frames);
 const code = (ch) => ch.codePointAt(0).toString(16);
 
@@ -297,6 +370,8 @@ export default {
         },
       });
     }
+    // The title font.
+    out.push({ name: 'font_title', render() { return FONT_CHARS.map((ch) => { const g = titleGlyph(ch); return { name: `font_title_${code(ch)}`, img: g.quantize() }; }); } });
     return out;
   },
   meta: {
@@ -319,6 +394,18 @@ export default {
       glyphs[' '] = [0, 0, 0, 0, 6];
       fonts[style] = { image: 'ui.png', lineHeight: 22, baseline: 14, capHeight: 14, italic: !!FONT_STYLES[style].italic, glyphs };
     }
+    // The title font: glyph boxes include a 6 px margin for the bevel's outline and shadow,
+    // so draw each glyph at (pen x - 6, line top - 6) and advance by the fifth value.
+    const tg = {};
+    for (const ch of FONT_CHARS) {
+      const f = frames[`font_title_${code(ch)}`];
+      const rows = snesFont.frames[ch];
+      let right = -1;
+      for (const r of rows) for (let x = 0; x < 8; x++) if (r[x] !== '.') right = Math.max(right, x);
+      if (f) tg[ch] = [f[0], f[1], f[2], f[3], (right + 2) * TS];
+    }
+    tg[' '] = [0, 0, 0, 0, 3 * TS];
+    fonts.title = { image: 'ui.png', lineHeight: 64, baseline: 42, capHeight: 42, margin: TPAD, pre: 'gold', glyphs: tg };
     return fonts;
   },
 };
