@@ -198,13 +198,13 @@ test('pointer: Act 4, the morning to the reveal', async ({ page }) => {
   for (const v of ['valve_thin', 'valve_stout', 'valve_middle']) { await ptrInteract(page, v); await read(); }
   await ptrInteract(page, 'valve_middle'); await read();
   expect((await snap(page)).flags['pumps.burst']).toBe(true);
-  // Climbing by tapping the top of the screen, a rung at a time.
+  // Climbing by tapping the ladder above her, a rung at a time.
   await ptrExit(page, 'emergency_shaft', [22, 2]);
-  for (let i = 0; i < 40; i++) {
+  for (let i = 0; i < 80; i++) {
     const s = await snap(page);
     if (s.map === 'ice_cellar') break;
     if (s.text || s.busy) { await ptrAdvance(page)(); await page.waitForTimeout(150); continue; }
-    const p = await page.evaluate(() => window.moonshine.display.toClient(128, 10));
+    const p = await page.evaluate(() => { const pl = window.moonshine.world.player; return window.moonshine.tileToClient(pl.x, Math.max(0, pl.y - 3)); });
     await page.mouse.click(p.x, p.y);
     await page.waitForTimeout(700);
   }

@@ -15,7 +15,10 @@ import { convertMap } from './convert.js';
 import { isoFrameFor } from './sprites.js';
 
 const SPRITE_SCALE = 2; // SNES sprites as stand-ins
-const SLAB_Z = 64; // overhead tiles float this high above their floor
+const SLAB_Z = 64;
+// Walls and slabs in front of Cheryl within this far (screen px) of her are cut away.
+const CUT_X = 112;
+const CUT_Y = 80; // overhead tiles float this high above their floor
 const SHADE = { top: 1, south: 0.8, east: 0.62 };
 
 let nextId = 1;
@@ -229,11 +232,13 @@ export class IsoRenderer {
     const pk = Math.max(p.x + p.y, p.fromX + p.fromY);
     const cut = new Set();
     if (pr && p.visible) {
+      // The area around her, so the floor she'd walk or click on next shows too.
+      const zone = { x: pr.x - CUT_X, y: pr.y - CUT_Y, w: pr.w + 2 * CUT_X, h: pr.h + 2 * CUT_Y };
       for (const it of items) {
         if (it.type !== 'cell' && it.type !== 'slab') continue;
         if (it.key <= pk) continue;
         const r = this.cellRect(it);
-        if (r && overlap(r, pr)) cut.add(it);
+        if (r && overlap(r, zone)) cut.add(it);
       }
     }
 
@@ -344,7 +349,8 @@ export class IsoRenderer {
       ctx.drawImage(img, q.x - cx, q.y + HH - cy);
     }
     if (cutAway && wall(c.kind)) {
-      ctx.drawImage(plainTop(), q.x - HW - cx, q.y - cy);
+      // A cut-away wall's stub shows its own top, dimmed.
+      ctx.drawImage(topImg ? diamond(topImg, 0.55) : plainTop(), q.x - HW - cx, q.y - cy);
     } else if (topImg) {
       ctx.drawImage(diamond(topImg), q.x - HW - cx, q.y - cy);
     }

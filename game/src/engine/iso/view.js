@@ -30,6 +30,7 @@ export class IsoView {
     try { keys = new URLSearchParams(location.search).get('keys') || 'cw'; } catch { /* ignore */ }
     this.keymap = KEYMAPS[keys] || KEYMAPS.cw;
     this.picCanvas = null;
+    this.bagButton = BAG_BTN;
   }
 
   // The current map's converter draft as override rows (for the console).
@@ -120,13 +121,53 @@ export class IsoView {
     return dir ? this.keymap[dir] : dir;
   }
 
-  tileToScreen(world, tx, ty) {
+  // Can a click reach this tile (is any of it visible)?
+  clickable(world, tx, ty) {
+    const q = this.tileToScreen(world, tx, ty);
+    const k = this.pick(world, q.x, q.y);
+    if (k.entity) return k.entity.occupies(tx, ty);
+    return k.tx === tx && k.ty === ty;
+  }
+
+  // The center of a tile's top on screen.
+  tileCenter(world, tx, ty) {
     const r = this.renderer;
     r.model(world);
     const c = r.iso.at(tx, ty);
     const z = c ? r.top(c) ?? 0 : 0;
     const q = proj(tx + 0.5, ty + 0.5, z, r.ox);
     return { x: q.x - world.cam.x, y: q.y - world.cam.y };
+  }
+
+  // Where a player would click to reach a tile: a character or object drawn
+  // standing on it, else a visible part of the tile (something in front may
+  // hide its center), else its center.
+  tileToScreen(world, tx, ty) {
+    const e = world.entities.find((o) => !o.isPlayer && o.visible && o.isoRect && o.x === tx && o.y + o.h - 1 === ty);
+    if (e) return { x: e.isoRect.x + e.isoRect.w / 2, y: e.isoRect.y + e.isoRect.h * 0.6 };
+    // A door in a wall: the door itself, low on the wall's face.
+    const r = this.renderer;
+    const cell = r.model(world) && r.iso.at(tx, ty);
+    if (cell && cell.kind === 'door') {
+      for (const up of [12, 20, 28, 6]) {
+        const q = proj(tx + 0.5, ty + 1, cell.z + up, r.ox);
+        const p = { x: q.x - world.cam.x, y: q.y - world.cam.y }; // the middle of its south face
+        const k = this.pick(world, p.x, p.y);
+        if (k.tx === tx && k.ty === ty && (!k.entity || k.entity.occupies(tx, ty))) return p;
+      }
+    }
+    const c = this.tileCenter(world, tx, ty);
+    // Search the diamond, nearest the center first.
+    const pts = [];
+    for (let dy = -14; dy <= 14; dy += 2) {
+      for (let dx = -28; dx <= 28; dx += 4) if (Math.abs(dx) / 32 + Math.abs(dy) / 16 < 0.95) pts.push([dx, dy]);
+    }
+    pts.sort((a, b) => Math.hypot(a[0] / 2, a[1]) - Math.hypot(b[0] / 2, b[1]));
+    for (const [dx, dy] of pts) {
+      const k = this.pick(world, c.x + dx, c.y + dy);
+      if (k.tx === tx && k.ty === ty && (!k.entity || k.entity.occupies(tx, ty))) return { x: c.x + dx, y: c.y + dy };
+    }
+    return c;
   }
 
   playerScreenY(world) {

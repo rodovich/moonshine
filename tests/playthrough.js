@@ -20,7 +20,8 @@ export async function settle(page) {
 
 export async function newGame(page) {
   await page.goto('/');
-  await page.evaluate(() => localStorage.clear());
+  // Clear the save (but not the remembered view: the iso project relies on it).
+  await page.evaluate(() => localStorage.removeItem('moonshine.save.v1'));
   const errors = await boot(page, '');
   await page.waitForTimeout(500);
   return errors;
@@ -165,14 +166,13 @@ export async function clickTileAt(page, tx, ty) {
 }
 
 export const ptrAdvance = (page) => Object.assign(async () => {
-  const p = await page.evaluate(() => window.moonshine.display.toClient(128, 112));
+  const p = await page.evaluate(() => window.moonshine.uiToClient('center'));
   await page.mouse.click(p.x, p.y);
 }, { pointer: true });
 
 export const onScreen = (page, tx, ty) => page.evaluate(([x, y]) => {
   const w = window.moonshine.world;
-  const sx = x * 16 + 8 - w.cam.x;
-  const sy = y * 16 + 8 - w.cam.y;
+  const [sx, sy] = window.moonshine.tileScreen(x, y);
   // Anywhere on screen except the bag button's corner (top right).
   return sx >= 4 && sy >= 4 && sx < 252 && sy < 220 && !(sx >= 224 && sy < 30);
 }, [tx, ty]);
@@ -191,8 +191,7 @@ export async function ptrWalk(page, x, y) {
         const path = w.pathFor(w.player, [[x, y]]);
         let best = null;
         for (const [px, py] of path || []) {
-          const sx = px * 16 + 8 - w.cam.x;
-          const sy = py * 16 + 8 - w.cam.y;
+          const [sx, sy] = window.moonshine.tileScreen(px, py);
           // Anywhere on screen but the bag button's corner, as in onScreen.
           if (sx >= 4 && sy >= 4 && sx < 252 && sy < 220 && !(sx >= 224 && sy < 30) && !w.isExit(px, py)) best = [px, py];
         }
@@ -235,8 +234,7 @@ export async function ptrInteract(page, id) {
       const path = w.pathFor(w.player, spots.map((s) => [s.x, s.y]));
       let best = null;
       for (const [px, py] of path || []) {
-        const sx = px * 16 + 8 - w.cam.x;
-        const sy = py * 16 + 8 - w.cam.y;
+        const [sx, sy] = window.moonshine.tileScreen(px, py);
         if (sx >= 24 && sy >= 40 && sx < 232 && sy < 200 && !w.isExit(px, py)) best = [px, py];
       }
       return best;
@@ -257,12 +255,12 @@ export async function ptrInteract(page, id) {
 
 // Tap the bag button, tap the item twice (select, use), then tap the target.
 export async function ptrUse(page, item, id) {
-  const bag = await page.evaluate(() => window.moonshine.display.toClient(241, 14));
+  const bag = await page.evaluate(() => window.moonshine.uiToClient('bag'));
   await page.mouse.click(bag.x, bag.y);
   await waitFor(page, () => window.moonshine.snapshot().inventoryOpen);
   const i = (await snap(page)).items.indexOf(item);
   expect(i).toBeGreaterThanOrEqual(0);
-  const slot = await page.evaluate((i) => window.moonshine.display.toClient(40 + (i % 8) * 22 + 11, 36 + Math.floor(i / 8) * 22 + 11), i);
+  const slot = await page.evaluate((i) => window.moonshine.uiToClient('slot', i), i);
   await page.mouse.click(slot.x, slot.y);
   await page.waitForTimeout(100);
   await page.mouse.click(slot.x, slot.y);
