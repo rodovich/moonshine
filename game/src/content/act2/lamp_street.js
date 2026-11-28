@@ -15,6 +15,7 @@
 
 import { composedMap, blankGrid } from '../opening/grid.js';
 import { act2Tiles } from './tiles.js';
+import { lampStreetIso } from './lamp_street-iso.js';
 import { layout, house, pave, lowRoof, LOOKS, bump, firstMeet, cherylDeclines, actWrongness, getItem } from './common.js';
 import { props } from '../../art/props.js';
 
@@ -295,4 +296,6 @@ export const lampStreetMap = composedMap(compose, {
     },
   ],
   entities: [...objects, ...girls, rope, wateringWoman, benchMan, cat],
+  // The isometric view's scene, from the art task's town kit (lamp_street-iso.js).
+  iso: lampStreetIso,
 });
