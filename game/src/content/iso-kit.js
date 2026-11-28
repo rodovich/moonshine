@@ -165,6 +165,46 @@ export function isoScene() {
         else if (c.fn === 'bench') S.bench(c.args[0], c.args[1], e.z ?? 0);
       });
     },
+    /**
+     * A room, cut away as the era drew rooms (sheet `rooms`). The floor covers x0…x0+w−1 by
+     * y0…y0+h−1; the north wall stands on row y0−1 and the west wall on column x0−1, both at full
+     * height showing their inner faces; the south wall (row y0+h) and the east wall (column x0+w)
+     * are 16 px stubs. set: shop | archive | crypt | lamp. doors and windows: [[x, y]] on any of
+     * those wall tiles (windows only on the north and west walls; a door in a stub is a threshold,
+     * walkable). floor: a frame name to use for every floor tile instead of the set's.
+     */
+    room(x0, y0, w, h, { set = 'shop', z = 0, doors = [], windows = [], floor = null } = {}) {
+      const R = 'rooms';
+      const has = (list, x, y) => list.some(([a, b]) => a === x && b === y);
+      const kind = (x, y) => (has(doors, x, y) ? 'door' : has(windows, x, y) ? 'window' : 'plain');
+      for (let y = y0; y < y0 + h; y++) for (let x = x0; x < x0 + w; x++) {
+        add(R, floor ?? `${set}_floor_${hash(x, y, 5) < 0.3 ? 1 : 0}`, x, y, z, 1, 1, 0);
+        heights.set(key(x, y), z);
+      }
+      // The back walls and their cut tops.
+      add(R, `${set}_corner`, x0 - 1, y0 - 1, z, 1, 1, 0.1);
+      add('flat', 'wall_cap_corner', x0 - 1, y0 - 1, z, 1, 1, 0.2);
+      for (let x = x0; x < x0 + w; x++) {
+        add(R, `${set}_s_${kind(x, y0 - 1)}`, x, y0 - 1, z, 1, 1, 0.1);
+        add('flat', 'wall_cap_s', x, y0 - 1, z, 1, 1, 0.2);
+        heights.delete(key(x, y0 - 1));
+      }
+      for (let y = y0; y < y0 + h; y++) {
+        add(R, `${set}_e_${kind(x0 - 1, y)}`, x0 - 1, y, z, 1, 1, 0.1);
+        add('flat', 'wall_cap_e', x0 - 1, y, z, 1, 1, 0.2);
+        heights.delete(key(x0 - 1, y));
+      }
+      // The near walls, cut to stubs; a door is a threshold on a floor tile.
+      const stub = (x, y, dir) => {
+        const door = has(doors, x, y);
+        if (door) { add(R, `${set}_floor_0`, x, y, z, 1, 1, 0); heights.set(key(x, y), z); } else heights.delete(key(x, y));
+        add(R, `${set}_cut_${door ? 'door_' : ''}${dir}`, x, y, z);
+      };
+      for (let x = x0; x < x0 + w; x++) stub(x, y0 + h, 'x');
+      for (let y = y0 - 1; y < y0 + h; y++) stub(x0 + w, y, 'y');
+      add(R, `${set}_cut_corner`, x0 + w, y0 + h, z);
+      heights.delete(key(x0 + w, y0 + h));
+    },
     /** Where characters stand: z for each walkable tile recorded, else `fallback`. */
     floorHeight(fallback = 0) { const m = new Map(heights); return (x, y) => m.get(key(x, y)) ?? fallback; },
     done() { return out; },
