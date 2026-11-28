@@ -50,7 +50,7 @@ function tubShell() {
  * The tub in a state: 'empty' (drain hole), 'plugged', 'full', 'filling' (level 0–1),
  * 'slosh' (tilt), 'whirl' (drain vortex, the Wrongness). `t` is the animation phase 0–1.
  */
-export function tub(state = 'empty', { t = 0, level = 1, grey = false } = {}) {
+export function tub(state = 'empty', { t = 0, level = 1, grey = false, still = false, waterMat = null } = {}) {
   const { L, W, z0, z1 } = TUB;
   const parts = [tubShell()];
   const floorZ = z0 + 0.08;
@@ -81,14 +81,15 @@ export function tub(state = 'empty', { t = 0, level = 1, grey = false } = {}) {
       }
       return base;
     }, { tag: 'prop', spec: 1.6, shin: 110 });
+    const wm = waterMat || water;
     const tilt = state === 'slosh' ? Math.sin(t * PI * 2) * 0.12 : 0;
     const surf = custom((x, y, z) => {
       let h = lvl + x * tilt * 0.3;
-      if (state !== 'whirl') h += (vnoise(x * 14 + t * 5, y * 14, t * 2) - 0.5) * 0.012;
+      if (state !== 'whirl' && !still) h += (vnoise(x * 14 + t * 5, y * 14, t * 2) - 0.5) * 0.012;
       else { const rr = Math.hypot(x - drainX, y); h -= Math.max(0, 0.12 - rr) * 0.8; }
       return (z - h) * 0.7;
-    }, [-L, -W, floorZ, L, W, lvl + 0.05], water);
-    parts.push(intersect(surf, move(box(L - 0.06, W - 0.06, 0.4, water, 0.17), 0, 0, (z0 + z1) / 2 + 0.06)));
+    }, [-L, -W, floorZ, L, W, lvl + 0.05], wm);
+    parts.push(intersect(surf, move(box(L - 0.06, W - 0.06, 0.4, wm, 0.17), 0, 0, (z0 + z1) / 2 + 0.06)));
   }
   void grey;
   return union(parts);
