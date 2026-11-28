@@ -17,6 +17,7 @@ import { lampStreetIso } from './lamp_street-iso.js';
 import { squareIso } from './square-iso.js';
 import { stepsIso } from './steps-iso.js';
 import { shopIso, archiveIso, cryptIso, lampRoomIso } from './rooms-iso.js';
+import { goatPathIso } from './goat_path-iso.js';
 
 // The isometric view's hand-built scenes (each map's <map>-iso.js, from the town kit).
 // Wired here, not in the map files, because each scene replays its map's compose().
@@ -28,6 +29,7 @@ shopMap.iso = shopIso;
 archiveMap.iso = archiveIso;
 cryptMap.iso = cryptIso;
 lampRoomMap.iso = lampRoomIso;
+goatPathMap.iso = goatPathIso;
 
 export const act2Maps = {
   lamp_street: lampStreetMap,
