@@ -20,7 +20,7 @@ const right = (p, sx) => sx >= 0;
 
 /** A wall piece rendered with its feature on the south face (kept: left half) or east face (right half). */
 function wallPiece(name, face, h, kind, opts) {
-  return split(name, () => facade(face, h, kind, opts), { [name]: face === 's' ? left : right }, { fp: [1, 1], h: Math.round(h * 40) });
+  return split(name, () => facade(face, h, kind, opts), { [name]: face === 's' ? left : right }, { trimTop: true, fp: [1, 1], h: Math.round(h * 40) });
 }
 
 const floor = (name, build) => frame(name, build, { diamond: [1], fp: [1, 1], h: 0 });
@@ -76,25 +76,25 @@ export default {
     for (const [suffix, color] of [['blue', COLORS.cobalt], ['green', COLORS.sage]]) {
       for (const kind of ['window', 'window_box', 'door']) out.push(wallPiece(`facade_s_${kind}_${suffix}`, 's', STOREY, kind, { color }));
     }
-    out.push(split('facade_plain', () => facade('s', STOREY, 'plain'), { facade_s_plain: left, facade_e_plain: right }, { fp: [1, 1], h: 96 }));
+    out.push(split('facade_plain', () => facade('s', STOREY, 'plain'), { facade_s_plain: left, facade_e_plain: right }, { trimTop: true, fp: [1, 1], h: 96 }));
     // The Pelletiers' house closes the court's west side: ochre, shutters closed (they're away), and the gate.
     out.push(wallPiece('facade_e_window_closed_ochre', 'e', STOREY, 'window_closed', { color: COLORS.cobalt, wall: COLORS.ochre }));
     out.push(wallPiece('facade_e_gate_ochre', 'e', STOREY, 'gate', { wall: COLORS.ochre }));
-    out.push(split('facade_plain_ochre', () => facade('e', STOREY, 'plain', { wall: COLORS.ochre }), { facade_s_plain_ochre: left, facade_e_plain_ochre: right }, { fp: [1, 1], h: 96 }));
+    out.push(split('facade_plain_ochre', () => facade('e', STOREY, 'plain', { wall: COLORS.ochre }), { facade_s_plain_ochre: left, facade_e_plain_ochre: right }, { trimTop: true, fp: [1, 1], h: 96 }));
     // Upper storeys and courses for stacking (no plinth).
-    out.push(split('upper_plain', () => facade('s', STOREY, 'plain', { plinth: 0 }), { upper_s_plain: left, upper_e_plain: right }, { fp: [1, 1], h: 96 }));
+    out.push(split('upper_plain', () => facade('s', STOREY, 'plain', { plinth: 0 }), { upper_s_plain: left, upper_e_plain: right }, { trimTop: true, fp: [1, 1], h: 96 }));
     out.push(wallPiece('upper_s_window_blue', 's', STOREY, 'window', { color: COLORS.cobalt, plinth: 0, z0: 0.7, z1: 1.85 }));
     out.push(wallPiece('upper_e_window_closed_ochre', 'e', STOREY, 'window_closed', { color: COLORS.cobalt, wall: COLORS.ochre, plinth: 0, z0: 0.7, z1: 1.85 }));
-    out.push(split('upper_plain_ochre', () => facade('e', STOREY, 'plain', { wall: COLORS.ochre, plinth: 0 }), { upper_s_plain_ochre: left, upper_e_plain_ochre: right }, { fp: [1, 1], h: 96 }));
-    out.push(split('course', () => facade('s', 1, 'plain', { plinth: 0 }), { course_s: left, course_e: right }, { fp: [1, 1], h: 40 }));
-    out.push(split('course24', () => facade('s', 0.6, 'plain', { plinth: 0 }), { course24_s: left, course24_e: right }, { fp: [1, 1], h: 24 }));
-    out.push(split('retain', () => retainingWall(1), { retain_s: left, retain_e: right }, { fp: [1, 1], h: 40 }));
+    out.push(split('upper_plain_ochre', () => facade('e', STOREY, 'plain', { wall: COLORS.ochre, plinth: 0 }), { upper_s_plain_ochre: left, upper_e_plain_ochre: right }, { trimTop: true, fp: [1, 1], h: 96 }));
+    out.push(split('course', () => facade('s', 1, 'plain', { plinth: 0 }), { course_s: left, course_e: right }, { trimTop: true, fp: [1, 1], h: 40 }));
+    out.push(split('course24', () => facade('s', 0.6, 'plain', { plinth: 0 }), { course24_s: left, course24_e: right }, { trimTop: true, fp: [1, 1], h: 24 }));
+    out.push(split('retain', () => retainingWall(1), { retain_s: left, retain_e: right }, { trimTop: true, fp: [1, 1], h: 40 }));
     // The backdrop: the Crown's lower walls and higher houses, above Cheryl's roof.
-    out.push(split('crown', () => crownWall(4), { crown_s: left, crown_e: right }, { fp: [1, 1], h: 160 }));
-    out.push(split('crown_buttress', () => crownWall(4, { buttress: true }), { crown_s_buttress: left }, { fp: [1, 1], h: 160 }));
+    out.push(split('crown', () => crownWall(4), { crown_s: left, crown_e: right }, { trimTop: true, fp: [1, 1], h: 160 }));
+    out.push(split('crown_buttress', () => crownWall(4, { buttress: true }), { crown_s_buttress: left }, { trimTop: true, fp: [1, 1], h: 160 }));
     out.push(wallPiece('house_s_window_blue', 's', 3, 'window', { color: COLORS.cobalt, plinth: 0, z0: 1.4, z1: 2.5 }));
     out.push(wallPiece('house_s_window_rose', 's', 3, 'window_box', { color: COLORS.sage, wall: COLORS.rose, plinth: 0, z0: 1.4, z1: 2.5 }));
-    out.push(split('house_plain', () => facade('s', 3, 'plain', { plinth: 0 }), { house_s_plain: left, house_e_plain: right }, { fp: [1, 1], h: 120 }));
+    out.push(split('house_plain', () => facade('s', 3, 'plain', { plinth: 0 }), { house_s_plain: left, house_e_plain: right }, { trimTop: true, fp: [1, 1], h: 120 }));
 
     // ---- Roof terraces: parapets (36 px), the low wall (22 px), sighting pins, stairs, pent roof
     out.push(runProp('parapet_x', 'x', () => parapet('x', 0.9), 36));

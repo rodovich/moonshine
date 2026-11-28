@@ -238,8 +238,10 @@ export class IsoRenderer {
         const k = d.x0 + d.fw - 1 + d.y0 + d.fd - 1;
         // Floors and decals on them (layer < 0.1) go down before anything stands on them.
         if (d.layer < 0.1) { items.push({ type: 'd', key: -1e6 + d.layer * 1e5 + k, order: 0, d }); continue; }
-        if (d.fw === 1 && d.fd === 1) { items.push({ type: 'd', key: k, order: d.layer, d }); continue; }
-        // A piece wider than a tile is drawn in 32 px screen columns, one per
+        // Pieces up to two tiles long sort whole by their front corner (a pent
+        // roof's eave then stays over the wall beside it).
+        if (Math.max(d.fw, d.fd) < 3) { items.push({ type: 'd', key: k, order: d.layer, d }); continue; }
+        // A long piece (three tiles or more) is drawn in 32 px screen columns, one per
         // diagonal of its footprint, each sorted by its own front tile, so a
         // long back line or a tower sorts right against people beside it.
         const ac = d.x - d.y; // the anchor's column (x - y), in tiles
@@ -308,6 +310,9 @@ export class IsoRenderer {
       }
     }
 
+    // Her outline shows through things that cover her body, not just her
+    // feet (a parapet in front of her hides her feet, as it should).
+    const body = pr && { x: pr.x, y: pr.y, w: pr.w, h: Math.round(pr.h * 0.6) };
     this.hits = [];
     let hidden = false;
     let drawnPlayer = false;
@@ -322,19 +327,19 @@ export class IsoRenderer {
       if (it.type === 'd') {
         this.drawDrawable(ctx, it.d, ms, cut.has(it), it.strip);
         // A prop drawn over her: her outline shows through it.
-        if (drawnPlayer && pr && it.d.layer >= 1 && it.d.rect && overlap(stripRect(it.d.rect, it.strip), pr)) hidden = true;
+        if (drawnPlayer && body && it.d.layer >= 1 && it.d.rect && overlap(stripRect(it.d.rect, it.strip), body)) hidden = true;
       }
       else if (it.type === 'cell') this.drawCell(ctx, world, it, ms, cut.has(it));
       else if (it.type === 'slab') { if (!cut.has(it)) this.drawSlab(ctx, world, it.c, ms); }
       else if (it.type === 'fx') this.drawFx(ctx, world, it.fx);
       else if (it.type === 'prop') {
         this.drawProp(ctx, world, it.pr, ms);
-        if (drawnPlayer && pr && it.pr.rect && overlap(it.pr.rect, pr)) hidden = true;
+        if (drawnPlayer && body && it.pr.rect && overlap(it.pr.rect, body)) hidden = true;
       }
       else {
         this.drawEntity(ctx, world, it.e, ms);
         if (it.e === p) drawnPlayer = true;
-        else if (drawnPlayer && pr && it.e.isoRect && overlap(it.e.isoRect, pr)) hidden = true;
+        else if (drawnPlayer && body && it.e.isoRect && overlap(it.e.isoRect, body)) hidden = true;
       }
     }
     this.drawMarker(ctx, world);
@@ -768,6 +773,21 @@ export class IsoRenderer {
       const c = h.c;
       if (inDiamond(mx, my, c.x, c.y, h.T, this.ox) || inFace(mx, my, c, h, this.ox)) tile = c;
       if (tile && entity) break;
+    }
+    // A click that just misses a character's pixels (a running Kid) still
+    // reaches the character before the tile behind them.
+    if (!entity) {
+      let best = null;
+      let bestD = 10;
+      for (const e of world.entities) {
+        const r = e.isoRect;
+        if (!r || e.isPlayer || !e.visible || !e.directional || !isInteractable(e)) continue;
+        const dx = Math.max(r.x - sx, 0, sx - (r.x + r.w));
+        const dy = Math.max(r.y - sy, 0, sy - (r.y + r.h));
+        const d = Math.max(dx, dy);
+        if (d < bestD) { bestD = d; best = e; }
+      }
+      if (best) entity = best;
     }
     if (!entity && tile) {
       const list = world.entities.filter((e) => !e.isPlayer && e.visible && isInteractable(e) && e.occupies(tile.x, tile.y) && !e.moving);

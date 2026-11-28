@@ -42,7 +42,7 @@ function feature(kind, P) {
 }
 const piece = (name, face, h, kind, P, plinth) => split(name, () => facade(face, h, ['shop', 'arch', 'balcony'].includes(kind) ? 'custom' : kind, {
   color: P.shutters, wall: P.wall, plinth, feature: feature(kind, P), ...(plinth ? {} : { z0: 0.7, z1: 1.85 }),
-}), { [name]: face === 's' ? left : right }, { fp: [1, 1], h: Math.round(h * 40) });
+}), { [name]: face === 's' ? left : right }, { trimTop: true, fp: [1, 1], h: Math.round(h * 40) });
 
 export default {
   name: 'town',
@@ -63,17 +63,17 @@ export default {
 
     // ---- Walls in each plaster
     for (const [name, P] of Object.entries(T.PLASTERS)) {
-      out.push(split(`w_${name}_plain`, () => facade('s', STOREY, 'plain', { wall: P.wall }), { [`w_${name}_s_plain`]: left, [`w_${name}_e_plain`]: right }, { fp: [1, 1], h: 96 }));
+      out.push(split(`w_${name}_plain`, () => facade('s', STOREY, 'plain', { wall: P.wall }), { [`w_${name}_s_plain`]: left, [`w_${name}_e_plain`]: right }, { trimTop: true, fp: [1, 1], h: 96 }));
       for (const k of S_KINDS) out.push(piece(`w_${name}_s_${k}`, 's', STOREY, k, P, 0.2));
       for (const k of E_KINDS) out.push(piece(`w_${name}_e_${k}`, 'e', STOREY, k, P, 0.2));
-      out.push(split(`u_${name}_plain`, () => facade('s', STOREY, 'plain', { wall: P.wall, plinth: 0 }), { [`u_${name}_s_plain`]: left, [`u_${name}_e_plain`]: right }, { fp: [1, 1], h: 96 }));
+      out.push(split(`u_${name}_plain`, () => facade('s', STOREY, 'plain', { wall: P.wall, plinth: 0 }), { [`u_${name}_s_plain`]: left, [`u_${name}_e_plain`]: right }, { trimTop: true, fp: [1, 1], h: 96 }));
       for (const k of U_S) out.push(piece(`u_${name}_s_${k}`, 's', STOREY, k, P, 0));
       for (const k of U_E) out.push(piece(`u_${name}_e_${k}`, 'e', STOREY, k, P, 0));
-      out.push(split(`c_${name}`, () => facade('s', 1, 'plain', { wall: P.wall, plinth: 0 }), { [`c_${name}_s`]: left, [`c_${name}_e`]: right }, { fp: [1, 1], h: 40 }));
+      out.push(split(`c_${name}`, () => facade('s', 1, 'plain', { wall: P.wall, plinth: 0 }), { [`c_${name}_s`]: left, [`c_${name}_e`]: right }, { trimTop: true, fp: [1, 1], h: 40 }));
       out.push(floor(`roof_${name}`, () => T.roofTopFor(P.wall)));
     }
-    out.push(split('retain', () => retainingWall(1), { retain_s: left, retain_e: right }, { fp: [1, 1], h: 40 }));
-    out.push(split('quay', () => T.quayWall(1), { quay_s: left, quay_e: right }, { fp: [1, 1], h: 40 }));
+    out.push(split('retain', () => retainingWall(1), { retain_s: left, retain_e: right }, { trimTop: true, fp: [1, 1], h: 40 }));
+    out.push(split('quay', () => T.quayWall(1), { quay_s: left, quay_e: right }, { trimTop: true, fp: [1, 1], h: 40 }));
 
     // ---- Roofs and domes
     out.push(arch('lip_x', () => T.roofLip('x'), [1, 1], 9), arch('lip_y', () => T.roofLip('y'), [1, 1], 9));

@@ -124,6 +124,9 @@ function scene(g) {
   }
   // East: a low wall with a view over the town below.
   for (let y = 12; y <= 23; y++) column(W - 1, y, 0, y === 23 ? [['retain_s', 40]] : [], [['retain_e', 40]], ['roof_top', 40]);
+  // The east edge's stone, from the court and the houses down to the roofs below (LOW - 80).
+  const below = Array.from({ length: 4 }, () => ['retain_e', 40]);
+  for (let y = 0; y <= 23; y++) column(W - 1, y, LOW - 80, y === 23 ? Array.from({ length: 4 }, () => ['retain_s', 40]) : [], below, null);
   add(C, 'lemon_tree', 3, 14, 0);
   add(C, 'stool', 2, 16, 0);
   add(C, am ? 'chess_slid' : f('oldMan.hasPepperKing') ? 'chess_pepper' : 'chess_plug', 3, 16, 0);
@@ -141,6 +144,12 @@ function scene(g) {
   // Their walls stand 60 px from LOW - 60 to the eaves (the two beside the Squeeze a storey taller).
   for (const [x, fr] of [[0, 'lowhouse_terra_3x2'], [3, 'lowhouse_flat_2x2'], [5, 'lowhouse_flat_3x2'], [8, 'lowhouse_terra_2x2'], [10, 'lowhouse_terra_3x2'], [13, 'lowhouse_flat_2x2_tall'], [17, 'lowhouse_terra_3x2_tall']]) {
     add(C, fr, x, 24, LOW - 60, fr.includes('3x2') ? 3 : 2, 2, 1);
+  }
+  // East, past the low wall: the town falling away in bands of roofs, each a storey lower, so the
+  // view the wall looks over fills the screen past the map's last column.
+  const EAST = ['lowhouse_flat_2x2', 'lowhouse_terra_2x2', 'lowhouse_flat_2x2', 'lowhouse_flat_2x2', 'lowhouse_terra_2x2'];
+  for (let b = 0; b < 3; b++) {
+    for (let y = -1 + b; y <= 25; y += 2) add(C, EAST[(y + 1 + b * 2) % EAST.length], W + b * 2, y, LOW - 60 - b * 80, 2, 2, 1);
   }
   const step = am || f('piano.gone') ? 'stair_scraped' : 'stair';
   for (const x of [15, 16]) {
