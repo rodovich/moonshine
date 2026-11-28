@@ -218,6 +218,38 @@ export class Game {
     };
   }
 
+  // Where tile (tx, ty)'s center is on screen, scaled to the SNES frame's
+  // 256×224 whichever view is on, as [x, y]: tests' "is it on screen" checks.
+  // A tile hidden behind something drawn in front of it counts as off screen.
+  tileScreen(tx, ty) {
+    if (this.view.clickable && !this.view.clickable(this.world, tx, ty)) return [-1000, -1000];
+    const p = this.view.tileToScreen(this.world, tx, ty);
+    return [(p.x * 256) / this.display.width, (p.y * 224) / this.display.height];
+  }
+
+  // Client coordinates of a UI element's center in whichever view is on,
+  // for tests: 'center', 'top' (the middle of the top edge), 'bag' (the bag
+  // button), 'slot' (inventory slot `arg`), 'look' / 'use' / 'close' (the
+  // inventory's buttons), 'title' (title option `arg`).
+  uiToClient(name, arg = 0) {
+    const W = this.display.width;
+    const H = this.display.height;
+    const mid = (r) => ({ x: r.x + r.w / 2, y: r.y + r.h / 2 });
+    let p;
+    if (name === 'center') p = { x: W / 2, y: H / 2 };
+    else if (name === 'top') p = { x: W / 2, y: Math.round(H / 22) };
+    else if (name === 'bag') p = mid(this.view.kind === 'iso' ? this.view.bagButton : { x: W - 26, y: 3, w: 22, h: 22 });
+    else if (name === 'slot') {
+      const inv = this.inventory;
+      const L = inv.L;
+      const row = Math.floor(arg / L.COLS) - (inv.openState?.scroll || 0);
+      p = { x: L.GRID_X + (arg % L.COLS) * L.SLOT + L.SLOT / 2, y: L.GRID_Y + row * L.SLOT + L.SLOT / 2 };
+    } else if (['look', 'use', 'close'].includes(name)) p = mid(this.inventory.L.BUTTONS.find(([a]) => a === name)[1]);
+    else if (name === 'title') p = mid(this.scene.rects[arg]);
+    else throw new Error(`uiToClient: no "${name}"`);
+    return this.display.toClient(p.x, p.y);
+  }
+
   // Client coordinates of the center of tile (tx, ty) on screen, for tests.
   tileToClient(tx, ty) {
     const p = this.view.tileToScreen(this.world, tx, ty);

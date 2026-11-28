@@ -9,7 +9,7 @@
 // usually has from the opening (soap, moon chart). Cheryl's own hat is retired
 // (structure pass): the straw hat comes out of the Shop window.
 import { test, expect } from '@playwright/test';
-import { snap, waitFor, shot, stepKey } from './helpers.js';
+import { snap, waitFor, shot, stepKey, clickUi } from './helpers.js';
 
 const DIRKEY = { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' };
 const START = '?map=lamp_street&x=3&y=1&facing=down&flags=act1.moonrise,act1.done,got.soap,got.moon_chart&items=moon_chart,soap';
@@ -229,12 +229,11 @@ async function clickGame(page, gx, gy) {
   const p = await page.evaluate(([x, y]) => window.moonshine.display.toClient(x, y), [gx, gy]);
   await page.mouse.click(p.x, p.y);
 }
-const ptrAdvance = (page) => () => clickGame(page, 128, 112);
+const ptrAdvance = (page) => () => clickUi(page, 'center');
 
 const onScreen = (page, tx, ty) => page.evaluate(([x, y]) => {
   const w = window.moonshine.world;
-  const sx = x * 16 + 8 - w.cam.x;
-  const sy = y * 16 + 8 - w.cam.y;
+  const [sx, sy] = window.moonshine.tileScreen(x, y);
   // Anywhere on screen except under the bag button (top right).
   return sx >= 4 && sy >= 4 && sx < 252 && sy < 220 && !(sx >= 220 && sy < 32);
 }, [tx, ty]);
@@ -252,8 +251,7 @@ async function ptrWalk(page, x, y, { exit = false } = {}) {
         const path = w.pathFor(w.player, [[x, y]]);
         let best = null;
         for (const [px, py] of path || []) {
-          const sx = px * 16 + 8 - w.cam.x;
-          const sy = py * 16 + 8 - w.cam.y;
+          const [sx, sy] = window.moonshine.tileScreen(px, py);
           if (sx >= 24 && sy >= 40 && sx < 232 && sy < 200 && !w.isExit(px, py) && !w.entityAt?.(px, py)) best = [px, py];
         }
         return best;
@@ -303,8 +301,7 @@ async function ptrInteract(page, id) {
       const path = w.pathFor(w.player, spots.map((s) => [s.x, s.y]));
       let best = null;
       for (const [px, py] of path || []) {
-        const sx = px * 16 + 8 - w.cam.x;
-        const sy = py * 16 + 8 - w.cam.y;
+        const [sx, sy] = window.moonshine.tileScreen(px, py);
         if (sx >= 24 && sy >= 40 && sx < 232 && sy < 200 && !w.isExit(px, py)) best = [px, py];
       }
       return best;
@@ -312,17 +309,23 @@ async function ptrInteract(page, id) {
     if (!near || (near[0] === s.x && near[1] === s.y)) throw new Error(`can't get toward ${id}`);
     await clickTileAt(page, near[0], near[1]);
     await page.waitForTimeout(120);
-    await waitFor(page, () => window.moonshine.snapshot().idle, null, 12000);
+    // A tile on the way may hold a hotspot (the landing's edge): read its look and go on.
+    for (let i = 0; i < 20; i++) {
+      await waitFor(page, () => { const p = window.moonshine.snapshot(); return p.idle || !!p.text; }, null, 12000);
+      if (!(await snap(page)).text) break;
+      await ptrAdvance(page)();
+      await page.waitForTimeout(150);
+    }
   }
   throw new Error(`never got to ${id}`);
 }
 
 async function ptrOpenBag(page, item) {
-  await clickGame(page, 241, 14);
+  await clickUi(page, 'bag');
   await waitFor(page, () => window.moonshine.snapshot().inventoryOpen);
   const i = (await snap(page)).items.indexOf(item);
   expect(i).toBeGreaterThanOrEqual(0);
-  const slot = await page.evaluate((i) => window.moonshine.display.toClient(40 + (i % 8) * 22 + 11, 36 + Math.floor(i / 8) * 22 + 11), i);
+  const slot = await page.evaluate((i) => window.moonshine.uiToClient('slot', i), i);
   return slot;
 }
 
@@ -339,7 +342,7 @@ async function ptrUse(page, item, id) {
     });
     if (st.holding === item) break;
     if (!st.open) {
-      await clickGame(page, 241, 14);
+      await clickUi(page, 'bag');
       await waitFor(page, () => window.moonshine.snapshot().inventoryOpen);
       continue;
     }
@@ -358,17 +361,17 @@ async function ptrUse(page, item, id) {
 }
 
 async function ptrLookItem(page, item) {
-  await clickGame(page, 241, 14);
+  await clickUi(page, 'bag');
   await waitFor(page, () => window.moonshine.snapshot().inventoryOpen);
   // Tapping the selected item uses it, so only tap it if it isn't selected yet.
   const sel = await page.evaluate(() => { const s = window.moonshine.world.inventory.openState; return s.owned[s.index]; });
   if (sel !== item) {
     const i = (await snap(page)).items.indexOf(item);
-    const slot = await page.evaluate((i) => window.moonshine.display.toClient(40 + (i % 8) * 22 + 11, 36 + Math.floor(i / 8) * 22 + 11), i);
+    const slot = await page.evaluate((i) => window.moonshine.uiToClient('slot', i), i);
     await page.mouse.click(slot.x, slot.y);
     await page.waitForTimeout(100);
   }
-  await clickGame(page, 100, 94); // the Look button
+  await clickUi(page, 'look');
   await waitFor(page, () => !!window.moonshine.snapshot().text);
 }
 
@@ -676,7 +679,7 @@ test('pointer: Act 2, the piano first, the guidebook before the Tide-Sheet', asy
   await ptrLookItem(page, 'guidebook');
   log = await read();
   expect(joined(log)).toContain('there are, in fact, 99');
-  await clickGame(page, 198, 94); // Close
+  await clickUi(page, 'close');
   await waitFor(page, () => window.moonshine.snapshot().idle);
 
   // Up through the arch: the guidebook first. One book won't do.

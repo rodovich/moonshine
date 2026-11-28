@@ -8,7 +8,7 @@
 // pointer run also takes the drop-ladder shortcut both ways before the valve,
 // and both runs check that the passage's water shuts the hall's west end after it.
 import { test, expect } from '@playwright/test';
-import { snap, waitFor, shot, stepKey } from './helpers.js';
+import { snap, waitFor, shot, stepKey, clickUi } from './helpers.js';
 
 const DIRKEY = { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' };
 const STEP_FLAGS = 'act1.moonrise,act1.done,act2.started,piano.slid,movers.met,counter.left,step.found,step.open,basin.inside,got.crowbar,ottilie.met,n.stepsArrived=1';
@@ -211,12 +211,11 @@ async function clickGame(page, gx, gy) {
   const p = await page.evaluate(([x, y]) => window.moonshine.display.toClient(x, y), [gx, gy]);
   await page.mouse.click(p.x, p.y);
 }
-const ptrAdvance = (page) => () => clickGame(page, 128, 112);
+const ptrAdvance = (page) => () => clickUi(page, 'center');
 
 const onScreen = (page, tx, ty) => page.evaluate(([x, y]) => {
   const w = window.moonshine.world;
-  const sx = x * 16 + 8 - w.cam.x;
-  const sy = y * 16 + 8 - w.cam.y;
+  const [sx, sy] = window.moonshine.tileScreen(x, y);
   return sx >= 4 && sy >= 4 && sx < 252 && sy < 220 && !(sx >= 220 && sy < 32);
 }, [tx, ty]);
 
@@ -232,8 +231,7 @@ async function ptrWalk(page, x, y) {
         const path = w.pathFor(w.player, [[x, y]]);
         let best = null;
         for (const [px, py] of path || []) {
-          const sx = px * 16 + 8 - w.cam.x;
-          const sy = py * 16 + 8 - w.cam.y;
+          const [sx, sy] = window.moonshine.tileScreen(px, py);
           if (sx >= 24 && sy >= 40 && sx < 232 && sy < 200 && !w.isExit(px, py)) best = [px, py];
         }
         return best;
@@ -277,8 +275,7 @@ async function ptrInteract(page, id) {
       const path = w.pathFor(w.player, spots.map((s) => [s.x, s.y]));
       let best = null;
       for (const [px, py] of path || []) {
-        const sx = px * 16 + 8 - w.cam.x;
-        const sy = py * 16 + 8 - w.cam.y;
+        const [sx, sy] = window.moonshine.tileScreen(px, py);
         if (sx >= 24 && sy >= 40 && sx < 232 && sy < 200 && !w.isExit(px, py)) best = [px, py];
       }
       return best;
@@ -292,11 +289,11 @@ async function ptrInteract(page, id) {
 }
 
 async function ptrSelect(page, item) {
-  await clickGame(page, 241, 14);
+  await clickUi(page, 'bag');
   await waitFor(page, () => window.moonshine.snapshot().inventoryOpen);
   const i = (await snap(page)).items.indexOf(item);
   expect(i).toBeGreaterThanOrEqual(0);
-  const slot = await page.evaluate((i) => window.moonshine.display.toClient(40 + (i % 8) * 22 + 11, 36 + Math.floor(i / 8) * 22 + 11), i);
+  const slot = await page.evaluate((i) => window.moonshine.uiToClient('slot', i), i);
   const sel = await page.evaluate(() => { const s = window.moonshine.world.inventory.openState; return s.owned[s.index]; });
   if (sel !== item) {
     await page.mouse.click(slot.x, slot.y);
@@ -307,7 +304,7 @@ async function ptrSelect(page, item) {
 
 async function ptrUse(page, item, id) {
   await ptrSelect(page, item);
-  await clickGame(page, 148, 94); // the Use button
+  await clickUi(page, 'use');
   await waitFor(page, (item) => window.moonshine.snapshot().holding === item, item);
   await waitFor(page, () => !window.moonshine.snapshot().busy);
   await ptrInteract(page, id);
@@ -315,7 +312,7 @@ async function ptrUse(page, item, id) {
 
 async function ptrLookItem(page, item) {
   await ptrSelect(page, item);
-  await clickGame(page, 100, 94); // the Look button
+  await clickUi(page, 'look');
 }
 
 // ---- the playthroughs -------------------------------------------------------
@@ -672,12 +669,12 @@ test('pointer: Act 3', async ({ page }) => {
   await ptrLookItem(page, 'ship_plan');
   await waitFor(page, () => window.moonshine.snapshot().picture, null, 5000);
   await page.waitForTimeout(400);
-  await clickGame(page, 128, 112);
+  await clickUi(page, 'center');
   await waitFor(page, () => !window.moonshine.snapshot().picture, null, 5000);
   log = await read();
   expect(joined(log)).toContain('She\'ll be wrong about it');
   await page.waitForTimeout(400);
-  if ((await snap(page)).inventoryOpen) { await clickGame(page, 241, 14); await page.waitForTimeout(300); }
+  if ((await snap(page)).inventoryOpen) { await clickUi(page, 'bag'); await page.waitForTimeout(300); }
   if ((await snap(page)).inventoryOpen) { await page.keyboard.press('Escape'); await page.waitForTimeout(300); }
 
   // After the valve the hall's west end is under the passage's water.

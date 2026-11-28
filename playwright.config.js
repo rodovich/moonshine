@@ -23,6 +23,18 @@ export default defineConfig({
     // Safari: desktop WebKit for the full suite, and an iPhone profile for touch.
     { name: 'webkit', use: { ...devices['Desktop Safari'], viewport: { width: 768, height: 672 } }, testIgnore: /mobile\.spec\.js/ },
     { name: 'iphone', use: { ...devices['iPhone 13'] }, testMatch: /mobile\.spec\.js/ },
+    // The story playthroughs again in the isometric view (the view is
+    // remembered in localStorage, so every page starts in it).
+    {
+      name: 'iso',
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 768, height: 672 },
+        screenshot: 'only-on-failure',
+        storageState: { cookies: [], origins: [{ origin: `http://localhost:${PORT}`, localStorage: [{ name: 'moonshine.view', value: 'iso' }] }] },
+      },
+      testMatch: /(opening|act[2-6])\.spec\.js/,
+    },
   ],
   webServer: {
     command: `node tests/serve.js ${PORT}`,

@@ -157,7 +157,7 @@ test('pointer: the whole opening', async ({ page }) => {
   const errors = await newGame(page);
   const adv = ptrAdvance(page);
   const read = (opts) => readThrough(page, adv, opts);
-  const title = await page.evaluate(() => window.moonshine.display.toClient(128, 137));
+  const title = await page.evaluate(() => window.moonshine.uiToClient('title', 0));
   await page.mouse.click(title.x, title.y);
   await waitFor(page, () => window.moonshine.snapshot().scene === 'world');
   await waitFor(page, () => !!window.moonshine.snapshot().text, null, 8000);

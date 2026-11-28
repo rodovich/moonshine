@@ -6,7 +6,7 @@
 // The climax in the Windlass Room (the bell, the hauling, the montage) needs
 // Act 5's Windlass Room, so these runs start just after it, in the Long Keel.
 import { test, expect } from '@playwright/test';
-import { snap, waitFor, shot, stepKey } from './helpers.js';
+import { snap, waitFor, shot, stepKey, clickUi } from './helpers.js';
 
 const DIRKEY = { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' };
 const BEFORE = 'act1.moonrise,act1.done,n.squeezeSeen=1,n.stepsArrived=1,act2.started,piano.slid,counter.left,step.open,basin.inside,got.crowbar,act6.started,bell.final,brake.thrown,chain.home,hatch.open';
@@ -181,12 +181,11 @@ async function clickGame(page, gx, gy) {
   const p = await page.evaluate(([x, y]) => window.moonshine.display.toClient(x, y), [gx, gy]);
   await page.mouse.click(p.x, p.y);
 }
-const ptrAdvance = (page) => () => clickGame(page, 128, 112);
+const ptrAdvance = (page) => () => clickUi(page, 'center');
 
 const onScreen = (page, tx, ty) => page.evaluate(([x, y]) => {
   const w = window.moonshine.world;
-  const sx = x * 16 + 8 - w.cam.x;
-  const sy = y * 16 + 8 - w.cam.y;
+  const [sx, sy] = window.moonshine.tileScreen(x, y);
   return sx >= 4 && sy >= 4 && sx < 252 && sy < 220 && !(sx >= 220 && sy < 32);
 }, [tx, ty]);
 
@@ -196,8 +195,7 @@ const stepToward = (page, goals) => page.evaluate((goals) => {
   const path = w.pathFor(w.player, goals);
   let best = null;
   for (const [px, py] of path || []) {
-    const sx = px * 16 + 8 - w.cam.x;
-    const sy = py * 16 + 8 - w.cam.y;
+    const [sx, sy] = window.moonshine.tileScreen(px, py);
     if (sx >= 24 && sy >= 40 && sx < 232 && sy < 200 && !w.isExit(px, py)) best = [px, py];
   }
   return best;
@@ -256,16 +254,16 @@ async function ptrInteract(page, id) {
 }
 
 async function ptrUse(page, item, id) {
-  await clickGame(page, 241, 14);
+  await clickUi(page, 'bag');
   await waitFor(page, () => window.moonshine.snapshot().inventoryOpen);
   const i = (await snap(page)).items.indexOf(item);
   expect(i).toBeGreaterThanOrEqual(0);
   const sel = await page.evaluate(() => { const s = window.moonshine.world.inventory.openState; return s.owned[s.index]; });
   if (sel !== item) {
-    await clickGame(page, 40 + (i % 8) * 22 + 11, 36 + Math.floor(i / 8) * 22 + 11);
+    await clickUi(page, 'slot', i);
     await page.waitForTimeout(100);
   }
-  await clickGame(page, 148, 94); // the Use button
+  await clickUi(page, 'use');
   await waitFor(page, (item) => window.moonshine.snapshot().holding === item, item);
   await waitFor(page, () => !window.moonshine.snapshot().busy);
   await ptrInteract(page, id);
@@ -484,7 +482,7 @@ test('pointer: Act 6, the Long Keel to the title screen', async ({ page }) => {
   await ptrExit(page, 3, 11, [3, 12], 'flat');
   await readUntil(page, adv, 'But it counts.');
   await adv();
-  await creditsToTitle(page, { name: 'ptr', press: () => clickGame(page, 128, 112) });
+  await creditsToTitle(page, { name: 'ptr', press: () => clickUi(page, 'center') });
   expect(errors).toEqual([]);
 });
 
