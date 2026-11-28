@@ -12,6 +12,11 @@ import { harborMap, lampRoomMap } from './harbor.js';
 import { bilgeMap } from './bilge.js';
 import { act2Items, migrateAct2 } from './common.js';
 import { endOfAct } from './ending.js';
+import { crownIso } from './crown-iso.js';
+
+// The isometric view's hand-built scenes (each map's <map>-iso.js, from the town kit).
+// Wired here, not in the map files, because each scene replays its map's compose().
+crownMap.iso = crownIso;
 
 export const act2Maps = {
   lamp_street: lampStreetMap,

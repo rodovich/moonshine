@@ -20,7 +20,8 @@ const W = 24, H = 16;
 // Where the moon-eye studs sit in the plaza (docs/design/03-downstairs.md); Act 3 swaps them to their glow at dusk.
 export const CROWN_MOON_EYES = [[5, 8], [9, 12], [14, 9], [18, 12], [3, 10], [20, 8]];
 
-function compose(g) {
+// Exported for the isometric scene (crown-iso.js), which replays its layout calls.
+export function composeCrown(g) {
   const L = layout(W, H, blankGrid);
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) L.set('ground', x, y, pave(x, y));
 
@@ -196,7 +197,7 @@ const cat = {
 
 // ---------------------------------------------------------------------------
 
-export const crownMap = composedMap(compose, {
+export const crownMap = composedMap(composeCrown, {
   id: 'crown',
   name: 'The Crown',
   tileset: act2Tiles,
