@@ -14,11 +14,13 @@ import { act2Items, migrateAct2 } from './common.js';
 import { endOfAct } from './ending.js';
 import { crownIso } from './crown-iso.js';
 import { lampStreetIso } from './lamp_street-iso.js';
+import { squareIso } from './square-iso.js';
 
 // The isometric view's hand-built scenes (each map's <map>-iso.js, from the town kit).
 // Wired here, not in the map files, because each scene replays its map's compose().
 lampStreetMap.iso = lampStreetIso;
 crownMap.iso = crownIso;
+squareMap.iso = squareIso;
 
 export const act2Maps = {
   lamp_street: lampStreetMap,
