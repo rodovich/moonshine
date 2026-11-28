@@ -564,7 +564,7 @@ export class IsoRenderer {
         drawAnchored(ctx, sh, q.x - this.cx, q.y - this.cy);
       } else if (it.type === 'ent') {
         const e = it.e;
-        if (!e.visible || e.def.shadow === false || this.hidden.has(e.id)) continue;
+        if (!e.visible || e.def.shadow === false || e.def.iso === false || this.hidden.has(e.id)) continue;
         const f = isoFrameFor(e);
         if (!f || !f.shadow) continue;
         const b = this.entityBase(world, e);
@@ -640,6 +640,7 @@ export class IsoRenderer {
     const base = proj(gx, gy, z, this.ox);
     const bx = base.x - this.cx;
     const by = base.y - this.cy;
+    if (e.def.iso === false) return; // drawn by the map's scene instead (still there to click)
     let f = e.visible && !this.hidden.has(e.id) ? isoFrameFor(e) : null;
     let scale = 1;
     let drop = 0;
@@ -692,7 +693,7 @@ export class IsoRenderer {
 
   drawFx(ctx, world, fx) {
     const ms = fx.t * (1000 / 60);
-    const q = this.worldToMap(world, fx.x + fx.offset[0], fx.y + fx.offset[1]);
+    const q = this.worldToMap(world, fx.x + fx.offset[0], fx.y + fx.offset[1] + (fx.lift || 0) * TILE);
     // The art's version, standing at its point (raised by the effect's z, in px).
     const art = isoFrameForSheet(fx.art.sheet, fx.frame, ms);
     if (art) {
@@ -737,6 +738,11 @@ export class IsoRenderer {
       const h = this.hits[i];
       if (h.type === 'd') {
         if (tile || !hitRect(h.rect, sx, sy)) continue;
+        // A piece that stands for an entity (pick: 'ferry'): clicks on it reach that entity.
+        if (h.d.pick && !entity) {
+          const pe = world.entity(h.d.pick);
+          if (pe && pe.visible && isInteractable(pe)) entity = pe;
+        }
         if (h.strip) {
           const local = sx - (h.rect.x + h.rect.anchorX); // from the anchor's column
           if (local < h.strip[0] || local >= h.strip[1]) continue;

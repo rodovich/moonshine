@@ -177,7 +177,7 @@ export class IsoView {
         const q = proj(tx + 0.5, ty + 1, cell.z + up, r.ox);
         const p = { x: q.x - world.cam.x, y: q.y - world.cam.y }; // the middle of its south face
         const k = this.pick(world, p.x, p.y);
-        if (k.tx === tx && k.ty === ty && (!k.entity || k.entity.occupies(tx, ty))) return p;
+        if (k.entity ? k.entity.occupies(tx, ty) : k.tx === tx && k.ty === ty) return p;
       }
     }
     const c = this.tileCenter(world, tx, ty);
@@ -189,7 +189,7 @@ export class IsoView {
     pts.sort((a, b) => Math.hypot(a[0] / 2, a[1]) - Math.hypot(b[0] / 2, b[1]));
     for (const [dx, dy] of pts) {
       const k = this.pick(world, c.x + dx, c.y + dy);
-      if (k.tx === tx && k.ty === ty && (!k.entity || k.entity.occupies(tx, ty))) return { x: c.x + dx, y: c.y + dy };
+      if (k.entity ? k.entity.occupies(tx, ty) : k.tx === tx && k.ty === ty) return { x: c.x + dx, y: c.y + dy };
     }
     return c;
   }
