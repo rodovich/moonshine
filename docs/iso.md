@@ -13,14 +13,14 @@ The client asked for a second version of Moonshine: "a 640x480 version with a 2:
 
 - **640×480 internal resolution**, scaled by whole numbers where possible and letterboxed, like the SNES version's 256×224.
 - **2:1 dimetric projection.** One map tile is a floor diamond 64 px wide and 32 px tall (starting point; the engine and art tasks may adjust it together and record the change here). Heights are drawn in the same pixel scale.
-- **Grid directions stay the game's four directions.** On screen they run along the diagonals. How the arrow keys map to them is decided by playtesting and recorded in the engine README.
-- **Depth sorting:** tiles, walls, props, and characters sort back to front by their position on the grid (and height), so Cheryl walks behind buildings and in front of them correctly. Where a wall would hide her, the renderer cuts it away or shows her outline, as games of the era did.
+- **Grid directions stay the game's four directions.** On screen they run along the diagonals: the game's up is up-right on screen, right is down-right. Each arrow key walks the grid direction of the same name, which turns it 45° clockwise on screen (Up walks up-right); `?keys=ccw` offers the other turn for playtesting. Decided by the engine task: it keeps every arrow on one grid direction and opposite keys opposite; revisit if playtests disagree. Details in the engine README, "Isometric view".
+- **Depth sorting:** tiles, walls, props, and characters sort back to front by their position on the grid (and height), so Cheryl walks behind buildings and in front of them correctly. Where a wall would hide her, the renderer cuts it away or shows her outline, as games of the era did. Walls along a map's front edges are always drawn low, so rooms show; a wall or slab that would cover Cheryl drops to a stub while it does, and a character or prop in front of her lets her show through at half strength.
 - **Clicks and taps** map from the screen back to the grid tile under the pointer (accounting for height), then use the shared pathfinding.
 
 ## Maps
 
 - **Each map may carry an `iso` description** alongside its layers: per-tile heights and kinds (floor, step, wall block, roof, water) and which isometric art to draw. Content tasks write it per map.
-- **A converter drafts it** from the map's existing layers and collision, so every map renders in the isometric view from the start (roughly), and content tasks hand-correct each map to full quality act by act. The whole game stays playable in both views at all times.
+- **A converter drafts it** from the map's existing layers and collision, so every map renders in the isometric view from the start (roughly), and content tasks hand-correct each map to full quality act by act. The whole game stays playable in both views at all times. The description is `iso: { cells: [[x, y, w, h, { kind, z, h, top, south, east, over }]] }` on the map: overrides on top of the converter's draft (engine README, "Isometric view"). Until a map has isometric art, its SNES tiles are drawn sheared onto the floor diamonds and wall faces, and its characters and props at 2×.
 
 ## Art
 

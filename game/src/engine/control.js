@@ -26,6 +26,10 @@ const HOLD_BANNER = { x: 4, y: 3, w: 0, h: 22 }; // width set when drawn
 const DIRS = ['up', 'down', 'left', 'right'];
 
 export class Control {
+  static BAG_BTN = BAG_BTN;
+  static BAG_HIT = BAG_HIT;
+  static HOLD_BANNER = HOLD_BANNER;
+
   constructor(world) {
     this.world = world;
     this.icons = loadSheet(uiIcons);
@@ -71,8 +75,9 @@ export class Control {
   // Called each tick while the player has control, before entities move.
   update(input) {
     for (const t of input.taps()) this.tap(t);
+    const view = this.world.game.view;
     for (const d of DIRS) {
-      if (input.pressed(d)) this.bufferedDir = d;
+      if (input.pressed(d)) this.bufferedDir = view.mapDir(d);
     }
     if (input.pressed('confirm')) this.bufferedConfirm = true;
     if (input.pressed('cancel')) {
@@ -89,14 +94,13 @@ export class Control {
     if (this.dragging) {
       if (!ptr.down) this.dragging = false;
       else if (++this.dragT % 6 === 0) {
-        const tx = Math.floor((ptr.x + this.world.cam.x) / TILE);
-        const ty = Math.floor((ptr.y + this.world.cam.y) / TILE);
+        const { tx, ty } = view.pick(this.world, ptr.x, ptr.y);
         if (!this.goal || this.goal[0] !== tx || this.goal[1] !== ty) this.walkTo(tx, ty, false);
       }
     }
     // Pointer cursor hints on desktop.
     if (input.hover && input.lastScheme === 'pointer') {
-      const over = this.entityAtPoint(input.hover.x, input.hover.y) || inRect(input.hover, BAG_BTN);
+      const over = view.pick(this.world, input.hover.x, input.hover.y).entity || view.hudHover(this.world, input.hover);
       this.world.game.display.canvas.style.cursor = over ? 'pointer' : 'default';
     }
   }
@@ -108,7 +112,7 @@ export class Control {
     if (!input) return;
     const p = this.player;
     if (p.moving) return;
-    const held = input.dir();
+    const held = this.world.game.view.mapDir(input.dir());
     const dir = held || this.bufferedDir;
     this.bufferedDir = null;
     if (!held) this.turned = null;
@@ -337,25 +341,28 @@ export class Control {
       this.openInventory();
       return;
     }
-    if (t.x < 0 || t.y < 0 || t.x >= WIDTH || t.y >= HEIGHT) return;
-    if (inRect(t, BAG_HIT)) {
+    const w = this.world;
+    const view = w.game.view;
+    if (!view.onScreen(t)) return;
+    const hud = view.hudHit(w, t);
+    if (hud === 'bag') {
       this.openInventory();
       return;
     }
-    if (this.holding && inRect(t, { ...HOLD_BANNER, w: this.bannerW || 0 })) {
+    if (hud === 'banner') {
       this.holding = null;
       sfx('cancel');
       return;
     }
-    const w = this.world;
-    const e = this.entityAtPoint(t.x, t.y);
+    const picked = view.pick(w, t.x, t.y);
+    const e = picked.entity;
     if (e) {
       this.approach(e, this.holding);
       return;
     }
-    const tx = Math.floor((t.x + w.cam.x) / TILE);
-    let ty = Math.floor((t.y + w.cam.y) / TILE);
-    if (!w.map.inBounds(tx, ty)) return;
+    const tx = picked.tx;
+    let ty = picked.ty;
+    if (tx == null || !w.map.inBounds(tx, ty)) return;
     // A door is drawn two tiles tall over a one-tile exit: a tap on the wall
     // tile right above an exit goes to the exit.
     if (w.map.solid(tx, ty) && !w.isExit(tx, ty) && w.isExit(tx, ty + 1)) ty += 1;

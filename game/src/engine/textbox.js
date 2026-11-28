@@ -44,7 +44,7 @@ export class TextBox {
     return new Promise((resolve) => {
       const s = STYLES[style] || STYLES.npc;
       this.applyLayout();
-      const lines = wrap(text, this.bw - PAD_X * 2);
+      const lines = this.wrapText(text);
       const pages = paginate(lines);
       this.position = position;
       this.active = { pages, page: 0, shown: 0, pause: 0, style: s, styleName: style, speaker, resolve, choice: null, auto, autoT: 0, openT: this.openStart() };
@@ -58,7 +58,7 @@ export class TextBox {
       const s = STYLES[style] || STYLES.npc;
       // A long prompt pages like normal text; the options appear on its last page.
       this.applyLayout();
-      const lines = prompt ? wrap(prompt, this.bw - PAD_X * 2) : [];
+      const lines = prompt ? this.wrapText(prompt) : [];
       const pages = paginate(lines);
       if (!pages.length) pages.push([]);
       this.position = position;
@@ -69,6 +69,12 @@ export class TextBox {
       };
       if (!prompt) this.active.shown = Infinity;
     });
+  }
+
+  // Lines of text as they'll fit the box (the isometric view overrides this
+  // and the drawing methods below; the paging and input logic is shared).
+  wrapText(text) {
+    return wrap(text, this.bw - PAD_X * 2);
   }
 
   applyLayout() {
