@@ -3,17 +3,14 @@
 // parameters say so), and runs a fixed 60 Hz update with rendering on every
 // animation frame.
 
-import { Display, WIDTH, HEIGHT } from './display.js';
-import { wrap, drawTextCentered, LINE_HEIGHT } from './text.js';
+import { Display } from './display.js';
 import { drawBox, STYLES } from './ui.js';
 import { loadSheet } from './art.js';
 import { uiIcons } from '../art/ui.js';
 import { Input } from './input.js';
 import { Effects } from './effects.js';
-import { TextBox } from './textbox.js';
-import { Inventory } from './inventory.js';
 import { World } from './world.js';
-import { Title } from './title.js';
+import { chooseView, makeView } from './view.js';
 import { newState, hasSave, loadSave, clearSave, validateState } from './save.js';
 import { readDebugParams } from './debug.js';
 import { unlockAudio } from './sound.js';
@@ -38,12 +35,14 @@ export class Game {
     this.content = content;
     this.debug = readDebugParams(content);
     this.rng = makeRng(this.debug.seed ?? Date.now());
-    this.display = new Display(parent);
+    // The presentation: the SNES view, or the isometric one (?view=iso).
+    this.view = makeView(chooseView());
+    this.display = new Display(parent, this.view.display);
     this.input = new Input(this.display);
     this.input.onGesture = unlockAudio;
     this.effects = new Effects();
-    this.textbox = new TextBox();
-    this.inventory = new Inventory(content.items || {});
+    this.textbox = this.view.makeTextBox();
+    this.inventory = this.view.makeInventory(content.items || {});
     this.ticks = 0;
     // Smoothed milliseconds per update tick and per rendered frame (CPU time
     // in our code; the browser's compositing comes on top). ?debug=1 shows it.
@@ -58,7 +57,7 @@ export class Game {
         else console.warn(`[debug] no script "${this.debug.run}" in content.scripts`);
       }
     } else {
-      this.scene = new Title(this, titleState());
+      this.scene = this.view.makeTitle(this, titleState());
       this.effects.fadeAlpha = 1;
       this.effects.fade('in', 0.6);
     }
@@ -90,7 +89,7 @@ export class Game {
     this.input.flush();
     this.card = null;
     this.world = null;
-    this.scene = new Title(this, titleState());
+    this.scene = this.view.makeTitle(this, titleState());
     this.effects.setLight([], 0);
     await this.effects.clear(0);
     await this.effects.fade('in', 0.6);
@@ -191,10 +190,11 @@ export class Game {
   // A snapshot for tests and the console.
   snapshot() {
     const w = this.world;
-    if (!w || this.scene !== w) return { scene: 'title' };
+    if (!w || this.scene !== w) return { scene: 'title', view: this.view.kind };
     const p = w.player;
     return {
       scene: 'world',
+      view: this.view.kind,
       map: w.state.map,
       x: p.x,
       y: p.y,
@@ -220,15 +220,15 @@ export class Game {
 
   // Client coordinates of the center of tile (tx, ty) on screen, for tests.
   tileToClient(tx, ty) {
-    const w = this.world;
-    return this.display.toClient(tx * 16 + 8 - w.cam.x, ty * 16 + 8 - w.cam.y);
+    const p = this.view.tileToScreen(this.world, tx, ty);
+    return this.display.toClient(p.x, p.y);
   }
 
   render() {
     const ctx = this.display.bctx;
     this.scene.draw(ctx);
     this.effects.applyFade(ctx);
-    if (this.card) drawCard(ctx, this.card.text);
+    if (this.card) this.view.drawCard(ctx, this.card.text);
     this.display.present(this.effects.waveParams(), this.touchBarImage(), this.dialogImage());
   }
 }
@@ -244,15 +244,6 @@ function guard(what, fn) {
   } catch (err) {
     console.error(`[game] ${what}`, err);
   }
-}
-
-// A centered text card on black.
-function drawCard(ctx, text) {
-  ctx.fillStyle = '#000000';
-  ctx.fillRect(0, 0, WIDTH, HEIGHT);
-  const lines = wrap(text, WIDTH - 48);
-  const top = Math.round(HEIGHT / 2 - (lines.length * LINE_HEIGHT) / 2);
-  lines.forEach((line, i) => drawTextCentered(ctx, line, WIDTH / 2, top + i * LINE_HEIGHT, { color: 'ui_text' }));
 }
 
 export function startGame(content, parent = document.body) {
