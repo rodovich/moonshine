@@ -125,6 +125,7 @@ export function court(state = {}) {
       add('neighbor', 'up_0', 14, 3, DECK, 1, 1, 2);
       add('sweaty_kid', 'jog_down_0', 15, 22, 0, 1, 1, 2);
       add('cheryl', 'down_0', 9, 19, 0, 1, 1, 2);
+      add('fx', 'mist_1', 9, 16, 26, 2, 2, 3); // the well breathes
     }
   }
   return out;

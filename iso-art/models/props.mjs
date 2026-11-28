@@ -271,21 +271,21 @@ export function lemonTree({ part = 'all', t = 0 } = {}) {
   }
   if (part !== 'trunk') {
     const R = rng(11);
+    // Glossy, dark lemon leaves in clumps, lighter where the clumps catch the sun.
     const lf = mat((x, y, z, lx, ly, lz) => {
-      const n = vnoise(x * 18, y * 18, z * 18);
-      const c = mix(hex('#3f7a34'), hex('#78b04a'), n);
-      return c;
-    }, { tag: 'leaf', spec: 0.2, shin: 16 });
+      const n = vnoise(x * 26, y * 26, z * 26), clump = vnoise(x * 4, y * 4, z * 4);
+      return mix(mix(hex('#2e6428'), hex('#5e9a3a'), n), hex('#7aae48'), Math.max(0, clump - 0.6));
+    }, { tag: 'leaf', spec: 0.35, shin: 22 });
     const blobs = [];
-    for (let i = 0; i < 26; i++) {
-      const a = R() * PI * 2, rr = Math.sqrt(R()) * 1.0, h = 1.75 + R() * 0.75 - rr * 0.25;
-      blobs.push(move(sphere(0.32 + R() * 0.18, lf), Math.cos(a) * rr, Math.sin(a) * rr, h));
+    for (let i = 0; i < 38; i++) {
+      const a = R() * PI * 2, rr = Math.sqrt(R()) * 1.05, h = 1.7 + R() * 0.85 - rr * 0.3;
+      blobs.push(move(sphere(0.24 + R() * 0.16, lf), Math.cos(a) * rr, Math.sin(a) * rr, h));
     }
     // Lumpy foliage: blobs smoothed together, then roughened by noise.
-    const canopy = smooth(0.25, blobs);
+    const canopy = smooth(0.18, blobs);
     const rough = {
       b: canopy.b.map((v, i) => (i < 3 ? v - 0.1 : v + 0.1)),
-      dist(x, y, z) { return canopy.dist(x, y, z) + (vnoise(x * 9 + t, y * 9, z * 9) - 0.5) * 0.12; },
+      dist(x, y, z) { return canopy.dist(x, y, z) + (vnoise(x * 9 + t, y * 9, z * 9) - 0.5) * 0.1 + (vnoise(x * 24, y * 24, z * 24) - 0.5) * 0.05; },
       near(x, y, z) { return canopy.near(x, y, z); },
     };
     parts.push(rough);

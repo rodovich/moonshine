@@ -74,6 +74,129 @@ if (!only || only === 'court') {
   if (missing.size) { const p = document.createElement('p'); p.textContent = 'Missing frames: ' + [...missing].join(', '); p.style.color = '#f08080'; div.append(p); }
 }
 
+// ---- The UI in use, over the court: a reference for drawing 9-slice panels and the font.
+function nine(ctx, name, x, y, w, h) {
+  const ui = manifest.sheets.ui, fr = ui.frames[name], [l, t, r, b] = ui.slices[name];
+  const img = images.ui, [sx, sy, sw, sh] = fr;
+  const cols = [[0, l, x, l], [l, sw - l - r, x + l, w - l - r], [sw - r, r, x + w - r, r]];
+  const rows = [[0, t, y, t], [t, sh - t - b, y + t, h - t - b], [sh - b, b, y + h - b, b]];
+  for (const [cx, cw, dx, dw] of cols) for (const [cy, ch, dy, dh] of rows) ctx.drawImage(img, sx + cx, sy + cy, cw, ch, dx, dy, dw, dh);
+}
+function text(ctx, style, str, x, y, maxW) {
+  const f = manifest.fonts[style];
+  const lines = [];
+  let line = '';
+  const width = (s) => [...s].reduce((a, ch) => a + (f.glyphs[ch] || f.glyphs['?'])[4], 0);
+  for (const word of str.split(' ')) {
+    const t = line ? line + ' ' + word : word;
+    if (maxW && width(t) > maxW && line) { lines.push(line); line = word; } else line = t;
+  }
+  lines.push(line);
+  lines.forEach((ln, i) => {
+    let cx = x;
+    for (const ch of ln) {
+      const g = f.glyphs[ch] || f.glyphs['?'];
+      if (g[2]) ctx.drawImage(images.ui, g[0], g[1], g[2], g[3], cx, y + i * f.lineHeight, g[2], g[3]);
+      cx += g[4];
+    }
+  });
+  return lines.length;
+}
+function sprite(ctx, sheet, name, x, y) {
+  const fr = manifest.sheets[sheet].frames[name];
+  ctx.drawImage(images[sheet], fr[0], fr[1], fr[2], fr[3], Math.round(x - fr[4]), Math.round(y - fr[5]), fr[2], fr[3]);
+}
+if ((!only || only === 'ui') && manifest.fonts && manifest.sheets.ui) {
+  const div = section('UI in use (640×480, over the court at dusk)');
+  const row = document.createElement('div'); row.className = 'row'; div.append(row);
+  const mocks = {
+    dialog: (ctx) => {
+      nine(ctx, 'panel_dialog', 16, 372, 608, 96);
+      nine(ctx, 'panel_label', 28, 352, 116, 28);
+      text(ctx, 'label', 'OLD MAN', 40, 356);
+      text(ctx, 'text', "Bring me another king and you can have it back. Black. Tall. Dignified. Gerald's particular.", 34, 390, 572);
+    },
+    narration: (ctx) => {
+      nine(ctx, 'panel_narration', 16, 372, 608, 96);
+      text(ctx, 'narr', 'My tub. Cast iron, clawfooted, and twice as stubborn as me.', 34, 390, 572);
+    },
+    thought: (ctx) => {
+      nine(ctx, 'panel_thought', 16, 372, 608, 96);
+      text(ctx, 'thought', 'No. It comes up in the Gate. It has come up in the Gate every year of my life.', 34, 390, 572);
+    },
+    choice: (ctx) => {
+      nine(ctx, 'panel_menu', 384, 250, 236, 112);
+      ['Give the pepper mill', 'Talk', 'Never mind'].forEach((s, i) => text(ctx, i === 0 ? 'text' : 'dim', s, 418, 268 + i * 26));
+      sprite(ctx, 'ui', 'choice_marker', 404, 276);
+      nine(ctx, 'panel_dialog', 16, 372, 608, 96);
+      nine(ctx, 'panel_label', 28, 352, 116, 28);
+      text(ctx, 'label', 'OLD MAN', 40, 356);
+      text(ctx, 'text', 'Shh. Gerald’s thinking.', 34, 390, 572);
+    },
+    inventory: (ctx) => {
+      nine(ctx, 'panel_inventory', 120, 110, 400, 250);
+      text(ctx, 'label', 'Satchel', 144, 128);
+      const items = ['pepper_mill', 'egg_timer', 'bath_plug', 'soap', 'clothes_prop', 'moon_chart'];
+      items.forEach((it, i) => {
+        const x = 146 + (i % 6) * 58, y = 160;
+        sprite(ctx, 'ui', i === 1 ? 'slot_selected' : 'slot', x + 24, y + 24);
+        sprite(ctx, 'ui', `item_${it}`, x + 24, y + 24);
+      });
+      text(ctx, 'narr', 'My egg timer. It ticks like it’s furious about something. Then it dings, and it’s over it.', 146, 228, 350);
+      sprite(ctx, 'ui', 'cursor_arrow', 330, 196);
+    },
+  };
+  for (const [name, fn] of Object.entries(mocks)) {
+    if (q.get('mock') && q.get('mock') !== name) continue;
+    const c = document.createElement('canvas'); c.width = 640; c.height = 480; c.style.width = 640 * (+(q.get('zoom') || 1)) + 'px';
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#58607a'; ctx.fillRect(0, 0, 640, 480);
+    const [sx, sy] = proj(6.5, 5.5, 160);
+    draw(ctx, court({}), images, manifest, Math.round(sx - 320), Math.round(sy - 240));
+    applyTint(ctx, 640, 480, ISO_TINTS.dusk);
+    fn(ctx);
+    sprite(ctx, 'ui', 'bag', 600, 36);
+    const cell = document.createElement('div'); cell.className = 'cell';
+    const label = document.createElement('span'); label.textContent = name;
+    cell.append(c, label); row.append(cell);
+  }
+}
+
+// ---- Full-screen pictures, composed at a few moments
+if (!only || only === 'pictures') {
+  for (const [name, sheet] of Object.entries(manifest.sheets)) {
+    if (!sheet.picture) continue;
+    const div = section(`${name} — composed (sky, glow, moon, far, path, fg, twinkles)`);
+    const row = document.createElement('div'); row.className = 'row'; div.append(row);
+    const stages = q.get('stage') ? [q.get('stage')] : ['before', 'glow', 'rising', 'risen'];
+    for (const stage of stages) {
+      const c = document.createElement('canvas');
+      const [w, h] = sheet.size; c.width = w; c.height = h;
+      c.style.width = w * (+(q.get('zoom') || 1)) + 'px';
+      const ctx = c.getContext('2d');
+      const blit = (f, x, y, alpha = 1) => {
+        const fr = sheet.frames[f]; if (!fr) return;
+        ctx.globalAlpha = alpha;
+        ctx.drawImage(images[name], fr[0], fr[1], fr[2], fr[3], Math.round(x - fr[4]), Math.round(y - fr[5]), fr[2], fr[3]);
+        ctx.globalAlpha = 1;
+      };
+      const { from, to } = sheet.moonRise;
+      const t = { before: -1, glow: -1, rising: 0.12, risen: 0.55 }[stage];
+      const mx = from[0] + (to[0] - from[0]) * Math.max(0, t), my = from[1] + (to[1] - from[1]) * Math.max(0, t);
+      blit('sky', 0, 0);
+      if (stage !== 'before') blit('glow', sheet.glowAt[0], sheet.glowAt[1], stage === 'glow' ? 1 : 0.6);
+      if (t >= 0) { blit('moon_halo', mx, my, 0.9); blit(t < 0.3 ? 'moon_peach' : t < 0.7 ? 'moon_cream' : 'moon_white', mx, my); }
+      blit('far', 0, 0);
+      if (t >= 0) blit('path', mx, sheet.pathTop, Math.min(1, t * 4));
+      blit('fg', 0, 0);
+      (sheet.twinkles || []).forEach(([x, y], i) => { if ((i * 7 + stages.indexOf(stage)) % 3 === 0) blit(`twinkle_${i % 3}`, x, y); });
+      const cell = document.createElement('div'); cell.className = 'cell';
+      const label = document.createElement('span'); label.textContent = stage;
+      cell.append(c, label); row.append(cell);
+    }
+  }
+}
+
 // ---- Every sheet, every frame
 for (const [name, sheet] of Object.entries(manifest.sheets)) {
   if (only && only !== 'sheets' && only !== name && !(only === 'pictures' && sheet.picture) && !(only === 'ui' && sheet.ui)) continue;

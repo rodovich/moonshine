@@ -104,7 +104,8 @@ async function main() {
     manifest = { ...manifest, ...m };
   }
   for (const { sheet } of sheets) {
-    const outs = results.get(sheet.name).sort((a, b) => a.order - b.order).flatMap((r) => r.outs);
+    let outs = results.get(sheet.name).sort((a, b) => a.order - b.order).flatMap((r) => r.outs);
+    if (sheet.assemble) outs = await sheet.assemble(outs);
     const items = [];
     for (const o of outs) {
       items.push({ name: o.name, img: o.img, o });
@@ -121,7 +122,8 @@ async function main() {
       if (it.o.fp || it.o.h != null) f.push(...(it.o.fp || [1, 1]), it.o.h ?? 0);
       frames[it.name] = f;
     }
-    manifest.sheets[sheet.name] = { image: `${sheet.name}.png`, frames, ...(sheet.anims ? { anims: sheet.anims } : {}), ...(sheet.meta || {}) };
+    const meta = typeof sheet.meta === 'function' ? sheet.meta(outs) : sheet.meta;
+    manifest.sheets[sheet.name] = { image: `${sheet.name}.png`, frames, ...(sheet.anims ? { anims: sheet.anims } : {}), ...(meta || {}) };
     if (sheet.fonts) Object.assign(manifest.fonts, sheet.fonts(frames));
     console.log(`  ${sheet.name}: ${items.length} frames, ${at.w}×${at.h}`);
   }
