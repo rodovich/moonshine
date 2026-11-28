@@ -137,10 +137,13 @@ const bySnes = new WeakMap(); // SNES sheet object -> isometric sheet names
 // content.iso.sheets = { isoSheetName: snesSheet }.
 let aliases = {};
 export function bindSnesSheets(map = {}, frameAliases = {}) {
-  for (const [name, snes] of Object.entries(map)) {
+  for (const [name, list] of Object.entries(map)) {
+    // One isometric sheet may stand in for several SNES sheets (fx and fx_mist).
+    for (const snes of [list].flat()) {
     if (!snes) continue;
     // Several isometric sheets may draw one shared SNES sheet's objects (the cat, from props).
     bySnes.set(snes, [...(bySnes.get(snes) || []), name]);
+    }
   }
   aliases = frameAliases;
 }
@@ -189,4 +192,17 @@ function frameIn(e, s, name) {
     if (r) return r;
   }
   return pick((d) => s.frame(`${d}_0`) || s.frameAt(`idle_${d}`, ms));
+}
+
+// The isometric frame for an SNES sheet's frame or animation (an effect's
+// sprite), as { img, ax, ay }, or null.
+export function isoFrameForSheet(snes, frame, ms) {
+  for (const name of bySnes.get(snes) || []) {
+    const s = sheets.get(name);
+    if (!s || !s.ready) continue;
+    const alias = aliases[name] && aliases[name][frame];
+    const f = s.frameAt(alias || frame, ms);
+    if (f) return f;
+  }
+  return null;
 }

@@ -123,3 +123,36 @@ test('a picture shows full screen at 640×480', async ({ page }) => {
   expect(px).toEqual([48, 96, 160]);
   expect(errors).toEqual([]);
 });
+
+test("a later act's change to a hand-built map shows, and an act can extend the scene", async ({ page }) => {
+  const errors = await boot(page, '?view=iso&map=cistern_court&x=8&y=18&seed=3');
+  await waitIdle(page);
+  await page.waitForFunction(() => window.moonshine.view.renderer.sceneReady(window.moonshine.world), null, { timeout: 10000 });
+  const r = await page.evaluate(async () => {
+    const g = window.moonshine;
+    const w = g.world;
+    const def = w.mapDef;
+    // A later act patches a tile under a flag the scene doesn't follow...
+    const base = def.patches;
+    const someTile = def.legend[Object.keys(def.legend)[0]];
+    def.patches = (api) => [...((base && base(api)) || []), ...(api.flag('test.later') ? [['detail', 10, 20, someTile]] : [])];
+    // ...and extends the scene with a piece of its own.
+    def.iso.extend = [(api, list, kit) => { if (api.flag('test.later')) kit.add(list, 'cistern', 'stool', 12, 20, 0); return list; }];
+    w.api.setFlag('test.later');
+    g.render();
+    const ren = g.view.renderer;
+    const list = ren.sceneFor(w);
+    const out = {
+      net: [...ren.netCells],
+      drawnAtCell: list.some((d) => d.x0 === 10 && d.y0 === 20),
+      extended: list.some((d) => d.f === 'stool' && d.x0 === 12 && d.y0 === 20),
+    };
+    def.patches = base;
+    delete def.iso.extend;
+    return out;
+  });
+  expect(r.net).toContain('10,20');
+  expect(r.drawnAtCell).toBe(false); // the scene's cobble there gives way to the converter's cell
+  expect(r.extended).toBe(true);
+  expect(errors).toEqual([]);
+});
