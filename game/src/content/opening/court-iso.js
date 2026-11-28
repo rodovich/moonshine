@@ -92,7 +92,8 @@ function scene(g) {
   // ---- Her Next Door's roof: the line posts, the sheets, the back line.
   const stage = f('neighbor.stage') || 0;
   const moved = am || f('neighbor.sheetsMoved');
-  const grey = am ? '_grey' : '';
+  // Grey the morning after; white again in Act 6's epilogue (act6/epilogue.js patches the SNES line the same way).
+  const grey = am && !f('epilogue') ? '_grey' : '';
   for (const x of [12, 15]) {
     add(C, 'line_post', x, 3, DECK);
     add(C, 'line_post', x, 7, DECK);
@@ -129,7 +130,8 @@ function scene(g) {
   add(C, am || f('kid.hasTimer') ? 'pots_bare' : 'hurdle', 12, 17, 0, 3, 1);
   add(C, 'bench', 16, 12, 0, 2, 1);
   for (const [x, y, i] of [[1, 21, 0], [18, 21, 1], [1, 23, 2], [2, 23, 0], [18, 23, 1]]) add(C, `geraniums_${i}`, x, y, 0);
-  if (!(am || f('piano.gone'))) add(C, 'piano', 15, 22, 0, 2, 2);
+  // Wedged at the top of the Squeeze, over rows 23-24 as on the SNES map, so (15-16, 22) stays clear in front of it.
+  if (!(am || f('piano.gone'))) add(C, 'piano', 15, 23, 0, 2, 2);
 
   // ---- Below: the roofs of the next houses down, and the Squeeze between them.
   // Their walls stand 60 px from LOW - 60 to the eaves (the two beside the Squeeze a storey taller).
