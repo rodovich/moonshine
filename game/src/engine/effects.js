@@ -4,7 +4,6 @@
 // Order of application each frame: world draws -> tint -> hue shift ->
 // flicker -> fade -> (UI draws) -> wave distortion at present time.
 
-import { WIDTH, HEIGHT } from './display.js';
 import { colorOf } from './art.js';
 
 class Tween {
@@ -81,7 +80,7 @@ export class Effects {
         ctx.globalCompositeOperation = p.mode || 'source-over';
         ctx.globalAlpha = Math.min(1, a);
         ctx.fillStyle = colorOf(p.color);
-        ctx.fillRect(0, 0, WIDTH, HEIGHT);
+        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
         ctx.restore();
       }
     };
@@ -208,7 +207,7 @@ export class Effects {
       ctx.globalCompositeOperation = this.tintMode;
       ctx.globalAlpha = Math.min(1, this.tintAmount);
       ctx.fillStyle = this.tintColor;
-      ctx.fillRect(0, 0, WIDTH, HEIGHT);
+      ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
       ctx.restore();
     }
     if (Math.abs(this.hue) > 0.5) applyHue(ctx, this.hue);
@@ -216,7 +215,7 @@ export class Effects {
       ctx.save();
       ctx.globalCompositeOperation = 'difference';
       ctx.fillStyle = this.flickerColor;
-      ctx.fillRect(0, 0, WIDTH, HEIGHT);
+      ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
       ctx.restore();
     }
   }
@@ -228,7 +227,7 @@ export class Effects {
       // Quantize alpha to 8 steps, like SNES brightness levels.
       ctx.globalAlpha = Math.round(Math.min(1, this.fadeAlpha) * 8) / 8;
       ctx.fillStyle = this.fadeColor;
-      ctx.fillRect(0, 0, WIDTH, HEIGHT);
+      ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
       ctx.restore();
     }
   }
@@ -243,15 +242,17 @@ export class Effects {
 // stays GPU-backed (fast to draw) and only this effect pays for readback.
 let hueCtx = null;
 function applyHue(ctx, degrees) {
-  if (!hueCtx) {
+  const W = ctx.canvas.width;
+  const H = ctx.canvas.height;
+  if (!hueCtx || hueCtx.canvas.width !== W || hueCtx.canvas.height !== H) {
     const c = document.createElement('canvas');
-    c.width = WIDTH;
-    c.height = HEIGHT;
+    c.width = W;
+    c.height = H;
     hueCtx = c.getContext('2d', { willReadFrequently: true });
   }
-  hueCtx.clearRect(0, 0, WIDTH, HEIGHT);
+  hueCtx.clearRect(0, 0, W, H);
   hueCtx.drawImage(ctx.canvas, 0, 0);
-  const img = hueCtx.getImageData(0, 0, WIDTH, HEIGHT);
+  const img = hueCtx.getImageData(0, 0, W, H);
   const d = img.data;
   const a = (degrees * Math.PI) / 180;
   const c = Math.cos(a);

@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Moonshine — isometric art</title>
+<style>
+  body { background: #1a1820; color: #e8e0d0; font: 13px/1.4 system-ui, sans-serif; margin: 16px; }
+  h1 { font-size: 18px; margin: 0 0 8px; }
+  h2 { font-size: 15px; margin: 24px 0 8px; color: #f0c860; }
+  canvas { image-rendering: pixelated; display: block; }
+  .row { display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-end; }
+  .cell { background: #2a2834; padding: 3px; display: flex; flex-direction: column; align-items: center; }
+  .cell span { font-size: 10px; color: #a8a0b8; margin-top: 2px; max-width: 140px; overflow-wrap: anywhere; text-align: center; }
+  .bar a { color: #9cc4f0; margin-right: 10px; }
+  .note { color: #a8a0b8; max-width: 820px; }
+</style>
+</head>
+<body>
+<h1>Moonshine — isometric art</h1>
+<div class="bar">
+  Scene: <a href="?only=court&cam=roof">roof</a><a href="?only=court&cam=court">court</a><a href="?only=court&cam=all&zoom=1">whole map</a>
+  <a href="?only=court&cam=roof&tint=dusk">roof at dusk</a><a href="?only=court&cam=court&state=morning&tint=day">morning</a>
+  <a href="?only=court&cam=roof&tint=night">night</a>
+  · Pictures: <a href="?only=pictures">moonrise</a> · UI: <a href="?only=ui">ui</a> · <a href="?only=sheets">all sheets</a> · <a href="?">everything</a>
+</div>
+<p class="note">Rendered by <code>npm run art:iso</code> from the models in <code>iso-art/</code>. See <code>docs/iso-art-direction.md</code>. Params: <code>only=court|sheets|pictures|ui|&lt;sheet&gt;</code>, <code>cam=roof|court|all</code>, <code>tint=dusk|night|day</code>, <code>state=morning</code>, <code>zoom=n</code>, <code>bg=rrggbb</code>.</p>
+<div id="out"></div>
+<script type="module">
+import manifest from '../assets/iso/manifest.js';
+import { court, draw, proj, W, H } from './iso-court.js';
+import { ISO_TINTS, applyTint } from '../assets/iso/tints.js';
+
+const q = new URLSearchParams(location.search);
+const only = q.get('only');
+const zoom = +(q.get('zoom') || 2);
+const out = document.getElementById('out');
+
+const images = {};
+await Promise.all(Object.entries(manifest.sheets).map(([name, s]) => new Promise((res) => {
+  const img = new Image();
+  img.onload = () => { images[name] = img; res(); };
+  img.onerror = () => res();
+  img.src = `../assets/iso/${s.image}`;
+})));
+
+function section(title) {
+  const h = document.createElement('h2'); h.textContent = title; out.append(h);
+  const d = document.createElement('div'); out.append(d); return d;
+}
+
+// ---- The composed court
+if (!only || only === 'court') {
+  const cam = q.get('cam') || 'roof';
+  const state = { morning: q.get('state') === 'morning' };
+  const list = court(state);
+  const div = section(`Cistern Court (${cam}${state.morning ? ', morning' : ''}${q.get('tint') ? ', ' + q.get('tint') : ''})`);
+  let cw = 640, ch = 480, cx, cy;
+  const centerOn = (x, y, z) => { const [sx, sy] = proj(x, y, z); cx = Math.round(sx - cw / 2); cy = Math.round(sy - ch / 2); };
+  if (cam === 'all') {
+    cw = (W + H) * 32 + 64; ch = (W + H) * 16 + 420;
+    cx = -H * 32 - 32; cy = -380;
+  } else if (cam === 'court') centerOn(8.5, 17.5, 30);
+  else centerOn(6.5, 5.5, 160);
+  const c = document.createElement('canvas');
+  c.width = cw; c.height = ch;
+  c.style.width = cw * (cam === 'all' ? +(q.get('zoom') || 1) : zoom) + 'px';
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#' + (q.get('bg') || '58607a');
+  ctx.fillRect(0, 0, cw, ch);
+  const missing = new Set();
+  draw(ctx, list, images, manifest, cx, cy, { missing: (d) => missing.add(`${d.s}:${d.f}`) });
+  if (q.get('tint')) applyTint(ctx, cw, ch, ISO_TINTS[q.get('tint')]);
+  div.append(c);
+  if (missing.size) { const p = document.createElement('p'); p.textContent = 'Missing frames: ' + [...missing].join(', '); p.style.color = '#f08080'; div.append(p); }
+}
+
+// ---- The UI in use, over the court: a reference for drawing 9-slice panels and the font.
+function nine(ctx, name, x, y, w, h) {
+  const ui = manifest.sheets.ui, fr = ui.frames[name], [l, t, r, b] = ui.slices[name];
+  const img = images.ui, [sx, sy, sw, sh] = fr;
+  const cols = [[0, l, x, l], [l, sw - l - r, x + l, w - l - r], [sw - r, r, x + w - r, r]];
+  const rows = [[0, t, y, t], [t, sh - t - b, y + t, h - t - b], [sh - b, b, y + h - b, b]];
+  for (const [cx, cw, dx, dw] of cols) for (const [cy, ch, dy, dh] of rows) ctx.drawImage(img, sx + cx, sy + cy, cw, ch, dx, dy, dw, dh);
+}
+function text(ctx, style, str, x, y, maxW) {
+  const f = manifest.fonts[style];
+  const lines = [];
+  let line = '';
+  const width = (s) => [...s].reduce((a, ch) => a + (f.glyphs[ch] || f.glyphs['?'])[4], 0);
+  for (const word of str.split(' ')) {
+    const t = line ? line + ' ' + word : word;
+    if (maxW && width(t) > maxW && line) { lines.push(line); line = word; } else line = t;
+  }
+  lines.push(line);
+  lines.forEach((ln, i) => {
+    let cx = x;
+    for (const ch of ln) {
+      const g = f.glyphs[ch] || f.glyphs['?'];
+      if (g[2]) ctx.drawImage(images.ui, g[0], g[1], g[2], g[3], cx, y + i * f.lineHeight, g[2], g[3]);
+      cx += g[4];
+    }
+  });
+  return lines.length;
+}
+function sprite(ctx, sheet, name, x, y) {
+  const fr = manifest.sheets[sheet].frames[name];
+  ctx.drawImage(images[sheet], fr[0], fr[1], fr[2], fr[3], Math.round(x - fr[4]), Math.round(y - fr[5]), fr[2], fr[3]);
+}
+if ((!only || only === 'ui') && manifest.fonts && manifest.sheets.ui) {
+  const div = section('UI in use (640×480, over the court at dusk)');
+  const row = document.createElement('div'); row.className = 'row'; div.append(row);
+  const mocks = {
+    dialog: (ctx) => {
+      nine(ctx, 'panel_dialog', 16, 372, 608, 96);
+      nine(ctx, 'panel_label', 28, 352, 116, 28);
+      text(ctx, 'label', 'OLD MAN', 40, 356);
+      text(ctx, 'text', "Bring me another king and you can have it back. Black. Tall. Dignified. Gerald's particular.", 34, 390, 572);
+    },
+    narration: (ctx) => {
+      nine(ctx, 'panel_narration', 16, 372, 608, 96);
+      text(ctx, 'narr', 'My tub. Cast iron, clawfooted, and twice as stubborn as me.', 34, 390, 572);
+    },
+    thought: (ctx) => {
+      nine(ctx, 'panel_thought', 16, 372, 608, 96);
+      text(ctx, 'thought', 'No. It comes up in the Gate. It has come up in the Gate every year of my life.', 34, 390, 572);
+    },
+    choice: (ctx) => {
+      nine(ctx, 'panel_menu', 384, 250, 236, 112);
+      ['Give the pepper mill', 'Talk', 'Never mind'].forEach((s, i) => text(ctx, i === 0 ? 'text' : 'dim', s, 418, 268 + i * 26));
+      sprite(ctx, 'ui', 'choice_marker', 404, 276);
+      nine(ctx, 'panel_dialog', 16, 372, 608, 96);
+      nine(ctx, 'panel_label', 28, 352, 116, 28);
+      text(ctx, 'label', 'OLD MAN', 40, 356);
+      text(ctx, 'text', 'Shh. Gerald’s thinking.', 34, 390, 572);
+    },
+    inventory: (ctx) => {
+      nine(ctx, 'panel_inventory', 120, 110, 400, 250);
+      text(ctx, 'label', 'Satchel', 144, 128);
+      const items = ['pepper_mill', 'egg_timer', 'bath_plug', 'soap', 'clothes_prop', 'moon_chart'];
+      items.forEach((it, i) => {
+        const x = 146 + (i % 6) * 58, y = 160;
+        sprite(ctx, 'ui', i === 1 ? 'slot_selected' : 'slot', x + 24, y + 24);
+        sprite(ctx, 'ui', `item_${it}`, x + 24, y + 24);
+      });
+      text(ctx, 'narr', 'My egg timer. It ticks like it’s furious about something. Then it dings, and it’s over it.', 146, 228, 350);
+      sprite(ctx, 'ui', 'cursor_arrow', 330, 196);
+    },
+  };
+  for (const [name, fn] of Object.entries(mocks)) {
+    if (q.get('mock') && q.get('mock') !== name) continue;
+    const c = document.createElement('canvas'); c.width = 640; c.height = 480; c.style.width = 640 * (+(q.get('zoom') || 1)) + 'px';
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#58607a'; ctx.fillRect(0, 0, 640, 480);
+    const [sx, sy] = proj(6.5, 5.5, 160);
+    draw(ctx, court({}), images, manifest, Math.round(sx - 320), Math.round(sy - 240));
+    applyTint(ctx, 640, 480, ISO_TINTS.dusk);
+    fn(ctx);
+    sprite(ctx, 'ui', 'bag', 600, 36);
+    const cell = document.createElement('div'); cell.className = 'cell';
+    const label = document.createElement('span'); label.textContent = name;
+    cell.append(c, label); row.append(cell);
+  }
+}
+
+// ---- Full-screen pictures, composed at a few moments
+if (!only || only === 'pictures') {
+  for (const [name, sheet] of Object.entries(manifest.sheets)) {
+    if (!sheet.picture) continue;
+    const div = section(`${name} — composed (sky, glow, moon, far, path, fg, twinkles)`);
+    const row = document.createElement('div'); row.className = 'row'; div.append(row);
+    const stages = q.get('stage') ? [q.get('stage')] : ['before', 'glow', 'rising', 'risen'];
+    for (const stage of stages) {
+      const c = document.createElement('canvas');
+      const [w, h] = sheet.size; c.width = w; c.height = h;
+      c.style.width = w * (+(q.get('zoom') || 1)) + 'px';
+      const ctx = c.getContext('2d');
+      const blit = (f, x, y, alpha = 1) => {
+        const fr = sheet.frames[f]; if (!fr) return;
+        ctx.globalAlpha = alpha;
+        ctx.drawImage(images[name], fr[0], fr[1], fr[2], fr[3], Math.round(x - fr[4]), Math.round(y - fr[5]), fr[2], fr[3]);
+        ctx.globalAlpha = 1;
+      };
+      const { from, to } = sheet.moonRise;
+      const t = { before: -1, glow: -1, rising: 0.12, risen: 0.55 }[stage];
+      const mx = from[0] + (to[0] - from[0]) * Math.max(0, t), my = from[1] + (to[1] - from[1]) * Math.max(0, t);
+      blit('sky', 0, 0);
+      if (stage !== 'before') blit('glow', sheet.glowAt[0], sheet.glowAt[1], stage === 'glow' ? 1 : 0.6);
+      if (t >= 0) { blit('moon_halo', mx, my, 0.9); blit(t < 0.3 ? 'moon_peach' : t < 0.7 ? 'moon_cream' : 'moon_white', mx, my); }
+      blit('far', 0, 0);
+      if (t >= 0) blit('path', mx, sheet.pathTop, Math.min(1, t * 4));
+      blit('fg', 0, 0);
+      (sheet.twinkles || []).forEach(([x, y], i) => { if ((i * 7 + stages.indexOf(stage)) % 3 === 0) blit(`twinkle_${i % 3}`, x, y); });
+      const cell = document.createElement('div'); cell.className = 'cell';
+      const label = document.createElement('span'); label.textContent = stage;
+      cell.append(c, label); row.append(cell);
+    }
+  }
+}
+
+// ---- Every sheet, every frame
+for (const [name, sheet] of Object.entries(manifest.sheets)) {
+  if (only && only !== 'sheets' && only !== name && !(only === 'pictures' && sheet.picture) && !(only === 'ui' && sheet.ui)) continue;
+  if (sheet.picture && only !== 'pictures' && only !== name && only) continue;
+  const div = section(`${name} — ${Object.keys(sheet.frames).length} frames (${sheet.image})`);
+  const row = document.createElement('div'); row.className = 'row'; div.append(row);
+  const z = sheet.picture ? 1 : zoom;
+  for (const [fname, fr] of Object.entries(sheet.frames)) {
+    if (fname.endsWith('.shadow')) continue;
+    const cell = document.createElement('div'); cell.className = 'cell';
+    const c = document.createElement('canvas');
+    c.width = fr[2]; c.height = fr[3];
+    c.style.width = fr[2] * z + 'px';
+    const ctx = c.getContext('2d');
+    if (q.get('bg')) { ctx.fillStyle = '#' + q.get('bg'); ctx.fillRect(0, 0, fr[2], fr[3]); }
+    const sh = sheet.frames[fname + '.shadow'];
+    if (sh) ctx.drawImage(images[name], sh[0], sh[1], sh[2], sh[3], fr[4] - sh[4], fr[5] - sh[5], sh[2], sh[3]);
+    ctx.drawImage(images[name], fr[0], fr[1], fr[2], fr[3], 0, 0, fr[2], fr[3]);
+    const label = document.createElement('span'); label.textContent = fname + (fr.length > 6 ? ` [${fr[6]}×${fr[7]}, ${fr[8]}px]` : '');
+    cell.append(c, label); row.append(cell);
+  }
+  // Animations play in a strip.
+  if (sheet.anims) {
+    const arow = document.createElement('div'); arow.className = 'row'; div.append(arow);
+    for (const [an, a] of Object.entries(sheet.anims)) {
+      const frames = a.frames.map((f) => sheet.frames[f]).filter(Boolean);
+      if (!frames.length) continue;
+      const bw = Math.max(...frames.map((f) => Math.max(f[4], f[2] - f[4]))) * 2, bh = Math.max(...frames.map((f) => f[5])) + Math.max(...frames.map((f) => f[3] - f[5]));
+      const top = Math.max(...frames.map((f) => f[5]));
+      const cell = document.createElement('div'); cell.className = 'cell';
+      const c = document.createElement('canvas'); c.width = bw; c.height = bh; c.style.width = bw * z + 'px';
+      const ctx = c.getContext('2d');
+      let i = 0;
+      const tick = () => {
+        const fr = frames[i % frames.length];
+        ctx.clearRect(0, 0, bw, bh);
+        ctx.drawImage(images[name], fr[0], fr[1], fr[2], fr[3], bw / 2 - fr[4], top - fr[5], fr[2], fr[3]);
+        const ms = Array.isArray(a.ms) ? a.ms[i % a.ms.length] : a.ms;
+        i++;
+        setTimeout(tick, ms);
+      };
+      tick();
+      const label = document.createElement('span'); label.textContent = '▶ ' + an;
+      cell.append(c, label); arow.append(cell);
+    }
+  }
+}
+document.body.dataset.ready = '1';
+</script>
+</body>
+</html>

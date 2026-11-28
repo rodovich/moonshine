@@ -10,7 +10,7 @@
 // clapper first, does the relay before the rope (so the Kid throws the disc
 // up from the mud), then the rope, and goes down once.
 import { test, expect } from '@playwright/test';
-import { snap, waitFor, shot, stepKey } from './helpers.js';
+import { snap, waitFor, shot, stepKey, clickUi } from './helpers.js';
 
 const DIRKEY = { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' };
 const DIRS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
@@ -230,12 +230,11 @@ async function clickGame(page, gx, gy) {
   const p = await page.evaluate(([x, y]) => window.moonshine.display.toClient(x, y), [gx, gy]);
   await page.mouse.click(p.x, p.y);
 }
-const ptrAdvance = (page) => () => clickGame(page, 128, 112);
+const ptrAdvance = (page) => () => clickUi(page, 'center');
 
 const onScreen = (page, tx, ty) => page.evaluate(([x, y]) => {
   const w = window.moonshine.world;
-  const sx = x * 16 + 8 - w.cam.x;
-  const sy = y * 16 + 8 - w.cam.y;
+  const [sx, sy] = window.moonshine.tileScreen(x, y);
   return sx >= 4 && sy >= 4 && sx < 252 && sy < 220 && !(sx >= 220 && sy < 32);
 }, [tx, ty]);
 
@@ -245,8 +244,7 @@ const stepToward = (page, goals) => page.evaluate((goals) => {
   const path = w.pathFor(w.player, goals);
   let best = null;
   for (const [px, py] of path || []) {
-    const sx = px * 16 + 8 - w.cam.x;
-    const sy = py * 16 + 8 - w.cam.y;
+    const [sx, sy] = window.moonshine.tileScreen(px, py);
     if (sx >= 24 && sy >= 40 && sx < 232 && sy < 200 && !w.isExit(px, py)) best = [px, py];
   }
   return best;
@@ -280,12 +278,12 @@ async function ptrGo(page, to) {
     const s = await snap(page);
     if (s.x === a.x && s.y === a.y && !s.text && !s.busy) break;
     // A line on the way (a trigger): read it and carry on.
-    await readThrough(page, () => clickGame(page, 128, 112));
+    await readThrough(page, () => clickUi(page, 'center'));
   }
   const [ox, oy] = DIRS[a.dir];
   await clickTileAt(page, a.x + ox, a.y + oy);
   // A door may say something before it opens (the Clockmaker's, the tower): read on.
-  await readThrough(page, () => clickGame(page, 128, 112), { stop: (st) => st.map === to, timeout: 20000 });
+  await readThrough(page, () => clickUi(page, 'center'), { stop: (st) => st.map === to, timeout: 20000 });
   await waitFor(page, (m) => window.moonshine.snapshot().map === m, to, 10000);
   await waitFor(page, () => { const s = window.moonshine.snapshot(); return s.idle || !!s.text || !!s.choice; }, null, 20000);
 }
@@ -318,12 +316,12 @@ async function ptrInteract(page, id, tile = null) {
 }
 
 async function ptrSelect(page, item) {
-  await clickGame(page, 241, 14);
+  await clickUi(page, 'bag');
   await waitFor(page, () => window.moonshine.snapshot().inventoryOpen);
   const i = (await snap(page)).items.indexOf(item);
   expect(i, `has ${item}`).toBeGreaterThanOrEqual(0);
   const page0 = await page.evaluate(() => window.moonshine.world.inventory.openState.page || 0);
-  const slot = await page.evaluate((i) => window.moonshine.display.toClient(40 + (i % 8) * 22 + 11, 36 + Math.floor((i % 16) / 8) * 22 + 11), i);
+  const slot = await page.evaluate((i) => window.moonshine.uiToClient('slot', i), i);
   void page0;
   const sel = await page.evaluate(() => { const s = window.moonshine.world.inventory.openState; return s.owned[s.index]; });
   if (sel !== item) {

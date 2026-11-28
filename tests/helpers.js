@@ -123,3 +123,9 @@ export async function expectAt(page, x, y) {
   const s = await snap(page);
   expect([s.x, s.y]).toEqual([x, y]);
 }
+
+// Click a UI element in whichever view is on (see Game.uiToClient).
+export async function clickUi(page, name, arg = 0) {
+  const p = await page.evaluate(([n, a]) => window.moonshine.uiToClient(n, a), [name, arg]);
+  await page.mouse.click(p.x, p.y);
+}

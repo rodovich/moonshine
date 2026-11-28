@@ -5,6 +5,7 @@ This file records the project's technical and process decisions. Creative decisi
 ## Sources
 
 - The client's brief is in [brief.md](brief.md). It is the root authority for what the game must be.
+- The isometric 640×480 version (client request): [iso.md](iso.md); its visual identity and art pipeline: [iso-art-direction.md](iso-art-direction.md).
 - Creative direction: [story-bible.md](story-bible.md), [art-direction.md](art-direction.md), [audio-direction.md](audio-direction.md) (each written by the task that owns it).
 - Game design: [design/overview.md](design/overview.md) (world map, gating, puzzle dependencies, interaction rules) and one build-ready document per slice, starting with [design/01-opening.md](design/01-opening.md).
 
@@ -73,6 +74,6 @@ tests/                Playwright smoke tests and screenshot scripts
 - **Iterate from a narrow slice.** First build the opening confined area to high quality, then widen in stages: wider city, first underground entrance, the changed-surface reveal, the ending. (From the client's brief.)
 - **The orchestrator task owns `main`.** Child tasks work on their own branches in their own worktrees. Another task reviews the work (code, writing, art, and a real-browser playtest with screenshots), the author addresses the feedback, and the orchestrator merges. Pushing to and merging into rodovich/moonshine is authorized by the client.
 - **`main` is always playable.** Every push to `main` deploys `game/` to GitHub Pages through `.github/workflows/pages.yml`.
-- **Merge only on a green full suite.** The orchestrator merges a branch into `main` only after the full desktop and phone Playwright suite passes on the branch merged with current `main` (`npx playwright test --project=desktop --project=phone`, about 25 minutes). Each checkout gets its own test server port, so worktrees can test in parallel.
+- **Merge only on a green full suite.** The orchestrator merges a branch into `main` only after the full desktop, phone, and isometric Playwright suite passes on the branch merged with current `main` (`npx playwright test --project=desktop --project=phone --project=iso`, about an hour; the `iso` project replays the story in the isometric view). Each checkout gets its own test server port, so worktrees can test in parallel.
 - **Every blocker must earn its place.** A blocked path, a refused exit, or a locked door is fine only if it gates a puzzle or a story moment, and it must look blocked and stay consistent (no slipping past it later). A blocker whose only job is to send the player the long way round goes. Every interactable must also be reachable and usable by keyboard alone (`npm run check:keyboard`). (From the client's feedback after playing through Act 4: "obstacles are fine if they're earned, if they make sense and force me to solve a particular puzzle or experience a particular part of the story.")
 - **Original work.** The game draws on the feel of SNES-era adventures but does not recreate any existing game's story, characters, art, music, or maps.

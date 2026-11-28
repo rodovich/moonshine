@@ -813,14 +813,9 @@ export class World {
     return { x: p.px + TILE / 2, y: p.py + TILE / 2 - 8 };
   }
 
+  // The camera (screen pixels of the view) for a target in world pixels.
   clampCamera(cx, cy) {
-    const mw = this.map.w * TILE;
-    const mh = this.map.h * TILE;
-    let x = Math.round(cx - WIDTH / 2);
-    let y = Math.round(cy - HEIGHT / 2);
-    x = mw <= WIDTH ? Math.floor((mw - WIDTH) / 2) : Math.max(0, Math.min(mw - WIDTH, x));
-    y = mh <= HEIGHT ? Math.floor((mh - HEIGHT) / 2) : Math.max(0, Math.min(mh - HEIGHT, y));
-    return { x, y };
+    return this.game.view.clampCamera(this, cx, cy);
   }
 
   snapCamera() {
@@ -835,7 +830,7 @@ export class World {
     const glide = (this.camFollow && this.camFollowSpeed) || (this.camPan && this.camPan.speed);
     if (glide) {
       // Glide toward the pan target.
-      const s = glide;
+      const s = glide * this.game.view.panScale;
       const dx = want.x - this.camF.x;
       const dy = want.y - this.camF.y;
       const dist = Math.hypot(dx, dy);
@@ -850,6 +845,11 @@ export class World {
   // ---- Drawing --------------------------------------------------------
 
   draw(ctx) {
+    this.game.view.drawScene(ctx, this);
+  }
+
+  // The SNES view's scene (see view.js).
+  drawSnes(ctx) {
     if (this.picture) {
       this.drawPicture(ctx);
     } else {
@@ -992,13 +992,13 @@ export class World {
     let c = this.layers[name];
     if (!c) {
       c = document.createElement('canvas');
-      c.width = WIDTH;
-      c.height = HEIGHT;
+      c.width = this.game.display.width;
+      c.height = this.game.display.height;
       this.layers[name] = c.getContext('2d');
       c = this.layers[name];
       c.imageSmoothingEnabled = false;
     }
-    c.clearRect(0, 0, WIDTH, HEIGHT);
+    c.clearRect(0, 0, c.canvas.width, c.canvas.height);
     return c;
   }
 

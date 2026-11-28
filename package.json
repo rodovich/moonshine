@@ -7,7 +7,8 @@
     "serve": "node tests/serve.js",
     "test": "playwright test",
     "check": "node tests/check-content.mjs && node tests/check-art.mjs",
-    "check:keyboard": "node tests/check-keyboard.mjs"
+    "check:keyboard": "node tests/check-keyboard.mjs",
+    "art:iso": "node iso-art/build.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.49.0"

@@ -1,4 +1,5 @@
-// Display: the game draws into a 256×224 buffer; present() scales it onto a
+// Display: the game draws into a fixed-size buffer (256×224 for the SNES
+// view, 640×480 for the isometric one); present() scales it onto a
 // full-window canvas at an integer factor of *device* pixels, centered and
 // letterboxed, with nearest-neighbor sampling.
 //
@@ -10,22 +11,27 @@ export const WIDTH = 256;
 export const HEIGHT = 224;
 
 export class Display {
-  constructor(parent) {
+  // `phonePanels`: on tall phones, put dialogue and a bag button below the
+  // frame (the SNES view; the isometric view keeps everything in frame).
+  constructor(parent, { width = WIDTH, height = HEIGHT, phonePanels = true } = {}) {
+    this.width = width;
+    this.height = height;
+    this.phonePanels = phonePanels;
     this.canvas = document.createElement('canvas');
     this.canvas.id = 'screen';
     parent.appendChild(this.canvas);
     this.ctx = this.canvas.getContext('2d', { alpha: false });
 
     this.buffer = document.createElement('canvas');
-    this.buffer.width = WIDTH;
-    this.buffer.height = HEIGHT;
+    this.buffer.width = width;
+    this.buffer.height = height;
     this.bctx = this.buffer.getContext('2d');
     this.bctx.imageSmoothingEnabled = false;
 
     // Second buffer for post effects (scanline wave).
     this.post = document.createElement('canvas');
-    this.post.width = WIDTH;
-    this.post.height = HEIGHT;
+    this.post.width = width;
+    this.post.height = height;
     this.pctx = this.post.getContext('2d');
 
     this.scale = 1;
@@ -48,27 +54,29 @@ export class Display {
     this.canvas.height = devH;
     this.canvas.style.width = `${cssW}px`;
     this.canvas.style.height = `${cssH}px`;
-    const fit = Math.min(devW / WIDTH, devH / HEIGHT);
+    const W = this.width;
+    const H = this.height;
+    const fit = Math.min(devW / W, devH / H);
     const whole = Math.floor(fit);
     this.scale = whole >= 1 && whole / fit >= 0.8 ? whole : fit;
-    this.drawW = Math.round(WIDTH * this.scale);
-    this.drawH = Math.round(HEIGHT * this.scale);
+    this.drawW = Math.round(W * this.scale);
+    this.drawH = Math.round(H * this.scale);
     this.ox = Math.floor((devW - this.drawW) / 2);
     // In tall portrait screens, sit near the top and leave the space below
     // for thumbs; otherwise center.
-    const portrait = devH > devW * 1.3;
+    const portrait = this.phonePanels && devH > devW * 1.3;
     this.oy = Math.floor(((devH - this.drawH) / 2) * (portrait ? 0.4 : 1));
     // On tall portrait screens there's room below the frame for a big bag
     // button (in game pixels, below y = 224, drawn at twice the frame's scale).
     const below = (devH - this.oy - this.drawH) / this.scale;
-    this.touchBar = portrait && below >= 64 ? { x: WIDTH / 2 - 24, y: HEIGHT + Math.min(24, (below - 48) / 2), w: 48, h: 48 } : null;
+    this.touchBar = portrait && below >= 64 ? { x: W / 2 - 24, y: H + Math.min(24, (below - 48) / 2), w: 48, h: 48 } : null;
     // On tall portrait screens, dialogue is drawn below the frame at 1.5× the
     // frame's scale (whole device pixels), so phone text is readable.
     this.dialogArea = null;
     if (portrait) {
       const k = Math.max(1, Math.round(this.scale * 1.5));
       const top = this.oy + this.drawH + Math.round(6 * this.scale);
-      const w = Math.min(WIDTH, Math.floor((devW - 2 * Math.round(2 * this.scale)) / k));
+      const w = Math.min(W, Math.floor((devW - 2 * Math.round(2 * this.scale)) / k));
       const h = 124; // label + 3-line box + up to 4 options
       if (devH - top >= h * k && w >= 160) this.dialogArea = { x: Math.floor((devW - w * k) / 2), y: top, w, h, k };
     }
@@ -120,14 +128,17 @@ export class Display {
     if (wave && wave.amp > 0) {
       // Per-scanline horizontal offset, like SNES HDMA wobble.
       const p = this.pctx;
-      p.clearRect(0, 0, WIDTH, HEIGHT);
-      for (let y = 0; y < HEIGHT; y++) {
-        const off = Math.round(Math.sin(y * wave.freq + wave.phase) * wave.amp);
-        p.drawImage(this.buffer, 0, y, WIDTH, 1, off, y, WIDTH, 1);
+      const W = this.width;
+      const H = this.height;
+      const k = H / HEIGHT; // the wave is in SNES pixels; scale it to this buffer
+      p.clearRect(0, 0, W, H);
+      for (let y = 0; y < H; y++) {
+        const off = Math.round(Math.sin((y / k) * wave.freq + wave.phase) * wave.amp * k);
+        p.drawImage(this.buffer, 0, y, W, 1, off, y, W, 1);
       }
-      ctx.drawImage(this.post, 0, 0, WIDTH, HEIGHT, this.ox, this.oy, this.drawW, this.drawH);
+      ctx.drawImage(this.post, 0, 0, W, H, this.ox, this.oy, this.drawW, this.drawH);
     } else {
-      ctx.drawImage(this.buffer, 0, 0, WIDTH, HEIGHT, this.ox, this.oy, this.drawW, this.drawH);
+      ctx.drawImage(this.buffer, 0, 0, this.width, this.height, this.ox, this.oy, this.drawW, this.drawH);
     }
     if (dialog && this.dialogArea) {
       const a = this.dialogArea;
