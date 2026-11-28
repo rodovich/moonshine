@@ -80,7 +80,7 @@ export function cherylLook({ swim = false } = {}) {
   if (swim) {
     look.shortSleeves = true;
     look.sleeve = skinMat(C.skin);
-    look.trousers = swimTop();
+    look.trousers = swimTop({ back: false }); // the legs and seat: knit all round, no low back
     look.shorts = true;
     look.shortsLen = 0.95;
     look.shoes = C.skin;
@@ -90,14 +90,15 @@ export function cherylLook({ swim = false } = {}) {
   return look;
 }
 
-function swimTop() {
+function swimTop({ back = true } = {}) {
   const navy = hex(C.stripeNavy), cream = hex(C.cream), skin = hex(C.skin);
   return mat((x, y, z, lx, ly, lz) => {
     // A low back: bare skin across the shoulder blades, crossed by two navy straps
     // (only the torso's own frame has its back at lx < -0.06 and its top at lz > 0).
-    if (lx < -0.07 && lz > 0.02 && lz < 0.3) {
+    if (back && lx < -0.07 && lz > 0.02 && lz < 0.3) {
       if (Math.abs(Math.abs(ly) - 0.07) < 0.018) return navy;
-      return skin.map((v) => v * (0.96 + vnoise(ly * 40, lz * 40, 3) * 0.06));
+      const spine = Math.abs(ly) < 0.008 ? 0.86 : 1; // the groove of the spine
+      return skin.map((v) => v * spine * (0.96 + vnoise(ly * 40, lz * 40, 3) * 0.06));
     }
     // Knit: horizontal stripes in world height, with a fine vertical rib and soft wear.
     const band = Math.floor(z / 0.045);
@@ -112,7 +113,7 @@ function cherylHair(s, swim) {
   const hm = hairMat(C.hair, C.hairStreak, 0.2);
   if (swim) {
     // A snug navy cap with a cream band, over the bun.
-    const cap = mat((x, y, z, lx, ly, lz) => (Math.abs(lz - 0.02 * s) < 0.014 * s ? hex(C.cream) : hex(C.stripeNavy)), { tag: 'hair', spec: 0.2, shin: 16 });
+    const cap = mat((x, y, z, lx, ly, lz) => (Math.abs(lz - 0.02 * s) < 0.014 * s ? hex(C.cream) : hex(C.stripeNavy)).map((v) => v * (Math.sin(lz * 420) > 0.3 ? 0.88 : 1)), { tag: 'hair', spec: 0.2, shin: 16 });
     return union(
       move(ellipsoid(0.11 * s, 0.086 * s, 0.1 * s, cap), -0.01 * s, 0, 0.038 * s),
       move(ellipsoid(0.07 * s, 0.072 * s, 0.065 * s, cap), -0.115 * s, 0, 0.07 * s), // the bun's bump under the cap
@@ -132,7 +133,16 @@ function cherylHair(s, swim) {
 }
 
 function cherylExtras(j, swim) {
-  if (swim) return [];
+  if (swim) {
+    const { k, shZ } = j;
+    const sk = skinMat(C.skin);
+    return [
+      move(ellipsoid(0.05 * k, 0.055 * k, 0.065 * k, sk), -0.03 * k, -0.17 * k, shZ - 0.06 * k), // deltoids
+      move(ellipsoid(0.05 * k, 0.055 * k, 0.065 * k, sk), -0.03 * k, 0.17 * k, shZ - 0.06 * k),
+      move(ellipsoid(0.018 * k, 0.05 * k, 0.065 * k, sk), -0.094 * k, -0.06 * k, shZ - 0.1 * k), // shoulder blades, just under the skin
+      move(ellipsoid(0.018 * k, 0.05 * k, 0.065 * k, sk), -0.094 * k, 0.06 * k, shZ - 0.1 * k),
+    ];
+  }
   const { k, z0, shZ, waistZ, leanX } = j;
   const leather = mat((x, y, z, lx, ly, lz) => {
     const c = hex(C.satchel);
