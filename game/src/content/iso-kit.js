@@ -47,6 +47,7 @@ const SIDE_UP = { '#': 'plain', w: 'window', b: 'window', c: 'window_closed', B:
 export function isoScene() {
   const out = [];
   const heights = new Map(); // walkable tiles' z
+  const floorTop = new Map(); // the highest floor laid on each tile, walkable or not
   const key = (x, y) => `${x},${y}`;
   const add = (s, f, x, y, z = 0, fw = 1, fd = 1, layer = 1) => { out.push({ s, f, x: x + fw / 2, y: y + fd / 2, z, fw, fd, layer }); };
   const S = {
@@ -57,15 +58,16 @@ export function isoScene() {
     floor(x0, y0, w, h, { z = 0, kind = 'pave', walk = true, sheet = T } = {}) {
       for (let y = y0; y < y0 + h; y++) for (let x = x0; x < x0 + w; x++) {
         add(sheet, floorFrame(kind, x, y), x, y, z, 1, 1, 0);
+        floorTop.set(key(x, y), Math.max(z, floorTop.get(key(x, y)) ?? -Infinity));
         if (walk) heights.set(key(x, y), z); else heights.delete(key(x, y));
       }
     },
     /** One column: south faces then east faces stacked from z0, then a top at its height. */
     column(x, y, z0, south = [], east = [], top = null, sheet = T) {
       let z = z0;
-      for (const [f, h] of south) { add(sheet, f, x, y, z, 1, 1, 0.1); z += h; }
+      for (const [f, h] of south) { add(sheet, f, x, y, z, 1, 1, 0.1); out[out.length - 1].face = ['s', x, y, z + h]; z += h; }
       z = z0;
-      for (const [f, h] of east) { add(sheet, f, x, y, z, 1, 1, 0.1); z += h; }
+      for (const [f, h] of east) { add(sheet, f, x, y, z, 1, 1, 0.1); out[out.length - 1].face = ['e', x, y, z + h]; z += h; }
       if (top) add(sheet, top[0], x, y, top[1], 1, 1, 0.2);
     },
     /**
@@ -207,7 +209,19 @@ export function isoScene() {
     },
     /** Where characters stand: z for each walkable tile recorded, else `fallback`. */
     floorHeight(fallback = 0) { const m = new Map(heights); return (x, y) => m.get(key(x, y)) ?? fallback; },
-    done() { return out; },
+    /**
+     * The drawables. A wall face is dropped when the tile in front of it has a floor at or above
+     * the face's top: the floor's ground hides it, but the engine draws every face after every
+     * floor, so it would show through (the seam between two terraces at one height, say).
+     */
+    done() {
+      return out.filter((d) => {
+        if (!d.face) return true;
+        const [dir, x, y, top] = d.face;
+        const front = floorTop.get(dir === 's' ? key(x, y + 1) : key(x + 1, y));
+        return !(front >= top);
+      }).map(({ face, ...d }) => d);
+    },
   };
   return S;
 }
