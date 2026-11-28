@@ -90,6 +90,7 @@ export function renderPersp(scene, opts) {
       c = c.map((v, i) => v * (1 - m.spec * 0.5) + sk[i] * m.spec * 0.5);
     }
     if (em) c = c.map((v, i) => v * (1 - em) + alb[i] * em);
+    if (opts.rim) { const rl = opts.rim(p, n0, d, m); if (rl) c = c.map((v, i) => v + alb[i] * rl[i]); }
     if (opts.fog) c = opts.fog(c, p, t);
     return { c, m, p, n };
   };

@@ -16,7 +16,7 @@ import { fbm, vnoise, hash3 } from '../lib/noise.mjs';
 const C = {
   skin: hex('#e6ac8c'), skinWarm: hex('#d88a70'), skinPale: hex('#f0c4a8'),
   navy: hex('#30406c'), cream: hex('#eee4cc'),
-  hair: hex('#6e6874'), hairSilver: hex('#b8b8c6'),
+  hair: hex('#4e4852'), hairSilver: hex('#8a8494'),
 };
 
 /** Skin: warm, with soft variation, a little redder over the shoulders where the sun has been. */
@@ -60,7 +60,7 @@ function arm(side, S, E, Wr, hand) {
   return smooth(0.025,
     move(ellipsoid(0.042, 0.045, 0.055, skin), S[0] - 0.005, S[1], S[2] - 0.025),
     roundCone(S, E, 0.036, 0.028, skin),
-    move(ellipsoid(0.03, 0.031, 0.05, skin), mid[0] - 0.008, mid[1], mid[2]),
+    move(ellipsoid(0.026, 0.027, 0.06, skin), mid[0] - 0.006, mid[1], mid[2] + 0.01),
     roundCone(E, Wr, 0.027, 0.02, skin),
     hand,
   );
@@ -144,12 +144,12 @@ export function vistaCheryl() {
     custom((x, y, z) => { const e = edgeAt(x, y); return Math.max(e - 0.002 - z, z - e - 0.017); }, [-0.3, -0.3, 0.5, 0.3, 0.3, 1.0], bandM));
   // Loose strands of ash hair escaping at the nape and behind the ears.
   const strands = [];
-  for (let i = 0; i < 16; i++) {
-    const a = Math.PI + (i - 7.5) * 0.15, r = 0.088;
+  for (let i = 0; i < 7; i++) {
+    const a = Math.PI + (i - 3) * 0.3, r = 0.088;
     const x0 = 0.02 + Math.cos(a) * r, y0 = Math.sin(a) * r * 1.08;
     const z0 = edgeAt(x0, y0) + 0.004;
     const len = 0.02 + hash3(i, 3, 1) * 0.03;
-    strands.push(capsule([x0, y0, z0], [x0 - 0.006 + (hash3(i, 1, 1) - 0.5) * 0.012, y0 * 1.04 + (hash3(i, 2, 1) - 0.5) * 0.02, z0 - len], 0.0015, hairM));
+    strands.push(capsule([x0, y0, z0], [x0 - 0.006 + (hash3(i, 1, 1) - 0.5) * 0.012, y0 * 1.04 + (hash3(i, 2, 1) - 0.5) * 0.02, z0 - len], 0.0022, hairM));
   }
   // ---- Arms. Her right hand rests on the rim beside her; her left on her knee.
   const rS = [-0.015, 0.16, 0.54], rE = [-0.07, 0.235, 0.31], rW = [-0.06, 0.25, 0.07];
